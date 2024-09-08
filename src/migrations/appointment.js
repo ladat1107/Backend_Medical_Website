@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('appointment', {
+        await queryInterface.createTable('appointments', {
             userId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
@@ -18,7 +18,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'staff', // Tham chiếu đến bảng staff
+                    model: 'staffs', // Tham chiếu đến bảng staffs
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -47,11 +47,11 @@ module.exports = {
             }
         });
         // Tạo chỉ mục cho staffId
-        await queryInterface.addIndex('appointment', ['staffId'], {
+        await queryInterface.addIndex('appointments', ['staffId'], {
             name: 'fk_appointment_staff_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('appointment');
+        await queryInterface.dropTable('appointments');
     }
 };

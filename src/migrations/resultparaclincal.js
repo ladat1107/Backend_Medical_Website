@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('resultparaclincal', {
+        await queryInterface.createTable('resultparaclincals', {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
@@ -13,7 +13,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'examination', // Tên bảng tham chiếu
+                    model: 'examinations', // Tên bảng tham chiếu
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -54,11 +54,11 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho examinationId
-        await queryInterface.addIndex('resultparaclincal', ['examinationId'], {
+        await queryInterface.addIndex('resultparaclincals', ['examinationId'], {
             name: 'fk_resultparaclincal_examination_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('resultparaclincal');
+        await queryInterface.dropTable('resultparaclincals');
     }
 };

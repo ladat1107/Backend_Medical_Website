@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'allgergy', // Tên bảng tham chiếu
+                model: 'allgergys', // Tên bảng tham chiếu
                 key: 'id',
             },
             onUpdate: 'CASCADE',

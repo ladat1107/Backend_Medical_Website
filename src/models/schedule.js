@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'staff', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'staffs', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
             onUpdate: 'CASCADE',

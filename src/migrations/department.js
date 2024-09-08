@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('department', {
+        await queryInterface.createTable('departments', {
             id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
@@ -21,7 +21,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'staff',   // Bảng tham chiếu
+                    model: 'staffs',   // Bảng tham chiếu
                     key: 'id',        // Khoá ngoại tham chiếu đến cột `id` của bảng `users`
                 },
                 onUpdate: 'CASCADE',
@@ -45,7 +45,7 @@ module.exports = {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'location', // Tên bảng location
+                model: 'locations', // Tên bảng locations
                 key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -64,17 +64,17 @@ module.exports = {
         });
 
         // Tạo các index cho các khoá ngoại
-        await queryInterface.addIndex('department', ['locationId'], {
+        await queryInterface.addIndex('departments', ['locationId'], {
             name: 'fk_department_location_idx'
         });
-        await queryInterface.addIndex('department', ['deanId'], {
+        await queryInterface.addIndex('departments', ['deanId'], {
             name: 'fk_department_staff_idx'
         });
-        await queryInterface.addIndex('department', ['descriptionId'], {
+        await queryInterface.addIndex('departments', ['descriptionId'], {
             name: 'fk_department_description'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('department');
+        await queryInterface.dropTable('departments');
     }
 };

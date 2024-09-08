@@ -17,7 +17,7 @@ module.exports = {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'roomtype', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'roomtypes', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -27,7 +27,7 @@ module.exports = {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'location', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'locations', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -37,7 +37,7 @@ module.exports = {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'department', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',

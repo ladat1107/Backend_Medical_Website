@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'disease', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'diseases', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
             onUpdate: 'CASCADE',

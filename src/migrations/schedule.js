@@ -2,12 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('schedule', {
+        await queryInterface.createTable('schedules', {
             staffId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'staff', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'staffs', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -40,11 +40,11 @@ module.exports = {
         });
 
         // Tạo các index cho các khoá ngoại
-        await queryInterface.addIndex('schedule', ['roomId'], {
+        await queryInterface.addIndex('schedules', ['roomId'], {
             name: 'fk_schedule_room_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('schedule');
+        await queryInterface.dropTable('schedules');
     }
 };

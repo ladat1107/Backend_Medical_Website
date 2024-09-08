@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'staff', // Tên bảng staff
+                model: 'staffs', // Tên bảng staffs
                 key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'location', // Tên bảng location
+                model: 'locations', // Tên bảng locations
                 key: 'id',
             },
             onUpdate: 'CASCADE',

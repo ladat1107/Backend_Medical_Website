@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'examination', // Tên bảng tham chiếu
+                model: 'examinations', // Tên bảng tham chiếu
                 key: 'id',
             },
             onUpdate: 'CASCADE',

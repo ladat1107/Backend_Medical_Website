@@ -2,12 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('prescription', {
+        await queryInterface.createTable('prescriptions', {
             examId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'examination',
+                    model: 'examinations',
                     key: 'id',
                 },
                 onDelete: 'CASCADE',
@@ -17,7 +17,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'medicine',
+                    model: 'medicines',
                     key: 'id',
                 },
                 onDelete: 'CASCADE',
@@ -50,11 +50,11 @@ module.exports = {
 
         });
         // Tạo chỉ mục cho surgicalhistoryId
-        await queryInterface.addIndex('prescription', ['medicineId'], {
+        await queryInterface.addIndex('prescriptions', ['medicineId'], {
             name: 'fk_prescription_medicine_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('prescription');
+        await queryInterface.dropTable('prescriptions');
     }
 };

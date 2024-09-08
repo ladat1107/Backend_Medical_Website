@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('vitalsign', {
+        await queryInterface.createTable('vitalsigns', {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
@@ -13,7 +13,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'examination', // Tên bảng tham chiếu
+                    model: 'examinations', // Tên bảng tham chiếu
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -68,12 +68,12 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho examinationId
-        await queryInterface.addIndex('vitalsign', ['examinationId'], {
+        await queryInterface.addIndex('vitalsigns', ['examinationId'], {
             name: 'fk_vitalsign_examination_idx'
         });
 
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('vitalsign');
+        await queryInterface.dropTable('vitalsigns');
     }
 };

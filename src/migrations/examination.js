@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('examination', {
+        await queryInterface.createTable('examinations', {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
@@ -23,7 +23,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'staff', // Tham chiếu đến bảng staff
+                    model: 'staffs', // Tham chiếu đến bảng staffs
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -78,16 +78,16 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho staffId
-        await queryInterface.addIndex('examination', ['staffId'], {
+        await queryInterface.addIndex('examinations', ['staffId'], {
             name: 'fk_examination_staff_idx'
         });
 
         // Tạo chỉ mục cho userId
-        await queryInterface.addIndex('examination', ['userId'], {
+        await queryInterface.addIndex('examinations', ['userId'], {
             name: 'fk_examination_user_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('examination');
+        await queryInterface.dropTable('examinations');
     }
 };

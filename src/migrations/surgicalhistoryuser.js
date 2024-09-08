@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('surgicalhistoryuser', {
+        await queryInterface.createTable('surgicalhistoryusers', {
             userId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
@@ -18,7 +18,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'surgicalhistory', // Bảng surgicalhistory đã tồn tại
+                    model: 'surgicalhistories', // Bảng surgicalhistories đã tồn tại
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -48,11 +48,11 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho surgicalhistoryId
-        await queryInterface.addIndex('surgicalhistoryuser', ['surgicalhistoryId'], {
+        await queryInterface.addIndex('surgicalhistoryusers', ['surgicalhistoryId'], {
             name: 'fk_surgicalhistoryuser_surgicalhistory_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('surgicalhistoryuser');
+        await queryInterface.dropTable('surgicalhistoryusers');
     }
 };

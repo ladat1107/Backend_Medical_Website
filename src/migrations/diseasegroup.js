@@ -21,7 +21,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'department',   // Bảng tham chiếu
+                    model: 'departments',   // Bảng tham chiếu
                     key: 'id',        // Khoá ngoại tham chiếu đến cột `id` của bảng `users`
                 },
                 onUpdate: 'CASCADE',

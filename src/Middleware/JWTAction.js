@@ -56,9 +56,9 @@ const checkAuthentication = (req, res, next) => {
         return next();
     }
     if (req.user && req.user.groupRole && req.user.groupRole) {
-        let role = req.user.groupRole[0].groupData;
-        if (role && role.length > 0) {
-            let allowedRoles = role.map(r => r.url);
+        let roles = req.user.groupRole[0].groupData;
+        if (roles && roles.length > 0) {
+            let allowedRoles = roles.map(r => r.url);
             if (allowedRoles.includes(req.path)) {
                 return next();
             } else {

@@ -2,12 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('allergyuser', {
+        await queryInterface.createTable('allergyusers', {
             allergyId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'allgergy', // Tham chiếu đến bảng allgergy
+                    model: 'allgergys', // Tham chiếu đến bảng allgergys
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -39,11 +39,11 @@ module.exports = {
             }
         });
         // Tạo chỉ mục cho userId
-        await queryInterface.addIndex('allergyuser', ['userId'], {
+        await queryInterface.addIndex('allergyusers', ['userId'], {
             name: 'fk_allergyuser_user_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('allergyuser');
+        await queryInterface.dropTable('allergyusers');
     }
 };
