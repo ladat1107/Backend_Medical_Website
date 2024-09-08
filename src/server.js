@@ -34,7 +34,7 @@ configViewEngine(app);
 
 initWebRount(app);
 
-// connectDB();
+connectDB();
 let PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {

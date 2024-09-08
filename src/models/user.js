@@ -26,18 +26,84 @@ module.exports = (sequelize, DataTypes) => {
       //     uniqueKey: 'userId',
       //     as: "userData",
       //   });
-
     }
   }
   User.init({
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    userName: DataTypes.STRING,
-    address: DataTypes.STRING,
-    phoneNumber: DataTypes.STRING,
-    gender: DataTypes.BOOLEAN,
-    image: DataTypes.TEXT('long'),
-    groupId: DataTypes.INTEGER,
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    lastName: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
+    firstName: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+      unique: true,
+    },
+    cid: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    currentResident: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    dob: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      unique: true,
+    },
+    avatar: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    folk: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    nationality: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    ABOBloodGroup: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    RHBloodGroup: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    maritalStatus: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    point: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    }
   }, {
     sequelize,
     modelName: 'User',
