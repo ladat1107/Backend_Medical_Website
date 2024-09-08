@@ -3,11 +3,11 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Vitalsign extends Model {
+    class VitalSign extends Model {
         static associate(models) {
         }
     }
-    Vitalsign.init({
+    VitalSign.init({
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -60,19 +60,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: true,
         },
-        createdAt: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: DataTypes.NOW,
-        },
-        updatedAt: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: DataTypes.NOW,
-        },
+
     }, {
         sequelize,
-        modelName: 'Vitalsign',
+        modelName: 'VitalSign',
     });
-    return Vitalsign;
+    return VitalSign;
 };

@@ -23,15 +23,13 @@ module.exports = {
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
             },
-            createAt: {
+            createdAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
-            updateAt: {
+            updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
             },
         });
 

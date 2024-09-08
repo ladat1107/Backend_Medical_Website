@@ -31,25 +31,23 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
             },
-            createAt: {
+            createdAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
-            updateAt: {
+            updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
             },
             locationId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'locations', // Tên bảng locations
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: 'locations', // Tên bảng locations
+                    key: 'id',
+                },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
             },
             descriptionId: {
                 type: DataTypes.INTEGER,

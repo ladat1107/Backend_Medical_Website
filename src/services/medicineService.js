@@ -462,7 +462,10 @@ for (let i = 0; i < data.length; i++) {
         unit: raw.donvitinh,
         inventory: raw.soluong_ton,
         exp: raw.hansudung,
-        image: null
+        image: null,
+        status: 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
     customData.push(obj);
 }

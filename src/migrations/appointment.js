@@ -35,15 +35,13 @@ module.exports = {
                 allowNull: false,
                 primaryKey: true,
             },
-            createAt: {
+            createdAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
-            updateAt: {
+            updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
             }
         });
         // Tạo chỉ mục cho staffId
