@@ -35,7 +35,7 @@ configViewEngine(app);
 initWebRount(app);
 
 connectDB();
-//insertMedicine();
+
 let PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
