@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('insuances', {
+        await queryInterface.createTable('insurances', {
             id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
@@ -58,11 +58,11 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho userId
-        await queryInterface.addIndex('insuances', ['userId'], {
+        await queryInterface.addIndex('insurances', ['userId'], {
             name: 'fk_insuances_user_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('insuances');
+        await queryInterface.dropTable('insurances');
     }
 };

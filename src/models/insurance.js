@@ -3,11 +3,15 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Insuance extends Model {
+    class Insurance extends Model {
         static associate(models) {
+            Insurance.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'insuranceUserData',
+            });
         }
     }
-    Insuance.init({
+    Insurance.init({
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -55,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
         
     }, {
         sequelize,
-        modelName: 'Insuance',
+        modelName: 'Insurance',
     });
-    return Insuance;
+    return Insurance;
 };

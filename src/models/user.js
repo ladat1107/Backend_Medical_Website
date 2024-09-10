@@ -10,22 +10,58 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //   User.belongsTo(models.Group, {
-      //     foreignKey: 'groupId',
-      //     targetKey: 'id',
-      //     as: 'userGroup'
-      //   });
-      //   User.hasMany(models.Project, {
-      //     foreignKey: 'customerId',
-      //     targetKey: 'id',
-      //     as: 'customerData',
-      //   });
-
-      //   User.belongsToMany(models.Project, {
-      //     through: models.ProjectUser,
-      //     uniqueKey: 'userId',
-      //     as: "userData",
-      //   });
+      User.hasOne(models.Insurance, {
+        foreignKey: 'userId',
+        as: 'userInsuranceData',
+      });
+      User.hasOne(models.ConditionAtBirth, {
+        foreignKey: 'userId',
+        as: 'userConditionAtBirthData',
+      });
+      User.hasMany(models.Staff, {
+        foreignKey: 'userId',
+        as: 'staffUserData',
+      });
+      User.hasMany(models.Patient, {
+        foreignKey: 'userId',
+        as: 'userPatientData',
+      });
+      User.hasMany(models.Relative, {
+        foreignKey: 'userId',
+        as: 'userRelativeData',
+      });
+      User.hasMany(models.FamilyHistory, {
+        foreignKey: 'userId',
+        as: 'userFamilyHistoryData',
+      });
+      User.hasMany(models.SurgicalhistoryUser, {
+        foreignKey: 'userId',
+        as: 'userSurgicalhistoryUserData',
+      });
+      User.hasMany(models.DisablityUser, {
+        foreignKey: 'userId',
+        as: 'userDisablityUserData',
+      });
+      User.hasMany(models.AllergyUser, {
+        foreignKey: 'userId',
+        as: 'userAllergyUserData',
+      });
+      User.hasMany(models.DiseaseUser, {
+        foreignKey: 'userId',
+        as: 'userDiseaseUserData',
+      });
+      User.hasMany(models.Appointment, {
+        foreignKey: 'userId',
+        as: 'userAppointmentData',
+      });
+      User.hasMany(models.Examination, {
+        foreignKey: 'userId',
+        as: 'userExaminationData',
+      });
+      User.belongsTo(models.Role, {
+        foreignKey: 'roleId',
+        as: 'userRoleData',
+      });
     }
   }
   User.init({

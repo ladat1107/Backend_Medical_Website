@@ -44,7 +44,17 @@ module.exports = {
                 },
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
-            }
+            },
+            departmentId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    key: 'id',
+                },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
+            },
         });
 
         // Tạo các index cho các khoá ngoại

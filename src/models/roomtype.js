@@ -5,15 +5,13 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class RoomType extends Model {
         static associate(models) {
+            RoomType.hasMany(models.Room, {
+                foreignKey: 'roomTypeId',
+                as: 'roomTypeRoomData',
+            });
         }
     }
     RoomType.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,

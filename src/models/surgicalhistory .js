@@ -3,17 +3,15 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Surgicalhistory extends Model {
+    class SurgicalHistory extends Model {
         static associate(models) {
+            SurgicalHistory.hasMany(models.SurgicalhistoryUser, {
+                foreignKey: 'surgicalhistoryId',
+                as: 'surgicalhistoryUserData',
+            });
         }
     }
-    Surgicalhistory.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
+    SurgicalHistory.init({
         diseaseName: {
             type: DataTypes.STRING(45),
             allowNull: false,
@@ -25,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       
     }, {
         sequelize,
-        modelName: 'Surgicalhistory',
+        modelName: 'SurgicalHistory',
     });
-    return Surgicalhistory;
+    return SurgicalHistory;
 };

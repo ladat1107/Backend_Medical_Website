@@ -5,7 +5,38 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Staff extends Model {
         static associate(models) {
-
+            Staff.hasOne(models.Department, {
+                foreignKey: 'deanId',
+                as: 'deanDepartmentData',
+            });
+            Staff.hasMany(models.Handbook, {
+                foreignKey: 'author',
+                as: 'staffHandbookData',
+            });
+            Staff.hasMany(models.Schedule, {
+                foreignKey: 'staffId',
+                as: 'staffScheduleData',
+            });
+            Staff.hasMany(models.Appointment, {
+                foreignKey: 'staffId',
+                as: 'staffAppointmentData',
+            });
+            Staff.hasMany(models.Examination, {
+                foreignKey: 'staffId',
+                as: 'staffExaminationData',
+            });
+            Staff.belongsTo(models.Description, {
+                foreignKey: 'descriptionId',
+                as: 'staffDescriptionData',
+            });
+            Staff.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'staffUserData',
+            });
+            Staff.belongsTo(models.Department, {
+                foreignKey: 'departmentId',
+                as: 'staffDepartmentData',
+            });
         }
     }
     Staff.init({
@@ -52,7 +83,17 @@ module.exports = (sequelize, DataTypes) => {
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
-        }
+        },
+        departmentId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'departments', // Tên bảng departments
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
+        },
     }, {
         sequelize,
         modelName: 'Staff',

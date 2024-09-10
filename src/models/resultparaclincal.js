@@ -5,15 +5,13 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class ResultParaclincal extends Model {
         static associate(models) {
+            ResultParaclincal.belongsTo(models.Examination, {
+                foreignKey: 'examinationId',
+                as: 'resultParaclincalExaminationData',
+            });
         }
     }
     ResultParaclincal.init({
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            allowNull: false,
-        },
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,

@@ -5,15 +5,29 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Room extends Model {
         static associate(models) {
+            Room.belongsTo(models.Location, {
+                foreignKey: 'locationId',
+                as: 'roomLocationData',
+            });
+            Room.belongsTo(models.RoomType, {
+                foreignKey: 'typeRoom',
+                as: 'roomRoomTypeData',
+            });
+            Room.belongsTo(models.Department, {
+                foreignKey: 'medicalExamination',
+                as: 'roomDepartmentData',
+            });
+            Room.hasMany(models.Schedule, {
+                foreignKey: 'roomId',
+                as: 'roomScheduleData',
+            });
+            Room.hasMany(models.Bed, {
+                foreignKey: 'roomId',
+                as: 'roomBedData',
+            });
         }
     }
     Room.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,

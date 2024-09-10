@@ -5,6 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class AllergyUser extends Model {
         static associate(models) {
+            AllergyUser.belongsTo(models.Allgergy, {
+                foreignKey: 'allergyId',
+                as: 'allergyUserAllergyData',
+            });
+            AllergyUser.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'allergyUserUserData',
+            });
         }
     }
     AllergyUser.init({
@@ -12,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'allgergys', // Tên bảng tham chiếu
+                model: 'allgergies', // Tên bảng tham chiếu
                 key: 'id',
             },
             onUpdate: 'CASCADE',

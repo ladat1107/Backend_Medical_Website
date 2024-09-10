@@ -5,15 +5,33 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Examination extends Model {
         static associate(models) {
+            Examination.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'examinationUserData',
+            });
+            Examination.belongsTo(models.Staff, {
+                foreignKey: 'staffId',
+                as: 'examinationStaffData',
+            });
+            Examination.hasMany(models.ResultParaclincal, {
+                foreignKey: 'examinationId',
+                as: 'examinationResultParaclincalData',
+            });
+            Examination.hasOne(models.VitalSign, {
+                foreignKey: 'examinationId',
+                as: 'examinationVitalSignData',
+            });
+            Examination.hasMany(models.Prescription, {
+                foreignKey: 'examinationId',
+                as: 'examinationPrescriptionData',
+            });
+            Examination.hasMany(models.Comorbidities, {
+                foreignKey: 'examinationId',
+                as: 'examinationComorbiditiesData',
+            });
         }
     }
     Examination.init({
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            allowNull: false,
-        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,

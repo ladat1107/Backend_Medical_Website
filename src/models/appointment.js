@@ -5,6 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Appointment extends Model {
         static associate(models) {
+            Appointment.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'appointmentUserData',
+            });
+            Appointment.belongsTo(models.Staff, {
+                foreignKey: 'staffId',
+                as: 'appointmentStaffData',
+            });
         }
     }
     Appointment.init({
@@ -43,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
 
     }, {
         sequelize,
-        modelName: 'Appointment ',
+        modelName: 'Appointment',
     });
     return Appointment;
 };

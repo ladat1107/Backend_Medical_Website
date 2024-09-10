@@ -5,15 +5,13 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class ConditionAtBirth extends Model {
         static associate(models) {
+            ConditionAtBirth.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'conditionAtBirthUserData',
+            });
         }
     }
     ConditionAtBirth.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,

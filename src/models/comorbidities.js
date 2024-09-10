@@ -5,6 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Comorbidities extends Model {
         static associate(models) {
+            Comorbidities.belongsTo(models.Examination, {
+                foreignKey: 'examinationId',
+                as: 'comorbiditiesExaminationData',
+            });
+            Comorbidities.belongsTo(models.Disease, {
+                foreignKey: 'diseaseId',
+                as: 'comorbiditiesDiseaseData',
+            });
         }
     }
     Comorbidities.init({

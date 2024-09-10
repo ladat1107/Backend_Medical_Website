@@ -10,31 +10,40 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //   Handbook.belongsTo(models.Group, {
-      //     foreignKey: 'groupId',
-      //     targetKey: 'id',
-      //     as: 'userGroup'
-      //   });
-      //   Handbook.hasMany(models.Project, {
-      //     foreignKey: 'customerId',
-      //     targetKey: 'id',
-      //     as: 'customerData',
-      //   });
-
-      //   Handbook.belongsToMany(models.Project, {
-      //     through: models.ProjectUser,
-      //     uniqueKey: 'userId',
-      //     as: "userData",
-      //   });
-
+      Handbook.belongsTo(models.Description, {
+        foreignKey: 'descriptionId',
+        as: 'handbookDescriptionData',
+      });
+      Handbook.belongsTo(models.Staff, {
+        foreignKey: 'author',
+        as: 'handbookStaffData',
+      });
     }
   }
   Handbook.init({
     title: DataTypes.STRING,
-    author: DataTypes.INTEGER,
+    author: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'staffs',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
     image: DataTypes.STRING,
     status: DataTypes.INTEGER,
-    descriptionId: DataTypes.INTEGER
+    descriptionId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'descriptions',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    }
   }, {
     sequelize,
     modelName: 'Handbook',

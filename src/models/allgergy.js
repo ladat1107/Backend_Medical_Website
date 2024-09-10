@@ -5,15 +5,13 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Allgergy extends Model {
         static associate(models) {
+            Allgergy.hasMany(models.AllergyUser, {
+                foreignKey: 'allergyId',
+                as: 'allgergyAllergyUserData',
+            });
         }
     }
     Allgergy.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         userID: {
             type: DataTypes.INTEGER,
             allowNull: false,

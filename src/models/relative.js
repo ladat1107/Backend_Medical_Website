@@ -5,6 +5,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Relative extends Model {
         static associate(models) {
+            Relative.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'relativeUserData',
+            });
         }
     }
     Relative.init({

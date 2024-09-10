@@ -5,15 +5,13 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class VitalSign extends Model {
         static associate(models) {
+            VitalSign.belongsTo(models.Examination, {
+                foreignKey: 'examinationId',
+                as: 'vitalSignExaminationData',
+            });
         }
     }
     VitalSign.init({
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            allowNull: false,
-        },
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,

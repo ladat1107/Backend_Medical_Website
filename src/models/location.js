@@ -10,23 +10,14 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //   Location.belongsTo(models.Group, {
-      //     foreignKey: 'groupId',
-      //     targetKey: 'id',
-      //     as: 'userGroup'
-      //   });
-      //   Location.hasMany(models.Project, {
-      //     foreignKey: 'customerId',
-      //     targetKey: 'id',
-      //     as: 'customerData',
-      //   });
-
-      //   Location.belongsToMany(models.Project, {
-      //     through: models.ProjectUser,
-      //     uniqueKey: 'userId',
-      //     as: "userData",
-      //   });
-
+      Location.hasMany(models.Department, {
+        foreignKey: 'locationId',
+        as: 'locationDepartmentData',
+      });
+      Location.hasMany(models.Room, {
+        foreignKey: 'locationId',
+        as: 'locationRoomData',
+      });
     }
   }
   Location.init({

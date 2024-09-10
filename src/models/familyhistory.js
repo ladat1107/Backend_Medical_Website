@@ -3,11 +3,15 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Familyhistory extends Model {
+    class FamilyHistory extends Model {
         static associate(models) {
+            FamilyHistory.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'userFamilyHistoryData',
+            });
         }
     }
-    Familyhistory.init({
+    FamilyHistory.init({
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -55,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
        
     }, {
         sequelize,
-        modelName: 'Familyhistory',
+        modelName: 'FamilyHistory',
     });
-    return Familyhistory;
+    return FamilyHistory;
 };

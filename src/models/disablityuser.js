@@ -5,6 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class DisablityUser extends Model {
         static associate(models) {
+            DisablityUser.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'disablityUserUserData',
+            });
+            DisablityUser.belongsTo(models.Disability, {
+                foreignKey: 'disabilityId',
+                as: 'disablityUserDisabilityData',
+            });
         }
     }
     DisablityUser.init({

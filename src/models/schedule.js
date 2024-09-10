@@ -5,6 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Schedule extends Model {
         static associate(models) {
+            Schedule.belongsTo(models.Staff, {
+                foreignKey: 'staffId',
+                as: 'scheduleStaffData',
+            });
+            Schedule.belongsTo(models.Room, {
+                foreignKey: 'roomId',
+                as: 'schduleRoomData',
+            });
         }
     }
     Schedule.init({

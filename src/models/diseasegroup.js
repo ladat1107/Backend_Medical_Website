@@ -5,15 +5,17 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class DiseaseGroup extends Model {
         static associate(models) {
+            DiseaseGroup.belongsTo(models.Department, {
+                foreignKey: 'departmentId',
+                as: 'diseaseGroupDepartmentData',
+            });
+            DiseaseGroup.hasMany(models.Disease, {
+                foreignKey: 'diseaseGroupId',
+                as: 'diseaseGroupDiseaseData',
+            });
         }
     }
     DiseaseGroup.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         name: {
             type: DataTypes.STRING(255),
             allowNull: false,
