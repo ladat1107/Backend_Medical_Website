@@ -16,29 +16,23 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     DiseaseGroup.init({
-        name: {
-            type: DataTypes.STRING(255),
+        groupName: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
-        description: {
-            type: DataTypes.TEXT,
-            allowNull: false,
+        groupCode: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
-        departmentId: {
+        chapterId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
+            allowNull: true,
         },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-       
+
     }, {
         sequelize,
         modelName: 'DiseaseGroup',
