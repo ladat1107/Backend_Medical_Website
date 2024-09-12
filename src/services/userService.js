@@ -18,8 +18,6 @@ let hashPasswordUser = async (password) => {
         }
     }
 }
-
-
 const checkEmail = async (email) => {
     try {
         let user = await db.User.findOne({
@@ -47,6 +45,44 @@ const checkPhoneNumber = async (phoneNumber) => {
         return false;
     }
 }
+
+const createUser = async (data) => {
+    try{
+        let hashPassword = await hashPasswordUser(data.password);
+        let user = await db.User.create({
+            email: data.email,
+            password: hashPassword,
+            phoneNumber: data.phoneNumber,
+            lastName: data.lastName,
+            firstName: data.firstName,
+            cid: data.cid,
+            currentRescident: data.currentRescident,
+            status: data.status,
+            roleId: data.roleId
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Đăng ký thành công",
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Đăng ký thất bại",
+                DT: "",
+            }
+        }
+    }catch(error){
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const registerUser = async (data) => {
     try {
         if (await checkEmail(data.email) == false) {
@@ -357,6 +393,7 @@ const getFunctionById = async (userId) => {
     }
 }
 module.exports = {
+    createUser,
     registerUser,
     loginUser,
     getFunction,

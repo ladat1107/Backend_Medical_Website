@@ -92,11 +92,11 @@ const getFunction = async (req, res) => {
         })
     }
 }
-const createFunction = async (req, res) => {
+const createUser = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
-            let arr = ["userName", "password", "email", "phoneNumber", "gender", "groupId"];
+            let arr = ["password", "email", "phoneNumber", "lastName", "firstName", "cid", "currentRescident", "status", "roleId"];
             for (let i = 0; i < arr.length; i++) {
                 if (!data[arr[i]]) {
                     return res.status(400).json({
@@ -106,7 +106,7 @@ const createFunction = async (req, res) => {
                     })
                 }
             }
-            let response = await userService.createFunction(data);
+            let response = await userService.createUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -245,11 +245,11 @@ const handleGetAccount = async (req, res) => {
     }
 }
 module.exports = {
+    createUser,
     handleRegisterUser,
     handleLogin,
     handleLogout,
     getFunction,
-    createFunction,
     updateFunction,
     deleteFunction,
     getFunctionById,

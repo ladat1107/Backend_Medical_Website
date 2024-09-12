@@ -57,9 +57,11 @@ let initWebRount = (app) => {
     router.get("/account", userController.handleGetAccount)
     router.get("/user/get", userController.getFunction)
     router.get("/user/getById", userController.getFunctionById)
-    router.post("/user/create", userController.createFunction)
+    //router.post("/user/create", userController.createFunction)
     router.put("/user/update", userController.updateFunction)
     router.delete("/user/delete", userController.deleteFunction)
+
+    router.post("/admin/createUser", userController.createUser)
 
     return app.use("/api/", router);
 }
