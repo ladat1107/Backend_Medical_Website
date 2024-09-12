@@ -88,7 +88,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-       
+        price: {
+            type: DataTypes.DOUBLE,
+            allowNull: false,
+        },
+        special: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
     }, {
         sequelize,
         modelName: 'Examination',

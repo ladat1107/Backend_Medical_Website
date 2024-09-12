@@ -2,26 +2,28 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('symptomdiseases', {
+        await queryInterface.createTable('departmentsymptoms', {
+            departmentId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: 'departments', // Tên bảng tham chiếu
+                    key: 'id',
+                },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
+                primaryKey: true,
+            },
             symptomId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'symptoms', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'symptoms', // Tên bảng tham chiếu
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
-            },
-            diseaseId: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'diseases', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                    key: 'id',
-                },
-                onUpdate: 'CASCADE',
-                onDelete: 'CASCADE',
+                primaryKey: true,
             },
             createdAt: {
                 type: Sequelize.DATE,
@@ -30,15 +32,15 @@ module.exports = {
             updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-            },
+            }
+        });
+        // Tạo chỉ mục cho userId
+        await queryInterface.addIndex('departmentsymptoms', ['symptomId'], {
+            name: 'fk_DepartmentSymptoms_Symptoms_idx'
         });
 
-        // Tạo các index cho các khoá ngoại
-        await queryInterface.addIndex('symptomdiseases', ['diseaseId'], {
-            name: 'fk_symptomdisease_disease_idx'
-        });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('symptomdiseases');
+        await queryInterface.dropTable('departmentsymptoms');
     }
 };

@@ -5,10 +5,6 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Department extends Model {
         static associate(models) {
-            Department.hasMany(models.DiseaseGroup, {
-                foreignKey: 'departmentId',
-                as: 'departmentDiseaseGroupData',
-            });
             Department.hasMany(models.Room, {
                 foreignKey: 'medicalExamination',
                 as: 'departmentRoomData',
@@ -16,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
             Department.hasMany(models.Staff, {
                 foreignKey: 'departmentId',
                 as: 'departmentStaffData',
+            });
+            Department.hasMany(models.DepartmentSymptom, {
+                foreignKey: 'departmentId',
+                as: 'departmentDepartmentSymptomData',
             });
             Department.belongsTo(models.Location, {
                 foreignKey: 'locationId',

@@ -50,6 +50,10 @@ module.exports = {
             updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
+            },
+            price: {
+                type: Sequelize.DOUBLE,
+                allowNull: false,
             }
         });
 

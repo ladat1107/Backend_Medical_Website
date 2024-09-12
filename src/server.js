@@ -5,7 +5,7 @@ import initWebRount from './rounter/web';
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { insertMedicine } from './services/medicineService';
+import { insertGroup } from './services/diseaseGroupService';
 
 const app = express();
 
@@ -41,5 +41,7 @@ let PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+//insertGroup();
 
 export default app;

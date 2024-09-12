@@ -1,334 +1,757 @@
+
 import db from "../models/index";
 
-let arr = [
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "f759c29f-c1a3-4a21-aa64-0f3e64e1f116",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A00-A09",
-        "ten_nhomchinh_tienganh": "Intestinal infectious diseases",
-        "ten_nhomchinh": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng \u0111\u01b0\u1eddng ru\u1ed9t",
-        "tennhombenh_khongdau": "benh nhiem trung duong ruot",
-        "active": 1,
-        "stt": 1
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "d6ac3ab8-0e64-48fd-965d-fd4838f010df",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A15-A19",
-        "ten_nhomchinh_tienganh": "Tuberculosis",
-        "ten_nhomchinh": "B\u1ec7nh lao",
-        "tennhombenh_khongdau": "benh lao",
-        "active": 1,
-        "stt": 2
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "3b9a73c1-6ddf-46da-8b2f-9ea88a3d2bf7",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A20-A28",
-        "ten_nhomchinh_tienganh": "Certain zoonotic bacterial diseases",
-        "ten_nhomchinh": "B\u1ec7nh nhi\u1ec5m khu\u1ea9n do \u0111\u1ed9ng v\u1eadt truy\u1ec1n sang ng\u01b0\u1eddi",
-        "tennhombenh_khongdau": "benh nhiem khu\u1ea9n do dong vat truyen sang nguoi",
-        "active": 1,
-        "stt": 3
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "a9fb9e46-62be-411e-a252-5abbc3394963",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A30-A49",
-        "ten_nhomchinh_tienganh": "Other bacterial diseases",
-        "ten_nhomchinh": "B\u1ec7nh nhi\u1ec5m khu\u1ea9n kh\u00e1c",
-        "tennhombenh_khongdau": "benh nhiem khu\u1ea9n khac",
-        "active": 1,
-        "stt": 4
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "0641ee2d-5421-45e5-a39c-b9cb8c062dd0",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A50-A64",
-        "ten_nhomchinh_tienganh": "Infections with a predominantly sexual mode of transmission",
-        "ten_nhomchinh": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng l\u00e2y truy\u1ec1n ch\u1ee7 y\u1ebfu qua \u0111\u01b0\u1eddng t\u00ecnh d\u1ee5c",
-        "tennhombenh_khongdau": "benh nhiem trung lay truyen chu yeu qua duong tinh duc",
-        "active": 1,
-        "stt": 5
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "75afa468-9a48-4756-abaa-a81252cac815",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A65-A69",
-        "ten_nhomchinh_tienganh": "Other spirochaetal diseases",
-        "ten_nhomchinh": "B\u1ec7nh do xo\u1eafn tr\u00f9ng kh\u00e1c",
-        "tennhombenh_khongdau": "benh do xoan trung khac",
-        "active": 1,
-        "stt": 6
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "862f7ec9-eb5a-4bef-8a5e-2f1bd94bd04a",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A70-A74",
-        "ten_nhomchinh_tienganh": "Other diseases caused by chlamydiae",
-        "ten_nhomchinh": "C\u00e1c b\u1ec7nh kh\u00e1c do Chlamydia",
-        "tennhombenh_khongdau": "cac benh khac do chlamydia",
-        "active": 1,
-        "stt": 7
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "6e306fa8-26e4-485a-b8e4-ff010d5175f1",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A75-A79",
-        "ten_nhomchinh_tienganh": "Rickettsioses",
-        "ten_nhomchinh": "B\u1ec7nh do Rickettsia",
-        "tennhombenh_khongdau": "benh do rickettsia",
-        "active": 1,
-        "stt": 8
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "2e34bfa2-115c-4912-bc61-6a3578c97819",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A80-A89",
-        "ten_nhomchinh_tienganh": "Viral infections of the central nervous system",
-        "ten_nhomchinh": "Nhi\u1ec5m virus \u1edf h\u1ec7 th\u1ea7n kinh trung \u01b0\u01a1ng",
-        "tennhombenh_khongdau": "nhiem virus o he than kinh trung uong",
-        "active": 1,
-        "stt": 9
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "eda0f838-9ed4-4a0d-ae47-715ee67fe06e",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "A90-A99",
-        "ten_nhomchinh_tienganh": "Arthropod-borne viral fevers and viral haemorrhagic fevers",
-        "ten_nhomchinh": "S\u1ed1t virus v\u00e0 s\u1ed1t xu\u1ea5t huy\u1ebft virus do ti\u1ebft t\u00fac truy\u1ec1n",
-        "tennhombenh_khongdau": "sot virus va sot xuat huyet virus do tiet tuc truyen",
-        "active": 1,
-        "stt": 10
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "cacb6e98-bfb7-4b5d-a281-41707365507e",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "B00-B09",
-        "ten_nhomchinh_tienganh": "Viral infections characterized by skin and mucous membrane lesions",
-        "ten_nhomchinh": "Nhi\u1ec5m virus c\u00f3 \u0111\u1eb7c \u0111i\u1ec3m t\u1ed5n th\u01b0\u01a1ng t\u1ea1i da v\u00e0 ni\u00eam m\u1ea1c",
-        "tennhombenh_khongdau": "nhiem virus co dac diem ton thuong tai da va niem mac",
-        "active": 1,
-        "stt": 11
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "401bd98a-bdfa-46ce-8435-e28a55187045",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "B15-B19",
-        "ten_nhomchinh_tienganh": "Viral hepatitis",
-        "ten_nhomchinh": "Vi\u00eam gan virus",
-        "tennhombenh_khongdau": "viem gan virus",
-        "active": 1,
-        "stt": 12
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "14dd9f16-1e54-4566-911c-f43ad35aabf9",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "B20-B24",
-        "ten_nhomchinh_tienganh": "Human immunodeficiency virus [HIV] disease",
-        "ten_nhomchinh": "B\u1ec7nh do nhi\u1ec5m virus suy gi\u1ea3m mi\u1ec5n d\u1ecbch \u1edf ng\u01b0\u1eddi [HIV]",
-        "tennhombenh_khongdau": "benh do nhiem virus suy giam mien dich o nguoi [hiv]",
-        "active": 1,
-        "stt": 13
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "bd0ec228-5c98-470e-8a2a-eed7284c8490",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "B25-B34",
-        "ten_nhomchinh_tienganh": "Other viral diseases",
-        "ten_nhomchinh": "C\u00e1c b\u1ec7nh nhi\u1ec5m virus kh\u00e1c",
-        "tennhombenh_khongdau": "cac benh nhiem virus khac",
-        "active": 1,
-        "stt": 14
-    },
-    {
-        "created_at": 1605549561,
-        "created_by": null,
-        "updated_at": 1605549561,
-        "updated_by": null,
-        "deleted": false,
-        "deleted_by": null,
-        "deleted_at": null,
-        "id": "1bf0c31e-d5e4-4dff-b43c-451b29e48c4b",
-        "stt_chuong": "I",
-        "ma_chuong": "A00-B99",
-        "ten_chuong_tienganh": "Certain infectious and parasitic diseases",
-        "ten_chuong": "B\u1ec7nh nhi\u1ec5m tr\u00f9ng v\u00e0 k\u00fd sinh tr\u00f9ng",
-        "ma_nhomchinh": "B35-B49",
-        "ten_nhomchinh_tienganh": "Mycoses",
-        "ten_nhomchinh": "B\u1ec7nh nhi\u1ec5m n\u1ea5m",
-        "tennhombenh_khongdau": "benh nhiem nam",
-        "active": 1,
-        "stt": 15
+let data = {
+    "type": "div",
+    "content": [
+      "\n    \n    ",
+      {
+        "type": "div",
+        "content": [
+          " ",
+          {
+            "type": "h2",
+            "content": [
+              " CHƯƠNG XI ",
+              {
+                "type": "br"
+              },
+              " BỆNH HỆ TIÊU HOÁ (K00-K93) "
+            ]
+          },
+          "\n    "
+        ],
+        "attributes": {
+          "class": "chapter"
+        }
+      },
+      "\n    \n    \n    \n    \n    \n    \n    ",
+      {
+        "type": "p",
+        "content": [
+          "Chương này chứa:"
+        ]
+      },
+      "\n    ",
+      {
+        "type": "ul",
+        "content": [
+          "\n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K00-K14"
+                ],
+                "attributes": {
+                  "href": "section/K00-K14",
+                  "title": "Bệnh của khoang miệng, tuyến nước bọt và xương hàm",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh của khoang miệng, tuyến nước bọt và xương hàm"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K20-K31"
+                ],
+                "attributes": {
+                  "href": "section/K20-K31",
+                  "title": "Bệnh của thực quản, dạ dày và tá tràng",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh của thực quản, dạ dày và tá tràng"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K35-K38"
+                ],
+                "attributes": {
+                  "href": "section/K35-K38",
+                  "title": "Bệnh ruột thừa",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh ruột thừa"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K40-K46"
+                ],
+                "attributes": {
+                  "href": "section/K40-K46",
+                  "title": "Thoát vị",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Thoát vị"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K50-K52"
+                ],
+                "attributes": {
+                  "href": "section/K50-K52",
+                  "title": "Viêm ruột non và đại tràng không do nhiễm trùng",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Viêm ruột non và đại tràng không do nhiễm trùng"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K55-K64"
+                ],
+                "attributes": {
+                  "href": "section/K55-K64",
+                  "title": "Bệnh đường ruột khác",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh đường ruột khác"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K65-K67"
+                ],
+                "attributes": {
+                  "href": "section/K65-K67",
+                  "title": "Bệnh của phúc mạc",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh của phúc mạc"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K70-K77"
+                ],
+                "attributes": {
+                  "href": "section/K70-K77",
+                  "title": "Bệnh của gan",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh của gan"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K80-K87"
+                ],
+                "attributes": {
+                  "href": "section/K80-K87",
+                  "title": "Bệnh túi mật, ống mật và tuỵ",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh túi mật, ống mật và tuỵ"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    \n    ",
+          {
+            "type": "li",
+            "content": [
+              "\n        ",
+              {
+                "type": "a",
+                "content": [
+                  "K90-K93"
+                ],
+                "attributes": {
+                  "href": "section/K90-K93",
+                  "title": "Bệnh khác của hệ tiêu hoá",
+                  "class": "code-section"
+                }
+              },
+              "\n        ",
+              {
+                "type": "span",
+                "content": [
+                  "Bệnh khác của hệ tiêu hoá"
+                ],
+                "attributes": {
+                  "class": "label"
+                }
+              },
+              "\n        \n    "
+            ],
+            "attributes": {
+              "class": ""
+            }
+          },
+          "\n    "
+        ]
+      },
+      "\n    \n    \n    ",
+      {
+        "type": "h4",
+        "content": [
+          {
+            "type": "strong",
+            "content": [
+              "Các mã dấu sao (*) trong chương:"
+            ]
+          }
+        ]
+      },
+      "\n",
+      {
+        "type": "ul",
+        "content": [
+          "\n",
+          {
+            "type": "li",
+            "content": [
+              "\n",
+              {
+                "type": "p",
+                "content": [
+                  {
+                    "type": "a",
+                    "content": [
+                      "K23*"
+                    ],
+                    "attributes": {
+                      "href": "disease/K23"
+                    }
+                  },
+                  " Rối loạn của thực quản trong bệnh phân loại nơi khác "
+                ]
+              },
+              "\n"
+            ]
+          },
+          "\n",
+          {
+            "type": "li",
+            "content": [
+              "\n",
+              {
+                "type": "p",
+                "content": [
+                  {
+                    "type": "a",
+                    "content": [
+                      "K67*"
+                    ],
+                    "attributes": {
+                      "href": "disease/K67"
+                    }
+                  },
+                  " Rối loạn của phúc mạc trong bệnh nhiễm trùng phân loại nơi khác "
+                ]
+              },
+              "\n"
+            ]
+          },
+          "\n",
+          {
+            "type": "li",
+            "content": [
+              "\n",
+              {
+                "type": "p",
+                "content": [
+                  {
+                    "type": "a",
+                    "content": [
+                      "K77*"
+                    ],
+                    "attributes": {
+                      "href": "disease/K77"
+                    }
+                  },
+                  " Rối loạn của gan trong bệnh phân loại nơi khác  "
+                ]
+              },
+              "\n"
+            ]
+          },
+          "\n",
+          {
+            "type": "li",
+            "content": [
+              "\n",
+              {
+                "type": "p",
+                "content": [
+                  {
+                    "type": "a",
+                    "content": [
+                      "K87*"
+                    ],
+                    "attributes": {
+                      "href": "disease/K87"
+                    }
+                  },
+                  " Rối loạn của túi mật, đường mật và tụy trong bệnh phân loại nơi khác "
+                ]
+              },
+              "\n"
+            ]
+          },
+          "\n",
+          {
+            "type": "li",
+            "content": [
+              "\n",
+              {
+                "type": "p",
+                "content": [
+                  {
+                    "type": "a",
+                    "content": [
+                      "K93*"
+                    ],
+                    "attributes": {
+                      "href": "disease/K93"
+                    }
+                  },
+                  " Rối loạn của cơ quan tiêu hoá khác trong bệnh phân loại nơi khác  "
+                ]
+              },
+              "\n"
+            ]
+          },
+          "\n"
+        ]
+      },
+      "\n    \n    \n    \n        ",
+      {
+        "type": "dt",
+        "content": [
+          "\n            Loại trừ:\n        "
+        ]
+      },
+      "\n        ",
+      {
+        "type": "ul",
+        "content": [
+          {
+            "type": "li",
+            "content": [
+              "một số bệnh lý khởi phát từ thời kỳ chu sinh (",
+              {
+                "type": "a",
+                "content": [
+                  "P00"
+                ],
+                "attributes": {
+                  "href": "type/P00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "P96"
+                ],
+                "attributes": {
+                  "href": "type/P96"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "một số bệnh nhiễm trùng và ký sinh trùng (",
+              {
+                "type": "a",
+                "content": [
+                  "A00"
+                ],
+                "attributes": {
+                  "href": "type/A00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "B99"
+                ],
+                "attributes": {
+                  "href": "type/B99"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "các biến chứng trong thời kỳ mang thai, lúc sinh đẻ và thời kỳ hậu sản (",
+              {
+                "type": "a",
+                "content": [
+                  "O00"
+                ],
+                "attributes": {
+                  "href": "type/O00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "O99"
+                ],
+                "attributes": {
+                  "href": "type/O99"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "các dị tật, dị dạng bẩm sinh và bất thường nhiễm sắc thể (",
+              {
+                "type": "a",
+                "content": [
+                  "Q00"
+                ],
+                "attributes": {
+                  "href": "type/Q00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "Q99"
+                ],
+                "attributes": {
+                  "href": "type/Q99"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "các bệnh nội tiết, dinh dưỡng và chuyển hoá (",
+              {
+                "type": "a",
+                "content": [
+                  "E00"
+                ],
+                "attributes": {
+                  "href": "type/E00"
+                }
+              },
+              "-E90)"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "chấn thương, ngộ độc và một số hậu quả khác do nguyên nhân ngoại sinh (",
+              {
+                "type": "a",
+                "content": [
+                  "S00"
+                ],
+                "attributes": {
+                  "href": "type/S00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "T98"
+                ],
+                "attributes": {
+                  "href": "type/T98"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "u tân sinh (",
+              {
+                "type": "a",
+                "content": [
+                  "C00"
+                ],
+                "attributes": {
+                  "href": "type/C00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "D48"
+                ],
+                "attributes": {
+                  "href": "type/D48"
+                }
+              },
+              ")"
+            ]
+          },
+          {
+            "type": "li",
+            "content": [
+              "triệu chứng cơ năng, thực thể, và bất thường về lâm sàng và cận lâm sàng, không phân loại nơi khác (",
+              {
+                "type": "a",
+                "content": [
+                  "R00"
+                ],
+                "attributes": {
+                  "href": "type/R00"
+                }
+              },
+              "-",
+              {
+                "type": "a",
+                "content": [
+                  "R99"
+                ],
+                "attributes": {
+                  "href": "type/R99"
+                }
+              },
+              ")"
+            ]
+          }
+        ]
+      },
+      "\n        \n    \n    \n    \n"
+    ],
+    "attributes": {
+      "class": "block-chapter"
     }
-]
-function decodeUnicode(str) {
-    return decodeURIComponent(JSON.parse('"' + str.replace(/\"/g, '\\"') + '"'));
-}
-let customData = [];
-for (let i = 0; i < arr.length; i++) {
-    let raw = arr[i];
+  }
+
+  const extractValues = (data) => {
+    const results = [];
+  
+    if (data.type === 'ul') {
+      data.content.forEach((li) => {
+        if (li.type === 'li') {
+          const code = li.content.find((item) => item.type === 'a').content[0];
+          const title = li.content.find((item) => item.type === 'span').content[0];
+          results.push({ code, title });
+        }
+      });
+    }
+  
+    return results;
+  };
+  let customData = [];
+  const sections = extractValues(data.content[5]);
+  sections.forEach(section => {
+
     let obj = {
-        name: raw.ten_nhomchinh,
-        description: raw.ten_nhomchinh_tienganh,
-        departmentId: 1,
+        chapterId: 11,
+        groupCode: section.code,
+        groupName: section.title,
         status: 1
     }
     customData.push(obj);
-}
-const insertMedicine = async () => {
+  });
+  
+const insertGroup = async () => {
     try {
+       console.log("check data: ", customData);
         let user = await db.DiseaseGroup.bulkCreate(customData);
-
         if (user) {
             console.log("Insert Medicine Success");
         }
-        console.log("Insert Medicine Fail");
+        else console.log("Insert Medicine Fail");
     } catch (error) {
         console.log(error);
         console.log("Error from server");
     }
 }
 module.exports = {
-    insertMedicine
+    insertGroup
 }

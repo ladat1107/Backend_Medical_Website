@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'diseaseGroupId',
                 as: 'diseaseDiseaseGroupData',
             });
-            Disease.hasMany(models.SymptomDisease, {
-                foreignKey: 'diseaseId',
-                as: 'diseaseSymptomDiseaseData',
-            });
             Disease.hasMany(models.DiseaseUser, {
                 foreignKey: 'diseaseId',
                 as: 'diseaseDiseaseUserData',

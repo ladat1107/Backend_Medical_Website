@@ -3,43 +3,44 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class SymptomDisease extends Model {
+    class DepartmentSymptom extends Model {
         static associate(models) {
-            SymptomDisease.belongsTo(models.Symptom, {
+            DepartmentSymptom.belongsTo(models.Symptom, {
                 foreignKey: 'symptomId',
-                as: 'symptomDiseaseSymptomData',
+                as: 'departmentSymptomSymptomData',
             });
-            SymptomDisease.belongsTo(models.Disease, {
-                foreignKey: 'diseaseId',
-                as: 'symptomDiseaseDiseaseData',
+            DepartmentSymptom.belongsTo(models.Department, {
+                foreignKey: 'departmentId',
+                as: 'departmentSymptomDepartmentData',
             });
         }
     }
-    SymptomDisease.init({
+    DepartmentSymptom.init({
+        departmentId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'departments', // Tên bảng tham chiếu
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
+            primaryKey: true,
+        },
         symptomId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'symptoms', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'symptoms', // Tên bảng tham chiếu
                 key: 'id',
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
-        diseaseId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'diseases', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
-        },
-       
     }, {
         sequelize,
-        modelName: 'SymptomDisease',
+        modelName: 'DepartmentSymptom',
     });
-    return SymptomDisease;
+    return DepartmentSymptom;
 };

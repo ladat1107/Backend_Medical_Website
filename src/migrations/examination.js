@@ -72,6 +72,14 @@ module.exports = {
             updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
+            },
+            price: {
+                type: Sequelize.DOUBLE,
+                allowNull: false,
+            },
+            special: {
+                type: Sequelize.INTEGER,
+                allowNull: true,
             }
         });
 

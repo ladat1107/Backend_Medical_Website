@@ -35,6 +35,17 @@ module.exports = {
                 allowNull: false,
                 primaryKey: true,
             },
+            cid: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                primaryKey: true,
+            },
+            symptomNote: {
+                type: Sequelize.STRING,
+            },
+            specialNote: {
+                type: Sequelize.STRING,
+            },
             createdAt: {
                 type: Sequelize.DATE,
                 allowNull: true,

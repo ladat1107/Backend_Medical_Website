@@ -48,7 +48,17 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             primaryKey: true,
         },
-
+        cid: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true,
+        },
+        symptomNote: {
+            type: DataTypes.STRING,
+        },
+        specialNote: {
+            type: DataTypes.STRING,
+        }
     }, {
         sequelize,
         modelName: 'Appointment',
