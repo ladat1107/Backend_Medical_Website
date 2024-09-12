@@ -13,12 +13,17 @@ module.exports = {
                 type: Sequelize.STRING(256),
                 allowNull: false,
             },
-            unitPrice: {
+            price: {
                 type: Sequelize.DOUBLE,
                 allowNull: false,
             },
+            registrationNumber: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                unique: true,
+            },
             unit: {
-                type: Sequelize.TEXT,
+                type: Sequelize.STRING,
                 allowNull: false,
             },
             inventory: {
@@ -26,11 +31,39 @@ module.exports = {
                 allowNull: false,
             },
             exp: {
-                type: Sequelize.DATE,
+                type: Sequelize.STRING,
                 allowNull: false,
             },
-            image: {
-                type: Sequelize.STRING(1000),
+            approvalNumber: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            approvalDate: {
+                type: Sequelize.DATE,
+                allowNull: true,
+            },
+            dosageForm: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            manufacturerCountry: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            description: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            activeIngredient: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            group: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            concentration: {
+                type: Sequelize.STRING,
                 allowNull: true,
             },
             createdAt: {

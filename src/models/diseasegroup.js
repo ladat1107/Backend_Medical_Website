@@ -5,10 +5,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class DiseaseGroup extends Model {
         static associate(models) {
-            DiseaseGroup.belongsTo(models.Department, {
-                foreignKey: 'departmentId',
-                as: 'diseaseGroupDepartmentData',
-            });
+            // DiseaseGroup.belongsTo(models.Department, {
+            //     foreignKey: 'departmentId',
+            //     as: 'diseaseGroupDepartmentData',
+            // });
             DiseaseGroup.hasMany(models.Disease, {
                 foreignKey: 'diseaseGroupId',
                 as: 'diseaseGroupDiseaseData',
