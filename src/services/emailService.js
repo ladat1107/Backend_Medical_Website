@@ -20,7 +20,7 @@ let sendEmailConform = (data) => {
             let token = createToken(data);
             let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/api/confirm?confirm=${token}`;
             let info = await transporter.sendMail({
-                from: process.env.GMAIL_APP, // sender address
+                from: "Bệnh viện Hoa sen <benhvienhoasen@gmail.com>",//process.env.GMAIL_APP, // sender address
                 to: `${data.email}`, // list of receivers
                 subject: "XÁC NHẬN TÀI KHOẢN", // Subject line
                 html: `<div style="width: 100%; padding: 20px; background-color: #ffffff; max-width: 600px; margin: 0 auto; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">

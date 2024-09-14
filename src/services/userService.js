@@ -153,7 +153,7 @@ const createUser = async (data) => {
                 DT: "",
             }
         }
-    }catch(error){
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
@@ -251,20 +251,6 @@ const registerUser = async (data) => {
                 DT: "",
             }
         }
-        if (await checkPhoneNumber(data.phoneNumber) == false) {
-            return {
-                EC: 200,
-                EM: "Số điện thoại đã tồn tại",
-                DT: "",
-            }
-        }
-        if (await checkCid(data.cid) == false) {
-            return {
-                EC: 200,
-                EM: "Căn cước công dân đã tồn tại",
-                DT: "",
-            }
-        }
         let passwordHash = await hashPasswordUser(data.password)
         sendEmailConform({ ...data, password: passwordHash });
         return {
@@ -335,29 +321,28 @@ const loginUser = async (data) => {
             where: {
                 [Op.or]: [
                     { email: data.userLogin },
-                    { phoneNumber: data.userLogin }
                 ]
+            },
+            attributes: {
+                exclude: ["createdAt", "updatedAt"]
             }
         })
         if (user) {
             let comparePassword = await bcrypt.compareSync(data.passwordLogin, user.password);
             if (comparePassword) {
-                delete user["password"];
-                let groupRole = await JWTService.getGroupWithRole(user);
+                delete user.dataValues.password;
                 let data = {
                     email: user.email,
-                    groupRole,
                     userName: user.userName,
+                    roleId: user.roleId,
                 }
                 let token = createToken(data);
                 return {
                     EC: 0,
                     EM: "Đăng nhập thành công",
                     DT: {
-                        email: user.email,
-                        userName: user.userName,
+                        user: user,
                         token: token,
-                        groupRole
                     }
                 }
             }

@@ -83,10 +83,11 @@ const handleLogin = async (req, res) => {
             httpOnly: true,
             maxAge: 60 * 60 * 1000
         })
+        delete response.DT.token;
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
-            DT: response.DT
+            DT: response.DT.user
         })
     } catch (error) {
         console.log(error);
