@@ -43,6 +43,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true,
       },
+      gender: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       phoneNumber: {
         type: Sequelize.STRING(20),
         allowNull: false,
@@ -57,10 +61,6 @@ module.exports = {
         allowNull: false,
       },
       folk: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-      },
-      nationality: {
         type: Sequelize.INTEGER,
         allowNull: true,
       },

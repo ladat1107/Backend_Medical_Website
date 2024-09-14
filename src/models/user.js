@@ -99,6 +99,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    gender: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     phoneNumber: {
       type: DataTypes.STRING(20),
       allowNull: false,
@@ -113,10 +117,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     folk: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    nationality: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

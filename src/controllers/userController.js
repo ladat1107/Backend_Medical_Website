@@ -96,9 +96,12 @@ const createUser = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
-            let arr = ["password", "email", "phoneNumber", "lastName", "firstName", "cid", "currentRescident", "status", "roleId"];
+            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address", "currentRescident", "roleId",
+                        "markDownContent", "htmlContent", // description
+                        "price", "position", "departmentId" // staff
+            ];
             for (let i = 0; i < arr.length; i++) {
-                if (!data[arr[i]]) {
+                if (!data[arr[i]]) {    
                     return res.status(400).json({
                         EC: 400,
                         EM: `Dữ liệu ${arr[i]} không được để trống`,
@@ -244,6 +247,9 @@ const handleGetAccount = async (req, res) => {
         })
     }
 }
+
+
+
 module.exports = {
     createUser,
     handleRegisterUser,

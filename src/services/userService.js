@@ -2,9 +2,10 @@ import db from "../models/index";
 import bcrypt from "bcrypt";
 import { Op, where } from 'sequelize';
 import JWTService from "../services/JWTService";
+import { createToken, verifyToken } from "../Middleware/JWTAction"
+import { status } from "../utils/index";
 
 const salt = bcrypt.genSaltSync(10);
-import { createToken, verifyToken } from "../Middleware/JWTAction"
 require('dotenv').config();
 let hashPasswordUser = async (password) => {
     try {
@@ -45,9 +46,29 @@ const checkPhoneNumber = async (phoneNumber) => {
         return false;
     }
 }
+const checkCid = async (cid) => {
+    try {
+        let user = await db.User.findOne({ where: { cid: cid } });
+        if (user) {
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
 
 const createUser = async (data) => {
     try{
+        if(!await checkEmail(data.email)){
+            return {
+                EC: 200,
+                EM: "Người dùng đã tồn tại",
+                DT: "",
+            }
+        }
+
         let hashPassword = await hashPasswordUser(data.password);
         let user = await db.User.create({
             email: data.email,
@@ -56,11 +77,30 @@ const createUser = async (data) => {
             lastName: data.lastName,
             firstName: data.firstName,
             cid: data.cid,
+            dob: data.dob,
+            gender: data.gender,
+            address: data.address,
             currentRescident: data.currentRescident,
-            status: data.status,
+            status: status.ACTIVE,
             roleId: data.roleId
         });
-        if (user) {
+
+        let description = await db.Description.create({
+            markDownContent: data.markDownContent,
+            htmlContent: data.htmlContent,
+            status: status.ACTIVE,
+        })
+
+        let staff = await db.Staff.create({
+            price: data.price,
+            position: data.price,
+            userId: user.id,
+            status: status.ACTIVE,
+            descriptionId: description.id,
+            departmentId: data.departmentId,
+        })
+        
+        if (user && staff && description) {
             return {
                 EC: 0,
                 EM: "Đăng ký thành công",

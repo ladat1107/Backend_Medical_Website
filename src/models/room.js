@@ -5,10 +5,6 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Room extends Model {
         static associate(models) {
-            Room.belongsTo(models.Location, {
-                foreignKey: 'locationId',
-                as: 'roomLocationData',
-            });
             Room.belongsTo(models.RoomType, {
                 foreignKey: 'typeRoom',
                 as: 'roomRoomTypeData',
@@ -42,11 +38,11 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
-        locationId: {
+        departmentId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'locations', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
             onUpdate: 'CASCADE',

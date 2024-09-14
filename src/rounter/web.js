@@ -1,5 +1,6 @@
 import express from 'express';
 import userController from '../controllers/userController';
+import departmentController from '../controllers/departmentController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -61,7 +62,10 @@ let initWebRount = (app) => {
     router.put("/user/update", userController.updateFunction)
     router.delete("/user/delete", userController.deleteFunction)
 
+    //admin
     router.post("/admin/createUser", userController.createUser)
+    router.get("/admin/getDepartment", departmentController.getAllDepartment)
+    router.get("/admin/getDepartmentById", departmentController.getDepartmentById)
 
     return app.use("/api/", router);
 }

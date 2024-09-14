@@ -9,6 +9,10 @@ module.exports = {
                 autoIncrement: true,
                 primaryKey: true,
             },
+            price: {
+                type: Sequelize.DOUBLE,
+                allowNull: false,
+            },
             position: {
                 type: Sequelize.INTEGER,
                 allowNull: false,

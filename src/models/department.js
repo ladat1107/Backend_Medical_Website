@@ -17,10 +17,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'departmentId',
                 as: 'departmentDepartmentSymptomData',
             });
-            Department.belongsTo(models.Location, {
-                foreignKey: 'locationId',
-                as: 'departmentLocationData',
-            });
             Department.belongsTo(models.Description, {
                 foreignKey: 'descriptionId',
                 as: 'departmentDescriptionData',
@@ -50,16 +46,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        locationId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'locations', // Tên bảng locations
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
-        },
         descriptionId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -69,6 +55,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+        },
+        address: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
         }
     }, {
         sequelize,

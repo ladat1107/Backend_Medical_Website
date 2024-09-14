@@ -46,6 +46,10 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true,
         },
+        price:{
+            type: DataTypes.DOUBLE,
+            allowNull: false,
+        },
         position: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -63,16 +67,6 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
-        },
-        createdAt: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: DataTypes.NOW,
-        },
-        updatedAt: {
-            type: DataTypes.DATE,
-            allowNull: true,
-            defaultValue: DataTypes.NOW,
         },
         descriptionId: {
             type: DataTypes.INTEGER,
