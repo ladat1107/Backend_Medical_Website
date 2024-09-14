@@ -2,7 +2,6 @@ import express from 'express';
 import userController from '../controllers/userController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
-import db from "../models/index";
 
 let router = express.Router();
 let initWebRount = (app) => {
@@ -20,6 +19,7 @@ let initWebRount = (app) => {
 
 
     router.post("/registerUser", userController.handleRegisterUser)
+    router.get("/confirm", userController.handleConfirm)
     router.post("/handleLogin", userController.handleLogin)
     router.post("/handleLogout", userController.handleLogout)
 
