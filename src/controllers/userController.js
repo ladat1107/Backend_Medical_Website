@@ -2,10 +2,10 @@ import userService from '../services/userService'
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
-        if (!data || !data.email || !data.password || !data.userName || !data.phoneNumber) {
+        if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid || !data.currentResident || !data.dob) {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Yêu cầu của bạn không đủ thông tin!",
                 DT: ""
             })
         }
@@ -19,11 +19,37 @@ const handleRegisterUser = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
 
+}
+const handleConfirm = async (req, res) => {
+    try {
+        let data = req.query;
+        if (data && data.confirm) {
+            let response = await userService.confirmUser(data.confirm);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Yêu cầu của bạn không đủ thông tin!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
 }
 const handleLogout = (req, res) => {
     try {
@@ -37,7 +63,7 @@ const handleLogout = (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -66,7 +92,7 @@ const handleLogin = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -87,7 +113,7 @@ const getFunction = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -172,7 +198,7 @@ const createUser = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -265,7 +291,7 @@ const updateFunction = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -291,7 +317,7 @@ const deleteFunction = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -317,7 +343,7 @@ const getFunctionById = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -345,7 +371,7 @@ const handleGetAccount = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         })
     }
@@ -365,4 +391,5 @@ module.exports = {
     deleteFunction,
     getFunctionById,
     handleGetAccount,
+    handleConfirm,
 }

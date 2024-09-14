@@ -5,12 +5,12 @@ import initWebRount from './router/web';
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { insertGroup } from './services/diseaseGroupService';
+require('dotenv').config();
 
 const app = express();
 
 const corsOptions = {
-    origin: "http://localhost:5173", // Chỉ cho phép yêu cầu từ URL được xác định trong REACT_URL
+    origin: process.env.REACT_APP_BACKEND_URL, // Chỉ cho phép yêu cầu từ URL được xác định trong REACT_URL
     methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE', // Các phương thức yêu cầu muốn cho phép
     allowedHeaders: 'X-Requested-With, content-type, Authorization', // Các header  muốn cho phép
     credentials: true // Cho phép gửi cookie cùng với yêu cầu

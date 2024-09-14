@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 require('dotenv').config();
-const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout'];
+const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm'];
 const createToken = (payload) => {
     let key = process.env.SECURITY_KEY;
-
     let token = null;
     try {
         token = jwt.sign(payload, key, { expiresIn: 10000 });

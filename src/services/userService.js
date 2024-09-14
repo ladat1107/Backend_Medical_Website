@@ -2,6 +2,7 @@ import db from "../models/index";
 import bcrypt from "bcrypt";
 import { Op, where } from 'sequelize';
 import JWTService from "../services/JWTService";
+import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
@@ -257,33 +258,73 @@ const registerUser = async (data) => {
                 DT: "",
             }
         }
-        let passwordHash = await hashPasswordUser(data.password)
-        console.log("check passwordHash:", passwordHash);
-        let user = await db.User.create({
-            email: data.email,
-            password: passwordHash,
-            userName: data.userName,
-            phoneNumber: data.phoneNumber,
-            groupId: 1,
-        })
-        if (user) {
-            return {
-                EC: 0,
-                EM: "Đăng ký thành công",
-                DT: "",
-            }
-        } else {
+        if (await checkCid(data.cid) == false) {
             return {
                 EC: 200,
-                EM: "Đăng ký thất bại",
+                EM: "Căn cước công dân đã tồn tại",
                 DT: "",
             }
+        }
+        let passwordHash = await hashPasswordUser(data.password)
+        sendEmailConform({ ...data, password: passwordHash });
+        return {
+            EC: 0,
+            EM: "Đăng ký thành công",
+            DT: "",
         }
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
+            DT: "",
+        }
+    }
+}
+const confirmUser = async (token) => {
+    try {
+        let data = await verifyToken(token);
+
+        if (data) {
+            console.log("gửi mail thành công");
+            let user = await db.User.create({
+                email: data.email,
+                password: data.password,
+                lastName: data.lastName,
+                firstName: data.firstName,
+                phoneNumber: data.phoneNumber,
+                cid: data.cid,
+                currentResident: data.currentResident,
+                dob: data.dob,
+                folk: data.folk,
+                point: 0,
+                roleId: 1,
+                status: 1,
+            })
+            if (user) {
+                return {
+                    EC: 0,
+                    EM: "Đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ",
+                    DT: "",
+                }
+            } else {
+                return {
+                    EC: 200,
+                    EM: "Đăng ký thất bại",
+                    DT: "",
+                }
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Token không hợp lệ",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi hệ thống",
             DT: "",
         }
     }
@@ -330,7 +371,7 @@ const loginUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: "",
         }
     }
@@ -369,7 +410,7 @@ const getFunction = async (page, limit) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         }
     }
@@ -398,7 +439,7 @@ const deleteFunction = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         }
     }
@@ -447,7 +488,7 @@ const createFunction = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         }
     }
@@ -509,7 +550,7 @@ const updateFunction = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: ""
         }
     }
@@ -545,7 +586,7 @@ const getFunctionById = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Lỗi hệ thống",
             DT: "",
         }
     }
