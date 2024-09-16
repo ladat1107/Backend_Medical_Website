@@ -48,8 +48,7 @@ const getDepartmentById = async (req, res) => {
 const createDepartment = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.image && data.deanId && data.descriptionId && data.address
-            && data.markDownContent && data.htmlContent){
+        if (data && data.name && data.image && data.deanId && data.address && data.markDownContent && data.htmlContent){
             let response = await departmentService.createDepartment(data);
             return res.status(200).json({
                 EC: response.EC,

@@ -103,13 +103,13 @@ const createUser = async (data) => {
         if (user && staff && description) {
             return {
                 EC: 0,
-                EM: "Đăng ký thành công",
+                EM: "Tạo tài khoản thành công",
                 DT: "",
             }
         } else {
             return {
                 EC: 200,
-                EM: "Đăng ký thất bại",
+                EM: "Tạo tài khoản thất bại",
                 DT: "",
             }
         }

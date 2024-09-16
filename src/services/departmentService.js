@@ -1,5 +1,6 @@
 import db from "../models/index";
 import { status } from "../utils/index";
+import descriptionService from "./descriptionService";
 
 const getAllDepartment = async () => {
     try {
@@ -51,26 +52,23 @@ const getDepartmentById = async (departmentId) => {
 }
 const createDepartment = async (data) => {
     try {
-        let description = await db.Description.create({
-            markDownContent: data.markDownContent,
-            htmlContent: data.htmlContent,
-            status: status.ACTIVE,
-        });
-        let department = await db.Department.create({
-            name: data.name,
-            image: data.image,
-            deanId: data.deanId,
-            status: status.ACTIVE,
-            descriptionId: description.id,
-            address: data.address
-        });
-        if(description && department){
+        let descriptionId = await descriptionService.createDescription(data);
+        if(descriptionId){
+            let department = await db.Department.create({
+                name: data.name,
+                image: data.image,
+                deanId: data.deanId,
+                status: status.ACTIVE,
+                descriptionId: descriptionId,
+                address: data.address
+            });
             return {
                 EC: 0,
                 EM: "Tạo phòng ban thành công",
                 DT: department
             }
-        } else {
+        } else{
+            await descriptionService.deleteDescription(descriptionId);
             return {
                 EC: 500,
                 EM: "Tạo phòng ban thất bại",
@@ -92,33 +90,33 @@ const updateDepartment = async (data) => {
             where: { id: data.id },
         }); 
         if (department) {
-            let description = await db.Description.findOne({
-                where: { id: department.descriptionId },
-            });
+            let description = await descriptionService.updateDescription(data, department.descriptionId);
             if (description) {
-                await description.update({
-                    markDownContent: data.markDownContent,
-                    htmlContent: data.htmlContent,
+                await department.update({
+                    name: data.name,
+                    image: data.image,
+                    deanId: data.deanId,
                     status: status.ACTIVE,
+                    address: data.address
                 });
+                return {
+                    EC: 0,
+                    EM: "Cập nhật phòng ban thành công",
+                    DT: department
+                }   
+            } else{
+                return {
+                    EC: 500,
+                    EM: "Cập nhật phòng ban thất bại",
+                    DT: "",
+                }
             }
-            await department.update({
-                name: data.name,
-                image: data.image,
-                deanId: data.deanId,
-                status: status.ACTIVE,
-                address: data.address
-            });
+        } else {
             return {
-                EC: 0,
-                EM: "Cập nhật phòng ban thành công",
-                DT: department
+                EC: 404,
+                EM: "Không tìm thấy phòng ban",
+                DT: "",
             }
-        }
-        return {
-            EC: 404,
-            EM: "Không tìm thấy phòng ban",
-            DT: "",
         }
     } catch (error) {
         console.log(error);
@@ -136,21 +134,22 @@ const deleteDepartment = async (departmentId) => {
             where: { id: departmentId },
         });
         if (department) {
-            let description = await db.Description.findOne({
-                where: { id: department.descriptionId },
-            });
+            let description = await descriptionService.updateStatusDescription(department.descriptionId);
             if (description) {
-                await description.update({
-                    status: status.DELETED,
+                await department.update({
+                    status: status.INACTIVE,
                 });
-            }
-            await department.update({
-                status: status.DELETED,
-            });
-            return {
-                EC: 0,
-                EM: "Xóa phòng ban thành công",
-                DT: department
+                return {
+                    EC: 0,
+                    EM: "Xóa phòng ban thành công",
+                    DT: department
+                }
+            }else{
+                return {
+                    EC: 500,
+                    EM: "Xóa phòng ban thất bại",
+                    DT: "",
+                }
             }
         }
         return {
