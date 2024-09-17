@@ -4,9 +4,7 @@ import { createToken } from "../Middleware/JWTAction"
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 465,               // Cổng SSL
-    secure: true,
+    port: 465,
     auth: {
         user: process.env.GMAIL_APP,
         pass: process.env.PASSWORD_APP,
