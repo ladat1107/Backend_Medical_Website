@@ -1,8 +1,8 @@
-import handBookService from '../services/handBookService';
+import roomTypeService from '../services/roomTypeService';
 
-const getAllHandBooks = async (req, res) => {
+const getAllRoomTypes = async (req, res) => {
     try{
-        let response = await handBookService.getAllHandBooks();
+        let response = await roomTypeService.getAllRoomTypes();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -18,32 +18,11 @@ const getAllHandBooks = async (req, res) => {
     }
 }
 
-const getHandBooksByStatus = async (req, res) => {
-    try{
-        let data = req.query;
-        if (data && data.status >= 0) {
-            let response = await handBookService.getHandBooksByStatus(data.status);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }
-    } catch (error){
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const getHandBookById = async (req, res) => {
+const getRoomTypeById = async (req, res) => {
     try{
         let data = req.query;
         if (data && data.id) {
-            let response = await handBookService.getHandBookById(data.id);
+            let response = await roomTypeService.getRoomTypeById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -66,11 +45,11 @@ const getHandBookById = async (req, res) => {
     }
 }
 
-const createHandBook = async (req, res) => {
+const createRoomType = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
-            let response = await handBookService.createHandBook(data);
+        if(data && data.name && data.price && data.description) {
+            let response = await roomTypeService.createRoomType(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -93,11 +72,11 @@ const createHandBook = async (req, res) => {
     }
 }
 
-const updateHandBook = async (req, res) => {
+const updateRoomType = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
-            let response = await handBookService.updateHandBook(data);
+        if(data && data.id && data.name && data.price && data.description) {
+            let response = await roomTypeService.updateRoomType(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -120,11 +99,11 @@ const updateHandBook = async (req, res) => {
     }
 }
 
-const updateHandbookStatus = async (req, res) => {
+const updateStatusRoomType = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.id && data.status >= 0){
-            let response = await handBookService.updateHandbookStatus(data);
+        if(data && data.id && data.status  >= 0) {
+            let response = await roomTypeService.updateStatusRoomType(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -148,10 +127,9 @@ const updateHandbookStatus = async (req, res) => {
 }
 
 module.exports = {
-    getAllHandBooks,
-    getHandBooksByStatus,
-    getHandBookById,
-    createHandBook,
-    updateHandBook,
-    updateHandbookStatus
+    getAllRoomTypes,
+    getRoomTypeById,
+    createRoomType,
+    updateRoomType,
+    updateStatusRoomType
 }

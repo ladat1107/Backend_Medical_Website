@@ -1,8 +1,8 @@
-import handBookService from '../services/handBookService';
+import roomService from '../services/roomService';
 
-const getAllHandBooks = async (req, res) => {
+const getAllRooms = async (req, res) => {
     try{
-        let response = await handBookService.getAllHandBooks();
+        let response = await roomService.getAllRooms();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -18,15 +18,21 @@ const getAllHandBooks = async (req, res) => {
     }
 }
 
-const getHandBooksByStatus = async (req, res) => {
+const getRoomByDepartment = async (req, res) => {
     try{
         let data = req.query;
-        if (data && data.status >= 0) {
-            let response = await handBookService.getHandBooksByStatus(data.status);
+        if(data && data.departmentId) {
+            let response = await roomService.getRoomByDepartment(data.departmentId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
                 DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
             })
         }
     } catch (error){
@@ -39,11 +45,11 @@ const getHandBooksByStatus = async (req, res) => {
     }
 }
 
-const getHandBookById = async (req, res) => {
+const getRoomById = async (req, res) => {
     try{
         let data = req.query;
-        if (data && data.id) {
-            let response = await handBookService.getHandBookById(data.id);
+        if(data && data.id) {
+            let response = await roomService.getRoomById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -66,11 +72,11 @@ const getHandBookById = async (req, res) => {
     }
 }
 
-const createHandBook = async (req, res) => {
+const createRoom = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
-            let response = await handBookService.createHandBook(data);
+        if(data && data.name && data.typeRoom && data.departmentId && data.medicalExamination !== undefined) {
+            let response = await roomService.createRoom(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -93,11 +99,11 @@ const createHandBook = async (req, res) => {
     }
 }
 
-const updateHandBook = async (req, res) => {
+const updateRoom = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
-            let response = await handBookService.updateHandBook(data);
+        if(data && data.id && data.name && data.typeRoom && data.departmentId && data.medicalExamination !== undefined) {
+            let response = await roomService.updateRoom(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -120,11 +126,11 @@ const updateHandBook = async (req, res) => {
     }
 }
 
-const updateHandbookStatus = async (req, res) => {
+const updateStatusRoom = async (req, res) => {
     try{
         let data = req.body;
-        if (data && data.id && data.status >= 0){
-            let response = await handBookService.updateHandbookStatus(data);
+        if(data && data.id && data.status >= 0) {
+            let response = await roomService.updateStatusRoom(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -148,10 +154,10 @@ const updateHandbookStatus = async (req, res) => {
 }
 
 module.exports = {
-    getAllHandBooks,
-    getHandBooksByStatus,
-    getHandBookById,
-    createHandBook,
-    updateHandBook,
-    updateHandbookStatus
+    getAllRooms,
+    getRoomByDepartment,
+    getRoomById,
+    createRoom,
+    updateRoom,
+    updateStatusRoom
 }

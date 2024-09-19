@@ -2,6 +2,8 @@ import express from 'express';
 import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
 import handBookController from '../controllers/handBookController'; 
+import roomTypeController from '../controllers/roomTypeController';
+import roomController from '../controllers/roomController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -88,6 +90,23 @@ let initWebRount = (app) => {
     //// ----> Admin
     router.get("/admin/getHandBooksByStatus", handBookController.getHandBooksByStatus)
     router.put("/admin/updateHandbookStatus", handBookController.updateHandbookStatus)
+
+    //-- RoomType
+    router.get("/getAllRoomTypes", roomTypeController.getAllRoomTypes)
+    router.get("/getRoomTypeById", roomTypeController.getRoomTypeById)
+    //// ----> Admin
+    router.post("/admin/createRoomType", roomTypeController.createRoomType)
+    router.put("/admin/updateRoomType", roomTypeController.updateRoomType)
+    router.put("/admin/updateStatusRoomType", roomTypeController.updateStatusRoomType)
+
+    //-- Room
+    router.get("/getAllRooms", roomController.getAllRooms)
+    router.get("/getRoomById", roomController.getRoomById)
+    router.get("/getRoomByDepartment", roomController.getRoomByDepartment)
+    //// ----> Admin
+    router.post("/admin/createRoom", roomController.createRoom)
+    router.put("/admin/updateRoom", roomController.updateRoom)
+    router.put("/admin/updateStatusRoom", roomController.updateStatusRoom)
 
     return app.use("/api/", router);
 }

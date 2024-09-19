@@ -23,11 +23,11 @@ module.exports = {
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
             },
-            locationId: {
+            departmentId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'locations', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -35,7 +35,6 @@ module.exports = {
             },
             medicalExamination: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
                 references: {
                     model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',

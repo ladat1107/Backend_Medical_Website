@@ -6,15 +6,19 @@ module.exports = (sequelize, DataTypes) => {
     class Department extends Model {
         static associate(models) {
             Department.hasMany(models.Room, {
-                foreignKey: 'medicalExamination',
-                as: 'departmentRoomData',
+                foreignKey: 'id',
+                as: 'roomDepartmentData',
+            });
+            Department.hasMany(models.Room, {
+                foreignKey: 'id',
+                as: 'medicalExaminationDepartmentData',
             });
             Department.hasMany(models.Staff, {
-                foreignKey: 'departmentId',
+                foreignKey: 'id',
                 as: 'staffDepartmentData',
             });
             Department.hasMany(models.DepartmentSymptom, {
-                foreignKey: 'departmentId',
+                foreignKey: 'id',
                 as: 'departmentDepartmentSymptomData',
             });
             Department.belongsTo(models.Description, {

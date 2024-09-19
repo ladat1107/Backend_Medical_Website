@@ -10,8 +10,12 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'roomRoomTypeData',
             });
             Room.belongsTo(models.Department, {
-                foreignKey: 'medicalExamination',
+                foreignKey: 'departmentId',
                 as: 'roomDepartmentData',
+            });
+            Room.belongsTo(models.Department, {
+                foreignKey: 'medicalExamination',
+                as: 'medicalExaminationDepartmentData',
             });
             Room.hasMany(models.Schedule, {
                 foreignKey: 'roomId',
@@ -50,7 +54,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         medicalExamination: {
             type: DataTypes.INTEGER,
-            allowNull: false,
             references: {
                 model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
