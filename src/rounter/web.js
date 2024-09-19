@@ -62,16 +62,22 @@ let initWebRount = (app) => {
     router.put("/user/update", userController.updateFunction)
     router.delete("/user/delete", userController.deleteFunction)
 
-    //department
-    router.get("/getDepartment", departmentController.getAllDepartment)
+    //-- User
+    router.get("/getUserById", userController.getUserById)
+    //------> Admin CRUD User
+    router.get("/admin/getAllUser", userController.getAllUser)
+    router.post("/admin/createUser", userController.createUser)
+    router.put("/admin/updateUser", userController.updateUser)
+    router.put("/admin/deleteUser", userController.deleteUser)
+
+    //-- Department
+    router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
-    ////admin C.U.D department
+    router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
+    ////-----> Admin C.U.D department
     router.post("/admin/createDepartment", departmentController.createDepartment)
     router.put("/admin/updateDepartment", departmentController.updateDepartment)
     router.put("/admin/deleteDepartment", departmentController.deleteDepartment)
-
-    //admin
-    router.post("/admin/createUser", userController.createUser)
 
     return app.use("/api/", router);
 }

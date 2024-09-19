@@ -4,6 +4,7 @@ import { Op, where } from 'sequelize';
 import JWTService from "../services/JWTService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
+import staffService from "./staffService";
 
 const salt = bcrypt.genSaltSync(10);
 require('dotenv').config();
@@ -59,6 +60,57 @@ const checkCid = async (cid) => {
     }
 }
 
+const getAllUser = async () => {
+    try {
+        let users = await db.User.findAll({
+            where: { status: status.ACTIVE },
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin người dùng thành công",
+            DT: users
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
+const getUserById = async (userId) => {
+    try {
+        let user = await db.User.findOne({
+            where: { id: userId, status: status.ACTIVE },
+            raw: true,
+            nest: true,
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin người dùng thành công",
+                DT: user
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createUser = async (data) => {
     try{
         if(!await checkEmail(data.email)){
@@ -85,22 +137,9 @@ const createUser = async (data) => {
             roleId: data.roleId
         });
 
-        let description = await db.Description.create({
-            markDownContent: data.markDownContent,
-            htmlContent: data.htmlContent,
-            status: status.ACTIVE,
-        })
-
-        let staff = await db.Staff.create({
-            price: data.price,
-            position: data.price,
-            userId: user.id,
-            status: status.ACTIVE,
-            descriptionId: description.id,
-            departmentId: data.departmentId,
-        })
+        const staff = await staffService.createStaff(data, user.id);
         
-        if (user && staff && description) {
+        if (user && staff) {
             return {
                 EC: 0,
                 EM: "Tạo tài khoản thành công",
@@ -119,6 +158,85 @@ const createUser = async (data) => {
             EC: 500,
             EM: "Error from server",
             DT: "",
+        }
+    }
+}
+
+const updateUser = async (data) => {
+    try{
+        let user = await db.User.findOne({
+            where: { id: data.id },
+        });
+        if(user){
+            await user.update({
+                email: data.email,
+                phoneNumber: data.phoneNumber,
+                lastName: data.lastName,
+                firstName: data.firstName,
+                cid: data.cid,
+                dob: data.dob,
+                gender: data.gender,
+                address: data.address,
+                currentRescident: data.currentRescident,
+                roleId: data.roleId
+            });
+            const staff = await staffService.updateStaff(data, user.id);
+            if(staff){
+                return {
+                    EC: 0,
+                    EM: "Cập nhật tài khoản thành công",
+                    DT: "",
+                }
+            } else{
+                return {
+                    EC: 200,
+                    EM: "Cập nhật tài khoản thất bại",
+                    DT: "",
+                }
+            }
+        } else{
+            return {
+                EC: 200,
+                EM: "Không tìm thấy tài khoản",
+                DT: "",
+            }
+        }
+    } catch(error){
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server user",
+            DT: "",
+        }
+    }
+}
+
+const deleteUser = async (userId) => {
+    try{
+        let user = await db.User.findOne({
+            where: { id: userId },
+        });
+        if(user){
+            await user.update({
+                status: status.INACTIVE,
+            });
+            return {
+                EC: 0,
+                EM: `Xóa người dùng ${user.userName} thành công`,
+                DT: "",
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch(error){
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
         }
     }
 }
@@ -433,12 +551,16 @@ const getFunctionById = async (userId) => {
     }
 }
 module.exports = {
+    getAllUser,
+    getUserById,
     createUser,
+    updateUser,
+    deleteUser,
     registerUser,
     loginUser,
-    getFunction,
-    deleteFunction,
-    createFunction,
-    updateFunction,
-    getFunctionById,
+    // getFunction,
+    // deleteFunction,
+    // createFunction,
+    // updateFunction,
+    // getFunctionById,
 }

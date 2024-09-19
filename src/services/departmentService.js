@@ -1,3 +1,4 @@
+import { where } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
@@ -5,6 +6,7 @@ import descriptionService from "./descriptionService";
 const getAllDepartment = async () => {
     try {
         let department = await db.Department.findAll({
+            where: { status: status.ACTIVE },
             raw: true,
             nest: true,
         });
@@ -25,7 +27,7 @@ const getAllDepartment = async () => {
 const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
-            where: { id: departmentId },
+            where: { id: departmentId, status: status.ACTIVE },
             raw: true,
             nest: true,
         });
@@ -50,6 +52,39 @@ const getDepartmentById = async (departmentId) => {
         }
     }
 }
+
+const getAllStaffInDepartment = async (departmentId) => {
+    try{
+        let department = await db.Department.findOne({
+            where: { id: departmentId, status: status.ACTIVE },
+            include: [{
+                model: db.Staff,
+                as: 'staffDepartmentData',
+                attributes:['id', 'position', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar','roleId'],
+                    where: { status: status.ACTIVE },
+                }],
+                where: { status: status.ACTIVE },
+            }],
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin nhân viên trong phòng ban thành công",
+            DT: department
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createDepartment = async (data) => {
     try {
         let descriptionId = await descriptionService.createDescription(data);
@@ -96,7 +131,6 @@ const updateDepartment = async (data) => {
                     name: data.name,
                     image: data.image,
                     deanId: data.deanId,
-                    status: status.ACTIVE,
                     address: data.address
                 });
                 return {
@@ -170,6 +204,7 @@ const deleteDepartment = async (departmentId) => {
 module.exports = {
     getAllDepartment,
     getDepartmentById,
+    getAllStaffInDepartment,
     createDepartment,
     updateDepartment,
     deleteDepartment

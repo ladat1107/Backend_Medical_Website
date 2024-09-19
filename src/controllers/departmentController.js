@@ -45,6 +45,33 @@ const getDepartmentById = async (req, res) => {
     }
 }
 
+const getAllStaffInDepartment = async (req, res) => {
+    try {
+        let data = req.query;
+        if (data && data.id) {
+            let response = await departmentService.getAllStaffInDepartment(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
 const createDepartment = async (req, res) => {
     try {
         let data = req.body;
@@ -129,6 +156,7 @@ const deleteDepartment = async (req, res) => {
 module.exports = {
     getAllDepartment,
     getDepartmentById,
+    getAllStaffInDepartment,
     createDepartment,
     updateDepartment,
     deleteDepartment

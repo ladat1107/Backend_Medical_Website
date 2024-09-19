@@ -59,8 +59,6 @@ const updateDescription = async (data, descriptionId) => {
                 markDownContent: data.markDownContent,
                 htmlContent: data.htmlContent,
                 status: status.ACTIVE,
-            },{
-                where: { id: descriptionId }
             });
             return true;
         } else {

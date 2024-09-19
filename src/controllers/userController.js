@@ -92,6 +92,52 @@ const getFunction = async (req, res) => {
         })
     }
 }
+
+const getAllUser = async (req, res) => {
+    try{
+        let response = await userService.getAllUser();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
+const getUserById = async (req, res) => {
+    try{
+        let data = req.query;
+        if(data && data.id){
+            let response = await userService.getUserById(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
 const createUser = async (req, res) => {
     try {
         let data = req.body;
@@ -131,6 +177,63 @@ const createUser = async (req, res) => {
         })
     }
 }
+const updateUser = async (req, res) => {
+    try{
+        let data = req.body;
+        if(data && data.id && data.email && data.phoneNumber && data.lastName && data.firstName && data.cid 
+            && data.dob && data.gender && data.address && data.currentRescident && data.roleId
+            && data.price && data.position && data.departmentId 
+            && data.markDownContent && data.htmlContent){
+                let response = await userService.updateUser(data);
+                return res.status(200).json({
+                    EC: response.EC,
+                    EM: response.EM,
+                    DT: response.DT
+                })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server dddd",
+            DT: ""
+        })
+    }
+}
+
+const deleteUser = async (req, res) => {
+    try{
+        let data = req.body;
+        if(data && data.id){
+            let response = await userService.deleteUser(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
 const updateFunction = async (req, res) => {
     try {
         let data = req.body;
@@ -248,10 +351,12 @@ const handleGetAccount = async (req, res) => {
     }
 }
 
-
-
 module.exports = {
+    getAllUser,
+    getUserById,
     createUser,
+    updateUser,
+    deleteUser,
     handleRegisterUser,
     handleLogin,
     handleLogout,
