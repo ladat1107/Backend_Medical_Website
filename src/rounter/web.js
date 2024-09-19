@@ -1,6 +1,7 @@
 import express from 'express';
 import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
+import handBookController from '../controllers/handBookController'; 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -78,6 +79,15 @@ let initWebRount = (app) => {
     router.post("/admin/createDepartment", departmentController.createDepartment)
     router.put("/admin/updateDepartment", departmentController.updateDepartment)
     router.put("/admin/deleteDepartment", departmentController.deleteDepartment)
+
+    //--  HandBook
+    router.get("/getAllHandBooks", handBookController.getAllHandBooks)
+    router.get("/getHandBookById", handBookController.getHandBookById)
+    router.post("/createHandBook", handBookController.createHandBook)
+    router.put("/updateHandBook", handBookController.updateHandBook)
+    //// ----> Admin
+    router.get("/admin/getHandBooksByStatus", handBookController.getHandBooksByStatus)
+    router.put("/admin/updateHandbookStatus", handBookController.updateHandbookStatus)
 
     return app.use("/api/", router);
 }

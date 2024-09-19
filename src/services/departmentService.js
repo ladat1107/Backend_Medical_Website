@@ -7,6 +7,16 @@ const getAllDepartment = async () => {
     try {
         let department = await db.Department.findAll({
             where: { status: status.ACTIVE },
+            include: [{
+                model: db.Staff,
+                as: 'deanDepartmentData',
+                attributes: ['id', 'position'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['firstName', 'lastName', 'email', 'avatar'],
+                }]
+            }],
             raw: true,
             nest: true,
         });
@@ -28,6 +38,21 @@ const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId, status: status.ACTIVE },
+            include: [{
+                model: db.Description,
+                as: 'departmentDescriptionData',
+                attributes: ['markDownContent', 'htmlContent'],
+                where: { status: status.ACTIVE },
+            },{
+                model: db.Staff,
+                as: 'deanDepartmentData',
+                attributes: ['id', 'position'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['firstName', 'lastName', 'email', 'avatar'],
+                }]
+            }],
             raw: true,
             nest: true,
         });

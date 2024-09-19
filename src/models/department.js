@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'descriptionId',
                 as: 'departmentDescriptionData',
             });
+            Department.belongsTo(models.Staff, {
+                foreignKey: 'deanId',
+                as: 'deanDepartmentData',
+            });
         }
     }
     Department.init({

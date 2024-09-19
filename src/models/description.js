@@ -7,15 +7,15 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Description.hasMany(models.Department, {
         foreignKey: 'descriptionId',
-        as: 'descriptionDepartmentData',
+        as: 'departmentDescriptionData',
       });
       Description.hasMany(models.Staff, {
         foreignKey: 'descriptionId',
-        as: 'descriptionStaffData',
+        as: 'staffDescriptionData',
       });
       Description.hasMany(models.Handbook, {
         foreignKey: 'descriptionId',
-        as: 'descriptionHandbookData',
+        as: 'handbookDescriptionData',
       });
     }
   }

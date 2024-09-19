@@ -54,6 +54,12 @@ const getStaffById = async (staffId) => {
     try {
         let staff = await db.Staff.findOne({
             where: { id: staffId },
+            include: [{
+                model: db.Description,
+                as: 'staffDescriptionData',
+                attributes: ['markDownContent', 'htmlContent'],
+                where: { status: status.ACTIVE },
+            }],
             raw: true,
             nest: true,
         });
