@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     class Bed extends Model {
         static associate(models) {
             Bed.hasMany(models.Patient, {
-                foreignKey: 'bedId',
                 as: 'bedPatientData',
+                foreignKey: 'bedId',
             });
             Bed.belongsTo(models.Room, {
                 foreignKey: 'roomId',
@@ -16,12 +16,6 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Bed.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,

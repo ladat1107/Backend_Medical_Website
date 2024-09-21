@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasMany(models.Patient, {
         foreignKey: 'userId',
-        as: 'userPatientData',
+        as: 'patientUserData',
       });
       User.hasMany(models.Relative, {
         foreignKey: 'userId',
