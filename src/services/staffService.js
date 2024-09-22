@@ -1,17 +1,38 @@
+import { where } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
+import Sequelize from "sequelize";
 
 const getAllStaff = async () => {
     try {
         let staff = await db.Staff.findAll({
+            where: { status: status.ACTIVE },
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                include: [{
+                    model: db.Role,
+                    as: 'userRoleData',
+                    attributes: ['name']
+                }],
+            },{
+                model: db.Department,
+                as: 'staffDepartmentData',
+                attributes: ['name']
+            },{
+                model: db.Description,
+                as: 'staffDescriptionData',
+                attributes: ['markDownContent', 'htmlContent']
+            }],
             raw: true,
             nest: true,
         });
         return {
             EC: 0,
             EM: "Lấy thông tin nhân viên thành công",
-            DT: department
+            DT: staff
         }
     } catch (error) {
         console.log(error);
@@ -22,10 +43,29 @@ const getAllStaff = async () => {
         }
     }
 }
+
 const getStaffbyDepartmentId = async (departmentId) => {
     try {
         let staffs = await db.Staff.findAll({
             where: { id: departmentId },
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                include: [{
+                    model: db.Role,
+                    as: 'userRoleData',
+                    attributes: ['name']
+                }],
+            },{
+                model: db.Department,
+                as: 'staffDepartmentData',
+                attributes: ['name']
+            },{
+                model: db.Description,
+                as: 'staffDescriptionData',
+                attributes: ['markDownContent', 'htmlContent']
+            }],
             raw: true,
             nest: true,
         });
@@ -33,7 +73,7 @@ const getStaffbyDepartmentId = async (departmentId) => {
             return {
                 EC: 0,
                 EM: "Lấy thông tin nhân viên trong khoa thành công",
-                DT: department
+                DT: staffs
             }
         }
         return {
@@ -50,15 +90,28 @@ const getStaffbyDepartmentId = async (departmentId) => {
         }
     }
 }
+
 const getStaffById = async (staffId) => {
     try {
         let staff = await db.Staff.findOne({
             where: { id: staffId },
             include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                include: [{
+                    model: db.Role,
+                    as: 'userRoleData',
+                    attributes: ['name']
+                }],
+            },{
+                model: db.Department,
+                as: 'staffDepartmentData',
+                attributes: ['name']
+            },{
                 model: db.Description,
                 as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent'],
-                where: { status: status.ACTIVE },
+                attributes: ['markDownContent', 'htmlContent']
             }],
             raw: true,
             nest: true,
@@ -67,7 +120,7 @@ const getStaffById = async (staffId) => {
             return {
                 EC: 0,
                 EM: "Lấy thông tin nhân viên thành công",
-                DT: department
+                DT: staff
             }
         }
         return {
@@ -84,6 +137,53 @@ const getStaffById = async (staffId) => {
         }
     }
 }
+
+const getStaffByRole = async (roleId) => {
+    try {
+        let staff = await db.Staff.findAll({
+            where: { status: status.ACTIVE }, // Chỉ lấy nhân viên active
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: [ 
+                    'id', 'email', 'phoneNumber', 'lastName', 'firstName', 
+                    'cid', 'dob', 'currentResident', 'gender', 'avatar' 
+                ],
+                include: [{
+                    model: db.Role,
+                    as: 'userRoleData',
+                    attributes: ['id', 'name'],
+                    where: { id: roleId }, // Chỉ lấy những user có roleId khớp
+                }],
+                required: true, // Bắt buộc phải có role
+            }, {
+                model: db.Department,
+                as: 'staffDepartmentData',
+                attributes: ['name']
+            }, {
+                model: db.Description,
+                as: 'staffDescriptionData',
+                attributes: ['markDownContent', 'htmlContent']
+            }]
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin nhân viên thành công",
+            DT: staff
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
+
+
 const createStaff = async (data, userId) => {
     try {
         let descriptionId = await descriptionService.createDescription(data);
@@ -137,6 +237,7 @@ module.exports = {
     getAllStaff,
     getStaffbyDepartmentId,
     getStaffById,
+    getStaffByRole,
     createStaff,
     updateStaff
 }

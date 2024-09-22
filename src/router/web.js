@@ -1,6 +1,7 @@
 import express from 'express';
 import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
+import staffController from '../controllers/staffController';
 import handBookController from '../controllers/handBookController'; 
 import roomTypeController from '../controllers/roomTypeController';
 import bedController from '../controllers/bedController';
@@ -86,6 +87,12 @@ let initWebRount = (app) => {
     router.post("/admin/createDepartment", departmentController.createDepartment)
     router.put("/admin/updateDepartment", departmentController.updateDepartment)
     router.put("/admin/deleteDepartment", departmentController.deleteDepartment)
+
+    //-- Staff
+    router.get("/getAllStaff", staffController.getAllStaff)
+    router.get("/getStaffById", staffController.getStaffById)
+    router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
+    router.get("/getStaffByRole", staffController.getStaffByRole)
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)
