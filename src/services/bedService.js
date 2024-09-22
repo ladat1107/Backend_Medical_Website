@@ -1,6 +1,7 @@
 import { where } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
+import Sequelize from "sequelize";
 
 const getAllBeds = async () => {
     try{
@@ -83,15 +84,16 @@ const getBedEmpty = async () => {
                 },{
                     model: db.Patient,
                     as: 'bedPatientData',
-                    required: false,
                     where: {
-                        dateOfDischarge: null
+                        [Sequelize.Op.or]: [
+                            { dateOfDischarge: { [Sequelize.Op.ne]: null } }, // Bệnh nhân đã xuất viện
+                        ],
                     }
                 }
             ],
             where: { 
-                status: status.ACTIVE, '$bedPatientData.id$': null
-            },
+                status: status.ACTIVE
+            }, 
             raw: true,
             nest: true,
         });

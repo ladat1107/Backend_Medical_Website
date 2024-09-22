@@ -4,6 +4,7 @@ import departmentController from '../controllers/departmentController';
 import handBookController from '../controllers/handBookController'; 
 import roomTypeController from '../controllers/roomTypeController';
 import bedController from '../controllers/bedController';
+import patientController from '../controllers/patientController';
 import roomController from '../controllers/roomController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -118,6 +119,14 @@ let initWebRount = (app) => {
     router.post("/admin/createBed", bedController.createBed)
     router.put("/admin/updateBed", bedController.updateBed)
     router.put("/admin/deleteBed", bedController.deleteBed)
+
+    //-- Patient
+    router.get("/getAllPatients", patientController.getAllPatients)
+    router.get("/getPatientById", patientController.getPatientById)
+    router.get("/getPatientByUserId", patientController.getPatientByUserId)
+    //// ----> Admin
+    router.post("/admin/createPatient", patientController.createPatient)
+    router.put("/admin/updatePatient", patientController.updatePatient)
 
     return app.use("/api/", router);
 }

@@ -16,19 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Patient.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         dateOfAdmission: {
             type: DataTypes.DATE,
             allowNull: false,
         },
         dateOfDischarge: {
             type: DataTypes.DATE,
-            allowNull: false,
         },
         bedId: {
             type: DataTypes.INTEGER,
