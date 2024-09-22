@@ -273,6 +273,13 @@ const confirmUser = async (token) => {
 
         if (data) {
             console.log("gửi mail thành công");
+            if (await checkEmail(data.email) == false) {
+                return {
+                    EC: 200,
+                    EM: "Bạn đã đăng ký tài khoản này",
+                    DT: "",
+                }
+            }
             let user = await db.User.create({
                 email: data.email,
                 password: data.password,

@@ -9,7 +9,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.PASSWORD_APP,
     },
     tls: {
-        // do not fail on invalid certs
         rejectUnauthorized: false
     }
 });
@@ -44,6 +43,7 @@ let sendEmailConform = (data) => {
             <p>[Bệnh viện Hoa Sen] | [0362322010]</p>
         </div>
     </div>`});
+            console.log("Message sent: %s", info.messageId);
             resolve({
                 errCode: 200,
                 message: "OK"
