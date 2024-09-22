@@ -84,6 +84,7 @@ const getBedEmpty = async () => {
                 },{
                     model: db.Patient,
                     as: 'bedPatientData',
+                    attributes: [],
                     where: {
                         [Sequelize.Op.or]: [
                             { dateOfDischarge: { [Sequelize.Op.ne]: null } }, // Bệnh nhân đã xuất viện

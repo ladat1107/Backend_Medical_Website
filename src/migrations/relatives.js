@@ -22,7 +22,7 @@ module.exports = {
                 allowNull: false,
             },
             relationship: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.STRING(45),
                 allowNull: false,
             },
             address: {

@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     class Role extends Model {
         static associate(models) {
             Role.hasMany(models.User, {
-                foreignKey: 'roleId',
-                as: 'roleUserData',
+                foreignKey: 'id',
+                as: 'userRoleData',
             });
         }
     }
@@ -22,7 +22,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(45),
             allowNull: false,
         },
-       
+        status: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
     }, {
         sequelize,
         modelName: 'Role',

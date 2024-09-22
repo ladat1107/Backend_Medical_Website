@@ -12,12 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Relative.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         fullName: {
             type: DataTypes.STRING(128),
             allowNull: false,
@@ -31,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         relationship: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(45),
             allowNull: false,
         },
         address: {

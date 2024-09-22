@@ -10,14 +10,14 @@ module.exports = {
                 primaryKey: true,
             },
             relationship: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.STRING(45),
                 allowNull: true,
             },
             diseaseGroup: {
                 type: Sequelize.INTEGER,
                 allowNull: true,
             },
-            disease_name: {
+            diseaseName: {
                 type: Sequelize.STRING(45),
                 allowNull: true,
             },

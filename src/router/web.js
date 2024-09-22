@@ -6,6 +6,9 @@ import roomTypeController from '../controllers/roomTypeController';
 import bedController from '../controllers/bedController';
 import patientController from '../controllers/patientController';
 import roomController from '../controllers/roomController';
+import roleController from '../controllers/roleController';
+import relativeController from '../controllers/relativeController';
+import familyHistoryController from '../controllers/familyHistoryController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -127,6 +130,29 @@ let initWebRount = (app) => {
     //// ----> Admin
     router.post("/admin/createPatient", patientController.createPatient)
     router.put("/admin/updatePatient", patientController.updatePatient)
+
+    //-- Role
+    router.get("/getAllRoles", roleController.getAllRoles)
+    router.get("/getRoleById", roleController.getRoleById)
+    //// ----> Admin
+    router.post("/admin/createRole", roleController.createRole)
+    router.put("/admin/updateRole", roleController.updateRole)
+
+    //-- Relative
+    router.get("/getAllRelatives", relativeController.getAllRelatives)
+    router.get("/getRelativeById", relativeController.getRelativeById)
+    router.get("/getRelativesByUserId", relativeController.getRelativesByUserId)
+    router.post("/createRelative", relativeController.createRelative)
+    router.put("/updateRelative", relativeController.updateRelative)
+    router.put("/deleteRelative", relativeController.deleteRelative)
+
+    //-- FamilyHistory
+    router.get("/getAllFamilyHistories", familyHistoryController.getAllFamilyHistories)
+    router.get("/getFamilyHistoryById", familyHistoryController.getFamilyHistoryById)
+    router.get("/getFamilyHistoriesByUserId", familyHistoryController.getFamilyHistoriesByUserId)
+    router.post("/createFamilyHistory", familyHistoryController.createFamilyHistory)
+    router.put("/updateFamilyHistory", familyHistoryController.updateFamilyHistory)
+    router.delete("/deleteFamilyHistory", familyHistoryController.deleteFamilyHistory)
 
     return app.use("/api/", router);
 }

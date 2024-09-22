@@ -12,21 +12,15 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     FamilyHistory.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         relationship: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(45),
             allowNull: true,
         },
         diseaseGroup: {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        disease_name: {
+        diseaseName: {
             type: DataTypes.STRING(45),
             allowNull: true,
         },
