@@ -61,10 +61,33 @@ const checkCid = async (cid) => {
     }
 }
 
-const getAllUser = async () => {
+const getAllUser = async (page, limit, search) => {
     try {
-        let users = await db.User.findAll({
-            where: { status: status.ACTIVE },
+        let users = await db.User.findAndCountAll({
+            where: {
+                status: status.ACTIVE ,
+                [Op.or]: [
+                    { firstName: { [Op.like]: `%${search}%` } },
+                    { lastName: { [Op.like]: `%${search}%` } },
+                    { email: { [Op.like]: `%${search}%` } },
+                    { phoneNumber: { [Op.like]: `%${search}%` } },
+                    { cid: { [Op.like]: `%${search}%` } },
+                    { address: { [Op.like]: `%${search}%` } },
+                    { currentResident: { [Op.like]: `%${search}%` } },
+                    { dob: { [Op.like]: `%${search}%` } },
+
+                ]
+            },
+            order: [
+                ['createdAt', 'DESC']
+            ],
+            include: [
+                {
+                    model: db.Role, as: "userRoleData", attributes: ["id", "name"]
+                }
+            ],
+            offset: (+page - 1) * +limit,
+            limit: limit,
             attributes: ["id", "email", "phoneNumber", "lastName", "firstName", 
                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
                 "RHBloodGroup", "maritalStatus", "roleId", "point"],
@@ -119,8 +142,8 @@ const getUserById = async (userId) => {
 }
 
 const createUser = async (data) => {
-    try{
-        if(!await checkEmail(data.email)){
+    try {
+        if (!await checkEmail(data.email)) {
             return {
                 EC: 200,
                 EM: "Người dùng đã tồn tại",
@@ -145,7 +168,7 @@ const createUser = async (data) => {
         });
 
         const staff = await staffService.createStaff(data, user.id);
-        
+
         if (user && staff) {
             return {
                 EC: 0,
@@ -170,11 +193,11 @@ const createUser = async (data) => {
 }
 
 const updateUser = async (data) => {
-    try{
+    try {
         let user = await db.User.findOne({
             where: { id: data.id },
         });
-        if(user){
+        if (user) {
             await user.update({
                 email: data.email,
                 phoneNumber: data.phoneNumber,
@@ -188,27 +211,27 @@ const updateUser = async (data) => {
                 roleId: data.roleId
             });
             const staff = await staffService.updateStaff(data, user.id);
-            if(staff){
+            if (staff) {
                 return {
                     EC: 0,
                     EM: "Cập nhật tài khoản thành công",
                     DT: "",
                 }
-            } else{
+            } else {
                 return {
                     EC: 200,
                     EM: "Cập nhật tài khoản thất bại",
                     DT: "",
                 }
             }
-        } else{
+        } else {
             return {
                 EC: 200,
                 EM: "Không tìm thấy tài khoản",
                 DT: "",
             }
         }
-    } catch(error){
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
@@ -219,11 +242,11 @@ const updateUser = async (data) => {
 }
 
 const deleteUser = async (userId) => {
-    try{
+    try {
         let user = await db.User.findOne({
             where: { id: userId },
         });
-        if(user){
+        if (user) {
             await user.update({
                 status: status.INACTIVE,
             });
@@ -238,7 +261,7 @@ const deleteUser = async (userId) => {
             EM: "Không tìm thấy người dùng",
             DT: "",
         }
-    } catch(error){
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
