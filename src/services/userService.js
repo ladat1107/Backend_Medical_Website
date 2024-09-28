@@ -65,6 +65,9 @@ const getAllUser = async () => {
     try {
         let users = await db.User.findAll({
             where: { status: status.ACTIVE },
+            attributes: ["id", "email", "phoneNumber", "lastName", "firstName", 
+                "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
+                "RHBloodGroup", "maritalStatus", "roleId", "point"],
             raw: true,
             nest: true,
         });
@@ -87,6 +90,9 @@ const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId, status: status.ACTIVE },
+            attributes: ["id", "email", "phoneNumber", "lastName", "firstName", 
+                "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
+                "RHBloodGroup", "maritalStatus", "roleId", "point"],
             raw: true,
             nest: true,
         });

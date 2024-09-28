@@ -20,7 +20,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(45),
             allowNull: false,
         },
-      
+        status: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        }
     }, {
         sequelize,
         modelName: 'SurgicalHistory',

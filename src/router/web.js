@@ -10,6 +10,8 @@ import roomController from '../controllers/roomController';
 import roleController from '../controllers/roleController';
 import relativeController from '../controllers/relativeController';
 import familyHistoryController from '../controllers/familyHistoryController';
+import surgicalHistoryController from '../controllers/surgicalHistoryController';
+import surgicalHistoryUserController from '../controllers/surgicalHistoryUserController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -160,6 +162,22 @@ let initWebRount = (app) => {
     router.post("/createFamilyHistory", familyHistoryController.createFamilyHistory)
     router.put("/updateFamilyHistory", familyHistoryController.updateFamilyHistory)
     router.delete("/deleteFamilyHistory", familyHistoryController.deleteFamilyHistory)
+
+    //-- SurgicalHistory
+    router.get("/getAllSurgicalHistories", surgicalHistoryController.getAllSurgicalHistories)
+    router.get("/getSurgicalHistoryById", surgicalHistoryController.getSurgicalHistoryById)
+    // ----> Admin
+    router.post("/admin/createSurgicalHistory", surgicalHistoryController.createSurgicalHistory)
+    router.put("/admin/updateSurgicalHistory", surgicalHistoryController.updateSurgicalHistory)
+    router.put("/admin/deleteSurgicalHistory", surgicalHistoryController.deleteSurgicalHistory)
+
+    //-- SurgicalHistoryUser
+    router.get("/getAllSurgicalHistoryUsers", surgicalHistoryUserController.getAllSurgicalHistoryUser)
+    router.get("/getSurgicalHistoryUsersByUserId", surgicalHistoryUserController.getSurgicalHistoryUserByUserId)
+    router.get("/getSurgicalHistoryUserBySurgicalHistoryId", surgicalHistoryUserController.getSurgicalHistoryUserBySurgicalHistoryId)
+    router.post("/createSurgicalHistoryUser", surgicalHistoryUserController.createSurgicalHistoryUser)
+    router.put("/updateSurgicalHistoryUser", surgicalHistoryUserController.updateSurgicalHistoryUser)
+    router.delete("/deleteSurgicalHistoryUser", surgicalHistoryUserController.deleteSurgicalHistoryUser)
 
     return app.use("/api/", router);
 }

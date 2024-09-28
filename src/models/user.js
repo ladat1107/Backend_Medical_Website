@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasMany(models.SurgicalhistoryUser, {
         foreignKey: 'userId',
-        as: 'userSurgicalhistoryUserData',
+        as: 'surgicalhistoryUserUserData',
       });
       User.hasMany(models.DisablityUser, {
         foreignKey: 'userId',
