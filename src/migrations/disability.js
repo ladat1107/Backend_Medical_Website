@@ -13,6 +13,10 @@ module.exports = {
                 type: Sequelize.STRING(45),
                 allowNull: false,
             },
+            status: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
             createdAt: {
                 type: Sequelize.DATE,
                 allowNull: true,

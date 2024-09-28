@@ -12,6 +12,8 @@ import relativeController from '../controllers/relativeController';
 import familyHistoryController from '../controllers/familyHistoryController';
 import surgicalHistoryController from '../controllers/surgicalHistoryController';
 import surgicalHistoryUserController from '../controllers/surgicalHistoryUserController';
+import disabilityController from '../controllers/disabilityController';
+import disabilityUserController from '../controllers/disabilityUserController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -178,6 +180,22 @@ let initWebRount = (app) => {
     router.post("/createSurgicalHistoryUser", surgicalHistoryUserController.createSurgicalHistoryUser)
     router.put("/updateSurgicalHistoryUser", surgicalHistoryUserController.updateSurgicalHistoryUser)
     router.delete("/deleteSurgicalHistoryUser", surgicalHistoryUserController.deleteSurgicalHistoryUser)
+
+    //-- Disability
+    router.get("/getAllDisabilities", disabilityController.getAllDisabilities)
+    router.get("/getDisabilityById", disabilityController.getDisabilityById)
+    // ----> Admin
+    router.post("/admin/createDisability", disabilityController.createDisability)
+    router.put("/admin/updateDisability", disabilityController.updateDisability)
+    router.put("/admin/deleteDisability", disabilityController.deleteDisability)
+
+    //-- DisabilityUser
+    router.get("/getAllDisabilityUsers", disabilityUserController.getAllDisabilityUsers)
+    router.get("/getDisabilityUserByUserId", disabilityUserController.getDisabilityUserByUserId)
+    router.get("/getDisabilityUserByDisabilityId", disabilityUserController.getDisabilityUserByDisabilityId)
+    router.post("/createDisabilityUser", disabilityUserController.createDisabilityUser)
+    router.put("/updateDisabilityUser", disabilityUserController.updateDisabilityUser)
+    router.delete("/deleteDisabilityUser", disabilityUserController.deleteDisabilityUser)
 
     return app.use("/api/", router);
 }
