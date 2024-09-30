@@ -16,6 +16,7 @@ import disabilityController from '../controllers/disabilityController';
 import disabilityUserController from '../controllers/disabilityUserController';
 import allergyController from '../controllers/allergyController';
 import allergyUserController from '../controllers/allergyUserController';
+import conditionAtBirthController from '../controllers/conditionAtBirthController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -214,6 +215,13 @@ let initWebRount = (app) => {
     router.post("/createAllergyUser", allergyUserController.createAllergyUser)
     router.put("/updateAllergyUser", allergyUserController.updateAllergyUser)
     router.delete("/deleteAllergyUser", allergyUserController.deleteAllergyUser)
+
+    //-- ConditionAtBirth
+    router.get("/getConditionAtBirthById", conditionAtBirthController.getConditionAtBirthById)
+    router.get("/getConditionAtBirthByUserId", conditionAtBirthController.getConditionAtBirthByUserId)
+    router.post("/createConditionAtBirth", conditionAtBirthController.createConditionAtBirth)
+    router.put("/updateConditionAtBirth", conditionAtBirthController.updateConditionAtBirth)
+    router.delete("/deleteConditionAtBirth", conditionAtBirthController.deleteConditionAtBirth)
 
     return app.use("/api/", router);
 }

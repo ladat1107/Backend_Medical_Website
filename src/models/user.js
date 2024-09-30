@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasOne(models.ConditionAtBirth, {
         foreignKey: 'userId',
-        as: 'userConditionAtBirthData',
+        as: 'conditionAtBirthUserData',
       });
       User.hasMany(models.Staff, {
         foreignKey: 'userId',
