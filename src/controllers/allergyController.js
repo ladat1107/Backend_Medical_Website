@@ -1,14 +1,14 @@
-import disabilityUserServices from '../services/disabilityUserService';
+import allgergyService from '../services/allergyService';
 
-const getAllDisabilityUsers = async (req, res) => {
+const getAllAllergies = async (req, res) => {
     try{
-        let response = await disabilityUserServices.getAllDisabilityUser();
+        let response = await allgergyService.getAllAllergies();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -18,11 +18,11 @@ const getAllDisabilityUsers = async (req, res) => {
     }
 }
 
-const getDisabilityUserByUserId = async (req, res) => {
-    try {
+const getAllergyById = async (req, res) => {
+    try{
         let data = req.query;
-        if (data && data.userId) {
-            let response = await disabilityUserServices.getDisabilityUserByUserId(data.userId);
+        if(data && data.id) {
+            let response = await allgergyService.getAllergyById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -35,7 +35,7 @@ const getDisabilityUserByUserId = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -45,38 +45,11 @@ const getDisabilityUserByUserId = async (req, res) => {
     }
 }
 
-const getDisabilityUserByDisabilityId = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.disabilityId) {
-            let response = await disabilityUserServices.getDisabilityUserByDisabilityId(data.disabilityId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Input is empty",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const createDisabilityUser = async (req, res) => {
-    try {
+const createAllergy = async (req, res) => {
+    try{
         let data = req.body;
-        if(data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
-            let response = await disabilityUserServices.createDisabilityUser(data);
+        if(data && data.agent && data.diseaseManifestation) {
+            let response = await allgergyService.createAllergy(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -89,7 +62,7 @@ const createDisabilityUser = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -99,11 +72,11 @@ const createDisabilityUser = async (req, res) => {
     }
 }
 
-const updateDisabilityUser = async (req, res) => {
-    try {
+const updateAllergy = async (req, res) => {
+    try{
         let data = req.body;
-        if(data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
-            let response = await disabilityUserServices.updateDisabilityUser(data);
+        if(data && data.id && data.agent && data.diseaseManifestation) {
+            let response = await allgergyService.updateAllergy(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -116,7 +89,7 @@ const updateDisabilityUser = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -126,11 +99,11 @@ const updateDisabilityUser = async (req, res) => {
     }
 }
 
-const deleteDisabilityUser = async (req, res) => {
-    try {
-        let data = req.query;
-        if(data && data.userId && data.disabilityId) {
-            let response = await disabilityUserServices.deleteDisabilityUser(data);
+const deleteAllergy = async (req, res) => {
+    try{
+        let data = req.body;
+        if(data && data.id) {
+            let response = await allgergyService.deleteAllergy(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -143,7 +116,7 @@ const deleteDisabilityUser = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -154,10 +127,9 @@ const deleteDisabilityUser = async (req, res) => {
 }
 
 module.exports = {
-    getAllDisabilityUsers,
-    getDisabilityUserByUserId,
-    getDisabilityUserByDisabilityId,
-    createDisabilityUser,
-    updateDisabilityUser,
-    deleteDisabilityUser
+    getAllAllergies,
+    getAllergyById,
+    createAllergy,
+    updateAllergy,
+    deleteAllergy
 }

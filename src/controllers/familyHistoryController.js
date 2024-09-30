@@ -130,7 +130,7 @@ const updateFamilyHistory = async (req, res) => {
 
 const deleteFamilyHistory = async (req, res) => {
     try {
-        let data = req.body;
+        let data = req.query;
         if (data && data.id) {
             let response = await familyHistoryService.deleteFamilyHistory(data.id);
             return res.status(200).json({

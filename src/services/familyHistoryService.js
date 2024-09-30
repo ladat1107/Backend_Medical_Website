@@ -1,5 +1,4 @@
 import db from "../models/index";
-import { status } from "../utils/index";
 
 const getAllFamilyHistories = async () => {
     try{

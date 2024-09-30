@@ -1,28 +1,28 @@
-import surgicalHistoryUserService from '../services/surgicalHistoryUserService';
+import allergyUserService from '../services/allergyUserService';
 
-const getAllSurgicalHistoryUser = async (req, res) => {
+const getAllAllergyUsers = async (req, res) => {
     try {
-        let response = await surgicalHistoryUserService.getAllSurgicalHistoryUser();
+        let response = await allergyUserService.getAllAllergyUsers();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error) {
+    } catch (error){
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const getSurgicalHistoryUserByUserId = async (req, res) => {
+const getAllergyUserByUserId = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.userId){
-            let response = await surgicalHistoryUserService.getSurgicalHistoryUserByUserId(data.userId);
+        if(data && data.userId) {
+            let response = await allergyUserService.getAllergyUserByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -35,21 +35,21 @@ const getSurgicalHistoryUserByUserId = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const getSurgicalHistoryUserBySurgicalHistoryId = async (req, res) => {
+const getAllergyUserByAllergyId = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.surgicalhistoryId){
-            let response = await surgicalHistoryUserService.getSurgicalHistoryUserBySurgicalHistoryId(data.surgicalhistoryId);
+        if(data && data.allergyId) {
+            let response = await allergyUserService.getAllergyUserByAllergyId(data.allergyId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -62,21 +62,21 @@ const getSurgicalHistoryUserBySurgicalHistoryId = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const createSurgicalHistoryUser = async (req, res) => {
-    try {
+const createAllergyUser = async (req, res) => {
+    try{
         let data = req.body;
-        if(data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords){
-            let response = await surgicalHistoryUserService.createSurgicalHistoryUser(data);
+        if(data && data.userId && data.allergyId && data.discoveryDate) {
+            let response = await allergyUserService.createAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -91,19 +91,19 @@ const createSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const updateSurgicalHistoryUser = async (req, res) => {
-    try {
+const updateAllergyUser = async (req, res) => {
+    try{
         let data = req.body;
-        if(data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords){
-            let response = await surgicalHistoryUserService.updateSurgicalHistoryUser(data);
+        if(data && data.userId && data.allergyId && data.discoveryDate) {
+            let response = await allergyUserService.updateAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -118,19 +118,19 @@ const updateSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const deleteSurgicalHistoryUser = async (req, res) => {
-    try {
+const deleteAllergyUser = async (req, res) => {
+    try{
         let data = req.query;
-        if(data && data.userId && data.surgicalhistoryId){
-            let response = await surgicalHistoryUserService.deleteSurgicalHistoryUser(data.userId, data.surgicalhistoryId);
+        if(data && data.userId && data.allergyId) {
+            let response = await allergyUserService.deleteAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -145,19 +145,19 @@ const deleteSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
 module.exports = {
-    getAllSurgicalHistoryUser,
-    getSurgicalHistoryUserByUserId,
-    getSurgicalHistoryUserBySurgicalHistoryId,
-    createSurgicalHistoryUser,          
-    updateSurgicalHistoryUser,
-    deleteSurgicalHistoryUser
+    getAllAllergyUsers,
+    getAllergyUserByUserId,
+    getAllergyUserByAllergyId,
+    createAllergyUser,
+    updateAllergyUser,
+    deleteAllergyUser
 }

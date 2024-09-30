@@ -14,6 +14,8 @@ import surgicalHistoryController from '../controllers/surgicalHistoryController'
 import surgicalHistoryUserController from '../controllers/surgicalHistoryUserController';
 import disabilityController from '../controllers/disabilityController';
 import disabilityUserController from '../controllers/disabilityUserController';
+import allergyController from '../controllers/allergyController';
+import allergyUserController from '../controllers/allergyUserController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 import db from "../models/index";
@@ -196,6 +198,22 @@ let initWebRount = (app) => {
     router.post("/createDisabilityUser", disabilityUserController.createDisabilityUser)
     router.put("/updateDisabilityUser", disabilityUserController.updateDisabilityUser)
     router.delete("/deleteDisabilityUser", disabilityUserController.deleteDisabilityUser)
+
+    //-- Allergy
+    router.get("/getAllAllergies", allergyController.getAllAllergies)
+    router.get("/getAllergyById", allergyController.getAllergyById)
+    // ----> Admin
+    router.post("/admin/createAllergy", allergyController.createAllergy)
+    router.put("/admin/updateAllergy", allergyController.updateAllergy)
+    router.put("/admin/deleteAllergy", allergyController.deleteAllergy)
+
+    //-- AllergyUser
+    router.get("/getAllAllergyUsers", allergyUserController.getAllAllergyUsers)
+    router.get("/getAllergyUserByUserId", allergyUserController.getAllergyUserByUserId)
+    router.get("/getAllergyUserByAllergyId", allergyUserController.getAllergyUserByAllergyId)
+    router.post("/createAllergyUser", allergyUserController.createAllergyUser)
+    router.put("/updateAllergyUser", allergyUserController.updateAllergyUser)
+    router.delete("/deleteAllergyUser", allergyUserController.deleteAllergyUser)
 
     return app.use("/api/", router);
 }

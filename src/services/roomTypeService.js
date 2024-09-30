@@ -1,4 +1,3 @@
-import { name } from "ejs";
 import db from "../models/index";
 import { status } from "../utils/index";
 

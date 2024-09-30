@@ -1,4 +1,3 @@
-import { where } from "sequelize";
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
