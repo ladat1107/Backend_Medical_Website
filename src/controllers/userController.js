@@ -1,4 +1,5 @@
 import userService from '../services/userService'
+import { PAGINATE } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -103,8 +104,22 @@ const getAllUser = async (req, res) => {
         if (req.query.page && req.query.limit) {
             let page = parseInt(req.query.page);
             let limit = parseInt(req.query.limit);
+            let limitValue = 25;
+            for (let i = 0; i < PAGINATE.length; i++) {
+                if (PAGINATE[i].id === limit) {
+                    limitValue = PAGINATE[i].value;
+                    break;
+                }
+            }
             let search = req.query.search;
-            let response = await userService.getAllUser(page, limit, search);
+            let position = req.query.position;
+            if (position.includes('[') && position.includes(']')) {
+                position = JSON.parse(position);
+            } else {
+                position = [];
+            }
+            console.log("Position: ", limitValue);
+            let response = await userService.getAllUser(page, limitValue, search, position);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,

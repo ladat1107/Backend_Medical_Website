@@ -6,6 +6,7 @@ import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
+import { PAGINATE } from "../utils/constraints";
 
 const salt = bcrypt.genSaltSync(10);
 require('dotenv').config();
@@ -61,11 +62,17 @@ const checkCid = async (cid) => {
     }
 }
 
-const getAllUser = async (page, limit, search) => {
+const getAllUser = async (page, limit, search, position) => {
     try {
+        if (position.length == 0) {
+            position = [3, 4, 5, 6, 7];
+        }
         let users = await db.User.findAndCountAll({
             where: {
-                status: status.ACTIVE ,
+                roleId: {
+                    [Op.in]: position
+                },
+                status: status.ACTIVE,
                 [Op.or]: [
                     { firstName: { [Op.like]: `%${search}%` } },
                     { lastName: { [Op.like]: `%${search}%` } },
@@ -75,7 +82,6 @@ const getAllUser = async (page, limit, search) => {
                     { address: { [Op.like]: `%${search}%` } },
                     { currentResident: { [Op.like]: `%${search}%` } },
                     { dob: { [Op.like]: `%${search}%` } },
-
                 ]
             },
             order: [
@@ -88,12 +94,13 @@ const getAllUser = async (page, limit, search) => {
             ],
             offset: (+page - 1) * +limit,
             limit: limit,
-            attributes: ["id", "email", "phoneNumber", "lastName", "firstName", 
+            attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
-                "RHBloodGroup", "maritalStatus", "roleId", "point"],
+                "RHBloodGroup", "maritalStatus", "roleId", "point", "status"],
             raw: true,
             nest: true,
         });
+        console.log(users);
         return {
             EC: 0,
             EM: "Lấy thông tin người dùng thành công",
@@ -113,7 +120,7 @@ const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId, status: status.ACTIVE },
-            attributes: ["id", "email", "phoneNumber", "lastName", "firstName", 
+            attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
                 "RHBloodGroup", "maritalStatus", "roleId", "point"],
             raw: true,
