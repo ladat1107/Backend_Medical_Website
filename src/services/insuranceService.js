@@ -1,8 +1,30 @@
 import db from "../models/index";
 
-const getInsuaranceByUserId = async () => {
+const getInsuranceById = async (id) => {
     try {
-        let insuarance = await db.Insuarance.findOne({
+        let insuarance = await db.Insurance.findOne({
+            where: { id: id },
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin bảo hiểm thành công",
+            DT: insuarance
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
+const getInsuranceByUserId = async (userId) => {
+    try {
+        let insuarance = await db.Insurance.findOne({
             where: { userId: userId },
             raw: true,
             nest: true,
@@ -22,9 +44,9 @@ const getInsuaranceByUserId = async () => {
     }
 }
 
-const createInsuarance = async (data) => {
+const createInsurance = async (data) => {
     try{
-        let insuarance = await db.Insuarance.create({
+        let insuarance = await db.Insurance.create({
             insuanceCode: data.insuanceCode,
             dateOfIssue: data.dateOfIssue,
             exp: data.exp,
@@ -49,9 +71,9 @@ const createInsuarance = async (data) => {
     }
 }
 
-const updateInsuarance = async (data) => {
+const updateInsurance = async (data) => {
     try{
-        let insuarance = await db.Insuarance.update({
+        let insuarance = await db.Insurance.update({
             insuanceCode: data.insuanceCode,
             dateOfIssue: data.dateOfIssue,
             exp: data.exp,
@@ -61,7 +83,7 @@ const updateInsuarance = async (data) => {
             continuousFiveYearPeriod: data.continuousFiveYearPeriod,
         }, {
             where: {
-                userId: data.userId
+                id: data.id
             }
         });
         return {
@@ -79,11 +101,11 @@ const updateInsuarance = async (data) => {
     }
 }
 
-const deleteInsuarance = async (userId) => {
+const deleteInsurance = async (id) => {
     try{
-        let insuarance = await db.Insuarance.destroy({
+        let insuarance = await db.Insurance.destroy({
             where: {
-                userId: userId
+                id: id
             }
         });
         return {
@@ -102,8 +124,9 @@ const deleteInsuarance = async (userId) => {
 }
 
 export default {
-    getInsuaranceByUserId,
-    createInsuarance,
-    updateInsuarance,
-    deleteInsuarance
+    getInsuranceById,
+    getInsuranceByUserId,
+    createInsurance,
+    updateInsurance,
+    deleteInsurance
 }

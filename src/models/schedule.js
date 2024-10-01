@@ -20,11 +20,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'staffs', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'staffs', 
                 key: 'id',
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
         roomId: {
             type: DataTypes.INTEGER,
@@ -35,10 +36,12 @@ module.exports = (sequelize, DataTypes) => {
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
         date: {
             type: DataTypes.DATE,
             allowNull: true,
+            primaryKey: true,
         },
         
     }, {

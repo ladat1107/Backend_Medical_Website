@@ -46,14 +46,13 @@ module.exports = (sequelize, DataTypes) => {
         time: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            primaryKey: true,
         },
         cid: {
             type: DataTypes.STRING,
             allowNull: false,
             primaryKey: true,
         },
-        symptomNote: {
+        symptom: {
             type: DataTypes.STRING,
         },
         specialNote: {

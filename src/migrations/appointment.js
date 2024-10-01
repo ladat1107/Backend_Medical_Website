@@ -40,7 +40,7 @@ module.exports = {
                 allowNull: false,
                 primaryKey: true,
             },
-            symptomNote: {
+            symptom: {
                 type: Sequelize.STRING,
             },
             specialNote: {
