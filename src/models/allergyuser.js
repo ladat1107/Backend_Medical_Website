@@ -5,7 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class AllergyUser extends Model {
         static associate(models) {
-            AllergyUser.belongsTo(models.Allgergy, {
+            AllergyUser.belongsTo(models.Allergy, {
                 foreignKey: 'allergyId',
                 as: 'allergyUserAllergyData',
             });

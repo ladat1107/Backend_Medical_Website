@@ -3,19 +3,19 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class DisablityUser extends Model {
+    class DisabilityUser extends Model {
         static associate(models) {
-            DisablityUser.belongsTo(models.User, {
+            DisabilityUser.belongsTo(models.User, {
                 foreignKey: 'userId',
                 as: 'disablityUserUserData',
             });
-            DisablityUser.belongsTo(models.Disability, {
+            DisabilityUser.belongsTo(models.Disability, {
                 foreignKey: 'disabilityId',
                 as: 'disablityUserDisabilityData',
             });
         }
     }
-    DisablityUser.init({
+    DisabilityUser.init({
         disabilityId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         },
     }, {
         sequelize,
-        modelName: 'DisablityUser',
+        modelName: 'DisabilityUser',
     });
-    return DisablityUser;
+    return DisabilityUser;
 };

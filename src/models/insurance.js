@@ -12,12 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Insurance.init({
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         insuanceCode: {
             type: DataTypes.STRING(45),
             allowNull: false,

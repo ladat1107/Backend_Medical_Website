@@ -1,28 +1,10 @@
-import familyHistoryService from '../services/familyHistoryService';
+import conditionAtBirthService from '../services/conditionAtBirthService';
 
-const getAllFamilyHistories = async (req, res) => {
-    try {
-        let response = await familyHistoryService.getAllFamilyHistories();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const getFamilyHistoryById = async (req, res) => {
-    try {
+const getConditionAtBirthById = async (req, res) => {
+    try{
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.getFamilyHistoryById(data.id);
+        if(data && data.id) {
+            let response = await conditionAtBirthService.getConditionAtBirthById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -35,7 +17,7 @@ const getFamilyHistoryById = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -45,11 +27,11 @@ const getFamilyHistoryById = async (req, res) => {
     }
 }
 
-const getFamilyHistoriesByUserId = async (req, res) => {
-    try {
+const getConditionAtBirthByUserId = async (req, res) => {
+    try{
         let data = req.query;
-        if (data && data.userId) {
-            let response = await familyHistoryService.getFamilyHistoriesByUserId(data.userId);
+        if(data && data.userId) {
+            let response = await conditionAtBirthService.getConditionAtBirthByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -62,7 +44,7 @@ const getFamilyHistoriesByUserId = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -72,12 +54,11 @@ const getFamilyHistoriesByUserId = async (req, res) => {
     }
 }
 
-const createFamilyHistory = async (req, res) => {
-    try {
+const createConditionAtBirth = async (req, res) => {
+    try{
         let data = req.body;
-        if (data && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
-            let response = await familyHistoryService.createFamilyHistory(data);
+        if(data && data.userId && data.typeOfBirth && data.weight && data.height && data.detail) {
+            let response = await conditionAtBirthService.createConditionAtBirth(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -90,7 +71,7 @@ const createFamilyHistory = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -100,12 +81,11 @@ const createFamilyHistory = async (req, res) => {
     }
 }
 
-const updateFamilyHistory = async (req, res) => {
-    try {
+const updateConditionAtBirth = async (req, res) => {
+    try{
         let data = req.body;
-        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration) {
-            let response = await familyHistoryService.updateFamilyHistory(data);
+        if(data && data.id && data.typeOfBirth && data.weight && data.height && data.detail) {
+            let response = await conditionAtBirthService.updateConditionAtBirth(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -118,7 +98,7 @@ const updateFamilyHistory = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -128,11 +108,11 @@ const updateFamilyHistory = async (req, res) => {
     }
 }
 
-const deleteFamilyHistory = async (req, res) => {
-    try {
+const deleteConditionAtBirth = async (req, res) => {
+    try{
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.deleteFamilyHistory(data.id);
+        if(data && data.id) {
+            let response = await conditionAtBirthService.deleteConditionAtBirth(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -145,7 +125,7 @@ const deleteFamilyHistory = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -156,10 +136,9 @@ const deleteFamilyHistory = async (req, res) => {
 }
 
 module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
+    getConditionAtBirthById,
+    getConditionAtBirthByUserId,
+    createConditionAtBirth,
+    updateConditionAtBirth,
+    deleteConditionAtBirth
 }

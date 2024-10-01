@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
             });
             SurgicalhistoryUser.belongsTo(models.SurgicalHistory, {
                 foreignKey: 'surgicalhistoryId',
-                as: 'surgicalhistoryUserSurgicalhistoryData',
+                as: 'surgicalhistoryUserData',
             });
         }
     }

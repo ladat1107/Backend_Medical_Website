@@ -2,22 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('allgergies', {
+        await queryInterface.createTable('allergies', {
             id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
-            },
-            userID: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'users', // Tham chiếu đến bảng users
-                    key: 'id',
-                },
-                onUpdate: 'CASCADE',
-                onDelete: 'CASCADE',
             },
             agent: {
                 type: Sequelize.STRING(45),
@@ -34,15 +24,14 @@ module.exports = {
             updatedAt: {
                 type: Sequelize.DATE,
                 allowNull: true,
-            }
-        });
-
-        // Tạo chỉ mục cho userID
-        await queryInterface.addIndex('allgergies', ['userID'], {
-            name: 'fk_allgergy_user_idx'
+            },
+            status: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('allgergies');
+        await queryInterface.dropTable('allergies');
     }
 };

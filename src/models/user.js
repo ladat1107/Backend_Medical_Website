@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasOne(models.ConditionAtBirth, {
         foreignKey: 'userId',
-        as: 'userConditionAtBirthData',
+        as: 'conditionAtBirthUserData',
       });
       User.hasMany(models.Staff, {
         foreignKey: 'userId',
@@ -36,15 +36,15 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasMany(models.SurgicalhistoryUser, {
         foreignKey: 'userId',
-        as: 'userSurgicalhistoryUserData',
+        as: 'surgicalhistoryUserUserData',
       });
-      User.hasMany(models.DisablityUser, {
+      User.hasMany(models.DisabilityUser, {
         foreignKey: 'userId',
-        as: 'userDisablityUserData',
+        as: 'disablityUserUserData',
       });
       User.hasMany(models.AllergyUser, {
         foreignKey: 'userId',
-        as: 'userAllergyUserData',
+        as: 'allergyUserUserData',
       });
       User.hasMany(models.DiseaseUser, {
         foreignKey: 'userId',

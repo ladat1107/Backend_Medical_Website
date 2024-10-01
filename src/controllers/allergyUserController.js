@@ -1,14 +1,14 @@
-import familyHistoryService from '../services/familyHistoryService';
+import allergyUserService from '../services/allergyUserService';
 
-const getAllFamilyHistories = async (req, res) => {
+const getAllAllergyUsers = async (req, res) => {
     try {
-        let response = await familyHistoryService.getAllFamilyHistories();
+        let response = await allergyUserService.getAllAllergyUsers();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -18,11 +18,11 @@ const getAllFamilyHistories = async (req, res) => {
     }
 }
 
-const getFamilyHistoryById = async (req, res) => {
+const getAllergyUserByUserId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.getFamilyHistoryById(data.id);
+        if(data && data.userId) {
+            let response = await allergyUserService.getAllergyUserByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -35,7 +35,7 @@ const getFamilyHistoryById = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -45,11 +45,11 @@ const getFamilyHistoryById = async (req, res) => {
     }
 }
 
-const getFamilyHistoriesByUserId = async (req, res) => {
+const getAllergyUserByAllergyId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.userId) {
-            let response = await familyHistoryService.getFamilyHistoriesByUserId(data.userId);
+        if(data && data.allergyId) {
+            let response = await allergyUserService.getAllergyUserByAllergyId(data.allergyId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -62,7 +62,7 @@ const getFamilyHistoriesByUserId = async (req, res) => {
                 DT: ""
             })
         }
-    } catch (error) {
+    } catch (error){
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -72,12 +72,11 @@ const getFamilyHistoriesByUserId = async (req, res) => {
     }
 }
 
-const createFamilyHistory = async (req, res) => {
-    try {
+const createAllergyUser = async (req, res) => {
+    try{
         let data = req.body;
-        if (data && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
-            let response = await familyHistoryService.createFamilyHistory(data);
+        if(data && data.userId && data.allergyId && data.discoveryDate) {
+            let response = await allergyUserService.createAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -100,12 +99,11 @@ const createFamilyHistory = async (req, res) => {
     }
 }
 
-const updateFamilyHistory = async (req, res) => {
-    try {
+const updateAllergyUser = async (req, res) => {
+    try{
         let data = req.body;
-        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration) {
-            let response = await familyHistoryService.updateFamilyHistory(data);
+        if(data && data.userId && data.allergyId && data.discoveryDate) {
+            let response = await allergyUserService.updateAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -128,11 +126,11 @@ const updateFamilyHistory = async (req, res) => {
     }
 }
 
-const deleteFamilyHistory = async (req, res) => {
-    try {
+const deleteAllergyUser = async (req, res) => {
+    try{
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.deleteFamilyHistory(data.id);
+        if(data && data.userId && data.allergyId) {
+            let response = await allergyUserService.deleteAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -156,10 +154,10 @@ const deleteFamilyHistory = async (req, res) => {
 }
 
 module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
+    getAllAllergyUsers,
+    getAllergyUserByUserId,
+    getAllergyUserByAllergyId,
+    createAllergyUser,
+    updateAllergyUser,
+    deleteAllergyUser
 }

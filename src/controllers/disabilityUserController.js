@@ -1,8 +1,8 @@
-import familyHistoryService from '../services/familyHistoryService';
+import disabilityUserServices from '../services/disabilityUserService';
 
-const getAllFamilyHistories = async (req, res) => {
-    try {
-        let response = await familyHistoryService.getAllFamilyHistories();
+const getAllDisabilityUsers = async (req, res) => {
+    try{
+        let response = await disabilityUserServices.getAllDisabilityUser();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -18,38 +18,11 @@ const getAllFamilyHistories = async (req, res) => {
     }
 }
 
-const getFamilyHistoryById = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.getFamilyHistoryById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Input is empty",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const getFamilyHistoriesByUserId = async (req, res) => {
+const getDisabilityUserByUserId = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await familyHistoryService.getFamilyHistoriesByUserId(data.userId);
+            let response = await disabilityUserServices.getDisabilityUserByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -72,67 +45,92 @@ const getFamilyHistoriesByUserId = async (req, res) => {
     }
 }
 
-const createFamilyHistory = async (req, res) => {
-    try {
-        let data = req.body;
-        if (data && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
-            let response = await familyHistoryService.createFamilyHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Input is empty",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const updateFamilyHistory = async (req, res) => {
-    try {
-        let data = req.body;
-        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration) {
-            let response = await familyHistoryService.updateFamilyHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Input is empty",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const deleteFamilyHistory = async (req, res) => {
+const getDisabilityUserByDisabilityId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.deleteFamilyHistory(data.id);
+        if (data && data.disabilityId) {
+            let response = await disabilityUserServices.getDisabilityUserByDisabilityId(data.disabilityId);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
+const createDisabilityUser = async (req, res) => {
+    try {
+        let data = req.body;
+        if(data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
+            let response = await disabilityUserServices.createDisabilityUser(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
+const updateDisabilityUser = async (req, res) => {
+    try {
+        let data = req.body;
+        if(data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
+            let response = await disabilityUserServices.updateDisabilityUser(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
+const deleteDisabilityUser = async (req, res) => {
+    try {
+        let data = req.query;
+        if(data && data.userId && data.disabilityId) {
+            let response = await disabilityUserServices.deleteDisabilityUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -156,10 +154,10 @@ const deleteFamilyHistory = async (req, res) => {
 }
 
 module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
+    getAllDisabilityUsers,
+    getDisabilityUserByUserId,
+    getDisabilityUserByDisabilityId,
+    createDisabilityUser,
+    updateDisabilityUser,
+    deleteDisabilityUser
 }

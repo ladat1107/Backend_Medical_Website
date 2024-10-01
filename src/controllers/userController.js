@@ -1,4 +1,5 @@
 import userService from '../services/userService'
+import { PAGINATE } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -98,37 +99,35 @@ const handleLogin = async (req, res) => {
         })
     }
 }
-const getFunction = async (req, res) => {
+const getAllUser = async (req, res) => {
     try {
         if (req.query.page && req.query.limit) {
             let page = parseInt(req.query.page);
             let limit = parseInt(req.query.limit);
-            let response = await userService.getFunction(page, limit);
+            let limitValue = 25;
+            for (let i = 0; i < PAGINATE.length; i++) {
+                if (PAGINATE[i].id === limit) {
+                    limitValue = PAGINATE[i].value;
+                    break;
+                }
+            }
+            let search = req.query.search;
+            let position = req.query.position;
+            if (position.includes('[') && position.includes(']')) {
+                position = JSON.parse(position);
+            } else {
+                position = [];
+            }
+            console.log("Position: ", limitValue);
+            let response = await userService.getAllUser(page, limitValue, search, position);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
                 DT: response.DT
             })
         }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
 
-const getAllUser = async (req, res) => {
-    try{
-        let response = await userService.getAllUser();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
-    }catch(error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -139,9 +138,9 @@ const getAllUser = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.id){
+        if (data && data.id) {
             let response = await userService.getUserById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -170,11 +169,11 @@ const createUser = async (req, res) => {
         let data = req.body;
         if (data) {
             let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address", "currentRescident", "roleId",
-                        "markDownContent", "htmlContent", // description
-                        "price", "position", "departmentId" // staff
+                "markDownContent", "htmlContent", // description
+                "price", "position", "departmentId" // staff
             ];
             for (let i = 0; i < arr.length; i++) {
-                if (!data[arr[i]]) {    
+                if (!data[arr[i]]) {
                     return res.status(400).json({
                         EC: 400,
                         EM: `Dữ liệu ${arr[i]} không được để trống`,
@@ -205,18 +204,18 @@ const createUser = async (req, res) => {
     }
 }
 const updateUser = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id && data.email && data.phoneNumber && data.lastName && data.firstName && data.cid 
+        if (data && data.id && data.email && data.phoneNumber && data.lastName && data.firstName && data.cid
             && data.dob && data.gender && data.address && data.currentRescident && data.roleId
-            && data.price && data.position && data.departmentId 
-            && data.markDownContent && data.htmlContent){
-                let response = await userService.updateUser(data);
-                return res.status(200).json({
-                    EC: response.EC,
-                    EM: response.EM,
-                    DT: response.DT
-                })
+            && data.price && data.position && data.departmentId
+            && data.markDownContent && data.htmlContent) {
+            let response = await userService.updateUser(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -235,9 +234,9 @@ const updateUser = async (req, res) => {
 }
 
 const deleteUser = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id){
+        if (data && data.id) {
             let response = await userService.deleteUser(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -387,7 +386,6 @@ module.exports = {
     handleRegisterUser,
     handleLogin,
     handleLogout,
-    getFunction,
     updateFunction,
     deleteFunction,
     getFunctionById,

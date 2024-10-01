@@ -1,8 +1,8 @@
-import familyHistoryService from '../services/familyHistoryService';
+import surgicalHistoryUserService from '../services/surgicalHistoryUserService';
 
-const getAllFamilyHistories = async (req, res) => {
+const getAllSurgicalHistoryUser = async (req, res) => {
     try {
-        let response = await familyHistoryService.getAllFamilyHistories();
+        let response = await surgicalHistoryUserService.getAllSurgicalHistoryUser();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,19 +10,19 @@ const getAllFamilyHistories = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
-const getFamilyHistoryById = async (req, res) => {
+const getSurgicalHistoryUserByUserId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.getFamilyHistoryById(data.id);
+        if(data && data.userId){
+            let response = await surgicalHistoryUserService.getSurgicalHistoryUserByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -37,19 +37,19 @@ const getFamilyHistoryById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
-const getFamilyHistoriesByUserId = async (req, res) => {
+const getSurgicalHistoryUserBySurgicalHistoryId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.userId) {
-            let response = await familyHistoryService.getFamilyHistoriesByUserId(data.userId);
+        if(data && data.surgicalhistoryId){
+            let response = await surgicalHistoryUserService.getSurgicalHistoryUserBySurgicalHistoryId(data.surgicalhistoryId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -64,20 +64,19 @@ const getFamilyHistoriesByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
-const createFamilyHistory = async (req, res) => {
+const createSurgicalHistoryUser = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
-            let response = await familyHistoryService.createFamilyHistory(data);
+        if(data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords){
+            let response = await surgicalHistoryUserService.createSurgicalHistoryUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -92,20 +91,19 @@ const createFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
-const updateFamilyHistory = async (req, res) => {
+const updateSurgicalHistoryUser = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
-            && data.description && data.discoveryDate && data.illnessDuration) {
-            let response = await familyHistoryService.updateFamilyHistory(data);
+        if(data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords){
+            let response = await surgicalHistoryUserService.updateSurgicalHistoryUser(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -120,19 +118,19 @@ const updateFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
-const deleteFamilyHistory = async (req, res) => {
+const deleteSurgicalHistoryUser = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await familyHistoryService.deleteFamilyHistory(data.id);
+        if(data && data.userId && data.surgicalhistoryId){
+            let response = await surgicalHistoryUserService.deleteSurgicalHistoryUser(data.userId, data.surgicalhistoryId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -147,19 +145,19 @@ const deleteFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(500).send({
             EC: 500,
             EM: "Error from server",
-            DT: ""
-        })
+            DT: "",
+        });
     }
 }
 
 module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
+    getAllSurgicalHistoryUser,
+    getSurgicalHistoryUserByUserId,
+    getSurgicalHistoryUserBySurgicalHistoryId,
+    createSurgicalHistoryUser,          
+    updateSurgicalHistoryUser,
+    deleteSurgicalHistoryUser
 }
