@@ -1,4 +1,5 @@
 import db from "../models/index";
+const { Op } = require('sequelize');
 
 const getAllSchedules = async () => {
     try{
@@ -56,7 +57,12 @@ const getScheduleByStaffId = async (staffId) => {
 const getScheduleInWeek = async (data) => {
     try{
         let schedule = await db.Schedule.findAll({
-            where: {date: {$gte: data.from}, date: {$lte: data.to}},
+            where: {
+                date: {
+                    [Op.gte]: +data.from, 
+                    [Op.lte]: +data.to,   
+                }
+            },
             include: [{
                 model: db.Staff,
                 as: 'scheduleStaffData',
@@ -107,12 +113,12 @@ const createSchedule = async (data) => {
     }
 }
 
-const updateSchedule = async (data) => {
+const updateScheduleStaff = async (data) => {
     try{
         let schedule = await db.Schedule.update({
-            staffId: data.staffId
+            staffId: data.newStaffId
         }, {
-            where: {roomId: data.roomId, date: data.date},
+            where: {roomId: data.roomId, staffId: data.oldStaffId , date: data.date},
         });
         return {
             EC: 0,
@@ -154,6 +160,6 @@ module.exports = {
     getScheduleByStaffId,
     getScheduleInWeek,
     createSchedule,
-    updateSchedule,
+    updateScheduleStaff,
     deleteSchedule,
 }

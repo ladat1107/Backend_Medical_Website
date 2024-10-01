@@ -19,6 +19,7 @@ import allergyUserController from '../controllers/allergyUserController';
 import conditionAtBirthController from '../controllers/conditionAtBirthController';
 import insuranceController from '../controllers/insuranceController';
 import scheduleController from '../controllers/scheduleController';
+import appointmentController from '../controllers/appointmentController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -205,8 +206,16 @@ let initWebRount = (app) => {
     router.get("/getScheduleInWeek", scheduleController.getScheduleInWeek)
     // ----> Admin
     router.post("/admin/createSchedule", scheduleController.createSchedule)
-    router.put("/admin/updateSchedule", scheduleController.updateSchedule)
+    router.put("/admin/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/admin/deleteSchedule", scheduleController.deleteSchedule)
+    
+    //-- Appointment
+    router.get("/getAllAppointments", appointmentController.getAllAppointments)
+    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate) 
+    router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
+    router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
+    router.post("/createAppointment", appointmentController.createAppointment)
+    router.delete("/deleteAppointment", appointmentController.deleteAppointment)
 
     return app.use("/api/", router);
 }

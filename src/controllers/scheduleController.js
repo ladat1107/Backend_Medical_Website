@@ -99,11 +99,11 @@ const createSchedule = async (req, res) => {
     }
 }
 
-const updateSchedule = async (req, res) => {
+const updateScheduleStaff = async (req, res) => {
     try{
         let data = req.body;
-        if(data && data.staffId && data.roomId && data.date){
-            let response = await scheduleService.updateSchedule(data);
+        if(data && data.newStaffId && data.oldStaffId && data.roomId && data.date){
+            let response = await scheduleService.updateScheduleStaff(data);
             res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -158,6 +158,6 @@ module.exports = {
     getScheduleByStaffId,
     getScheduleInWeek,
     createSchedule,
-    updateSchedule,
+    updateScheduleStaff,
     deleteSchedule
 }
