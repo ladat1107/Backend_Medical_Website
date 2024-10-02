@@ -1,4 +1,6 @@
 import db from "../models/index";
+import { getTodayTimestamp } from "../utils/getTodayTimestamp";
+const { Op } = require('sequelize');
 
 const getAllAppointments = async () => {
     try{
@@ -143,6 +145,60 @@ const getAppointmentByStaffId = async (staffId) => {
     }
 }
 
+const seachAppointment = async (data) => {
+    try{
+        if(!data.search) data.search = "";
+        if(data.from == '') data.from = 0;
+        if(data.to == '') data.to = getTodayTimestamp();
+
+        let appointment = await db.Appointment.findAll({
+            where: {
+                date: {
+                    [Op.gte]: +data.from, 
+                    [Op.lte]: +data.to,   
+                },
+            },
+            include: [{
+                model: db.User,
+                as: 'appointmentUserData',
+                attributes: ['id', 'lastName', 'firstName'],
+                required: true,
+                where: {
+                    [Op.or]: [
+                        { firstName: { [Op.like]: `%${data.search}%` } },
+                        { lastName: { [Op.like]: `%${data.search}%` } },
+                    ]
+                }
+            }, {
+                model: db.Staff,
+                as: 'appointmentStaffData',
+                attributes: ['id', 'departmentId', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'lastName', 'firstName'],
+                }],
+            }],
+            offset: (+data.page - 1) * +data.limit,
+            limit: +data.limit,
+            raw: true,
+            nest: true,
+        });        
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch hẹn thành công",
+            DT: appointment
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createAppointment = async (data) => {
     try{
         let appointment = await db.Appointment.create({
@@ -194,6 +250,7 @@ module.exports = {
     getAllAppointmentsByDate,
     getAppointmentByUserId,
     getAppointmentByStaffId,
+    seachAppointment,
     createAppointment,
     deleteAppointment,
 }
