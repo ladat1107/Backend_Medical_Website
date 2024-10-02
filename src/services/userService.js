@@ -1,15 +1,22 @@
 import db from "../models/index";
 import bcrypt from "bcrypt";
 import { Op, where } from 'sequelize';
+import diacritics from 'diacritics';
 import JWTService from "../services/JWTService";
 import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { PAGINATE } from "../utils/constraints";
-
-const salt = bcrypt.genSaltSync(10);
+import role from "../models/role";
 require('dotenv').config();
+
+
+const removeDiacritics = (str) => {
+    return diacritics.remove(str);
+}
+const salt = bcrypt.genSaltSync(10);
+
 let hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
@@ -62,86 +69,249 @@ const checkCid = async (cid) => {
     }
 }
 
+// const getAllUser = async (page, limit, search, position) => {
+//     try {
+//         let array1 = [3, 4, 5, 6, 7];
+//         if (position.length == 0) {
+//             position = array1;
+//         }
+//         let users = await db.User.findAndCountAll({
+//             include: [
+//                 {
+//                     model: db.Staff, as: "staffUserData",
+//                     include: [
+//                         {
+//                             model: db.Department,
+//                             as: 'staffDepartmentData',
+//                             attributes: ['id', 'name'],
+//                             where: {
+//                                 [Op.or]: [
+//                                     { name: { [Op.like]: `%${search}%` } },
+//                                 ]
+//                             },
+//                             required: false,
+//                         }
+//                     ],
+//                     where: {
+//                         [Op.or]: [
+//                             { position: { [Op.like]: `%${search}%` } },
+//                         ]
+//                     },
+//                     required: false,
+//                 },
+//                 {
+//                     model: db.Role, as: "userRoleData", attributes: ["id", "name"],
+//                     where: {
+//                         id: { [Op.in]: position }
+//                     },
+
+//                 },
+//             ],
+//             where: {
+//                 [Op.or]: [
+//                     { firstName: { [Op.like]: `%${search}%` } },
+//                     { lastName: { [Op.like]: `%${search}%` } },
+//                     { email: { [Op.like]: `%${search}%` } },
+//                     { phoneNumber: { [Op.like]: `%${search}%` } },
+//                     { cid: { [Op.like]: `%${search}%` } },
+//                     { address: { [Op.like]: `%${search}%` } },
+//                     { currentResident: { [Op.like]: `%${search}%` } },
+//                     { dob: { [Op.like]: `%${search}%` } },
+//                     // Điều kiện trong bảng Staff
+//                     Sequelize.literal(
+//                         `EXISTS (SELECT 1 FROM Staffs AS staff WHERE staff.userId = User.id AND (staff.position LIKE '%${search}%'))`
+//                     ),
+//                     // Điều kiện trong bảng Department
+//                     Sequelize.literal(
+//                         `EXISTS (SELECT 1 FROM Departments AS dept JOIN Staffs AS staff ON dept.id = staff.departmentId WHERE staff.userId = User.id AND (dept.name LIKE '%${search}%'))`
+//                     ),
+//                 ]
+//             },
+//             order: [
+//                 ['createdAt', 'DESC']
+//             ],
+
+//             offset: (+page - 1) * +limit,
+//             limit: limit,
+//             attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
+//                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
+//                 "RHBloodGroup", "maritalStatus", "roleId", "point", "status", "createdAt"],
+//             raw: true,
+//             nest: true,
+//         });
+//         console.log(users);
+//         return {
+//             EC: 0,
+//             EM: "Lấy thông tin người dùng thành công",
+//             DT: users
+//         }
+//     } catch (error) {
+//         console.log(error);
+//         return {
+//             EC: 500,
+//             EM: "Error from server",
+//             DT: "",
+//         }
+//     }
+// }
 const getAllUser = async (page, limit, search, position) => {
     try {
-        let array1 = [3, 4, 5, 6, 7];
-        if (position.length == 0) {
-            position = array1;
+        let defaultPositions = [1, 3, 4, 5, 6, 7];
+
+        // Nếu không có giá trị `position`, gán giá trị mặc định
+        if (!position || position.length === 0) {
+            position = defaultPositions;
         }
+        console.log("position ", position);
+        let userDepartment = await db.Department.findAll({
+            where: {
+                name: { [Op.like]: `%${search}%` }
+            },
+            attributes: ["id"],
+            raw: true,
+        });
+        let staff = await db.Staff.findAll({
+            where: {
+                [Op.or]: [
+                    { position: { [Op.like]: `%${search}%` } },
+                    { departmentId: { [Op.in]: userDepartment.map(item => item.id) } }
+                ],
+            },
+            attributes: ["userId"],
+            raw: true,
+        });
+
         let users = await db.User.findAndCountAll({
+            where: {
+                [Op.and]: [
+                    { roleId: { [Op.in]: position } },
+                    {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { email: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } },
+                            { id: { [Op.in]: staff.map(item => item.userId) } }
+                        ]
+                    }
+                ]
+            },
             include: [
                 {
-                    model: db.Staff, as: "staffUserData",
+                    model: db.Staff,
+                    as: "staffUserData",
+                    attributes: ["id", "price", "position", "departmentId"],
                     include: [
                         {
                             model: db.Department,
                             as: 'staffDepartmentData',
                             attributes: ['id', 'name'],
-                            where: {
-                                [Op.or]: [
-                                    { name: { [Op.like]: `%${search}%` } },
-                                ]
-                            },
-                            required: false,
+                            required: false, // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
                         }
                     ],
-                    where: {
-                        [Op.or]: [
-                            { position: { [Op.like]: `%${search}%` } },
-                        ]
-                    },
-                    required: false,
+                    required: false, // Cho phép tìm kiếm ngay cả khi không có Staff nào khớp
                 },
                 {
-                    model: db.Role, as: "userRoleData", attributes: ["id", "name"],
-                    where: {
-                        id: { [Op.in]: position }
-                    },
-
+                    model: db.Role,
+                    as: "userRoleData",
+                    attributes: ["id", "name"],
+                    require: false
                 },
             ],
-            where: {
-                // roleId: {
-                //     [Op.in]: position
-                // },
-                [Op.or]: [
-                    { firstName: { [Op.like]: `%${search}%` } },
-                    { lastName: { [Op.like]: `%${search}%` } },
-                    { email: { [Op.like]: `%${search}%` } },
-                    { phoneNumber: { [Op.like]: `%${search}%` } },
-                    { cid: { [Op.like]: `%${search}%` } },
-                    { address: { [Op.like]: `%${search}%` } },
-                    { currentResident: { [Op.like]: `%${search}%` } },
-                    { dob: { [Op.like]: `%${search}%` } },
-                ]
-            },
-            order: [
-                ['createdAt', 'DESC']
-            ],
+            order: [['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
 
+            // Phân trang
             offset: (+page - 1) * +limit,
-            limit: limit,
-            attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
-                "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
-                "RHBloodGroup", "maritalStatus", "roleId", "point", "status", "createdAt"],
+            limit: +limit,
+
+            // Chỉ lấy các thuộc tính cần thiết từ User
+            // attributes: [
+            //     "id", "email", "phoneNumber", "lastName", "firstName",
+            //     "cid", "dob", "address", "currentResident", "gender", "avatar",
+            //     "folk", "ABOBloodGroup", "RHBloodGroup", "maritalStatus",
+            //     "roleId", "point", "status", "createdAt", "staffUserData."
+            // ],
             raw: true,
             nest: true,
-        });
+        })
+        // console.log("search ", search);
+        // Tìm kiếm users
+        // let users = await db.User.findAndCountAll({
+
+        //     where: {
+        //         // roleId: { [Op.in]: position }, // Lọc theo roleId của người dùng
+        //         [Op.or]: [
+        //             // Tìm kiếm trong các cột của bảng User
+        //             { firstName: { [Op.like]: `%${search}%` } },
+        //             { lastName: { [Op.like]: `%${search}%` } },
+        //             { email: { [Op.like]: `%${search}%` } },
+        //             { phoneNumber: { [Op.like]: `%${search}%` } },
+        //             { cid: { [Op.like]: `%${search}%` } },
+        //             { address: { [Op.like]: `%${search}%` } },
+        //             { currentResident: { [Op.like]: `%${search}%` } },
+        //             // { '$userRoleData.name$': { [Op.like]: `%${search}%` }, },
+        //             // { '$staffUserData.position$': { [Op.like]: `%${search}%` }, },
+        //         ],
+        //     },
+        //     include: [
+        //         // {
+        //         //     model: db.Staff,
+        //         //     as: "staffUserData",
+        //         //     attributes: ["id", "price", "position", "departmentId"],
+        //         //     // include: [
+        //         //     //     {
+        //         //     //         model: db.Department,
+        //         //     //         as: 'staffDepartmentData',
+        //         //     //         attributes: ['id', 'name'],
+        //         //     //         required: false, // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
+        //         //     //     }
+        //         //     // ],
+        //         //     required: false, // Cho phép tìm kiếm ngay cả khi không có Staff nào khớp
+        //         // },
+        //         {
+        //             model: db.Role,
+        //             as: "userRoleData",
+        //             attributes: ["id", "name"],
+        //             where: {
+        //                 name: { [Op.like]: `%${search}%` }
+        //             },
+        //             require: false
+        //         },
+        //     ],
+        //     order: [['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
+
+        //     // Phân trang
+        //     offset: (+page - 1) * +limit,
+        //     limit: +limit,
+
+        //     // Chỉ lấy các thuộc tính cần thiết từ User
+        //     // attributes: [
+        //     //     "id", "email", "phoneNumber", "lastName", "firstName",
+        //     //     "cid", "dob", "address", "currentResident", "gender", "avatar",
+        //     //     "folk", "ABOBloodGroup", "RHBloodGroup", "maritalStatus",
+        //     //     "roleId", "point", "status", "createdAt", "staffUserData."
+        //     // ],
+        //     raw: true,
+        //     nest: true,
+        // });
         console.log(users);
         return {
             EC: 0,
             EM: "Lấy thông tin người dùng thành công",
             DT: users
-        }
+        };
+
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return {
             EC: 500,
             EM: "Error from server",
             DT: "",
-        }
+        };
     }
-}
+};
+
 
 const getUserById = async (userId) => {
     try {

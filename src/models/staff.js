@@ -50,12 +50,12 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true,
         },
-        price:{
+        price: {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
         position: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
         },
         userId: {
