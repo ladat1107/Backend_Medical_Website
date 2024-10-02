@@ -20,6 +20,7 @@ import conditionAtBirthController from '../controllers/conditionAtBirthControlle
 import insuranceController from '../controllers/insuranceController';
 import scheduleController from '../controllers/scheduleController';
 import appointmentController from '../controllers/appointmentController';
+import examinationController from '../controllers/examinationController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -217,6 +218,13 @@ let initWebRount = (app) => {
     router.get("/searchAppointment", appointmentController.searchAppointment)
     router.post("/createAppointment", appointmentController.createAppointment)
     router.delete("/deleteAppointment", appointmentController.deleteAppointment)
+
+    //-- Examination
+    router.get("/getExaminationById", examinationController.getExaminationById)
+    router.get("/getExaminationByUserId", examinationController.getExaminationByUserId)
+    router.post("/createExamination", examinationController.createExamination)
+    router.put("/updateExamination", examinationController.updateExamination)
+    router.put("/deleteExamination", examinationController.deleteExamination)
 
     return app.use("/api/", router);
 }

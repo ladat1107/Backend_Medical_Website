@@ -4,6 +4,13 @@ const status = {
     ACTIVE: 1,
     INACTIVE: 0
 }
+
+const pamentStatus = {
+    UNPAID: 0,
+    PENDING: 1,
+    PAID: 2
+}
+
 const PAGINATE = [
     {
         id: 1,
@@ -24,5 +31,6 @@ const PAGINATE = [
 ]
 module.exports = {
     status,
+    pamentStatus,
     PAGINATE
 }

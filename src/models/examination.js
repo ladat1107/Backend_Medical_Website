@@ -95,7 +95,11 @@ module.exports = (sequelize, DataTypes) => {
         special: {
             type: DataTypes.INTEGER,
             allowNull: true,
-        }
+        },
+        insuranceCoverage: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     }, {
         sequelize,
         modelName: 'Examination',
