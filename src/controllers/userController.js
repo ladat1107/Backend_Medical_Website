@@ -118,7 +118,6 @@ const getAllUser = async (req, res) => {
             } else {
                 position = [];
             }
-            console.log("Position: ", limitValue);
             let response = await userService.getAllUser(page, limitValue, search, position);
             return res.status(200).json({
                 EC: response.EC,

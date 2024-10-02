@@ -64,15 +64,46 @@ const checkCid = async (cid) => {
 
 const getAllUser = async (page, limit, search, position) => {
     try {
+        let array1 = [3, 4, 5, 6, 7];
         if (position.length == 0) {
-            position = [3, 4, 5, 6, 7];
+            position = array1;
         }
         let users = await db.User.findAndCountAll({
-            where: {
-                roleId: {
-                    [Op.in]: position
+            include: [
+                {
+                    model: db.Staff, as: "staffUserData",
+                    include: [
+                        {
+                            model: db.Department,
+                            as: 'staffDepartmentData',
+                            attributes: ['id', 'name'],
+                            where: {
+                                [Op.or]: [
+                                    { name: { [Op.like]: `%${search}%` } },
+                                ]
+                            },
+                            required: false,
+                        }
+                    ],
+                    where: {
+                        [Op.or]: [
+                            { position: { [Op.like]: `%${search}%` } },
+                        ]
+                    },
+                    required: false,
                 },
-                status: status.ACTIVE,
+                {
+                    model: db.Role, as: "userRoleData", attributes: ["id", "name"],
+                    where: {
+                        id: { [Op.in]: position }
+                    },
+
+                },
+            ],
+            where: {
+                // roleId: {
+                //     [Op.in]: position
+                // },
                 [Op.or]: [
                     { firstName: { [Op.like]: `%${search}%` } },
                     { lastName: { [Op.like]: `%${search}%` } },
@@ -87,16 +118,12 @@ const getAllUser = async (page, limit, search, position) => {
             order: [
                 ['createdAt', 'DESC']
             ],
-            include: [
-                {
-                    model: db.Role, as: "userRoleData", attributes: ["id", "name"]
-                }
-            ],
+
             offset: (+page - 1) * +limit,
             limit: limit,
             attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
-                "RHBloodGroup", "maritalStatus", "roleId", "point", "status"],
+                "RHBloodGroup", "maritalStatus", "roleId", "point", "status", "createdAt"],
             raw: true,
             nest: true,
         });
