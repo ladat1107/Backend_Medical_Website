@@ -3,15 +3,15 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class ResultParaclincal extends Model {
+    class Paraclinical extends Model {
         static associate(models) {
-            ResultParaclincal.belongsTo(models.Examination, {
+            Paraclinical.belongsTo(models.Examination, {
                 foreignKey: 'examinationId',
-                as: 'resultParaclincalExaminationData',
+                as: 'examinationResultParaclincalData',
             });
         }
     }
-    ResultParaclincal.init({
+    Paraclinical.init({
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
-        paraclincal: {
+        paraclinical: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'ResultParaclincal',
+        modelName: 'Paraclinical',
     });
-    return ResultParaclincal;
+    return Paraclinical;
 };

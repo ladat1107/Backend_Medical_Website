@@ -9,46 +9,32 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examId',
                 as: 'prescriptionExamData',
             });
-            Prescription.belongsTo(models.Medicine, {
-                foreignKey: 'medicineId',
-                as: 'prescriptionMedicineData',
-            });
         }
     }
     Prescription.init({
-        examId: {
+        examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'examinations', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'examinations',
                 key: 'id',
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
-        medicineId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'medicines', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
-        },
-        quantity: {
-            type: DataTypes.INTEGER,
+        note: {
+            type: DataTypes.STRING(512),
             allowNull: false,
         },
-        dosage: {
-            type: DataTypes.STRING(128),
-            allowNull: false,
-        },
-        totalAmount: {
+        totalMoney: {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
         paymentStatus: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        status: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

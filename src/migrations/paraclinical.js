@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('resultparaclincals', {
+        await queryInterface.createTable('paraclinicals', {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
@@ -19,7 +19,7 @@ module.exports = {
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
             },
-            paraclincal: {
+            paraclinical: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
             },
@@ -58,11 +58,11 @@ module.exports = {
         });
 
         // Tạo chỉ mục cho examinationId
-        await queryInterface.addIndex('resultparaclincals', ['examinationId'], {
+        await queryInterface.addIndex('paraclinicals', ['examinationId'], {
             name: 'fk_resultparaclincal_examination_idx'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('resultparaclincals');
+        await queryInterface.dropTable('paraclinicals');
     }
 };

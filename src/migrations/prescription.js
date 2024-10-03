@@ -3,40 +3,30 @@
 module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('prescriptions', {
-            examId: {
-                type: Sequelize.INTEGER,
+            examinationId: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
                     model: 'examinations',
                     key: 'id',
                 },
-                onDelete: 'CASCADE',
                 onUpdate: 'CASCADE',
-            },
-            medicineId: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'medicines',
-                    key: 'id',
-                },
                 onDelete: 'CASCADE',
-                onUpdate: 'CASCADE',
             },
-            quantity: {
-                type: Sequelize.INTEGER,
+            note: {
+                type: DataTypes.STRING(512),
                 allowNull: false,
             },
-            dosage: {
-                type: Sequelize.STRING(128),
-                allowNull: false,
-            },
-            totalAmount: {
-                type: Sequelize.DOUBLE,
+            totalMoney: {
+                type: DataTypes.DOUBLE,
                 allowNull: false,
             },
             paymentStatus: {
-                type: Sequelize.INTEGER,
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
+            status: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
             },
             createdAt: {
@@ -49,9 +39,8 @@ module.exports = {
             },
 
         });
-        // Tạo chỉ mục cho surgicalhistoryId
-        await queryInterface.addIndex('prescriptions', ['medicineId'], {
-            name: 'fk_prescription_medicine_idx'
+        await queryInterface.addIndex('prescriptions', ['examinationId'], {
+            name: 'fk_prescription_examination_idx'
         });
     },
     async down(queryInterface, Sequelize) {

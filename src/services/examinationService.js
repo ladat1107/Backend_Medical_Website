@@ -5,6 +5,26 @@ const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
             where: { id: id, status: status.ACTIVE },
+            include: [{
+                model: db.VitalSign,
+                as: 'examinationVitalSignData',
+            },{
+                model: db.Paraclinical,
+                as: 'examinationResultParaclincalData',
+            }, {
+                model: db.User,
+                as: 'userExaminationData',
+                attributes: ['id', 'lastName', 'firstName'],
+            }, {
+                model: db.Staff,
+                as: 'examinationStaffData',
+                attributes: ['id', 'departmentId', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'lastName', 'firstName'],
+                }],
+            }],
             raw: true,
             nest: true,
         });

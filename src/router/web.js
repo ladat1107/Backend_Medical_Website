@@ -21,6 +21,9 @@ import insuranceController from '../controllers/insuranceController';
 import scheduleController from '../controllers/scheduleController';
 import appointmentController from '../controllers/appointmentController';
 import examinationController from '../controllers/examinationController';
+import vitalSignController from '../controllers/vitalSignController';
+import paraclinicalController from '../controllers/paraclinicalController';
+import medicineController from '../controllers/medicineController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -225,6 +228,26 @@ let initWebRount = (app) => {
     router.post("/createExamination", examinationController.createExamination)
     router.put("/updateExamination", examinationController.updateExamination)
     router.put("/deleteExamination", examinationController.deleteExamination)
+
+    //-- VitalSign
+    router.get("/getVitalSignByExamId", vitalSignController.getVitalSignByExamId)
+    router.post("/createVitalSign", vitalSignController.createVitalSign)
+    router.put("/updateVitalSign", vitalSignController.updateVitalSign)
+    router.delete("/deleteVitalSign", vitalSignController.deleteVitalSign)
+
+    //-- Paraclinical
+    router.get("/getParaclinicalByExamId", paraclinicalController.getParaclinicalByExamId)
+    router.post("/createParaclinical", paraclinicalController.createParaclinical)
+    router.put("/updateParaclinical", paraclinicalController.updateParaclinical)
+    router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
+
+    //-- Medicine
+    router.get("/getAllMedicines", medicineController.getAllMedicines)
+    router.get("/getMedicineById", medicineController.getMedicineById)
+    // ----> Admin
+    router.post("/admin/createMedicine", medicineController.createMedicine)
+    router.put("/admin/updateMedicine", medicineController.updateMedicine)
+    router.put("/admin/deleteMedicine", medicineController.deleteMedicine)
 
     return app.use("/api/", router);
 }

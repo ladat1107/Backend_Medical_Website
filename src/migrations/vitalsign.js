@@ -43,15 +43,15 @@ module.exports = {
                 type: Sequelize.DOUBLE,
                 allowNull: true,
             },
-            low_blood_pressure: {
+            lowBloodPressure: {
                 type: Sequelize.DOUBLE,
                 allowNull: true,
             },
-            breathing_rate: {
+            breathingRate: {
                 type: Sequelize.DOUBLE,
                 allowNull: true,
             },
-            glycemic_index: {
+            glycemicIndex: {
                 type: Sequelize.DOUBLE,
                 allowNull: true,
             },

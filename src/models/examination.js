@@ -7,13 +7,13 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             Examination.belongsTo(models.User, {
                 foreignKey: 'userId',
-                as: 'examinationUserData',
+                as: 'userExaminationData',
             });
             Examination.belongsTo(models.Staff, {
                 foreignKey: 'staffId',
                 as: 'examinationStaffData',
             });
-            Examination.hasMany(models.ResultParaclincal, {
+            Examination.hasMany(models.Paraclinical, {
                 foreignKey: 'examinationId',
                 as: 'examinationResultParaclincalData',
             });
