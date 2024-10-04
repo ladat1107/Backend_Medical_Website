@@ -24,6 +24,7 @@ import examinationController from '../controllers/examinationController';
 import vitalSignController from '../controllers/vitalSignController';
 import paraclinicalController from '../controllers/paraclinicalController';
 import medicineController from '../controllers/medicineController';
+import prescriptionController from '../controllers/prescriptionController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -248,6 +249,10 @@ let initWebRount = (app) => {
     router.post("/admin/createMedicine", medicineController.createMedicine)
     router.put("/admin/updateMedicine", medicineController.updateMedicine)
     router.put("/admin/deleteMedicine", medicineController.deleteMedicine)
+
+    //-- Prescription
+    router.get("/getPrescriptionByExaminationId", prescriptionController.getPrescriptionByExaminationId)
+    router.post("/upsertPrescription", prescriptionController.upsertPrescription)
 
     return app.use("/api/", router);
 }

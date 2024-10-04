@@ -137,6 +137,17 @@ const updateMedicine = async (data) => {
     }
 }
 
+const updateInventory = async (medicineId, quantityChange) => {
+    const medicine = await db.Medicine.findByPk(medicineId);
+    if (medicine) {
+        await medicine.update({
+            inventory: medicine.inventory - quantityChange
+        });
+    } else {
+      console.warn(`Medicine with id ${medicineId} not found`);
+    }
+}
+
 const deleteMedicine = async (id) => {
     try {
         let medicine = await db.Medicine.update({
@@ -165,5 +176,6 @@ module.exports = {
     getMedicineById,
     createMedicine,
     updateMedicine,
+    updateInventory,
     deleteMedicine
 }

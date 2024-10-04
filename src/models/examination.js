@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
             });
             Examination.hasMany(models.Prescription, {
                 foreignKey: 'examinationId',
-                as: 'examinationPrescriptionData',
+                as: 'prescriptionExamData',
             });
             Examination.hasMany(models.Comorbidities, {
                 foreignKey: 'examinationId',

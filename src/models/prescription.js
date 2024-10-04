@@ -6,8 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     class Prescription extends Model {
         static associate(models) {
             Prescription.belongsTo(models.Examination, {
-                foreignKey: 'examId',
+                foreignKey: 'examinationId',
                 as: 'prescriptionExamData',
+            });
+            Prescription.hasMany(models.PrescriptionDetail, {
+                foreignKey: 'prescriptionId',
+                as: 'prescriptionDetails',
             });
         }
     }
