@@ -1,6 +1,7 @@
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
+const { Op } = require('sequelize');
 
 const getAllStaff = async () => {
     try {
@@ -180,7 +181,42 @@ const getStaffByRole = async (roleId) => {
     }
 }
 
-
+const getStaffByName = async (name) => {
+    try{
+        if(!name) name = ""
+        let staff = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE
+            },
+            attributes: ['id'],
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: ['id', 'lastName', 'firstName'],
+                where: {
+                    [Op.or]: [
+                        {lastName: {[Op.like]: `%${name}%`}},
+                        {firstName: {[Op.like]: `%${name}%`}}
+                    ]
+                }
+            }],
+            raw: true,
+            nest: true
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin nhân viên thành công",
+            DT: staff
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        }
+    }
+}
 
 const createStaff = async (data, userId) => {
     try {
@@ -236,6 +272,7 @@ module.exports = {
     getStaffbyDepartmentId,
     getStaffById,
     getStaffByRole,
+    getStaffByName,
     createStaff,
     updateStaff
 }

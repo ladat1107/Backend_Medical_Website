@@ -148,6 +148,37 @@ const getUserById = async (userId) => {
     }
 }
 
+const getUserByCid = async (cid) => {
+    try {
+        let user = await db.User.findOne({
+            where: { cid: cid },
+            attributes: ["id", "phoneNumber", "lastName", "firstName",
+                "cid", "dob", "gender", ],
+            raw: true,
+            nest: true,
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin người dùng thành công",
+                DT: user
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createUser = async (data) => {
     try {
         if (!await checkEmail(data.email)) {
@@ -622,6 +653,7 @@ const getFunctionById = async (userId) => {
 module.exports = {
     getAllUser,
     getUserById,
+    getUserByCid,
     createUser,
     updateUser,
     deleteUser,

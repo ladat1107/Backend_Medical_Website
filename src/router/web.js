@@ -25,6 +25,7 @@ import vitalSignController from '../controllers/vitalSignController';
 import paraclinicalController from '../controllers/paraclinicalController';
 import medicineController from '../controllers/medicineController';
 import prescriptionController from '../controllers/prescriptionController';
+import diseaseController from '../controllers/diseaseController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -55,6 +56,7 @@ let initWebRount = (app) => {
 
     //-- User
     router.get("/getUserById", userController.getUserById)
+    router.get("/getUserByCid", userController.getUserByCid)
     //------> Admin CRUD User
     router.get("/admin/getAllUser", userController.getAllUser)
     router.post("/admin/createUser", userController.createUser)
@@ -75,6 +77,7 @@ let initWebRount = (app) => {
     router.get("/getStaffById", staffController.getStaffById)
     router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
     router.get("/getStaffByRole", staffController.getStaffByRole)
+    router.get("/getStaffByName", staffController.getStaffByName)
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)
@@ -253,6 +256,10 @@ let initWebRount = (app) => {
     //-- Prescription
     router.get("/getPrescriptionByExaminationId", prescriptionController.getPrescriptionByExaminationId)
     router.post("/upsertPrescription", prescriptionController.upsertPrescription)
+
+    //-- Disease
+    router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
+
 
     return app.use("/api/", router);
 }
