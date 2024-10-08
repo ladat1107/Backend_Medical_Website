@@ -40,7 +40,8 @@ const createParaclinical = async (data) => {
             image: data.image,
             status: status.ACTIVE,
             paymentStatus: pamentStatus.UNPAID,
-            price: data.price
+            price: data.price,
+            doctorId: data.doctorId
         });
         return {
             EC: 0,

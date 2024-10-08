@@ -31,7 +31,7 @@ const createParaclinical = async (req, res) => {
     try{
         let data = req.body;
         if(data && data.examinationId && data.paraclinical && data.description 
-            && data.result && data.image && data.price) {
+            && data.result && data.image && data.price && data.doctorId) {
             let response = await paraclinicalService.createParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
