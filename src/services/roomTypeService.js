@@ -5,6 +5,7 @@ const getAllRoomTypes = async () => {
     try{
         let roomType = await db.RoomType.findAll({
             where: { status: status.ACTIVE },
+            attributes: ['id', 'name', 'price', 'description'],
             raw: true,
             nest: true,
         });

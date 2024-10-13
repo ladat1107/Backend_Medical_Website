@@ -39,6 +39,36 @@ const getAllMedicines = async () => {
     }
 }
 
+const getAllMedicinesForExam = async () => {
+    try {
+        let medicines = await db.Medicine.findAll({
+            where: { status: status.ACTIVE },
+            attributes: ['id', 'name', 'price', 'unit'],
+            raw: true,
+            nest: true,
+        });
+        if (!medicines) {
+            return {
+                EC: 404,
+                EM: "Không tìm thấy thuốc",
+                DT: "",
+            }
+        }
+        return {
+            EC: 0,
+            EM: "Lấy thông tin thuốc thành công",
+            DT: medicines
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: "",
+        }
+    }
+}
+
 const getMedicineById = async (id) => {
     try {
         let medicine = await db.Medicine.findOne({
@@ -173,6 +203,7 @@ const deleteMedicine = async (id) => {
 module.exports = {
     insertMedicine,
     getAllMedicines,
+    getAllMedicinesForExam,
     getMedicineById,
     createMedicine,
     updateMedicine,

@@ -11,6 +11,17 @@ const getExaminationById = async (id) => {
             },{
                 model: db.Paraclinical,
                 as: 'examinationResultParaclincalData',
+                include: [{
+                    model: db.Staff,
+                    as: 'doctorParaclinicalData',
+                    attributes: ['id', 'departmentId'],
+                    include: [{
+                        model: db.User,
+                        as: 'staffUserData',
+                        attributes: ['id', 'lastName', 'firstName'],
+                    }],
+                }],
+                separate: true,
             }, {
                 model: db.User,
                 as: 'userExaminationData',
@@ -24,10 +35,27 @@ const getExaminationById = async (id) => {
                     as: 'staffUserData',
                     attributes: ['id', 'lastName', 'firstName'],
                 }],
+            }, {
+                model: db.Prescription,
+                as: 'prescriptionExamData',
+                attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                include: [{
+                    model: db.PrescriptionDetail,
+                    as: 'prescriptionDetails',
+                    attributes: ['quantity', 'unit', 'dosage', 'price'],
+                    include: [{
+                        model: db.Medicine,
+                        as: 'prescriptionDetailMedicineData',
+                        attributes: ['id', 'name', 'price'],
+                    }],
+                    separate: true,
+                }],
             }],
-            raw: true,
             nest: true,
         });
+
+        examination = examination.get({ plain: true });
+
         return {
             EC: 0,
             EM: "Lấy thông tin khám bệnh thành công",
@@ -73,7 +101,8 @@ const createExamination = async (data) => {
             symptom: data.symptom,
             diseaseName: data.diseaseName,
             treatmentResult: data.treatmentResult,
-            admissionDate: new Date(),
+            comorbidities: data.comorbidities,
+            admissionDate: data.admissionDate,
             dischargeDate: data.dischargeDate,
             status: status.ACTIVE,
             reason: data.reason,
@@ -113,7 +142,7 @@ const updateExamination = async (data) => {
             special: data.special,
             insuranceCoverage: data.insuranceCoverage
         }, {
-            where: { id: data.id }
+            where: { id: data.id }  
         });
         return {
             EC: 0,

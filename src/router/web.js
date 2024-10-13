@@ -238,6 +238,7 @@ let initWebRount = (app) => {
     router.post("/createVitalSign", vitalSignController.createVitalSign)
     router.put("/updateVitalSign", vitalSignController.updateVitalSign)
     router.delete("/deleteVitalSign", vitalSignController.deleteVitalSign)
+    router.post("/createOrUpdateVitalSign", vitalSignController.createOrUpdateVitalSign)
 
     //-- Paraclinical
     router.get("/getParaclinicalByExamId", paraclinicalController.getParaclinicalByExamId)
@@ -247,6 +248,7 @@ let initWebRount = (app) => {
 
     //-- Medicine
     router.get("/getAllMedicines", medicineController.getAllMedicines)
+    router.get("/getAllMedicinesForExam", medicineController.getAllMedicinesForExam)
     router.get("/getMedicineById", medicineController.getMedicineById)
     // ----> Admin
     router.post("/admin/createMedicine", medicineController.createMedicine)
@@ -259,6 +261,7 @@ let initWebRount = (app) => {
 
     //-- Disease
     router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
+    router.get("/getAllDisease", diseaseController.getAllDisease)
 
 
     return app.use("/api/", router);

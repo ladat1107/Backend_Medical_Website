@@ -18,6 +18,24 @@ const getAllMedicines = async (req, res) => {
     }
 }
 
+const getAllMedicinesForExam = async (req, res) => {
+    try {
+        let response = await medicineService.getAllMedicinesForExam();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
+    }
+}
+
 const getMedicineById = async (req, res) => {
     try {
         let data = req.query;
@@ -134,6 +152,7 @@ const deleteMedicine = async (req, res) => {
 
 module.exports = {
     getAllMedicines,
+    getAllMedicinesForExam,
     getMedicineById,
     createMedicine,
     updateMedicine,
