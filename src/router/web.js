@@ -245,6 +245,7 @@ let initWebRount = (app) => {
     router.post("/createParaclinical", paraclinicalController.createParaclinical)
     router.put("/updateParaclinical", paraclinicalController.updateParaclinical)
     router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
+    router.post("/createOrUpdateParaclinical", paraclinicalController.createOrUpdateParaclinical)
 
     //-- Medicine
     router.get("/getAllMedicines", medicineController.getAllMedicines)

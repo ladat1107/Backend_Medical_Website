@@ -106,9 +106,61 @@ const deleteParaclinical = async (id) => {
     }
 }
 
+const createOrUpdateParaclinical = async (data) => {
+    try{
+        let paraclinical = await db.Paraclinical.findOne({
+            where: {
+                id: +data.id
+            }
+        });
+        if(paraclinical){
+            let paraclinical = await db.Paraclinical.update({
+                description: data.description,
+                result: data.result,
+                image: data.image,
+                price: data.price
+            }, {
+                where: {
+                    id: +data.id
+                }
+            });
+            return {
+                EC: 0,
+                EM: "Cập nhật xét nghiệm thành công",
+                DT: paraclinical
+            }
+        } else {
+            let paraclinical = await db.Paraclinical.create({
+                examinationId: data.examinationId,
+                paraclinical: data.paraclinical,
+                description: data.description,
+                result: data.result,
+                image: data.image,
+                status: status.ACTIVE,
+                paymentStatus: pamentStatus.UNPAID,
+                price: data.price,
+                doctorId: data.doctorId
+            });
+            return {
+                EC: 0,
+                EM: "Tạo xét nghiệm thành công",
+                DT: paraclinical
+            }
+        } 
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        }
+    }
+}
+
 module.exports = {
     getParaclinicalByExamId,
     createParaclinical,
     updateParaclinical,
-    deleteParaclinical
+    deleteParaclinical,
+    createOrUpdateParaclinical
 }
