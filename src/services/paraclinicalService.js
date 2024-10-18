@@ -110,27 +110,31 @@ const createOrUpdateParaclinical = async (data) => {
     try{
         let paraclinical = await db.Paraclinical.findOne({
             where: {
-                id: +data.id
+                id: +data.id,
+                examinationId: +data.examinationId
             }
         });
         if(paraclinical){
             let paraclinical = await db.Paraclinical.update({
+                paraclinical: data.paraclinical,
                 description: data.description,
                 result: data.result,
                 image: data.image,
                 price: data.price
             }, {
                 where: {
-                    id: +data.id
+                    id: +data.id,
+                    examinationId: +data.examinationId
                 }
             });
             return {
                 EC: 0,
                 EM: "Cập nhật xét nghiệm thành công",
-                DT: paraclinical
+                DT: true
             }
         } else {
             let paraclinical = await db.Paraclinical.create({
+                id: data.id,
                 examinationId: data.examinationId,
                 paraclinical: data.paraclinical,
                 description: data.description,
@@ -144,7 +148,7 @@ const createOrUpdateParaclinical = async (data) => {
             return {
                 EC: 0,
                 EM: "Tạo xét nghiệm thành công",
-                DT: paraclinical
+                DT: true
             }
         } 
     } catch (error) {

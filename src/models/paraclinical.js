@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Paraclinical.init({
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+        },
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -25,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
         paraclinical: {
             type: DataTypes.INTEGER,

@@ -11,11 +11,12 @@ const getPrescriptionByExaminationId = async (examinationId) => {
     try{
         let prescription = await db.Prescription.findOne({
             where: { examinationId: examinationId },
+            attributes: ['id', 'examinationId', 'note', 'totalMoney', 'paymentStatus'],
             include:[{
                 model: db.PrescriptionDetail,
                 as: 'prescriptionDetails',
                 attributes: {
-                    exclude: ['id']  // Loại bỏ cột id nếu nó không tồn tại
+                    exclude: ['id', 'createdAt', 'updatedAt']  // Loại bỏ cột id nếu nó không tồn tại
                 },
                 include: [
                     {
@@ -82,7 +83,7 @@ const upsertPrescription = async (data) => {
         return {
             EC: 0,
             EM: created ? "Tạo đơn thuốc thành công" : "Cập nhật đơn thuốc thành công",
-            DT: prescription
+            DT: true
         };
 
     } catch (error) {
