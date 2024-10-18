@@ -2,7 +2,7 @@ import express from 'express';
 import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
 import staffController from '../controllers/staffController';
-import handBookController from '../controllers/handBookController'; 
+import handBookController from '../controllers/handBookController';
 import roomTypeController from '../controllers/roomTypeController';
 import bedController from '../controllers/bedController';
 import patientController from '../controllers/patientController';
@@ -61,9 +61,11 @@ let initWebRount = (app) => {
     router.get("/admin/getAllUser", userController.getAllUser)
     router.post("/admin/createUser", userController.createUser)
     router.put("/admin/updateUser", userController.updateUser)
-    router.put("/admin/deleteUser", userController.deleteUser)
+    router.put("/admin/blockUser", userController.blockUser)
+    router.delete("/admin/deleteUser", userController.deleteUser)
 
     //-- Department
+    router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
     router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
     router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
@@ -216,10 +218,10 @@ let initWebRount = (app) => {
     router.post("/admin/createSchedule", scheduleController.createSchedule)
     router.put("/admin/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/admin/deleteSchedule", scheduleController.deleteSchedule)
-    
+
     //-- Appointment
     router.get("/getAllAppointments", appointmentController.getAllAppointments)
-    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate) 
+    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)
     router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
     router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
     router.get("/searchAppointment", appointmentController.searchAppointment)

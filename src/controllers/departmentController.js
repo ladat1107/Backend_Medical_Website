@@ -17,7 +17,23 @@ const getAllDepartment = async (req, res) => {
         })
     }
 }
-
+const getAllNameDepartment = async (req, res) => {
+    try {
+        let response = await departmentService.getAllNameDepartment();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
 const getDepartmentById = async (req, res) => {
     try {
         let data = req.query;
@@ -154,6 +170,7 @@ const deleteDepartment = async (req, res) => {
 }
 
 module.exports = {
+    getAllNameDepartment,
     getAllDepartment,
     getDepartmentById,
     getAllStaffInDepartment,

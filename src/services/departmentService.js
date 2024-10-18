@@ -1,3 +1,4 @@
+import { or } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
@@ -33,6 +34,30 @@ const getAllDepartment = async () => {
         }
     }
 }
+const getAllNameDepartment = async () => {
+    try {
+        let department = await db.Department.findAll({
+            where: { status: status.ACTIVE },
+            attributes: [
+                ['id', 'value'],  // Đổi tên cột id
+                ['name', 'label']  // Đổi tên cột name 
+            ],
+            order: [['name', 'ASC']],
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin phòng ban thành công",
+            DT: department
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
 const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
@@ -42,7 +67,7 @@ const getDepartmentById = async (departmentId) => {
                 as: 'departmentDescriptionData',
                 attributes: ['markDownContent', 'htmlContent'],
                 where: { status: status.ACTIVE },
-            },{
+            }, {
                 model: db.Staff,
                 as: 'deanDepartmentData',
                 attributes: ['id', 'position'],
@@ -78,17 +103,17 @@ const getDepartmentById = async (departmentId) => {
 }
 
 const getAllStaffInDepartment = async (departmentId) => {
-    try{
+    try {
         let department = await db.Department.findOne({
             where: { id: departmentId, status: status.ACTIVE },
             include: [{
                 model: db.Staff,
                 as: 'staffDepartmentData',
-                attributes:['id', 'position', 'price'],
+                attributes: ['id', 'position', 'price'],
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar','roleId'],
+                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar', 'roleId'],
                     where: { status: status.ACTIVE },
                 }],
                 where: { status: status.ACTIVE },
@@ -112,7 +137,7 @@ const getAllStaffInDepartment = async (departmentId) => {
 const createDepartment = async (data) => {
     try {
         let descriptionId = await descriptionService.createDescription(data);
-        if(descriptionId){
+        if (descriptionId) {
             let department = await db.Department.create({
                 name: data.name,
                 image: data.image,
@@ -126,7 +151,7 @@ const createDepartment = async (data) => {
                 EM: "Tạo phòng ban thành công",
                 DT: department
             }
-        } else{
+        } else {
             await descriptionService.deleteDescription(descriptionId);
             return {
                 EC: 500,
@@ -147,7 +172,7 @@ const updateDepartment = async (data) => {
     try {
         let department = await db.Department.findOne({
             where: { id: data.id },
-        }); 
+        });
         if (department) {
             let description = await descriptionService.updateDescription(data, department.descriptionId);
             if (description) {
@@ -161,8 +186,8 @@ const updateDepartment = async (data) => {
                     EC: 0,
                     EM: "Cập nhật phòng ban thành công",
                     DT: department
-                }   
-            } else{
+                }
+            } else {
                 return {
                     EC: 500,
                     EM: "Cập nhật phòng ban thất bại",
@@ -202,7 +227,7 @@ const deleteDepartment = async (departmentId) => {
                     EM: "Xóa phòng ban thành công",
                     DT: department
                 }
-            }else{
+            } else {
                 return {
                     EC: 500,
                     EM: "Xóa phòng ban thất bại",
@@ -231,5 +256,6 @@ module.exports = {
     getAllStaffInDepartment,
     createDepartment,
     updateDepartment,
-    deleteDepartment
+    deleteDepartment,
+    getAllNameDepartment
 }

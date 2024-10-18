@@ -258,7 +258,32 @@ const updateUser = async (req, res) => {
         })
     }
 }
-
+const blockUser = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id) {
+            let response = await userService.blockUser(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
 const deleteUser = async (req, res) => {
     try {
         let data = req.body;
@@ -409,6 +434,7 @@ module.exports = {
     getUserByCid,
     createUser,
     updateUser,
+    blockUser,
     deleteUser,
 
     handleRegisterUser,

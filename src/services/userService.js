@@ -69,91 +69,6 @@ const checkCid = async (cid) => {
     }
 }
 
-// const getAllUser = async (page, limit, search, position) => {
-//     try {
-//         let array1 = [3, 4, 5, 6, 7];
-//         if (position.length == 0) {
-//             position = array1;
-//         }
-//         let users = await db.User.findAndCountAll({
-//             include: [
-//                 {
-//                     model: db.Staff, as: "staffUserData",
-//                     include: [
-//                         {
-//                             model: db.Department,
-//                             as: 'staffDepartmentData',
-//                             attributes: ['id', 'name'],
-//                             where: {
-//                                 [Op.or]: [
-//                                     { name: { [Op.like]: `%${search}%` } },
-//                                 ]
-//                             },
-//                             required: false,
-//                         }
-//                     ],
-//                     where: {
-//                         [Op.or]: [
-//                             { position: { [Op.like]: `%${search}%` } },
-//                         ]
-//                     },
-//                     required: false,
-//                 },
-//                 {
-//                     model: db.Role, as: "userRoleData", attributes: ["id", "name"],
-//                     where: {
-//                         id: { [Op.in]: position }
-//                     },
-
-//                 },
-//             ],
-//             where: {
-//                 [Op.or]: [
-//                     { firstName: { [Op.like]: `%${search}%` } },
-//                     { lastName: { [Op.like]: `%${search}%` } },
-//                     { email: { [Op.like]: `%${search}%` } },
-//                     { phoneNumber: { [Op.like]: `%${search}%` } },
-//                     { cid: { [Op.like]: `%${search}%` } },
-//                     { address: { [Op.like]: `%${search}%` } },
-//                     { currentResident: { [Op.like]: `%${search}%` } },
-//                     { dob: { [Op.like]: `%${search}%` } },
-//                     // Điều kiện trong bảng Staff
-//                     Sequelize.literal(
-//                         `EXISTS (SELECT 1 FROM Staffs AS staff WHERE staff.userId = User.id AND (staff.position LIKE '%${search}%'))`
-//                     ),
-//                     // Điều kiện trong bảng Department
-//                     Sequelize.literal(
-//                         `EXISTS (SELECT 1 FROM Departments AS dept JOIN Staffs AS staff ON dept.id = staff.departmentId WHERE staff.userId = User.id AND (dept.name LIKE '%${search}%'))`
-//                     ),
-//                 ]
-//             },
-//             order: [
-//                 ['createdAt', 'DESC']
-//             ],
-
-//             offset: (+page - 1) * +limit,
-//             limit: limit,
-//             attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
-//                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
-//                 "RHBloodGroup", "maritalStatus", "roleId", "point", "status", "createdAt"],
-//             raw: true,
-//             nest: true,
-//         });
-//         console.log(users);
-//         return {
-//             EC: 0,
-//             EM: "Lấy thông tin người dùng thành công",
-//             DT: users
-//         }
-//     } catch (error) {
-//         console.log(error);
-//         return {
-//             EC: 500,
-//             EM: "Error from server",
-//             DT: "",
-//         }
-//     }
-// }
 const getAllUser = async (page, limit, search, position) => {
     try {
         let defaultPositions = [1, 3, 4, 5, 6, 7];
@@ -162,7 +77,6 @@ const getAllUser = async (page, limit, search, position) => {
         if (!position || position.length === 0) {
             position = defaultPositions;
         }
-        console.log("position ", position);
         let userDepartment = await db.Department.findAll({
             where: {
                 name: { [Op.like]: `%${search}%` }
@@ -219,83 +133,19 @@ const getAllUser = async (page, limit, search, position) => {
                     require: false
                 },
             ],
-            order: [['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
+            order: [
+                ["status", "DESC"],
+                ['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
 
             // Phân trang
             offset: (+page - 1) * +limit,
             limit: +limit,
-
-            // Chỉ lấy các thuộc tính cần thiết từ User
-            // attributes: [
-            //     "id", "email", "phoneNumber", "lastName", "firstName",
-            //     "cid", "dob", "address", "currentResident", "gender", "avatar",
-            //     "folk", "ABOBloodGroup", "RHBloodGroup", "maritalStatus",
-            //     "roleId", "point", "status", "createdAt", "staffUserData."
-            // ],
+            attributes: {
+                exclude: ["password"]
+            },
             raw: true,
             nest: true,
         })
-        // console.log("search ", search);
-        // Tìm kiếm users
-        // let users = await db.User.findAndCountAll({
-
-        //     where: {
-        //         // roleId: { [Op.in]: position }, // Lọc theo roleId của người dùng
-        //         [Op.or]: [
-        //             // Tìm kiếm trong các cột của bảng User
-        //             { firstName: { [Op.like]: `%${search}%` } },
-        //             { lastName: { [Op.like]: `%${search}%` } },
-        //             { email: { [Op.like]: `%${search}%` } },
-        //             { phoneNumber: { [Op.like]: `%${search}%` } },
-        //             { cid: { [Op.like]: `%${search}%` } },
-        //             { address: { [Op.like]: `%${search}%` } },
-        //             { currentResident: { [Op.like]: `%${search}%` } },
-        //             // { '$userRoleData.name$': { [Op.like]: `%${search}%` }, },
-        //             // { '$staffUserData.position$': { [Op.like]: `%${search}%` }, },
-        //         ],
-        //     },
-        //     include: [
-        //         // {
-        //         //     model: db.Staff,
-        //         //     as: "staffUserData",
-        //         //     attributes: ["id", "price", "position", "departmentId"],
-        //         //     // include: [
-        //         //     //     {
-        //         //     //         model: db.Department,
-        //         //     //         as: 'staffDepartmentData',
-        //         //     //         attributes: ['id', 'name'],
-        //         //     //         required: false, // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
-        //         //     //     }
-        //         //     // ],
-        //         //     required: false, // Cho phép tìm kiếm ngay cả khi không có Staff nào khớp
-        //         // },
-        //         {
-        //             model: db.Role,
-        //             as: "userRoleData",
-        //             attributes: ["id", "name"],
-        //             where: {
-        //                 name: { [Op.like]: `%${search}%` }
-        //             },
-        //             require: false
-        //         },
-        //     ],
-        //     order: [['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
-
-        //     // Phân trang
-        //     offset: (+page - 1) * +limit,
-        //     limit: +limit,
-
-        //     // Chỉ lấy các thuộc tính cần thiết từ User
-        //     // attributes: [
-        //     //     "id", "email", "phoneNumber", "lastName", "firstName",
-        //     //     "cid", "dob", "address", "currentResident", "gender", "avatar",
-        //     //     "folk", "ABOBloodGroup", "RHBloodGroup", "maritalStatus",
-        //     //     "roleId", "point", "status", "createdAt", "staffUserData."
-        //     // ],
-        //     raw: true,
-        //     nest: true,
-        // });
-        console.log(users);
         return {
             EC: 0,
             EM: "Lấy thông tin người dùng thành công",
@@ -476,18 +326,49 @@ const updateUser = async (data) => {
     }
 }
 
+const blockUser = async (data) => {
+    try {
+        let user = await db.User.update({
+            status: status.INACTIVE,
+        }, {
+            where: {
+                id: data.id
+            }
+        });
+        console.log(user);
+        if (user) {
+            return {
+                EC: 0,
+                EM: `Khóa hoạt động người dùng ${user.lastName + " " + user.firstName} thành công`,
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        }
+    }
+}
 const deleteUser = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId },
         });
         if (user) {
-            await user.update({
-                status: status.INACTIVE,
-            });
+            await user.destroy();
             return {
                 EC: 0,
-                EM: `Xóa người dùng ${user.userName} thành công`,
+                EM: `Xóa người dùng ${user.lastName + " " + user.firstName} thành công`,
                 DT: "",
             }
         }
@@ -853,6 +734,7 @@ module.exports = {
     getUserByCid,
     createUser,
     updateUser,
+    blockUser,
     deleteUser,
     registerUser,
     loginUser,
