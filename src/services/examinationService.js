@@ -140,7 +140,8 @@ const updateExamination = async (data) => {
             paymentDoctorStatus: data.paymentDoctorStatus,
             price: data.price,
             special: data.special,
-            insuranceCoverage: data.insuranceCoverage
+            insuranceCoverage: data.insuranceCoverage,
+            comorbidities: data.comorbidities
         }, {
             where: { id: data.id }  
         });

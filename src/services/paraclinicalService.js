@@ -86,10 +86,13 @@ const updateParaclinical = async (data) => {
     }
 }
 
-const deleteParaclinical = async (id) => {
+const deleteParaclinical = async (data) => {
     try{
         let paraclinical = await db.Paraclinical.destroy({
-            where: { id: id }
+            where: { 
+                id: +data.id,
+                examinationId: +data.examinationId
+            }
         });
         return {
             EC: 0,

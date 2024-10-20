@@ -100,6 +100,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
+        comorbidities: {
+            type: DataTypes.STRING(45),
+            allowNull: true,
+        },
     }, {
         sequelize,
         modelName: 'Examination',

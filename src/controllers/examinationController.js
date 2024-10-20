@@ -88,7 +88,8 @@ const updateExamination = async (req, res) => {
         let data = req.body;
         if(data && data.id && data.symptom && data.diseaseName
             && data.treatmentResult && data.admissionDate && data.dischargeDate && data.reason 
-            && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price && data.special && data.insuranceCoverage
+            && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price !== undefined
+            && data.special !== undefined && data.insuranceCoverage
         ) {
             let response = await examinationService.updateExamination(data);
             return res.status(200).json({
