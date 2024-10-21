@@ -129,6 +129,17 @@ const createExamination = async (data) => {
 
 const updateExamination = async (data) => {
     try{
+        let existExamination = await db.Examination.findOne({
+            where: { id: data.id }
+        });
+        if(!existExamination){
+            return {
+                EC: 404,
+                EM: "Không tìm thấy khám bệnh",
+                DT: ""
+            }
+        }
+
         let examination = await db.Examination.update({
             symptom: data.symptom,
             diseaseName: data.diseaseName,
@@ -162,6 +173,17 @@ const updateExamination = async (data) => {
 
 const deleteExamination = async (id) => {
     try{
+        let existExamination = await db.Examination.findOne({
+            where: { id: data.id }
+        });
+        if(!existExamination){
+            return {
+                EC: 404,
+                EM: "Không tìm thấy khám bệnh",
+                DT: ""
+            }
+        }
+
         let examination = await db.Examination.update({
             status: status.INACTIVE
         }, {

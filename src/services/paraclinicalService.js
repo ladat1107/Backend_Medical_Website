@@ -32,6 +32,36 @@ const getParaclinicalByExamId = async (examinationId) => {
 
 const createParaclinical = async (data) => {
     try{
+        let examination = await db.Examination.findOne({
+            where: {
+                id: data.examinationId
+            }
+        });
+
+        if(!examination){
+            return {
+                EC: 404,
+                EM: "Không tìm thấy phiên khám",
+                DT: ""
+            }
+        }
+
+        //tim xem co ton tai xet nghiem chua
+        let existParaclinical = await db.Paraclinical.findOne({
+            where: {
+                examinationId: data.examinationId,
+                paraclinical: data.paraclinical
+            }
+        });
+
+        if(existParaclinical){
+            return {
+                EC: 404,
+                EM: "Xét nghiệm đã tồn tại",
+                DT: ""
+            }
+        } 
+
         let paraclinical = await db.Paraclinical.create({
             examinationId: data.examinationId,
             paraclinical: data.paraclinical,
@@ -43,11 +73,13 @@ const createParaclinical = async (data) => {
             price: data.price,
             doctorId: data.doctorId
         });
+
         return {
             EC: 0,
             EM: "Tạo xét nghiệm thành công",
             DT: paraclinical
         }
+        
     } catch (error) {
         console.log(error);
         return {
@@ -111,12 +143,42 @@ const deleteParaclinical = async (data) => {
 
 const createOrUpdateParaclinical = async (data) => {
     try{
+        let examination = await db.Examination.findOne({
+            where: {
+                id: data.examinationId
+            }
+        });
+
+        if(!examination){
+            return {
+                EC: 404,
+                EM: "Không tìm thấy phiên khám",
+                DT: false
+            }
+        }
+
+        let existParaclinical = await db.Paraclinical.findOne({
+            where: {
+                examinationId: data.examinationId,
+                paraclinical: data.paraclinical
+            }
+        });
+
+        if(existParaclinical){
+            return {
+                EC: 404,
+                EM: "Xét nghiệm đã tồn tại",
+                DT: false
+            }
+        } 
+
         let paraclinical = await db.Paraclinical.findOne({
             where: {
                 id: +data.id,
                 examinationId: +data.examinationId
             }
         });
+
         if(paraclinical){
             let paraclinical = await db.Paraclinical.update({
                 paraclinical: data.paraclinical,
