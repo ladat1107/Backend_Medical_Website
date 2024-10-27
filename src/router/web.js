@@ -223,6 +223,7 @@ let initWebRount = (app) => {
     router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
     router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
     router.get("/searchAppointment", appointmentController.searchAppointment)
+    router.get("/searchAppointmentWithStaffId", appointmentController.seachAppointmentWithStaffId)
     router.post("/createAppointment", appointmentController.createAppointment)
     router.delete("/deleteAppointment", appointmentController.deleteAppointment)
 

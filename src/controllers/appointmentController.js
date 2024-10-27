@@ -126,6 +126,33 @@ const searchAppointment = async (req, res) => {
     }
 }
 
+const seachAppointmentWithStaffId = async (req, res) => {
+    try{
+        let data = req.query;
+        if(data && data.page && data.limit && data.staffId) {
+            let response = await appointmentService.seachAppointmentWithStaffId(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Input is empty",
+                DT: ""
+            })
+        }
+    } catch (error){
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
 const createAppointment = async (req, res) => {
     try{
         let data = req.body;
@@ -186,6 +213,7 @@ module.exports = {
     getAppointmentByUserId,
     getAppointmentByStaffId,
     searchAppointment,
+    seachAppointmentWithStaffId,
     createAppointment,
     deleteAppointment
 }

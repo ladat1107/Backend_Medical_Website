@@ -4,7 +4,7 @@ import { status, pamentStatus } from "../utils/index";
 const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
-            where: { id: id, status: status.ACTIVE },
+            where: { id: +id, status: status.ACTIVE },
             include: [{
                 model: db.VitalSign,
                 as: 'examinationVitalSignData',
@@ -25,11 +25,11 @@ const getExaminationById = async (id) => {
             }, {
                 model: db.User,
                 as: 'userExaminationData',
-                attributes: ['id', 'lastName', 'firstName'],
+                attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
             }, {
                 model: db.Staff,
                 as: 'examinationStaffData',
-                attributes: ['id', 'departmentId', 'price'],
+                attributes: ['id', 'departmentId'],
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
@@ -95,28 +95,26 @@ const getExaminationByUserId = async (userId) => {
 
 const createExamination = async (data) => {
     try{
+        let staff = await db.Staff.findOne({
+            where: { 
+                id: data.staffId 
+            }
+        });
+
         let examination = await db.Examination.create({
             userId: data.userId,
             staffId: data.staffId,
             symptom: data.symptom,
-            diseaseName: data.diseaseName,
-            treatmentResult: data.treatmentResult,
-            comorbidities: data.comorbidities,
-            admissionDate: data.admissionDate,
-            dischargeDate: data.dischargeDate,
+            admissionDate: data.date,
+            dischargeDate: data.date,
             status: status.ACTIVE,
-            reason: data.reason,
-            medicalTreatmentTier: data.medicalTreatmentTier,
             paymentDoctorStatus: pamentStatus.UNPAID,
-            price: data.price,
-            special: data.special,
+            price: staff.price,
+            special: data.specialNote,
             insuranceCoverage: data.insuranceCoverage
         });
-        return {
-            EC: 0,
-            EM: "Tạo khám bệnh thành công",
-            DT: examination
-        }
+
+        return examination.id;
     } catch (error) {
         console.log(error);
         return {

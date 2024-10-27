@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'staffId',
                 as: 'appointmentStaffData',
             });
+            Appointment.belongsTo(models.Examination, {
+                foreignKey: 'examinationId',
+                as: 'appointmentExaminationData',
+            });
         }
     }
     Appointment.init({
@@ -57,7 +61,17 @@ module.exports = (sequelize, DataTypes) => {
         },
         specialNote: {
             type: DataTypes.STRING,
-        }
+        },
+        examinationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'examinations', // Tên bảng tham chiếu
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
+        },
     }, {
         sequelize,
         modelName: 'Appointment',

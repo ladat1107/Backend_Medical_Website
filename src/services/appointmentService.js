@@ -1,5 +1,7 @@
+import { raw } from "body-parser";
 import db from "../models/index";
 import { getTodayTimestamp } from "../utils/getTodayTimestamp";
+import examinationService from "./examinationService";
 const { Op } = require('sequelize');
 
 const getAllAppointments = async () => {
@@ -199,8 +201,67 @@ const seachAppointment = async (data) => {
     }
 }
 
+const seachAppointmentWithStaffId = async (data) => {
+    try{
+        if(!data.search) data.search = "";
+
+        let fromDate = data.from ? new Date(+data.from) : new Date(0);
+        let toDate = data.to ? new Date(+data.to) : new Date();
+        toDate.setHours(23, 59, 59, 999);
+
+        let appointment = await db.Appointment.findAll({
+            where: {
+                date: {
+                    [Op.gte]: fromDate, 
+                    [Op.lte]: toDate,   
+                },
+                staffId: data.staffId,
+            },
+            include: [{
+                model: db.User,
+                as: 'appointmentUserData',
+                attributes: ['id', 'lastName', 'firstName'],
+                required: true,
+                where: {
+                    [Op.or]: [
+                        { firstName: { [Op.like]: `%${data.search}%` } },
+                        { lastName: { [Op.like]: `%${data.search}%` } },
+                    ]
+                }
+            }, {
+                model: db.Staff,
+                as: 'appointmentStaffData',
+                attributes: ['id', 'departmentId', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'lastName', 'firstName'],
+                }],
+            }],
+            offset: (+data.page - 1) * +data.limit,
+            limit: +data.limit,
+            raw: false,
+            nest: true,
+        });        
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch hẹn thành công",
+            DT: appointment
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createAppointment = async (data) => {
     try{
+        let examinationId = await examinationService.createExamination(data);
+
         let appointment = await db.Appointment.create({
             userId: data.userId,
             staffId: data.staffId,
@@ -209,7 +270,20 @@ const createAppointment = async (data) => {
             cid: data.cid,
             symptom: data.symptom,
             specialNote: data.specialNote,
+            examinationId: examinationId,
         });
+
+        if(!appointment) {
+            await db.Examination.destroy({
+                where: {id: examinationId},
+            });
+            return {
+                EC: 1000,
+                EM: "Tạo lịch hẹn thất bại",
+                DT: "",
+            }
+        }
+
         return {
             EC: 0,
             EM: "Tạo lịch hẹn thành công",
@@ -251,6 +325,7 @@ module.exports = {
     getAppointmentByUserId,
     getAppointmentByStaffId,
     seachAppointment,
+    seachAppointmentWithStaffId,
     createAppointment,
     deleteAppointment,
 }
