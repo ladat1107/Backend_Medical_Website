@@ -165,40 +165,35 @@ const createOrUpdateParaclinical = async (data) => {
         });
 
         if(existParaclinical){
-            return {
-                EC: 404,
-                EM: "Xét nghiệm đã tồn tại",
-                DT: false
-            }
-        } 
 
-        let paraclinical = await db.Paraclinical.findOne({
-            where: {
-                id: +data.id,
-                examinationId: +data.examinationId
-            }
-        });
-
-        if(paraclinical){
-            let paraclinical = await db.Paraclinical.update({
-                paraclinical: data.paraclinical,
-                description: data.description,
-                result: data.result,
-                image: data.image,
-                price: data.price
-            }, {
-                where: {
-                    id: +data.id,
-                    examinationId: +data.examinationId
+            if(existParaclinical.id === data.id){
+                await existParaclinical.update({
+                    paraclinical: data.paraclinical,
+                    description: data.description,
+                    result: data.result,
+                    image: data.image,
+                    price: data.price
+                }, {
+                    where: {
+                        id: +data.id,
+                        examinationId: +data.examinationId
+                    }
+                });
+    
+                return {
+                    EC: 0,
+                    EM: "Cập nhật xét nghiệm thành công",
+                    DT: true
                 }
-            });
-            return {
-                EC: 0,
-                EM: "Cập nhật xét nghiệm thành công",
-                DT: true
+            } else {
+                return {
+                    EC: 404,
+                    EM: "Xét nghiệm đã tồn tại",
+                    DT: false
+                }
             }
         } else {
-            let paraclinical = await db.Paraclinical.create({
+            await db.Paraclinical.create({
                 id: data.id,
                 examinationId: data.examinationId,
                 paraclinical: data.paraclinical,

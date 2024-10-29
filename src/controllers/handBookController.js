@@ -1,8 +1,11 @@
 import handBookService from '../services/handBookService';
 
 const getAllHandBooks = async (req, res) => {
-    try {
-        let response = await handBookService.getAllHandBooks();
+    try{
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 10;
+        let search = req.query.search || "";
+        let response = await handBookService.getAllHandBooks(page, limit, search);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

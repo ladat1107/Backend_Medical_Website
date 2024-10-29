@@ -1,18 +1,28 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
+const { Op, where } = require('sequelize');
 
-const getAllHandBooks = async () => {
+const getAllHandBooks = async (page, limit, search) => {
     try{
         let handBooks = await db.Handbook.findAll({
-            where: { status: status.ACTIVE },
+            where: { 
+                status: status.ACTIVE,
+                [Op.or]: [
+                    { title: { [Op.like]: `%${search}%` } },
+                    {'$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` }},
+                    {'$handbookStaffData.staffUserData.lastName$': { [Op.like]: `%${search}%` }},
+                ]
+            },
             include:[{
                 model: db.Staff,
                 as: 'handbookStaffData',
                 attributes: ['id', 'position'],
+                required: true,
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
+                    required: true,
                     attributes: ['firstName', 'lastName', 'email', 'avatar'],
                 },{
                     model: db.Department,
@@ -20,6 +30,9 @@ const getAllHandBooks = async () => {
                     attributes: ['id', 'name']
                 }]
             }],
+            attributes: ['id', 'title', 'image', 'createdAt'],
+            offset: (+page - 1) * +limit,
+            limit: +limit,
             raw: true,
             nest: true,
         });

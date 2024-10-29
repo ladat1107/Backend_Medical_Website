@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Handbook.init({
     title: DataTypes.STRING,
+    tags: DataTypes.STRING,
     author: {
       type: DataTypes.INTEGER,
       allowNull: false,
