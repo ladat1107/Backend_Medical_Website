@@ -1,10 +1,10 @@
-import insuranceService from "../services/insuranceService";
+import paraclinicalService from '../services/paraclinicalService';
 
-const getInsuranceById = async (req, res) => {
+const getParaclinicalByExamId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await insuranceService.getInsuranceById(data.id);
+        if (data && data.examinationId) {
+            let response = await paraclinicalService.getParaclinicalByExamId(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -27,38 +27,12 @@ const getInsuranceById = async (req, res) => {
     }
 }
 
-const getInsuranceByUserId = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.userId) {
-            let response = await insuranceService.getInsuranceByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const createInsurance = async (req, res) => {
+const createParaclinical = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod && data.userId) {
-            let response = await insuranceService.createInsurance(data);
+        if (data && data.examinationId && data.paraclinical && data.description
+            && data.result && data.image && data.price && data.doctorId) {
+            let response = await paraclinicalService.createParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -81,11 +55,12 @@ const createInsurance = async (req, res) => {
     }
 }
 
-const updateInsurance = async (req, res) => {
+const updateParaclinical = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod) {
-            let response = await insuranceService.updateInsurance(data);
+        if (data && data.id && data.paraclinical && data.description
+            && data.result && data.image && data.price) {
+            let response = await paraclinicalService.updateParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -108,11 +83,40 @@ const updateInsurance = async (req, res) => {
     }
 }
 
-const deleteInsurance = async (req, res) => {
+const deleteParaclinical = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.id) {
-            let response = await insuranceService.deleteInsurance(data.id);
+        let { id, examinationId } = req.query;
+        if (id !== undefined && examinationId !== undefined) {
+            let response = await paraclinicalService.deleteParaclinical({ id, examinationId });
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            });
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        });
+    }
+}
+
+
+const createOrUpdateParaclinical = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.examinationId && data.paraclinical && data.description
+            && data.result && data.image && data.price && data.doctorId !== undefined) {
+            let response = await paraclinicalService.createOrUpdateParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -136,9 +140,9 @@ const deleteInsurance = async (req, res) => {
 }
 
 module.exports = {
-    getInsuranceById,
-    getInsuranceByUserId,
-    createInsurance,
-    updateInsurance,
-    deleteInsurance
+    getParaclinicalByExamId,
+    createParaclinical,
+    updateParaclinical,
+    deleteParaclinical,
+    createOrUpdateParaclinical
 }

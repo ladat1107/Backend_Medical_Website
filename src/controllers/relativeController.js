@@ -31,7 +31,7 @@ const getRelativesByUserId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -58,7 +58,7 @@ const getRelativeById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -75,7 +75,7 @@ const getRelativeById = async (req, res) => {
 const createRelative = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.fullName && data.cid && data.phoneNumber && data.relationship && data.address && data.userId && data.email !== undefined) {  
+        if (data && data.fullName && data.cid && data.phoneNumber && data.relationship && data.address && data.userId && data.email !== undefined) {
             let response = await relativeService.createRelative(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,7 +85,7 @@ const createRelative = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -112,7 +112,7 @@ const updateRelative = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -139,7 +139,7 @@ const deleteRelative = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

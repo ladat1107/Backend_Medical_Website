@@ -2,8 +2,8 @@ import express from 'express';
 import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
 import staffController from '../controllers/staffController';
-import handBookController from '../controllers/handBookController'; 
-import roomTypeController from '../controllers/roomTypeController';
+import handBookController from '../controllers/handBookController';
+import serviceTypeController from '../controllers/serviceTypeController';
 import bedController from '../controllers/bedController';
 import patientController from '../controllers/patientController';
 import roomController from '../controllers/roomController';
@@ -20,6 +20,12 @@ import conditionAtBirthController from '../controllers/conditionAtBirthControlle
 import insuranceController from '../controllers/insuranceController';
 import scheduleController from '../controllers/scheduleController';
 import appointmentController from '../controllers/appointmentController';
+import examinationController from '../controllers/examinationController';
+import vitalSignController from '../controllers/vitalSignController';
+import paraclinicalController from '../controllers/paraclinicalController';
+import medicineController from '../controllers/medicineController';
+import prescriptionController from '../controllers/prescriptionController';
+import diseaseController from '../controllers/diseaseController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -50,26 +56,31 @@ let initWebRount = (app) => {
 
     //-- User
     router.get("/getUserById", userController.getUserById)
+    router.get("/getUserByCid", userController.getUserByCid)
     //------> Admin CRUD User
     router.get("/admin/getAllUser", userController.getAllUser)
     router.post("/admin/createUser", userController.createUser)
     router.put("/admin/updateUser", userController.updateUser)
-    router.put("/admin/deleteUser", userController.deleteUser)
+    router.put("/admin/blockUser", userController.blockUser)
+    router.delete("/admin/deleteUser", userController.deleteUser)
 
     //-- Department
-    router.get("/getAllDepartment", departmentController.getAllDepartment)
+    router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
     router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
     ////-----> Admin C.U.D department
+    router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.post("/admin/createDepartment", departmentController.createDepartment)
     router.put("/admin/updateDepartment", departmentController.updateDepartment)
-    router.put("/admin/deleteDepartment", departmentController.deleteDepartment)
+    router.put("/admin/blockDepartment", departmentController.blockDepartment)
+    router.delete("/admin/deleteDepartment", departmentController.deleteDepartment)
 
     //-- Staff
     router.get("/getAllStaff", staffController.getAllStaff)
     router.get("/getStaffById", staffController.getStaffById)
     router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
     router.get("/getStaffByRole", staffController.getStaffByRole)
+    router.get("/getStaffByName", staffController.getStaffByName)
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)
@@ -80,13 +91,15 @@ let initWebRount = (app) => {
     router.get("/admin/getHandBooksByStatus", handBookController.getHandBooksByStatus)
     router.put("/admin/updateHandbookStatus", handBookController.updateHandbookStatus)
 
-    //-- RoomType
-    router.get("/getAllRoomTypes", roomTypeController.getAllRoomTypes)
-    router.get("/getRoomTypeById", roomTypeController.getRoomTypeById)
+    //-- ServiceType
+    router.get("/getAllServiceTypes", serviceTypeController.getAllServiceTypes)
+    router.get("/getServiceTypeById", serviceTypeController.getServiceTypeById)
     //// ----> Admin
-    router.post("/admin/createRoomType", roomTypeController.createRoomType)
-    router.put("/admin/updateRoomType", roomTypeController.updateRoomType)
-    router.put("/admin/updateStatusRoomType", roomTypeController.updateStatusRoomType)
+    router.get("/admin/getAllServiceTypes", serviceTypeController.getAllServiceTypesAdmin)
+    router.post("/admin/createServiceType", serviceTypeController.createServiceType)
+    router.put("/admin/updateServiceType", serviceTypeController.updateServiceType)
+    router.put("/admin/blockServiceType", serviceTypeController.blockStatusServiceType)
+    router.delete("/admin/deleteServiceType", serviceTypeController.deleteStatusServiceType)
 
     //-- Room
     router.get("/getAllRooms", roomController.getAllRooms)
@@ -208,14 +221,55 @@ let initWebRount = (app) => {
     router.post("/admin/createSchedule", scheduleController.createSchedule)
     router.put("/admin/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/admin/deleteSchedule", scheduleController.deleteSchedule)
-    
+
     //-- Appointment
     router.get("/getAllAppointments", appointmentController.getAllAppointments)
-    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate) 
+    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)
     router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
     router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
+    router.get("/searchAppointment", appointmentController.searchAppointment)
+    router.get("/searchAppointmentWithStaffId", appointmentController.seachAppointmentWithStaffId)
     router.post("/createAppointment", appointmentController.createAppointment)
     router.delete("/deleteAppointment", appointmentController.deleteAppointment)
+
+    //-- Examination
+    router.get("/getExaminationById", examinationController.getExaminationById)
+    router.get("/getExaminationByUserId", examinationController.getExaminationByUserId)
+    router.post("/createExamination", examinationController.createExamination)
+    router.put("/updateExamination", examinationController.updateExamination)
+    router.put("/deleteExamination", examinationController.deleteExamination)
+
+    //-- VitalSign
+    router.get("/getVitalSignByExamId", vitalSignController.getVitalSignByExamId)
+    router.post("/createVitalSign", vitalSignController.createVitalSign)
+    router.put("/updateVitalSign", vitalSignController.updateVitalSign)
+    router.delete("/deleteVitalSign", vitalSignController.deleteVitalSign)
+    router.post("/createOrUpdateVitalSign", vitalSignController.createOrUpdateVitalSign)
+
+    //-- Paraclinical
+    router.get("/getParaclinicalByExamId", paraclinicalController.getParaclinicalByExamId)
+    router.post("/createParaclinical", paraclinicalController.createParaclinical)
+    router.put("/updateParaclinical", paraclinicalController.updateParaclinical)
+    router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
+    router.post("/createOrUpdateParaclinical", paraclinicalController.createOrUpdateParaclinical)
+
+    //-- Medicine
+    router.get("/getAllMedicines", medicineController.getAllMedicines)
+    router.get("/getAllMedicinesForExam", medicineController.getAllMedicinesForExam)
+    router.get("/getMedicineById", medicineController.getMedicineById)
+    // ----> Admin
+    router.post("/admin/createMedicine", medicineController.createMedicine)
+    router.put("/admin/updateMedicine", medicineController.updateMedicine)
+    router.put("/admin/deleteMedicine", medicineController.deleteMedicine)
+
+    //-- Prescription
+    router.get("/getPrescriptionByExaminationId", prescriptionController.getPrescriptionByExaminationId)
+    router.post("/upsertPrescription", prescriptionController.upsertPrescription)
+
+    //-- Disease
+    router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
+    router.get("/getAllDisease", diseaseController.getAllDisease)
+
 
     return app.use("/api/", router);
 }

@@ -1,8 +1,39 @@
 import departmentService from '../services/departmentService';
+import { PAGINATE } from '../utils';
 
 const getAllDepartment = async (req, res) => {
     try {
-        let response = await departmentService.getAllDepartment();
+        if (req.query.page && req.query.limit) {
+            let page = parseInt(req.query.page);
+            let limit = parseInt(req.query.limit);
+            let limitValue = 25;
+            for (let i = 0; i < PAGINATE.length; i++) {
+                if (PAGINATE[i].id === limit) {
+                    limitValue = PAGINATE[i].value;
+                    break;
+                }
+            }
+            let search = req.query.search;
+            let response = await departmentService.getAllDepartment(page, limitValue, search,);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        }
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+const getAllNameDepartment = async (req, res) => {
+    try {
+        let response = await departmentService.getAllNameDepartment();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -17,7 +48,6 @@ const getAllDepartment = async (req, res) => {
         })
     }
 }
-
 const getDepartmentById = async (req, res) => {
     try {
         let data = req.query;
@@ -31,7 +61,7 @@ const getDepartmentById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -58,7 +88,7 @@ const getAllStaffInDepartment = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -75,7 +105,7 @@ const getAllStaffInDepartment = async (req, res) => {
 const createDepartment = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.image && data.deanId && data.address && data.markDownContent && data.htmlContent){
+        if (data && data.name && data.image && data.deanId && data.address && data.markDownContent && data.htmlContent) {
             let response = await departmentService.createDepartment(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -100,10 +130,10 @@ const createDepartment = async (req, res) => {
 }
 
 const updateDepartment = async (req, res) => {
-    try{
+    try {
         let data = req.body
-        if(data && data.id && data.name && data.image && data.deanId && data.address 
-            && data.markDownContent && data.htmlContent){
+        if (data && data.id && data.name && data.image && data.deanId && data.address
+            && data.markDownContent && data.htmlContent) {
             let response = await departmentService.updateDepartment(data)
             return res.status(200).json({
                 EC: response.EC,
@@ -139,7 +169,33 @@ const deleteDepartment = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+const blockDepartment = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id) {
+            let response = await departmentService.blockDepartment(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
                 DT: ""
             })
         }
@@ -154,10 +210,12 @@ const deleteDepartment = async (req, res) => {
 }
 
 module.exports = {
+    getAllNameDepartment,
     getAllDepartment,
     getDepartmentById,
     getAllStaffInDepartment,
     createDepartment,
     updateDepartment,
-    deleteDepartment
+    deleteDepartment,
+    blockDepartment
 }

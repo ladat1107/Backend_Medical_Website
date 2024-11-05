@@ -23,7 +23,11 @@ module.exports = (sequelize, DataTypes) => {
             });
             Staff.hasMany(models.Examination, {
                 foreignKey: 'staffId',
-                as: 'staffExaminationData',
+                as: 'examinationStaffData',
+            });
+            Staff.hasMany(models.Paraclinical, {
+                foreignKey: 'doctorId',
+                as: 'doctorParaclinicalData',
             });
             Staff.belongsTo(models.Description, {
                 foreignKey: 'descriptionId',
@@ -46,12 +50,12 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true,
         },
-        price:{
+        price: {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
         position: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
         },
         userId: {

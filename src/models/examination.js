@@ -7,13 +7,13 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             Examination.belongsTo(models.User, {
                 foreignKey: 'userId',
-                as: 'examinationUserData',
+                as: 'userExaminationData',
             });
             Examination.belongsTo(models.Staff, {
                 foreignKey: 'staffId',
                 as: 'examinationStaffData',
             });
-            Examination.hasMany(models.ResultParaclincal, {
+            Examination.hasMany(models.Paraclinical, {
                 foreignKey: 'examinationId',
                 as: 'examinationResultParaclincalData',
             });
@@ -23,11 +23,15 @@ module.exports = (sequelize, DataTypes) => {
             });
             Examination.hasMany(models.Prescription, {
                 foreignKey: 'examinationId',
-                as: 'examinationPrescriptionData',
+                as: 'prescriptionExamData',
             });
             Examination.hasMany(models.Comorbidities, {
                 foreignKey: 'examinationId',
                 as: 'examinationComorbiditiesData',
+            });
+            Examination.hasOne(models.Appointment, {
+                foreignKey: 'examinationId',
+                as: 'examinationAppointmentData',
             });
         }
     }
@@ -95,7 +99,15 @@ module.exports = (sequelize, DataTypes) => {
         special: {
             type: DataTypes.INTEGER,
             allowNull: true,
-        }
+        },
+        insuranceCoverage: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        comorbidities: {
+            type: DataTypes.STRING(45),
+            allowNull: true,
+        },
     }, {
         sequelize,
         modelName: 'Examination',

@@ -1,5 +1,5 @@
 import userService from '../services/userService'
-import { PAGINATE } from '../utils';
+import { PAGINATE, ROLE } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -75,7 +75,7 @@ const handleLogin = async (req, res) => {
         if (!data || !data.userLogin || !data.passwordLogin) {
             return res.status(400).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -118,7 +118,6 @@ const getAllUser = async (req, res) => {
             } else {
                 position = [];
             }
-            console.log("Position: ", limitValue);
             let response = await userService.getAllUser(page, limitValue, search, position);
             return res.status(200).json({
                 EC: response.EC,
@@ -164,14 +163,44 @@ const getUserById = async (req, res) => {
     }
 }
 
+const getUserByCid = async (req, res) => {
+    try {
+        let data = req.query;
+        if (data && data.cid) {
+            let response = await userService.getUserByCid(data.cid);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
 const createUser = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
-            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address", "currentRescident", "roleId",
-                "markDownContent", "htmlContent", // description
-                "price", "position", "departmentId" // staff
+            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "roleId",
             ];
+            if ([3, 4, 5, 6, 7].includes(data.roleId)) {
+                arr.push("markDownContent", "departmentId")
+                data.staff = true;
+            }
+
             for (let i = 0; i < arr.length; i++) {
                 if (!data[arr[i]]) {
                     return res.status(400).json({
@@ -181,6 +210,7 @@ const createUser = async (req, res) => {
                     })
                 }
             }
+
             let response = await userService.createUser(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -232,7 +262,32 @@ const updateUser = async (req, res) => {
         })
     }
 }
-
+const blockUser = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id) {
+            let response = await userService.blockUser(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
 const deleteUser = async (req, res) => {
     try {
         let data = req.body;
@@ -309,7 +364,7 @@ const deleteFunction = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -380,9 +435,12 @@ const handleGetAccount = async (req, res) => {
 module.exports = {
     getAllUser,
     getUserById,
+    getUserByCid,
     createUser,
     updateUser,
+    blockUser,
     deleteUser,
+
     handleRegisterUser,
     handleLogin,
     handleLogout,

@@ -31,7 +31,7 @@ const getFamilyHistoryById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -58,7 +58,7 @@ const getFamilyHistoriesByUserId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -75,7 +75,7 @@ const getFamilyHistoriesByUserId = async (req, res) => {
 const createFamilyHistory = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
+        if (data && data.relationship && data.diseaseGroup && data.diseaseName && data.medicalFacilityRecords
             && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
             let response = await familyHistoryService.createFamilyHistory(data);
             return res.status(200).json({
@@ -86,7 +86,7 @@ const createFamilyHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -103,7 +103,7 @@ const createFamilyHistory = async (req, res) => {
 const updateFamilyHistory = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName  && data.medicalFacilityRecords
+        if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName && data.medicalFacilityRecords
             && data.description && data.discoveryDate && data.illnessDuration) {
             let response = await familyHistoryService.updateFamilyHistory(data);
             return res.status(200).json({
@@ -114,7 +114,7 @@ const updateFamilyHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -141,7 +141,7 @@ const deleteFamilyHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

@@ -1,6 +1,7 @@
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
+const { Op } = require('sequelize');
 
 const getAllStaff = async () => {
     try {
@@ -9,17 +10,17 @@ const getAllStaff = async () => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -49,17 +50,17 @@ const getStaffbyDepartmentId = async (departmentId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -96,17 +97,17 @@ const getStaffById = async (staffId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -143,9 +144,9 @@ const getStaffByRole = async (roleId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 
-                    'id', 'email', 'phoneNumber', 'lastName', 'firstName', 
-                    'cid', 'dob', 'currentResident', 'gender', 'avatar' 
+                attributes: [
+                    'id', 'email', 'phoneNumber', 'lastName', 'firstName',
+                    'cid', 'dob', 'currentResident', 'gender', 'avatar'
                 ],
                 include: [{
                     model: db.Role,
@@ -180,22 +181,63 @@ const getStaffByRole = async (roleId) => {
     }
 }
 
-
+const getStaffByName = async (name) => {
+    try {
+        if (!name) name = ""
+        let staff = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE
+            },
+            attributes: ['id'],
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: ['id', 'lastName', 'firstName'],
+                where: {
+                    [Op.or]: [
+                        { lastName: { [Op.like]: `%${name}%` } },
+                        { firstName: { [Op.like]: `%${name}%` } }
+                    ]
+                }
+            }],
+            raw: true,
+            nest: true
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin nhân viên thành công",
+            DT: staff
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        }
+    }
+}
 
 const createStaff = async (data, userId) => {
     try {
+        let positionInsert = ""
+        if (data.position) {
+            positionInsert = data.position.toString();
+        }
+        console.log("check data", positionInsert);
+
         let descriptionId = await descriptionService.createDescription(data);
-        if(descriptionId){
+        if (descriptionId) {
             await db.Staff.create({
-                price: data.price,
-                position: data.position,
+                price: data?.price || 0,
+                position: positionInsert,
                 departmentId: data.departmentId,
                 status: status.ACTIVE,
                 descriptionId: descriptionId,
                 userId: userId
             });
             return true;
-        }else{
+        } else {
             await descriptionService.deleteDescription(descriptionId);
             return false;
         }
@@ -211,14 +253,14 @@ const updateStaff = async (data) => {
         });
         if (staff) {
             let description = await descriptionService.updateDescription(data, staff.descriptionId);
-            if(description){
+            if (description) {
                 await staff.update({
                     price: data.price,
                     position: data.position,
                     departmentId: data.departmentId,
                 });
                 return true
-            }else{
+            } else {
                 return false;
             }
         }
@@ -236,6 +278,7 @@ module.exports = {
     getStaffbyDepartmentId,
     getStaffById,
     getStaffByRole,
+    getStaffByName,
     createStaff,
     updateStaff
 }

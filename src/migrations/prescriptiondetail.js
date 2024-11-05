@@ -2,37 +2,44 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('prescriptions', {
-            id: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                autoIncrement: true,
-                primaryKey: true,
-            },
-            examinationId: {
+        
+        await queryInterface.createTable('prescriptiondetails', {
+            prescriptionId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                primaryKey: true,
                 references: {
-                    model: 'examinations',
+                    model: 'prescriptions',
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
             },
-            note: {
-                type: DataTypes.STRING(512),
+            medicineId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                primaryKey: true,
+                references: {
+                    model: 'medicines',
+                    key: 'id',
+                },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
+            },
+            quantity: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
             },
-            totalMoney: {
+            unit: {
+                type: DataTypes.STRING(45),
+                allowNull: false,
+            },
+            dosage: {
+                type: DataTypes.STRING(128),
+                allowNull: false,
+            },
+            price: {
                 type: DataTypes.DOUBLE,
-                allowNull: false,
-            },
-            paymentStatus: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-            },
-            status: {
-                type: DataTypes.INTEGER,
                 allowNull: false,
             },
             createdAt: {
@@ -43,13 +50,12 @@ module.exports = {
                 type: Sequelize.DATE,
                 allowNull: true,
             },
-
         });
-        await queryInterface.addIndex('prescriptions', ['examinationId'], {
-            name: 'fk_prescription_examination_idx'
+        await queryInterface.addIndex('prescriptiondetails', ['medicineId'], {
+            name: 'fk_presdetail_medicine'
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('prescriptions');
+        await queryInterface.dropTable('prescriptiondetails');
     }
 };

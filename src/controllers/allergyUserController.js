@@ -8,7 +8,7 @@ const getAllAllergyUsers = async (req, res) => {
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -21,7 +21,7 @@ const getAllAllergyUsers = async (req, res) => {
 const getAllergyUserByUserId = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.userId) {
+        if (data && data.userId) {
             let response = await allergyUserService.getAllergyUserByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
@@ -31,11 +31,11 @@ const getAllergyUserByUserId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -48,7 +48,7 @@ const getAllergyUserByUserId = async (req, res) => {
 const getAllergyUserByAllergyId = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.allergyId) {
+        if (data && data.allergyId) {
             let response = await allergyUserService.getAllergyUserByAllergyId(data.allergyId);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,11 +58,11 @@ const getAllergyUserByAllergyId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -73,9 +73,9 @@ const getAllergyUserByAllergyId = async (req, res) => {
 }
 
 const createAllergyUser = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.userId && data.allergyId && data.discoveryDate) {
+        if (data && data.userId && data.allergyId && data.discoveryDate) {
             let response = await allergyUserService.createAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,7 +85,7 @@ const createAllergyUser = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -100,9 +100,9 @@ const createAllergyUser = async (req, res) => {
 }
 
 const updateAllergyUser = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.userId && data.allergyId && data.discoveryDate) {
+        if (data && data.userId && data.allergyId && data.discoveryDate) {
             let response = await allergyUserService.updateAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -112,7 +112,7 @@ const updateAllergyUser = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -127,9 +127,9 @@ const updateAllergyUser = async (req, res) => {
 }
 
 const deleteAllergyUser = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.userId && data.allergyId) {
+        if (data && data.userId && data.allergyId) {
             let response = await allergyUserService.deleteAllergyUser(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -139,7 +139,7 @@ const deleteAllergyUser = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

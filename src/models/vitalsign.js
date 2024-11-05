@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             VitalSign.belongsTo(models.Examination, {
                 foreignKey: 'examinationId',
-                as: 'vitalSignExaminationData',
+                as: 'examinationVitalSignData',
             });
         }
     }
@@ -46,15 +46,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: true,
         },
-        low_blood_pressure: {
+        lowBloodPressure: {
             type: DataTypes.DOUBLE,
             allowNull: true,
         },
-        breathing_rate: {
+        breathingRate: {
             type: DataTypes.DOUBLE,
             allowNull: true,
         },
-        glycemic_index: {
+        glycemicIndex: {
             type: DataTypes.DOUBLE,
             allowNull: true,
         },

@@ -1,10 +1,10 @@
-import insuranceService from "../services/insuranceService";
+import vitalSignService from '../services/vitalSignService';
 
-const getInsuranceById = async (req, res) => {
+const getVitalSignByExamId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await insuranceService.getInsuranceById(data.id);
+        if (data && data.examinationId) {
+            let response = await vitalSignService.getVitalSignByExamId(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -27,38 +27,13 @@ const getInsuranceById = async (req, res) => {
     }
 }
 
-const getInsuranceByUserId = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.userId) {
-            let response = await insuranceService.getInsuranceByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
-    }
-}
-
-const createInsurance = async (req, res) => {
+const createVitalSign = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod && data.userId) {
-            let response = await insuranceService.createInsurance(data);
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+            && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
+            && data.breathingRate && data.glycemicIndex) {
+            let response = await vitalSignService.createVitalSign(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -81,11 +56,13 @@ const createInsurance = async (req, res) => {
     }
 }
 
-const updateInsurance = async (req, res) => {
+const updateVitalSign = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod) {
-            let response = await insuranceService.updateInsurance(data);
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+            && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
+            && data.breathingRate && data.glycemicIndex) {
+            let response = await vitalSignService.updateVitalSign(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -108,11 +85,40 @@ const updateInsurance = async (req, res) => {
     }
 }
 
-const deleteInsurance = async (req, res) => {
+const deleteVitalSign = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.id) {
-            let response = await insuranceService.deleteInsurance(data.id);
+        if (data && data.examinationId) {
+            let response = await vitalSignService.deleteVitalSign(data.examinationId);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
+
+const createOrUpdateVitalSign = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+            && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
+            && data.breathingRate && data.glycemicIndex) {
+            let response = await vitalSignService.createOrUpdateVitalSign(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -136,9 +142,9 @@ const deleteInsurance = async (req, res) => {
 }
 
 module.exports = {
-    getInsuranceById,
-    getInsuranceByUserId,
-    createInsurance,
-    updateInsurance,
-    deleteInsurance
+    getVitalSignByExamId,
+    createVitalSign,
+    updateVitalSign,
+    deleteVitalSign,
+    createOrUpdateVitalSign
 }

@@ -1,8 +1,8 @@
-import handBookService from '../services/handBookService';
+import medicineService from "../services/medicineService";
 
-const getAllHandBooks = async (req, res) => {
+const getAllMedicines = async (req, res) => {
     try {
-        let response = await handBookService.getAllHandBooks();
+        let response = await medicineService.getAllMedicines();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -12,38 +12,35 @@ const getAllHandBooks = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
-const getHandBooksByStatus = async (req, res) => {
+const getAllMedicinesForExam = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.status >= 0) {
-            let response = await handBookService.getHandBooksByStatus(data.status);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }
+        let response = await medicineService.getAllMedicinesForExam();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
-const getHandBookById = async (req, res) => {
+const getMedicineById = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await handBookService.getHandBookById(data.id);
+            let response = await medicineService.getMedicineById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -60,17 +57,20 @@ const getHandBookById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
-const createHandBook = async (req, res) => {
+const createMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
-            let response = await handBookService.createHandBook(data);
+        if (data && data.name && data.price && data.registrationNumber && data.unit && data.inventory
+            && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
+            && data.description && data.activeIngredient && data.group && data.concentration
+        ) {
+            let response = await medicineService.createMedicine(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -87,17 +87,20 @@ const createHandBook = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
-const updateHandBook = async (req, res) => {
+const updateMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
-            let response = await handBookService.updateHandBook(data);
+        if (data && data.id && data.name && data.price && data.registrationNumber && data.unit && data.inventory
+            && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
+            && data.description && data.activeIngredient && data.group && data.concentration
+        ) {
+            let response = await medicineService.updateMedicine(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -114,17 +117,17 @@ const updateHandBook = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
-const updateHandbookStatus = async (req, res) => {
+const deleteMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.status >= 0) {
-            let response = await handBookService.updateHandbookStatus(data);
+        if (data && data.id) {
+            let response = await medicineService.deleteMedicine(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -141,17 +144,17 @@ const updateHandbookStatus = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
-            DT: ""
-        })
+            EM: "Lỗi hệ thống",
+            DT: "",
+        });
     }
 }
 
 module.exports = {
-    getAllHandBooks,
-    getHandBooksByStatus,
-    getHandBookById,
-    createHandBook,
-    updateHandBook,
-    updateHandbookStatus
+    getAllMedicines,
+    getAllMedicinesForExam,
+    getMedicineById,
+    createMedicine,
+    updateMedicine,
+    deleteMedicine
 }

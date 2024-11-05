@@ -1,7 +1,7 @@
 import disabilityService from '../services/disabilityService';
 
 const getAllDisabilities = async (req, res) => {
-    try{
+    try {
         let response = await disabilityService.getAllDisability();
         return res.status(200).json({
             EC: response.EC,
@@ -19,7 +19,7 @@ const getAllDisabilities = async (req, res) => {
 }
 
 const getDisabilityById = async (req, res) => {
-    try{
+    try {
         let data = req.query;
         if (data && data.id) {
             let response = await disabilityService.getDisabilityById(data.id);
@@ -31,10 +31,10 @@ const getDisabilityById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
-        }   
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -46,9 +46,9 @@ const getDisabilityById = async (req, res) => {
 }
 
 const createDisability = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.bodyPart) {
+        if (data && data.bodyPart) {
             let response = await disabilityService.createDisability(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,7 +58,7 @@ const createDisability = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -73,9 +73,9 @@ const createDisability = async (req, res) => {
 }
 
 const updateDisability = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id && data.bodyPart) {
+        if (data && data.id && data.bodyPart) {
             let response = await disabilityService.updateDisability(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,7 +85,7 @@ const updateDisability = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -100,9 +100,9 @@ const updateDisability = async (req, res) => {
 }
 
 const deleteDisability = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id) {
+        if (data && data.id) {
             let response = await disabilityService.deleteDisability(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -112,7 +112,7 @@ const deleteDisability = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

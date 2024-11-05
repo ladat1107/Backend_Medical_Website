@@ -1,15 +1,22 @@
-import db from "../models/index";
+import db, { sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op, where } from 'sequelize';
+import { Op } from 'sequelize';
+import diacritics from 'diacritics';
 import JWTService from "../services/JWTService";
 import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
-import { PAGINATE } from "../utils/constraints";
-
-const salt = bcrypt.genSaltSync(10);
+import { PAGINATE, ROLE } from "../utils/constraints";
+import role from "../models/role";
 require('dotenv').config();
+
+
+const removeDiacritics = (str) => {
+    return diacritics.remove(str);
+}
+const salt = bcrypt.genSaltSync(10);
+
 let hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
@@ -64,57 +71,97 @@ const checkCid = async (cid) => {
 
 const getAllUser = async (page, limit, search, position) => {
     try {
-        if (position.length == 0) {
-            position = [3, 4, 5, 6, 7];
+        let defaultPositions = [1, 3, 4, 5, 6, 7];
+
+        // Nếu không có giá trị `position`, gán giá trị mặc định
+        if (!position || position.length === 0) {
+            position = defaultPositions;
         }
+        let userDepartment = await db.Department.findAll({
+            where: {
+                name: { [Op.like]: `%${search}%` }
+            },
+            attributes: ["id"],
+            raw: true,
+        });
+        let staff = await db.Staff.findAll({
+            where: {
+                [Op.or]: [
+                    { position: { [Op.like]: `%${search}%` } },
+                    { departmentId: { [Op.in]: userDepartment.map(item => item.id) } }
+                ],
+            },
+            attributes: ["userId"],
+            raw: true,
+        });
+
         let users = await db.User.findAndCountAll({
             where: {
-                roleId: {
-                    [Op.in]: position
-                },
-                status: status.ACTIVE,
-                [Op.or]: [
-                    { firstName: { [Op.like]: `%${search}%` } },
-                    { lastName: { [Op.like]: `%${search}%` } },
-                    { email: { [Op.like]: `%${search}%` } },
-                    { phoneNumber: { [Op.like]: `%${search}%` } },
-                    { cid: { [Op.like]: `%${search}%` } },
-                    { address: { [Op.like]: `%${search}%` } },
-                    { currentResident: { [Op.like]: `%${search}%` } },
-                    { dob: { [Op.like]: `%${search}%` } },
+                [Op.and]: [
+                    { roleId: { [Op.in]: position } },
+                    {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { email: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } },
+                            { id: { [Op.in]: staff.map(item => item.userId) } }
+                        ]
+                    }
                 ]
             },
-            order: [
-                ['createdAt', 'DESC']
-            ],
             include: [
                 {
-                    model: db.Role, as: "userRoleData", attributes: ["id", "name"]
-                }
+                    model: db.Staff,
+                    as: "staffUserData",
+                    attributes: ["id", "price", "position", "departmentId"],
+                    include: [
+                        {
+                            model: db.Department,
+                            as: 'staffDepartmentData',
+                            attributes: ['id', 'name'],
+                            required: false, // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
+                        }
+                    ],
+                    required: false, // Cho phép tìm kiếm ngay cả khi không có Staff nào khớp
+                },
+                {
+                    model: db.Role,
+                    as: "userRoleData",
+                    attributes: ["id", "name"],
+                    require: false
+                },
             ],
+            order: [
+                ["status", "DESC"],
+                ['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
+
+            // Phân trang
             offset: (+page - 1) * +limit,
-            limit: limit,
-            attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
-                "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
-                "RHBloodGroup", "maritalStatus", "roleId", "point", "status"],
+            limit: +limit,
+            attributes: {
+                exclude: ["password"]
+            },
             raw: true,
             nest: true,
-        });
-        console.log(users);
+        })
         return {
             EC: 0,
             EM: "Lấy thông tin người dùng thành công",
             DT: users
-        }
+        };
+
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return {
             EC: 500,
             EM: "Error from server",
             DT: "",
-        }
+        };
     }
-}
+};
+
 
 const getUserById = async (userId) => {
     try {
@@ -148,12 +195,43 @@ const getUserById = async (userId) => {
     }
 }
 
+const getUserByCid = async (cid) => {
+    try {
+        let user = await db.User.findOne({
+            where: { cid: cid },
+            attributes: ["id", "phoneNumber", "lastName", "firstName",
+                "cid", "dob", "gender",],
+            raw: true,
+            nest: true,
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin người dùng thành công",
+                DT: user
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+
 const createUser = async (data) => {
     try {
         if (!await checkEmail(data.email)) {
             return {
                 EC: 200,
-                EM: "Người dùng đã tồn tại",
+                EM: "Email đã tồn tại",
                 DT: "",
             }
         }
@@ -166,29 +244,35 @@ const createUser = async (data) => {
             lastName: data.lastName,
             firstName: data.firstName,
             cid: data.cid,
-            dob: data.dob,
-            gender: data.gender,
-            address: data.address,
-            currentRescident: data.currentRescident,
             status: status.ACTIVE,
             roleId: data.roleId
         });
-
-        const staff = await staffService.createStaff(data, user.id);
-
-        if (user && staff) {
-            return {
-                EC: 0,
-                EM: "Tạo tài khoản thành công",
-                DT: "",
+        if (data.staff) {
+            const staff = await staffService.createStaff(data, user.id);
+            if (!staff) {
+                await user.destroy();
+                return {
+                    EC: 200,
+                    EM: "Tạo tài khoản thất bại",
+                    DT: "",
+                }
+            } else {
+                return {
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
+                    DT: "",
+                }
             }
         } else {
-            return {
-                EC: 200,
-                EM: "Tạo tài khoản thất bại",
-                DT: "",
+            if (user) {
+                return {
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
+                    DT: "",
+                }
             }
         }
+
     } catch (error) {
         console.log(error);
         return {
@@ -248,18 +332,49 @@ const updateUser = async (data) => {
     }
 }
 
+const blockUser = async (data) => {
+    try {
+        let user = await db.User.update({
+            status: status.INACTIVE,
+        }, {
+            where: {
+                id: data.id
+            }
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: `Khóa hoạt động người dùng ${data.firstName + " " + data.lastName} thành công`,
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        }
+    }
+}
 const deleteUser = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId },
         });
         if (user) {
-            await user.update({
-                status: status.INACTIVE,
-            });
+            let name = user.lastName + " " + user.firstName;
+            await user.destroy();
             return {
                 EC: 0,
-                EM: `Xóa người dùng ${user.userName} thành công`,
+                EM: `Xóa người dùng ${name} thành công`,
                 DT: "",
             }
         }
@@ -622,8 +737,10 @@ const getFunctionById = async (userId) => {
 module.exports = {
     getAllUser,
     getUserById,
+    getUserByCid,
     createUser,
     updateUser,
+    blockUser,
     deleteUser,
     registerUser,
     loginUser,

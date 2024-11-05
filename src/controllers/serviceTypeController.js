@@ -1,8 +1,9 @@
-import surgicalHistoryUserService from '../services/surgicalHistoryUserService';
+import serviceTypeService from '../services/serviceTypeService';
+import { PAGINATE } from '../utils';
 
-const getAllSurgicalHistoryUser = async (req, res) => {
+const getAllServiceTypes = async (req, res) => {
     try {
-        let response = await surgicalHistoryUserService.getAllSurgicalHistoryUser();
+        let response = await serviceTypeService.getAllServiceTypes();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,19 +11,48 @@ const getAllSurgicalHistoryUser = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
+    }
+}
+const getAllServiceTypesAdmin = async (req, res) => {
+    try {
+        if (req.query.page && req.query.limit) {
+            let page = parseInt(req.query.page);
+            let limit = parseInt(req.query.limit);
+            let limitValue = 25;
+            for (let i = 0; i < PAGINATE.length; i++) {
+                if (PAGINATE[i].id === limit) {
+                    limitValue = PAGINATE[i].value;
+                    break;
+                }
+            }
+            let search = req.query.search;
+            let response = await serviceTypeService.getAllServiceTypesAdmin(page, limitValue, search);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
     }
 }
 
-const getSurgicalHistoryUserByUserId = async (req, res) => {
+const getServiceTypeById = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.userId) {
-            let response = await surgicalHistoryUserService.getSurgicalHistoryUserByUserId(data.userId);
+        if (data && data.id) {
+            let response = await serviceTypeService.getServiceTypeById(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -37,46 +67,19 @@ const getSurgicalHistoryUserByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const getSurgicalHistoryUserBySurgicalHistoryId = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.surgicalhistoryId) {
-            let response = await surgicalHistoryUserService.getSurgicalHistoryUserBySurgicalHistoryId(data.surgicalhistoryId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Error from server",
-            DT: "",
-        });
-    }
-}
-
-const createSurgicalHistoryUser = async (req, res) => {
+const createServiceType = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords) {
-            let response = await surgicalHistoryUserService.createSurgicalHistoryUser(data);
+        if (data && data.name && data.price) {
+            let response = await serviceTypeService.createServiceType(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -91,19 +94,19 @@ const createSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const updateSurgicalHistoryUser = async (req, res) => {
+const updateServiceType = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.userId && data.surgicalhistoryId && data.description && data.implementationDate && data.medicalFacilityRecords) {
-            let response = await surgicalHistoryUserService.updateSurgicalHistoryUser(data);
+        if (data && data.id && data.name && data.price) {
+            let response = await serviceTypeService.updateServiceType(data);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -118,19 +121,19 @@ const updateSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
     }
 }
 
-const deleteSurgicalHistoryUser = async (req, res) => {
+const blockStatusServiceType = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.userId && data.surgicalhistoryId) {
-            let response = await surgicalHistoryUserService.deleteSurgicalHistoryUser(data.userId, data.surgicalhistoryId);
+        let data = req.body;
+        if (data && data.id) {
+            let response = await serviceTypeService.blockStatusServiceType(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -145,19 +148,46 @@ const deleteSurgicalHistoryUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
+        return res.status(500).json({
             EC: 500,
             EM: "Error from server",
-            DT: "",
-        });
+            DT: ""
+        })
+    }
+}
+const deleteStatusServiceType = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id) {
+            let response = await serviceTypeService.deleteStatusServiceType(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
     }
 }
 
 module.exports = {
-    getAllSurgicalHistoryUser,
-    getSurgicalHistoryUserByUserId,
-    getSurgicalHistoryUserBySurgicalHistoryId,
-    createSurgicalHistoryUser,
-    updateSurgicalHistoryUser,
-    deleteSurgicalHistoryUser
+    getAllServiceTypes,
+    getServiceTypeById,
+    createServiceType,
+    updateServiceType,
+    blockStatusServiceType,
+    deleteStatusServiceType,
+    getAllServiceTypesAdmin,
 }

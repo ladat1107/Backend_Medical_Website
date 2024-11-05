@@ -1,14 +1,14 @@
 import patientService from '../services/patientService';
 
 const getAllPatients = async (req, res) => {
-    try{
+    try {
         let response = await patientService.getAllPatients();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -19,9 +19,9 @@ const getAllPatients = async (req, res) => {
 }
 
 const getPatientById = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.id) {
+        if (data && data.id) {
             let response = await patientService.getPatientById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -31,11 +31,11 @@ const getPatientById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -46,9 +46,9 @@ const getPatientById = async (req, res) => {
 }
 
 const getPatientByUserId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.userId) {
+        if (data && data.userId) {
             let response = await patientService.getPatientByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,11 +58,11 @@ const getPatientByUserId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -73,9 +73,9 @@ const getPatientByUserId = async (req, res) => {
 }
 
 const createPatient = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.dateOfAdmission && data.bedId && data.userId) {
+        if (data && data.dateOfAdmission && data.bedId && data.userId) {
             let response = await patientService.createPatient(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,11 +85,11 @@ const createPatient = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -100,9 +100,9 @@ const createPatient = async (req, res) => {
 }
 
 const updatePatient = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id && data.dateOfAdmission && data.dateOfDischarge && data.bedId) {
+        if (data && data.id && data.dateOfAdmission && data.dateOfDischarge && data.bedId) {
             let response = await patientService.updatePatient(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -112,11 +112,11 @@ const updatePatient = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
