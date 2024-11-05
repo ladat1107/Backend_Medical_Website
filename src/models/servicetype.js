@@ -3,15 +3,15 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class RoomType extends Model {
+    class ServiceType extends Model {
         static associate(models) {
-            RoomType.hasMany(models.Room, {
-                foreignKey: 'id',
-                as: 'roomTypeRoomData',
+            ServiceType.hasMany(models.RoomServiceType, {
+                foreignKey: 'serviceId',
+                as: 'roomData',
             });
         }
     }
-    RoomType.init({
+    ServiceType.init({
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,
@@ -28,10 +28,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false,
         },
-        
+
     }, {
         sequelize,
-        modelName: 'RoomType',
+        modelName: 'ServiceType',
     });
-    return RoomType;
+    return ServiceType;
 };

@@ -1,9 +1,9 @@
 import prescriptionService from '../services/prescriptionService';
 
 const getPrescriptionByExaminationId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.examinationId) {
+        if (data && data.examinationId) {
             let response = await prescriptionService.getPrescriptionByExaminationId(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
@@ -13,7 +13,7 @@ const getPrescriptionByExaminationId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -28,7 +28,7 @@ const getPrescriptionByExaminationId = async (req, res) => {
 }
 
 const upsertPrescription = async (req, res) => {
-    try{
+    try {
         let data = req.body;
         let response = await prescriptionService.upsertPrescription(data);
         return res.status(200).json({

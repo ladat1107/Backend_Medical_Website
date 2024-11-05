@@ -2,7 +2,7 @@ import db from "../models/index";
 import { status } from "../utils/index";
 
 const getAllRooms = async () => {
-    try{
+    try {
         let room = await db.Room.findAll({
             where: { status: status.ACTIVE },
             raw: true,
@@ -24,7 +24,7 @@ const getAllRooms = async () => {
 }
 
 const getRoomByDepartment = async (departmentId) => {
-    try{
+    try {
         let room = await db.Room.findAll({
             where: { departmentId: departmentId, status: status.ACTIVE },
             include: [
@@ -34,9 +34,10 @@ const getRoomByDepartment = async (departmentId) => {
                     attributes: ['id', 'name'],
                 },
                 {
-                    model: db.RoomType,
-                    as: 'roomRoomTypeData',
-                    attributes: ['id', 'name', 'price'],
+                    model: db.RoomServiceType,
+                    as: 'serviceData',
+                    //attributes: ['id', 'name', 'price'],
+                    required: false,
                 }
             ],
             raw: true,
@@ -58,7 +59,7 @@ const getRoomByDepartment = async (departmentId) => {
 }
 
 const getRoomById = async (roomId) => {
-    try{
+    try {
         let room = await db.Room.findOne({
             where: { id: roomId },
             include: [
@@ -68,8 +69,8 @@ const getRoomById = async (roomId) => {
                     attributes: ['id', 'name'],
                 },
                 {
-                    model: db.RoomType,
-                    as: 'roomRoomTypeData',
+                    model: db.ServiceType,
+                    as: 'roomServiceTypeData',
                     attributes: ['id', 'name', 'price'],
                 }
             ],
@@ -100,7 +101,7 @@ const getRoomById = async (roomId) => {
 }
 
 const createRoom = async (data) => {
-    try{
+    try {
         let room = await db.Room.create({
             name: data.name,
             typeRoom: data.typeRoom,
@@ -124,7 +125,7 @@ const createRoom = async (data) => {
 }
 
 const updateRoom = async (data) => {
-    try{
+    try {
         let room = await db.Room.update({
             name: data.name,
             typeRoom: data.typeRoom,
@@ -149,7 +150,7 @@ const updateRoom = async (data) => {
 }
 
 const updateStatusRoom = async (data) => {
-    try{
+    try {
         let room = await db.Room.update({
             status: data.status,
         }, {

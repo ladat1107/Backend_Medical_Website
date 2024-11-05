@@ -1,9 +1,9 @@
 import vitalSignService from '../services/vitalSignService';
 
 const getVitalSignByExamId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.examinationId) {
+        if (data && data.examinationId) {
             let response = await vitalSignService.getVitalSignByExamId(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
@@ -13,11 +13,11 @@ const getVitalSignByExamId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -28,9 +28,9 @@ const getVitalSignByExamId = async (req, res) => {
 }
 
 const createVitalSign = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate && data.glycemicIndex) {
             let response = await vitalSignService.createVitalSign(data);
@@ -42,11 +42,11 @@ const createVitalSign = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -57,9 +57,9 @@ const createVitalSign = async (req, res) => {
 }
 
 const updateVitalSign = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate && data.glycemicIndex) {
             let response = await vitalSignService.updateVitalSign(data);
@@ -71,11 +71,11 @@ const updateVitalSign = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -86,9 +86,9 @@ const updateVitalSign = async (req, res) => {
 }
 
 const deleteVitalSign = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.examinationId) {
+        if (data && data.examinationId) {
             let response = await vitalSignService.deleteVitalSign(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
@@ -98,11 +98,11 @@ const deleteVitalSign = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -113,9 +113,9 @@ const deleteVitalSign = async (req, res) => {
 }
 
 const createOrUpdateVitalSign = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate && data.glycemicIndex) {
             let response = await vitalSignService.createOrUpdateVitalSign(data);
@@ -127,11 +127,11 @@ const createOrUpdateVitalSign = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,

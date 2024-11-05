@@ -3,7 +3,7 @@ import userController from '../controllers/userController';
 import departmentController from '../controllers/departmentController';
 import staffController from '../controllers/staffController';
 import handBookController from '../controllers/handBookController';
-import roomTypeController from '../controllers/roomTypeController';
+import serviceTypeController from '../controllers/serviceTypeController';
 import bedController from '../controllers/bedController';
 import patientController from '../controllers/patientController';
 import roomController from '../controllers/roomController';
@@ -66,13 +66,14 @@ let initWebRount = (app) => {
 
     //-- Department
     router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
-    router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
     router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
     ////-----> Admin C.U.D department
+    router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.post("/admin/createDepartment", departmentController.createDepartment)
     router.put("/admin/updateDepartment", departmentController.updateDepartment)
-    router.put("/admin/deleteDepartment", departmentController.deleteDepartment)
+    router.put("/admin/blockDepartment", departmentController.blockDepartment)
+    router.delete("/admin/deleteDepartment", departmentController.deleteDepartment)
 
     //-- Staff
     router.get("/getAllStaff", staffController.getAllStaff)
@@ -90,13 +91,15 @@ let initWebRount = (app) => {
     router.get("/admin/getHandBooksByStatus", handBookController.getHandBooksByStatus)
     router.put("/admin/updateHandbookStatus", handBookController.updateHandbookStatus)
 
-    //-- RoomType
-    router.get("/getAllRoomTypes", roomTypeController.getAllRoomTypes)
-    router.get("/getRoomTypeById", roomTypeController.getRoomTypeById)
+    //-- ServiceType
+    router.get("/getAllServiceTypes", serviceTypeController.getAllServiceTypes)
+    router.get("/getServiceTypeById", serviceTypeController.getServiceTypeById)
     //// ----> Admin
-    router.post("/admin/createRoomType", roomTypeController.createRoomType)
-    router.put("/admin/updateRoomType", roomTypeController.updateRoomType)
-    router.put("/admin/updateStatusRoomType", roomTypeController.updateStatusRoomType)
+    router.get("/admin/getAllServiceTypes", serviceTypeController.getAllServiceTypesAdmin)
+    router.post("/admin/createServiceType", serviceTypeController.createServiceType)
+    router.put("/admin/updateServiceType", serviceTypeController.updateServiceType)
+    router.put("/admin/blockServiceType", serviceTypeController.blockStatusServiceType)
+    router.delete("/admin/deleteServiceType", serviceTypeController.deleteStatusServiceType)
 
     //-- Room
     router.get("/getAllRooms", roomController.getAllRooms)

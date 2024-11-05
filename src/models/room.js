@@ -5,9 +5,9 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Room extends Model {
         static associate(models) {
-            Room.belongsTo(models.RoomType, {
-                foreignKey: 'typeRoom',
-                as: 'roomRoomTypeData',
+            Room.hasMany(models.RoomServiceType, {
+                foreignKey: 'roomId',
+                as: 'serviceData',
             });
             Room.belongsTo(models.Department, {
                 foreignKey: 'departmentId',
@@ -30,16 +30,6 @@ module.exports = (sequelize, DataTypes) => {
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,
-        },
-        typeRoom: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'roomtypes', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         departmentId: {
             type: DataTypes.INTEGER,
@@ -64,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        
+
     }, {
         sequelize,
         modelName: 'Room',

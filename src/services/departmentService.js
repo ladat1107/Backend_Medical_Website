@@ -1,12 +1,17 @@
-import { or } from "sequelize";
+import { Op, or } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
 
-const getAllDepartment = async () => {
+const getAllDepartment = async (page, limit, search) => {
     try {
-        let department = await db.Department.findAll({
-            where: { status: status.ACTIVE },
+        let department = await db.Department.findAndCountAll({
+            where: {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { address: { [Op.like]: `%${search}%` } },
+                ]
+            },
             include: [{
                 model: db.Staff,
                 as: 'deanDepartmentData',
@@ -17,6 +22,13 @@ const getAllDepartment = async () => {
                     attributes: ['firstName', 'lastName', 'email', 'avatar'],
                 }]
             }],
+            order: [
+                ["status", "DESC"],
+                ['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
+
+            // Phân trang
+            offset: (+page - 1) * +limit,
+            limit: +limit,
             raw: true,
             nest: true,
         });
@@ -61,17 +73,19 @@ const getAllNameDepartment = async () => {
 const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
-            where: { id: departmentId, status: status.ACTIVE },
+            where: { id: departmentId },
             include: [{
                 model: db.Description,
                 as: 'departmentDescriptionData',
                 attributes: ['markDownContent', 'htmlContent'],
+                required: false,
                 where: { status: status.ACTIVE },
             }, {
                 model: db.Staff,
                 as: 'deanDepartmentData',
                 attributes: ['id', 'position'],
                 include: [{
+                    required: false,
                     model: db.User,
                     as: 'staffUserData',
                     attributes: ['firstName', 'lastName', 'email', 'avatar'],
@@ -80,6 +94,7 @@ const getDepartmentById = async (departmentId) => {
             raw: true,
             nest: true,
         });
+        console.log("check depaart", department);
         if (department) {
             return {
                 EC: 0,
@@ -180,6 +195,8 @@ const updateDepartment = async (data) => {
                     name: data.name,
                     image: data.image,
                     deanId: data.deanId,
+                    descriptionId: description.id,
+                    status: data.status,
                     address: data.address
                 });
                 return {
@@ -211,7 +228,7 @@ const updateDepartment = async (data) => {
     }
 }
 
-const deleteDepartment = async (departmentId) => {
+const blockDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -222,6 +239,42 @@ const deleteDepartment = async (departmentId) => {
                 await department.update({
                     status: status.INACTIVE,
                 });
+                return {
+                    EC: 0,
+                    EM: "Khóa phòng ban thành công",
+                    DT: department
+                }
+            } else {
+                return {
+                    EC: 500,
+                    EM: "Khóa phòng ban thất bại",
+                    DT: "",
+                }
+            }
+        }
+        return {
+            EC: 404,
+            EM: "Không tìm thấy phòng ban",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
+const deleteDepartment = async (departmentId) => {
+    try {
+        let department = await db.Department.findOne({
+            where: { id: departmentId },
+        });
+        if (department) {
+            await db.Description.destroy(department.descriptionId);
+            if (description) {
+                await department.destroy();
                 return {
                     EC: 0,
                     EM: "Xóa phòng ban thành công",
@@ -257,5 +310,6 @@ module.exports = {
     createDepartment,
     updateDepartment,
     deleteDepartment,
-    getAllNameDepartment
+    getAllNameDepartment,
+    blockDepartment
 }

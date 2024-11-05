@@ -1,14 +1,14 @@
 import bedService from '../services/bedService';
 
 const getAllBeds = async (req, res) => {
-    try{
+    try {
         let response = await bedService.getAllBeds();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -19,9 +19,9 @@ const getAllBeds = async (req, res) => {
 }
 
 const getBedByRoom = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.roomId) {
+        if (data && data.roomId) {
             let response = await bedService.getBedByRoom(data.roomId);
             return res.status(200).json({
                 EC: response.EC,
@@ -31,11 +31,11 @@ const getBedByRoom = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -46,9 +46,9 @@ const getBedByRoom = async (req, res) => {
 }
 
 const getBedById = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.id) {
+        if (data && data.id) {
             let response = await bedService.getBedById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,11 +58,11 @@ const getBedById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -73,14 +73,14 @@ const getBedById = async (req, res) => {
 }
 
 const getBedEmpty = async (req, res) => {
-    try{
+    try {
         let response = await bedService.getBedEmpty();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -91,9 +91,9 @@ const getBedEmpty = async (req, res) => {
 }
 
 const createBed = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.name && data.roomId) {
+        if (data && data.name && data.roomId) {
             let response = await bedService.createBed(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -103,11 +103,11 @@ const createBed = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -118,9 +118,9 @@ const createBed = async (req, res) => {
 }
 
 const updateBed = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id && data.name && data.roomId) {
+        if (data && data.id && data.name && data.roomId) {
             let response = await bedService.updateBed(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -130,11 +130,11 @@ const updateBed = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -145,9 +145,9 @@ const updateBed = async (req, res) => {
 }
 
 const deleteBed = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id) {
+        if (data && data.id) {
             let response = await bedService.deleteBed(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -157,11 +157,11 @@ const deleteBed = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,

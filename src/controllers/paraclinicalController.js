@@ -1,23 +1,23 @@
 import paraclinicalService from '../services/paraclinicalService';
 
 const getParaclinicalByExamId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.examinationId) {
+        if (data && data.examinationId) {
             let response = await paraclinicalService.getParaclinicalByExamId(data.examinationId);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
                 DT: response.DT
-            }) 
+            })
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -28,9 +28,9 @@ const getParaclinicalByExamId = async (req, res) => {
 }
 
 const createParaclinical = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.paraclinical && data.description 
+        if (data && data.examinationId && data.paraclinical && data.description
             && data.result && data.image && data.price && data.doctorId) {
             let response = await paraclinicalService.createParaclinical(data);
             return res.status(200).json({
@@ -41,11 +41,11 @@ const createParaclinical = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -56,9 +56,9 @@ const createParaclinical = async (req, res) => {
 }
 
 const updateParaclinical = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.id && data.paraclinical && data.description 
+        if (data && data.id && data.paraclinical && data.description
             && data.result && data.image && data.price) {
             let response = await paraclinicalService.updateParaclinical(data);
             return res.status(200).json({
@@ -69,11 +69,11 @@ const updateParaclinical = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -96,7 +96,7 @@ const deleteParaclinical = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             });
         }
@@ -112,9 +112,9 @@ const deleteParaclinical = async (req, res) => {
 
 
 const createOrUpdateParaclinical = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.paraclinical && data.description 
+        if (data && data.examinationId && data.paraclinical && data.description
             && data.result && data.image && data.price && data.doctorId !== undefined) {
             let response = await paraclinicalService.createOrUpdateParaclinical(data);
             return res.status(200).json({
@@ -125,11 +125,11 @@ const createOrUpdateParaclinical = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,

@@ -21,7 +21,7 @@ const getAllSurgicalHistories = async (req, res) => {
 const getSurgicalHistoryById = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.id){
+        if (data && data.id) {
             let response = await surgicalHistoryService.getSurgicalHistoryById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -31,7 +31,7 @@ const getSurgicalHistoryById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -48,7 +48,7 @@ const getSurgicalHistoryById = async (req, res) => {
 const createSurgicalHistory = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.diseaseName && data.bodyPart){
+        if (data && data.diseaseName && data.bodyPart) {
             let response = await surgicalHistoryService.createSurgicalHistory(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,7 +58,7 @@ const createSurgicalHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -75,7 +75,7 @@ const createSurgicalHistory = async (req, res) => {
 const updateSurgicalHistory = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.id && data.diseaseName && data.bodyPart){
+        if (data && data.id && data.diseaseName && data.bodyPart) {
             let response = await surgicalHistoryService.updateSurgicalHistory(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,7 +85,7 @@ const updateSurgicalHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -102,7 +102,7 @@ const updateSurgicalHistory = async (req, res) => {
 const deleteSurgicalHistory = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.id){
+        if (data && data.id) {
             let response = await surgicalHistoryService.deleteSurgicalHistory(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -112,7 +112,7 @@ const deleteSurgicalHistory = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

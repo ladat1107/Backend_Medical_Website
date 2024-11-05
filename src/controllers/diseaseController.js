@@ -3,7 +3,7 @@ import diseaseService from '../services/diseaseService';
 const getDiseaseByName = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.name){
+        if (data && data.name) {
             let response = await diseaseService.getDiseaseByName(data.name);
             return res.status(200).json({
                 EC: response.EC,
@@ -13,7 +13,7 @@ const getDiseaseByName = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

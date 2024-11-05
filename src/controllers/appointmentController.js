@@ -1,14 +1,14 @@
 import appointmentService from '../services/appointmentService';
 
 const getAllAppointments = async (req, res) => {
-    try{
+    try {
         let response = await appointmentService.getAllAppointments();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -19,9 +19,9 @@ const getAllAppointments = async (req, res) => {
 }
 
 const getAllAppointmentsByDate = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.date) {
+        if (data && data.date) {
             let response = await appointmentService.getAllAppointmentsByDate(data.date);
             return res.status(200).json({
                 EC: response.EC,
@@ -31,11 +31,11 @@ const getAllAppointmentsByDate = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -46,9 +46,9 @@ const getAllAppointmentsByDate = async (req, res) => {
 }
 
 const getAppointmentByUserId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.userId) {
+        if (data && data.userId) {
             let response = await appointmentService.getAppointmentByUserId(data.userId);
             return res.status(200).json({
                 EC: response.EC,
@@ -58,11 +58,11 @@ const getAppointmentByUserId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -73,9 +73,9 @@ const getAppointmentByUserId = async (req, res) => {
 }
 
 const getAppointmentByStaffId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.staffId) {
+        if (data && data.staffId) {
             let response = await appointmentService.getAppointmentByStaffId(data.staffId);
             return res.status(200).json({
                 EC: response.EC,
@@ -85,11 +85,11 @@ const getAppointmentByStaffId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -100,9 +100,9 @@ const getAppointmentByStaffId = async (req, res) => {
 }
 
 const searchAppointment = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.page && data.limit) {
+        if (data && data.page && data.limit) {
             let response = await appointmentService.seachAppointment(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -112,11 +112,11 @@ const searchAppointment = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -127,9 +127,9 @@ const searchAppointment = async (req, res) => {
 }
 
 const seachAppointmentWithStaffId = async (req, res) => {
-    try{
+    try {
         let data = req.query;
-        if(data && data.page && data.limit && data.staffId) {
+        if (data && data.page && data.limit && data.staffId) {
             let response = await appointmentService.seachAppointmentWithStaffId(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -139,11 +139,11 @@ const seachAppointmentWithStaffId = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -154,9 +154,9 @@ const seachAppointmentWithStaffId = async (req, res) => {
 }
 
 const createAppointment = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.userId && data.staffId && data.date && data.time && data.cid && data.symptom !== undefined && data.specialNote !== undefined) {
+        if (data && data.userId && data.staffId && data.date && data.time && data.cid && data.symptom !== undefined && data.specialNote !== undefined) {
             let response = await appointmentService.createAppointment(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -166,11 +166,11 @@ const createAppointment = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -181,9 +181,9 @@ const createAppointment = async (req, res) => {
 }
 
 const deleteAppointment = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.userId && data.staffId && data.date && data.cid) {
+        if (data && data.userId && data.staffId && data.date && data.cid) {
             let response = await appointmentService.deleteAppointment(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -193,11 +193,11 @@ const deleteAppointment = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,

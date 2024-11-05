@@ -1,5 +1,5 @@
 import userService from '../services/userService'
-import { PAGINATE } from '../utils';
+import { PAGINATE, ROLE } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -75,7 +75,7 @@ const handleLogin = async (req, res) => {
         if (!data || !data.userLogin || !data.passwordLogin) {
             return res.status(400).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -194,10 +194,13 @@ const createUser = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
-            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address", "currentRescident", "roleId",
-                "markDownContent", "htmlContent", // description
-                "price", "position", "departmentId" // staff
+            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "roleId",
             ];
+            if ([3, 4, 5, 6, 7].includes(data.roleId)) {
+                arr.push("markDownContent", "departmentId")
+                data.staff = true;
+            }
+
             for (let i = 0; i < arr.length; i++) {
                 if (!data[arr[i]]) {
                     return res.status(400).json({
@@ -207,6 +210,7 @@ const createUser = async (req, res) => {
                     })
                 }
             }
+
             let response = await userService.createUser(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -360,7 +364,7 @@ const deleteFunction = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }

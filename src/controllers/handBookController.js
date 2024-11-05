@@ -1,14 +1,14 @@
 import handBookService from '../services/handBookService';
 
 const getAllHandBooks = async (req, res) => {
-    try{
+    try {
         let response = await handBookService.getAllHandBooks();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
             DT: response.DT
         })
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -19,7 +19,7 @@ const getAllHandBooks = async (req, res) => {
 }
 
 const getHandBooksByStatus = async (req, res) => {
-    try{
+    try {
         let data = req.query;
         if (data && data.status >= 0) {
             let response = await handBookService.getHandBooksByStatus(data.status);
@@ -29,7 +29,7 @@ const getHandBooksByStatus = async (req, res) => {
                 DT: response.DT
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -40,7 +40,7 @@ const getHandBooksByStatus = async (req, res) => {
 }
 
 const getHandBookById = async (req, res) => {
-    try{
+    try {
         let data = req.query;
         if (data && data.id) {
             let response = await handBookService.getHandBookById(data.id);
@@ -52,11 +52,11 @@ const getHandBookById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -67,9 +67,9 @@ const getHandBookById = async (req, res) => {
 }
 
 const createHandBook = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
+        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
             let response = await handBookService.createHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -79,11 +79,11 @@ const createHandBook = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -94,9 +94,9 @@ const createHandBook = async (req, res) => {
 }
 
 const updateHandBook = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent){
+        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
             let response = await handBookService.updateHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -106,11 +106,11 @@ const updateHandBook = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -121,9 +121,9 @@ const updateHandBook = async (req, res) => {
 }
 
 const updateHandbookStatus = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if (data && data.id && data.status >= 0){
+        if (data && data.id && data.status >= 0) {
             let response = await handBookService.updateHandbookStatus(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -133,11 +133,11 @@ const updateHandbookStatus = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
-    } catch (error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,

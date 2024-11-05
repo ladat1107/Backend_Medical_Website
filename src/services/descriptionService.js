@@ -49,19 +49,24 @@ const createDescription = async (data) => {
 }
 
 const updateDescription = async (data, descriptionId) => {
-    try{
+    try {
         let description = await db.Description.findOne({
-            where: { id: descriptionId},
+            where: { id: descriptionId },
         });
-        if(description){
+        if (description) {
             await description.update({
                 markDownContent: data.markDownContent,
                 htmlContent: data.htmlContent,
                 status: status.ACTIVE,
             });
-            return true;
+            return description;
         } else {
-            return false;
+            let newDescription = await db.Description.create({
+                markDownContent: data.markDownContent,
+                htmlContent: data.htmlContent,
+                status: status.ACTIVE,
+            });
+            return newDescription;
         }
     } catch (error) {
         console.log(error);
@@ -70,14 +75,14 @@ const updateDescription = async (data, descriptionId) => {
 }
 
 const updateStatusDescription = async (descriptionId) => {
-    try{
+    try {
         let description = await db.Description.findOne({
             where: { id: descriptionId }
         });
-        if(description){
+        if (description) {
             await description.update({
                 status: status.INACTIVE,
-            },{
+            }, {
                 where: { id: descriptionId }
             });
             return true;
@@ -108,5 +113,6 @@ module.exports = {
     createDescription,
     updateDescription,
     updateStatusDescription,
-    deleteDescription
+    deleteDescription,
+
 }

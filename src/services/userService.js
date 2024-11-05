@@ -1,13 +1,13 @@
-import db from "../models/index";
+import db, { sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op, where } from 'sequelize';
+import { Op } from 'sequelize';
 import diacritics from 'diacritics';
 import JWTService from "../services/JWTService";
 import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
-import { PAGINATE } from "../utils/constraints";
+import { PAGINATE, ROLE } from "../utils/constraints";
 import role from "../models/role";
 require('dotenv').config();
 
@@ -200,7 +200,7 @@ const getUserByCid = async (cid) => {
         let user = await db.User.findOne({
             where: { cid: cid },
             attributes: ["id", "phoneNumber", "lastName", "firstName",
-                "cid", "dob", "gender", ],
+                "cid", "dob", "gender",],
             raw: true,
             nest: true,
         });
@@ -231,7 +231,7 @@ const createUser = async (data) => {
         if (!await checkEmail(data.email)) {
             return {
                 EC: 200,
-                EM: "Người dùng đã tồn tại",
+                EM: "Email đã tồn tại",
                 DT: "",
             }
         }
@@ -244,29 +244,35 @@ const createUser = async (data) => {
             lastName: data.lastName,
             firstName: data.firstName,
             cid: data.cid,
-            dob: data.dob,
-            gender: data.gender,
-            address: data.address,
-            currentRescident: data.currentRescident,
             status: status.ACTIVE,
             roleId: data.roleId
         });
-
-        const staff = await staffService.createStaff(data, user.id);
-
-        if (user && staff) {
-            return {
-                EC: 0,
-                EM: "Tạo tài khoản thành công",
-                DT: "",
+        if (data.staff) {
+            const staff = await staffService.createStaff(data, user.id);
+            if (!staff) {
+                await user.destroy();
+                return {
+                    EC: 200,
+                    EM: "Tạo tài khoản thất bại",
+                    DT: "",
+                }
+            } else {
+                return {
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
+                    DT: "",
+                }
             }
         } else {
-            return {
-                EC: 200,
-                EM: "Tạo tài khoản thất bại",
-                DT: "",
+            if (user) {
+                return {
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
+                    DT: "",
+                }
             }
         }
+
     } catch (error) {
         console.log(error);
         return {
@@ -335,11 +341,10 @@ const blockUser = async (data) => {
                 id: data.id
             }
         });
-        console.log(user);
         if (user) {
             return {
                 EC: 0,
-                EM: `Khóa hoạt động người dùng ${user.lastName + " " + user.firstName} thành công`,
+                EM: `Khóa hoạt động người dùng ${data.firstName + " " + data.lastName} thành công`,
                 DT: "",
             }
         } else {
@@ -365,10 +370,11 @@ const deleteUser = async (userId) => {
             where: { id: userId },
         });
         if (user) {
+            let name = user.lastName + " " + user.firstName;
             await user.destroy();
             return {
                 EC: 0,
-                EM: `Xóa người dùng ${user.lastName + " " + user.firstName} thành công`,
+                EM: `Xóa người dùng ${name} thành công`,
                 DT: "",
             }
         }

@@ -10,17 +10,17 @@ const getAllStaff = async () => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -50,17 +50,17 @@ const getStaffbyDepartmentId = async (departmentId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -97,17 +97,17 @@ const getStaffById = async (staffId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 'id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
+                attributes: ['id', 'email', 'phoneNumber', 'lastName', 'firstName', 'cid', 'dob', 'currentResident', 'gender', 'avatar'],
                 include: [{
                     model: db.Role,
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            },{
+            }, {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            },{
+            }, {
                 model: db.Description,
                 as: 'staffDescriptionData',
                 attributes: ['markDownContent', 'htmlContent']
@@ -144,9 +144,9 @@ const getStaffByRole = async (roleId) => {
             include: [{
                 model: db.User,
                 as: 'staffUserData',
-                attributes: [ 
-                    'id', 'email', 'phoneNumber', 'lastName', 'firstName', 
-                    'cid', 'dob', 'currentResident', 'gender', 'avatar' 
+                attributes: [
+                    'id', 'email', 'phoneNumber', 'lastName', 'firstName',
+                    'cid', 'dob', 'currentResident', 'gender', 'avatar'
                 ],
                 include: [{
                     model: db.Role,
@@ -182,8 +182,8 @@ const getStaffByRole = async (roleId) => {
 }
 
 const getStaffByName = async (name) => {
-    try{
-        if(!name) name = ""
+    try {
+        if (!name) name = ""
         let staff = await db.Staff.findAll({
             where: {
                 status: status.ACTIVE
@@ -195,8 +195,8 @@ const getStaffByName = async (name) => {
                 attributes: ['id', 'lastName', 'firstName'],
                 where: {
                     [Op.or]: [
-                        {lastName: {[Op.like]: `%${name}%`}},
-                        {firstName: {[Op.like]: `%${name}%`}}
+                        { lastName: { [Op.like]: `%${name}%` } },
+                        { firstName: { [Op.like]: `%${name}%` } }
                     ]
                 }
             }],
@@ -220,18 +220,24 @@ const getStaffByName = async (name) => {
 
 const createStaff = async (data, userId) => {
     try {
+        let positionInsert = ""
+        if (data.position) {
+            positionInsert = data.position.toString();
+        }
+        console.log("check data", positionInsert);
+
         let descriptionId = await descriptionService.createDescription(data);
-        if(descriptionId){
+        if (descriptionId) {
             await db.Staff.create({
-                price: data.price,
-                position: data.position,
+                price: data?.price || 0,
+                position: positionInsert,
                 departmentId: data.departmentId,
                 status: status.ACTIVE,
                 descriptionId: descriptionId,
                 userId: userId
             });
             return true;
-        }else{
+        } else {
             await descriptionService.deleteDescription(descriptionId);
             return false;
         }
@@ -247,14 +253,14 @@ const updateStaff = async (data) => {
         });
         if (staff) {
             let description = await descriptionService.updateDescription(data, staff.descriptionId);
-            if(description){
+            if (description) {
                 await staff.update({
                     price: data.price,
                     position: data.position,
                     departmentId: data.departmentId,
                 });
                 return true
-            }else{
+            } else {
                 return false;
             }
         }

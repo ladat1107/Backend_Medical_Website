@@ -17,7 +17,7 @@ module.exports = {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'roomtypes', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                    model: 'ServiceTypes', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                     key: 'id',
                 },
                 onUpdate: 'CASCADE',
@@ -58,7 +58,7 @@ module.exports = {
 
         // Tạo các index cho các khoá ngoại
         await queryInterface.addIndex('rooms', ['typeRoom'], {
-            name: 'fk_rooms_roomtype_idx'
+            name: 'fk_rooms_ServiceType_idx'
         });
         await queryInterface.addIndex('rooms', ['locationId'], {
             name: 'fk_rooms_location_idx'

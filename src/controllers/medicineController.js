@@ -39,7 +39,7 @@ const getAllMedicinesForExam = async (req, res) => {
 const getMedicineById = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.id){ 
+        if (data && data.id) {
             let response = await medicineService.getMedicineById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -49,7 +49,7 @@ const getMedicineById = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -66,7 +66,7 @@ const getMedicineById = async (req, res) => {
 const createMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.name && data.price && data.registrationNumber && data.unit && data.inventory 
+        if (data && data.name && data.price && data.registrationNumber && data.unit && data.inventory
             && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
             && data.description && data.activeIngredient && data.group && data.concentration
         ) {
@@ -79,7 +79,7 @@ const createMedicine = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -96,7 +96,7 @@ const createMedicine = async (req, res) => {
 const updateMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.id && data.name && data.price && data.registrationNumber && data.unit && data.inventory 
+        if (data && data.id && data.name && data.price && data.registrationNumber && data.unit && data.inventory
             && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
             && data.description && data.activeIngredient && data.group && data.concentration
         ) {
@@ -109,7 +109,7 @@ const updateMedicine = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
@@ -126,7 +126,7 @@ const updateMedicine = async (req, res) => {
 const deleteMedicine = async (req, res) => {
     try {
         let data = req.body;
-        if(data && data.id) {
+        if (data && data.id) {
             let response = await medicineService.deleteMedicine(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -136,7 +136,7 @@ const deleteMedicine = async (req, res) => {
         } else {
             return res.status(200).json({
                 EC: 400,
-                EM: "Input is empty",
+                EM: "Dữ liệu không được trống!",
                 DT: ""
             })
         }
