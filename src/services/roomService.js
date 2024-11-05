@@ -34,13 +34,13 @@ const getRoomByDepartment = async (departmentId) => {
                     attributes: ['id', 'name'],
                 },
                 {
-                    model: db.RoomServiceType,
+                    model: db.ServiceType,
                     as: 'serviceData',
-                    //attributes: ['id', 'name', 'price'],
+                    attributes: ['id', 'name', 'price'],
                     required: false,
                 }
             ],
-            raw: true,
+            raw: false,
             nest: true,
         });
         return {

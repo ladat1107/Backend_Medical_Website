@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class RoomServiceType extends Model {
         static associate(models) {
-            RoomServiceType.belongsTo(models.Room, {
-                foreignKey: 'roomId',
-                as: 'serviceData',
-            });
-            RoomServiceType.belongsTo(models.ServiceType, {
-                foreignKey: 'serviceId',
-                as: 'roomData',
-            });
+            // RoomServiceType.belongsTo(models.Room, {
+            //     foreignKey: 'roomId',
+            //     as: 'serviceData',
+            // });
+            // RoomServiceType.belongsTo(models.ServiceType, {
+            //     foreignKey: 'serviceId',
+            //     as: 'roomData',
+            // });
         }
     }
     RoomServiceType.init({

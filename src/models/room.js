@@ -5,7 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Room extends Model {
         static associate(models) {
-            Room.hasMany(models.RoomServiceType, {
+            Room.belongsToMany(models.ServiceType, {
+                through: 'RoomServiceTypes',
                 foreignKey: 'roomId',
                 as: 'serviceData',
             });
