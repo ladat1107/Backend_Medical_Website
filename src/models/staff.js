@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'author',
                 as: 'staffHandbookData',
             });
-            Staff.hasMany(models.Schedule, {
+            Staff.belongsToMany(models.Room, {
+                through: 'Schedule',
                 foreignKey: 'staffId',
                 as: 'scheduleStaffData',
             });

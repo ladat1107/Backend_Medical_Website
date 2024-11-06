@@ -24,7 +24,39 @@ const getAllServiceTypes = async () => {
         }
     }
 }
-
+const getServiceSearch = async () => {
+    try {
+        let serviceType = await db.ServiceType.findAll({
+            where: {
+                status: status.ACTIVE,
+            },
+            attributes: ['id', 'name'],
+            raw: true,
+            nest: true,
+        });
+        let result = [];
+        if (serviceType.length > 0) {
+            serviceType.forEach(element => {
+                result.push({
+                    value: element.id,
+                    label: element.name,
+                })
+            });
+        }
+        return {
+            EC: 0,
+            EM: "Lấy thông tin loại phòng thành công",
+            DT: result
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Error from server",
+            DT: "",
+        }
+    }
+}
 const getAllServiceTypesAdmin = async (page, limit, search) => {
     try {
         let serviceType = await db.ServiceType.findAndCountAll({
@@ -206,6 +238,7 @@ module.exports = {
     getAllServiceTypes,
     getAllServiceTypesAdmin,
     getServiceTypeById,
+    getServiceSearch,
     createServiceType,
     updateServiceType,
     blockStatusServiceType,

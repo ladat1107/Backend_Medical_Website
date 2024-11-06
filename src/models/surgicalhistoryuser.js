@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class SurgicalhistoryUser extends Model {
         static associate(models) {
-            SurgicalhistoryUser.belongsTo(models.User, {
-                foreignKey: 'userId',
-                as: 'surgicalhistoryUserUserData',
-            });
-            SurgicalhistoryUser.belongsTo(models.SurgicalHistory, {
-                foreignKey: 'surgicalhistoryId',
-                as: 'surgicalhistoryUserData',
-            });
+            //     SurgicalhistoryUser.belongsTo(models.User, {
+            //         foreignKey: 'userId',
+            //         as: 'surgicalhistoryUserUserData',
+            //     });
+            //     SurgicalhistoryUser.belongsTo(models.SurgicalHistory, {
+            //         foreignKey: 'surgicalhistoryId',
+            //         as: 'surgicalhistoryUserData',
+            //     });
         }
     }
     SurgicalhistoryUser.init({
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(45),
             allowNull: true,
         },
-       
+
     }, {
         sequelize,
         modelName: 'SurgicalhistoryUser',

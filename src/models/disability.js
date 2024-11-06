@@ -5,9 +5,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Disability extends Model {
         static associate(models) {
-            Disability.hasMany(models.DisabilityUser, {
+            Disability.belongsToMany(models.User, {
+                through: 'DisabilityUsers',
                 foreignKey: 'disabilityId',
-                as: 'disablityUserDisabilityData',
+                as: 'userData',
             });
         }
     }

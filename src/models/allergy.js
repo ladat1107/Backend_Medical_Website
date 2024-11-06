@@ -5,9 +5,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Allergy extends Model {
         static associate(models) {
-            Allergy.hasMany(models.AllergyUser, {
+            Allergy.belongsToMany(models.User, {
+                through: 'AllergyUsers',
                 foreignKey: 'allergyId',
-                as: 'allergyUserAllergyData',
+                as: 'userData',
             });
         }
     }

@@ -34,21 +34,25 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'userFamilyHistoryData',
       });
-      User.hasMany(models.SurgicalhistoryUser, {
+      User.belongsToMany(models.SurgicalHistory, {
+        through: 'SurgicalhistoryUsers',
         foreignKey: 'userId',
-        as: 'surgicalhistoryUserUserData',
+        as: 'surgicalhistoryData',
       });
-      User.hasMany(models.DisabilityUser, {
+      User.belongsToMany(models.Disability, {
+        through: 'DisabilityUsers',
         foreignKey: 'userId',
-        as: 'disablityUserUserData',
+        as: 'disablityData',
       });
-      User.hasMany(models.AllergyUser, {
+      User.belongsToMany(models.Allergy, {
+        through: 'AllergyUsers',
         foreignKey: 'userId',
-        as: 'allergyUserUserData',
+        as: 'allergyData',
       });
-      User.hasMany(models.DiseaseUser, {
+      User.belongsToMany(models.Disease, {
+        through: 'DiseaseUsers',
         foreignKey: 'userId',
-        as: 'userDiseaseUserData',
+        as: 'diseaseData',
       });
       User.hasMany(models.Appointment, {
         foreignKey: 'userId',

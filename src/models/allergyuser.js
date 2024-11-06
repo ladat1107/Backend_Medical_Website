@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class AllergyUser extends Model {
         static associate(models) {
-            AllergyUser.belongsTo(models.Allergy, {
-                foreignKey: 'allergyId',
-                as: 'allergyUserAllergyData',
-            });
-            AllergyUser.belongsTo(models.User, {
-                foreignKey: 'userId',
-                as: 'allergyUserUserData',
-            });
+            // AllergyUser.belongsTo(models.Allergy, {
+            //     foreignKey: 'allergyId',
+            //     as: 'allergyUserAllergyData',
+            // });
+            // AllergyUser.belongsTo(models.User, {
+            //     foreignKey: 'userId',
+            //     as: 'allergyUserUserData',
+            // });
         }
     }
     AllergyUser.init({

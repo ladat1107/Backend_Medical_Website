@@ -96,19 +96,21 @@ let initWebRount = (app) => {
     router.get("/getServiceTypeById", serviceTypeController.getServiceTypeById)
     //// ----> Admin
     router.get("/admin/getAllServiceTypes", serviceTypeController.getAllServiceTypesAdmin)
+    router.get("/admin/getServiceSearch", serviceTypeController.getServiceSearch)
     router.post("/admin/createServiceType", serviceTypeController.createServiceType)
     router.put("/admin/updateServiceType", serviceTypeController.updateServiceType)
     router.put("/admin/blockServiceType", serviceTypeController.blockStatusServiceType)
     router.delete("/admin/deleteServiceType", serviceTypeController.deleteStatusServiceType)
 
     //-- Room
-    router.get("/getAllRooms", roomController.getAllRooms)
     router.get("/getRoomById", roomController.getRoomById)
     router.get("/getRoomByDepartment", roomController.getRoomByDepartment)
     //// ----> Admin
+    router.get("/admin/getAllRoomAdmin", roomController.getAllRoomAdmin)
     router.post("/admin/createRoom", roomController.createRoom)
     router.put("/admin/updateRoom", roomController.updateRoom)
-    router.put("/admin/updateStatusRoom", roomController.updateStatusRoom)
+    router.put("/admin/blockRoom", roomController.blockRoom)
+    router.delete("/admin/deleteRoom", roomController.deleteRoom)
 
     //-- Bed
     router.get("/getAllBeds", bedController.getAllBeds)

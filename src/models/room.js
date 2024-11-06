@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'medicalExamination',
                 as: 'medicalExaminationDepartmentData',
             });
-            Room.hasMany(models.Schedule, {
+            Room.belongsToMany(models.Staff, {
+                through: 'Schedule',
                 foreignKey: 'roomId',
                 as: 'roomScheduleData',
             });

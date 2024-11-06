@@ -9,9 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'diseaseGroupId',
                 as: 'diseaseDiseaseGroupData',
             });
-            Disease.hasMany(models.DiseaseUser, {
+            Disease.belongsToMany(models.User, {
+                through: 'DiseaseUsers',
                 foreignKey: 'diseaseId',
-                as: 'diseaseDiseaseUserData',
+                as: 'userData',
             });
             Disease.hasMany(models.Comorbidities, {
                 foreignKey: 'diseaseId',
@@ -42,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        
+
     }, {
         sequelize,
         modelName: 'Disease',

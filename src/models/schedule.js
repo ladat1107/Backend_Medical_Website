@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Schedule extends Model {
         static associate(models) {
-            Schedule.belongsTo(models.Staff, {
-                foreignKey: 'staffId',
-                as: 'scheduleStaffData',
-            });
-            Schedule.belongsTo(models.Room, {
-                foreignKey: 'roomId',
-                as: 'schduleRoomData',
-            });
+            // Schedule.belongsTo(models.Staff, {
+            //     foreignKey: 'staffId',
+            //     as: 'scheduleStaffData',
+            // });
+            // Schedule.belongsTo(models.Room, {
+            //     foreignKey: 'roomId',
+            //     as: 'schduleRoomData',
+            // });
         }
     }
     Schedule.init({
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'staffs', 
+                model: 'staffs',
                 key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             primaryKey: true,
         },
-        
+
     }, {
         sequelize,
         modelName: 'Schedule',

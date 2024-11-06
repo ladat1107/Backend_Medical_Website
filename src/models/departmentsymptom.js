@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class DepartmentSymptom extends Model {
         static associate(models) {
-            DepartmentSymptom.belongsTo(models.Symptom, {
-                foreignKey: 'symptomId',
-                as: 'departmentSymptomSymptomData',
-            });
-            DepartmentSymptom.belongsTo(models.Department, {
-                foreignKey: 'departmentId',
-                as: 'departmentSymptomDepartmentData',
-            });
+            // DepartmentSymptom.belongsTo(models.Symptom, {
+            //     foreignKey: 'symptomId',
+            //     as: 'departmentSymptomSymptomData',
+            // });
+            // DepartmentSymptom.belongsTo(models.Department, {
+            //     foreignKey: 'departmentId',
+            //     as: 'departmentSymptomDepartmentData',
+            // });
         }
     }
     DepartmentSymptom.init({

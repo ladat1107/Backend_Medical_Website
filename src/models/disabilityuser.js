@@ -5,14 +5,14 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class DisabilityUser extends Model {
         static associate(models) {
-            DisabilityUser.belongsTo(models.User, {
-                foreignKey: 'userId',
-                as: 'disablityUserUserData',
-            });
-            DisabilityUser.belongsTo(models.Disability, {
-                foreignKey: 'disabilityId',
-                as: 'disablityUserDisabilityData',
-            });
+            // DisabilityUser.belongsTo(models.User, {
+            //     foreignKey: 'userId',
+            //     as: 'disablityUserUserData',
+            // });
+            // DisabilityUser.belongsTo(models.Disability, {
+            //     foreignKey: 'disabilityId',
+            //     as: 'disablityUserDisabilityData',
+            // });
         }
     }
     DisabilityUser.init({

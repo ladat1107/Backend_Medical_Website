@@ -1,13 +1,26 @@
 import roomService from '../services/roomService';
+import { PAGINATE } from '../utils';
 
-const getAllRooms = async (req, res) => {
+const getAllRoomAdmin = async (req, res) => {
     try {
-        let response = await roomService.getAllRooms();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        if (req.query.page && req.query.limit) {
+            let page = parseInt(req.query.page);
+            let limit = parseInt(req.query.limit);
+            let limitValue = 25;
+            for (let i = 0; i < PAGINATE.length; i++) {
+                if (PAGINATE[i].id === limit) {
+                    limitValue = PAGINATE[i].value;
+                    break;
+                }
+            }
+            let search = req.query.search;
+            let response = await roomService.getAllRooms(page, limitValue, search);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -75,7 +88,7 @@ const getRoomById = async (req, res) => {
 const createRoom = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.typeRoom && data.departmentId && data.medicalExamination !== undefined) {
+        if (data && data.name && data.departmentId && data.bedQuantity && data.serviceIds.length > 0) {
             let response = await roomService.createRoom(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -126,11 +139,11 @@ const updateRoom = async (req, res) => {
     }
 }
 
-const updateStatusRoom = async (req, res) => {
+const blockRoom = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.status >= 0) {
-            let response = await roomService.updateStatusRoom(data);
+        if (data && data.id) {
+            let response = await roomService.blockRoom(data.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -152,12 +165,38 @@ const updateStatusRoom = async (req, res) => {
         })
     }
 }
-
+const deleteRoom = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id) {
+            let response = await roomService.deleteRoom(data.id);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Error from server",
+            DT: ""
+        })
+    }
+}
 module.exports = {
-    getAllRooms,
+    getAllRoomAdmin,
     getRoomByDepartment,
     getRoomById,
     createRoom,
     updateRoom,
-    updateStatusRoom
+    blockRoom,
+    deleteRoom
 }
