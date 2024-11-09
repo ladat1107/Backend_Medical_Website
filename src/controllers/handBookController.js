@@ -72,7 +72,8 @@ const getHandBookById = async (req, res) => {
 const createHandBook = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
+        if (data && data.title && data.author && data.image 
+            && data.htmlContent && data.markDownContent) {
             let response = await handBookService.createHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -99,7 +100,8 @@ const createHandBook = async (req, res) => {
 const updateHandBook = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
+        if (data && data.id && data.title && data.author && data.image 
+            && data.htmlContent && data.markDownContent) {
             let response = await handBookService.updateHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
