@@ -9,7 +9,8 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'prescriptionExamData',
             });
-            Prescription.hasMany(models.PrescriptionDetail, {
+            Prescription.belongsToMany(models.Medicine, {
+                through: 'PrescriptionDetail',
                 foreignKey: 'prescriptionId',
                 as: 'prescriptionDetails',
             });
@@ -23,8 +24,6 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'examinations',
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         note: {
             type: DataTypes.STRING(512),

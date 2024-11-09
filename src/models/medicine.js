@@ -5,9 +5,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Medicine extends Model {
         static associate(models) {
-            Medicine.hasMany(models.PrescriptionDetail, {
-                foreignKey: 'id',
-                as: 'prescriptionDetailMedicineData',
+            Medicine.belongsToMany(models.Prescription, {
+                through: 'PrescriptionDetail',
+                foreignKey: 'medicineId',
+                as: 'prescriptionData',
             });
         }
     }
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         registrationNumber: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique:true,
+            unique: true,
         },
         unit: {
             type: DataTypes.STRING,

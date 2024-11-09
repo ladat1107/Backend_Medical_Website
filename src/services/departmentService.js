@@ -1,4 +1,4 @@
-import { Op, or } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
@@ -12,16 +12,31 @@ const getAllDepartment = async (page, limit, search) => {
                     { address: { [Op.like]: `%${search}%` } },
                 ]
             },
-            include: [{
-                model: db.Staff,
-                as: 'deanDepartmentData',
-                attributes: ['id', 'position'],
-                include: [{
-                    model: db.User,
-                    as: 'staffUserData',
-                    attributes: ['firstName', 'lastName', 'email', 'avatar'],
-                }]
-            }],
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'deanDepartmentData',
+                    attributes: ['id', 'position'],
+                    include: [{
+                        model: db.User,
+                        as: 'staffUserData',
+                        attributes: ['firstName', 'lastName', 'email', 'avatar'],
+                    }]
+                },
+                {
+                    model: db.Room,
+                    as: 'roomData',
+                    attributes: ['id', "name"],
+                    raw: true,
+                },
+                {
+                    model: db.Staff,
+                    as: 'staffDepartmentData', // alias cho mối quan hệ với Staff
+                    attributes: ["id", "position", "price"], // Lấy ra các trường id, position, price
+                    raw: true,
+                    required: false
+                }
+            ],
             order: [
                 ["status", "DESC"],
                 ['createdAt', 'DESC']], // Sắp xếp theo ngày tạo mới nhất
@@ -29,9 +44,10 @@ const getAllDepartment = async (page, limit, search) => {
             // Phân trang
             offset: (+page - 1) * +limit,
             limit: +limit,
-            raw: true,
+            raw: false,
             nest: true,
         });
+        console.log(department);
         return {
             EC: 0,
             EM: "Lấy thông tin phòng ban thành công",

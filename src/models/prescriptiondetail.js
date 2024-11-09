@@ -5,14 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class PrescriptionDetail extends Model {
         static associate(models) {
-            PrescriptionDetail.belongsTo(models.Medicine, {
-                foreignKey: 'medicineId',
-                as: 'prescriptionDetailMedicineData',
-            });
-            PrescriptionDetail.belongsTo(models.Prescription, {
-                foreignKey: 'prescriptionId',
-                as: 'prescriptionDetails',
-            });
+
         }
     }
     PrescriptionDetail.init({
@@ -24,8 +17,6 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'prescriptions',
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         medicineId: {
             type: DataTypes.INTEGER,
@@ -35,8 +26,6 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'medicines',
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         quantity: {
             type: DataTypes.INTEGER,

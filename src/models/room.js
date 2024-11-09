@@ -9,8 +9,6 @@ module.exports = (sequelize, DataTypes) => {
                 through: 'RoomServiceTypes',
                 foreignKey: 'roomId',
                 as: 'serviceData',
-                onDelete: 'CASCADE',
-                onUpdate: 'CASCADE',
             });
             Room.belongsTo(models.Department, {
                 foreignKey: 'departmentId',
@@ -26,13 +24,18 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'roomScheduleData',
             });
             Room.hasMany(models.Bed, {
+                foreignKey: 'roomId',
                 as: 'bedRoomData',
-                onDelete: 'CASCADE',
-                onUpdate: 'CASCADE',
             });
         }
     }
     Room.init({
+        id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true,
+        },
         name: {
             type: DataTypes.STRING(256),
             allowNull: false,
