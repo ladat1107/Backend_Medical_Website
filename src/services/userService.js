@@ -10,11 +10,6 @@ import staffService from "./staffService";
 import { PAGINATE, ROLE } from "../utils/constraints";
 import role from "../models/role";
 require('dotenv').config();
-
-
-const removeDiacritics = (str) => {
-    return diacritics.remove(str);
-}
 const salt = bcrypt.genSaltSync(10);
 
 let hashPasswordUser = async (password) => {
@@ -250,7 +245,9 @@ const createUser = async (data) => {
         if (data.staff) {
             const staff = await staffService.createStaff(data, user.id);
             if (!staff) {
-                await user.destroy();
+                await db.User.destroy({
+                    where: { id: user.id }
+                });
                 return {
                     EC: 200,
                     EM: "Tạo tài khoản thất bại",

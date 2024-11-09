@@ -26,6 +26,7 @@ import paraclinicalController from '../controllers/paraclinicalController';
 import medicineController from '../controllers/medicineController';
 import prescriptionController from '../controllers/prescriptionController';
 import diseaseController from '../controllers/diseaseController';
+import specialtyController from '../controllers/specialtyController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -272,6 +273,9 @@ let initWebRount = (app) => {
     router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
     router.get("/getAllDisease", diseaseController.getAllDisease)
 
+
+    router.post("/admin/specialty", specialtyController.createSpecialty)
+    router.get("/admin/getSpecialtySelect", specialtyController.getSpecialtySelect)
 
     return app.use("/api/", router);
 }

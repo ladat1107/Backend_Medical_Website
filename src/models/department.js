@@ -9,13 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'id',
                 as: 'roomDepartmentData',
             });
-            Department.hasMany(models.Room, {
-                foreignKey: 'id',
-                as: 'medicalExaminationDepartmentData',
-            });
             Department.hasMany(models.Staff, {
                 foreignKey: 'id',
                 as: 'staffDepartmentData',
+                onDelete: "SET NULL",
             });
             Department.belongsToMany(models.Symptom, {
                 through: 'DepartmentSymptoms',
@@ -49,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
             onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
+            onDelete: 'SET NULL',
         },
         status: {
             type: DataTypes.INTEGER,

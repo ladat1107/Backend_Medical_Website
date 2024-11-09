@@ -94,7 +94,6 @@ const getDepartmentById = async (departmentId) => {
             raw: true,
             nest: true,
         });
-        console.log("check depaart", department);
         if (department) {
             return {
                 EC: 0,
@@ -234,20 +233,21 @@ const blockDepartment = async (departmentId) => {
             where: { id: departmentId },
         });
         if (department) {
-            let description = await descriptionService.updateStatusDescription(department.descriptionId);
-            if (description) {
-                await department.update({
-                    status: status.INACTIVE,
-                });
+            let departmentBlock = await db.Department.update({
+                status: status.INACTIVE,
+            }, {
+                where: { id: department.id }
+            });
+            if (departmentBlock) {
                 return {
                     EC: 0,
-                    EM: "Khóa phòng ban thành công",
+                    EM: "Khóa khoa thành công",
                     DT: department
                 }
             } else {
                 return {
                     EC: 500,
-                    EM: "Khóa phòng ban thất bại",
+                    EM: "Khóa khoa thất bại",
                     DT: "",
                 }
             }
@@ -268,13 +268,37 @@ const blockDepartment = async (departmentId) => {
 }
 const deleteDepartment = async (departmentId) => {
     try {
+
+
         let department = await db.Department.findOne({
             where: { id: departmentId },
         });
         if (department) {
-            await db.Description.destroy(department.descriptionId);
+            await db.Staff.update(
+                { departmentId: 1 }, // Giá trị cần cập nhật
+                {
+                    where: {
+                        departmentId: department.id
+                    }
+                }
+            );
+            await db.Room.update(
+                { departmentId: 1 }, // Giá trị cần cập nhật
+                {
+                    where: {
+                        departmentId: department.id
+                    }
+                }
+            );
+            let description = await db.Description.destroy({
+                where: { id: department.descriptionId }
+            });
             if (description) {
-                await department.destroy();
+                await db.Department.destroy({
+                    where: {
+                        id: department.id,
+                    },
+                });
                 return {
                     EC: 0,
                     EM: "Xóa phòng ban thành công",

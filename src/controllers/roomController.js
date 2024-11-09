@@ -14,7 +14,8 @@ const getAllRoomAdmin = async (req, res) => {
                 }
             }
             let search = req.query.search;
-            let response = await roomService.getAllRooms(page, limitValue, search);
+            let searchDepartment = req.query.searchDepartment;
+            let response = await roomService.getAllRooms(page, limitValue, search, searchDepartment);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -115,7 +116,7 @@ const createRoom = async (req, res) => {
 const updateRoom = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.name && data.typeRoom && data.departmentId && data.medicalExamination !== undefined) {
+        if (data && data.id && data.name && data.departmentId) {
             let response = await roomService.updateRoom(data);
             return res.status(200).json({
                 EC: response.EC,

@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'departmentId',
                 as: 'staffDepartmentData',
             });
+            Staff.belongsTo(models.Specialty, {
+                foreignKey: 'specialtyId',
+                as: 'staffSpecialtyData',
+            });
         }
     }
     Staff.init({
@@ -66,8 +70,6 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'users', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         status: {
             type: DataTypes.INTEGER,
@@ -80,8 +82,6 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'descriptions', // Tên bảng descriptions
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         departmentId: {
             type: DataTypes.INTEGER,
@@ -90,8 +90,13 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'departments', // Tên bảng departments
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
+        },
+        specialtyId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'specialties', 
+                key: 'id',
+            },
         },
     }, {
         sequelize,

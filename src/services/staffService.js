@@ -1,4 +1,5 @@
 import db from "../models/index";
+import specialty from "../models/specialty";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
 const { Op } = require('sequelize');
@@ -224,14 +225,13 @@ const createStaff = async (data, userId) => {
         if (data.position) {
             positionInsert = data.position.toString();
         }
-        console.log("check data", positionInsert);
-
         let descriptionId = await descriptionService.createDescription(data);
         if (descriptionId) {
             await db.Staff.create({
                 price: data?.price || 0,
                 position: positionInsert,
                 departmentId: data.departmentId,
+                specialtyId: data?.specialtyId || null,
                 status: status.ACTIVE,
                 descriptionId: descriptionId,
                 userId: userId

@@ -9,14 +9,16 @@ module.exports = (sequelize, DataTypes) => {
                 through: 'RoomServiceTypes',
                 foreignKey: 'roomId',
                 as: 'serviceData',
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             });
             Room.belongsTo(models.Department, {
                 foreignKey: 'departmentId',
                 as: 'roomDepartmentData',
             });
-            Room.belongsTo(models.Department, {
+            Room.belongsTo(models.Specialty, {
                 foreignKey: 'medicalExamination',
-                as: 'medicalExaminationDepartmentData',
+                as: 'specialtyData',
             });
             Room.belongsToMany(models.Staff, {
                 through: 'Schedule',
@@ -25,6 +27,8 @@ module.exports = (sequelize, DataTypes) => {
             });
             Room.hasMany(models.Bed, {
                 as: 'bedRoomData',
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             });
         }
     }
@@ -40,17 +44,13 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         medicalExamination: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'speciaties', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         status: {
             type: DataTypes.INTEGER,
