@@ -47,7 +47,6 @@ const getAllDepartment = async (page, limit, search) => {
             raw: false,
             nest: true,
         });
-        console.log(department);
         return {
             EC: 0,
             EM: "Lấy thông tin phòng ban thành công",

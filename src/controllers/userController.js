@@ -236,10 +236,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.email && data.phoneNumber && data.lastName && data.firstName && data.cid
-            && data.dob && data.gender && data.address && data.currentRescident && data.roleId
-            && data.price && data.position && data.departmentId
-            && data.markDownContent && data.htmlContent) {
+        if (data && data.id) {
             let response = await userService.updateUser(data);
             return res.status(200).json({
                 EC: response.EC,
