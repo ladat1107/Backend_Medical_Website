@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Handbook.init({
     title: DataTypes.STRING,
+    tags: DataTypes.STRING,
     author: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -41,9 +42,8 @@ module.exports = (sequelize, DataTypes) => {
         model: 'descriptions',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
-    }
+    },
+    shortDescription: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Handbook',

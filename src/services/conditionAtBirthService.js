@@ -1,7 +1,7 @@
 import db from '../models/index';
 
 const getConditionAtBirthById = async (id) => {
-    try{
+    try {
         let getConditionAtBirth = await db.ConditionAtBirth.findOne({
             where: { id: id },
             raw: true,
@@ -16,14 +16,14 @@ const getConditionAtBirthById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getConditionAtBirthByUserId = async (userId) => {
-    try{
+    try {
         let getConditionAtBirth = await db.ConditionAtBirth.findOne({
             where: { userId: userId },
             raw: true,
@@ -38,14 +38,14 @@ const getConditionAtBirthByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createConditionAtBirth = async (data) => {
-    try{
+    try {
         let createConditionAtBirth = await db.ConditionAtBirth.create({
             userId: data.userId,
             typeOfBirth: data.typeOfBirth,
@@ -62,14 +62,14 @@ const createConditionAtBirth = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateConditionAtBirth = async (data) => {
-    try{
+    try {
         let updateConditionAtBirth = await db.ConditionAtBirth.update({
             typeOfBirth: data.typeOfBirth,
             weight: data.weight,
@@ -87,14 +87,14 @@ const updateConditionAtBirth = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteConditionAtBirth = async (id) => {
-    try{
+    try {
         let deleteConditionAtBirth = await db.ConditionAtBirth.destroy({
             where: { id: id }
         });
@@ -107,7 +107,7 @@ const deleteConditionAtBirth = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

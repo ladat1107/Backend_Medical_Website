@@ -2,9 +2,9 @@ import db from "../models/index";
 import { status } from "../utils/index";
 
 const getAllSurgicalHistories = async () => {
-    try{
+    try {
         let surgicalHistory = await db.SurgicalHistory.findAll({
-            where: {status: status.ACTIVE},
+            where: { status: status.ACTIVE },
             raw: true,
             nest: true,
         });
@@ -17,14 +17,14 @@ const getAllSurgicalHistories = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getSurgicalHistoryById = async (id) => {
-    try{
+    try {
         let surgicalHistory = await db.SurgicalHistory.findOne({
             where: {
                 id: id
@@ -41,14 +41,14 @@ const getSurgicalHistoryById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createSurgicalHistory = async (data) => {
-    try{
+    try {
         let surgicalHistory = await db.SurgicalHistory.create({
             diseaseName: data.diseaseName,
             bodyPart: data.bodyPart,
@@ -63,14 +63,14 @@ const createSurgicalHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateSurgicalHistory = async (data) => {
-    try{
+    try {
         let surgicalHistory = await db.SurgicalHistory.update({
             diseaseName: data.diseaseName,
             bodyPart: data.bodyPart,
@@ -88,14 +88,14 @@ const updateSurgicalHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteSurgicalHistory = async (id) => {
-    try{
+    try {
         let surgicalHistory = await db.SurgicalHistory.update({
             status: status.INACTIVE,
         }, {
@@ -112,7 +112,7 @@ const deleteSurgicalHistory = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

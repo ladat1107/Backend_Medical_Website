@@ -15,7 +15,7 @@ const getDiseaseByName = async (name) => {
             raw: true,
             nest: true
         });
-        if(diseases.length === 0){
+        if (diseases.length === 0) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy bệnh",
@@ -35,7 +35,7 @@ const getDiseaseByName = async (name) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }
@@ -51,7 +51,7 @@ const getAllDisease = async () => {
             raw: true,
             nest: true
         });
-        if(diseases.length === 0){
+        if (diseases.length === 0) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy bệnh",
@@ -72,7 +72,7 @@ const getAllDisease = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }

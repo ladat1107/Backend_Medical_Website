@@ -16,7 +16,7 @@ const getInsuranceById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -38,14 +38,14 @@ const getInsuranceByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createInsurance = async (data) => {
-    try{
+    try {
         let insuarance = await db.Insurance.create({
             insuanceCode: data.insuanceCode,
             dateOfIssue: data.dateOfIssue,
@@ -65,14 +65,14 @@ const createInsurance = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateInsurance = async (data) => {
-    try{
+    try {
         let insuarance = await db.Insurance.update({
             insuanceCode: data.insuanceCode,
             dateOfIssue: data.dateOfIssue,
@@ -95,14 +95,14 @@ const updateInsurance = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteInsurance = async (id) => {
-    try{
+    try {
         let insuarance = await db.Insurance.destroy({
             where: {
                 id: id
@@ -117,7 +117,7 @@ const deleteInsurance = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

@@ -2,7 +2,7 @@ import db from "../models/index";
 import { status } from "../utils/index";
 
 const getAllAllergies = async () => {
-    try{
+    try {
         let allergies = await db.Allergy.findAll({
             where: { status: status.ACTIVE },
             raw: true,
@@ -17,7 +17,7 @@ const getAllAllergies = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -39,14 +39,14 @@ const getAllergyById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createAllergy = async (data) => {
-    try{
+    try {
         let allergy = await db.Allergy.create({
             agent: data.agent,
             diseaseManifestation: data.diseaseManifestation,
@@ -61,7 +61,7 @@ const createAllergy = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -84,7 +84,7 @@ const updateAllergy = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -106,7 +106,7 @@ const deleteAllergy = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
@@ -47,7 +47,6 @@ const getAllDepartment = async (page, limit, search) => {
             raw: false,
             nest: true,
         });
-        console.log(department);
         return {
             EC: 0,
             EM: "Lấy thông tin phòng ban thành công",
@@ -57,7 +56,26 @@ const getAllDepartment = async (page, limit, search) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
+            DT: "",
+        }
+    }
+}
+const getDepartmentHome = async () => {
+    try {
+        let departments = await db.Department.findAll({
+            where: { status: status.ACTIVE },
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin phòng ban thành công",
+            DT: departments
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -81,7 +99,7 @@ const getAllNameDepartment = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -126,7 +144,7 @@ const getDepartmentById = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -158,7 +176,7 @@ const getAllStaffInDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -193,7 +211,7 @@ const createDepartment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -237,7 +255,7 @@ const updateDepartment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -277,7 +295,7 @@ const blockDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -337,7 +355,7 @@ const deleteDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -351,5 +369,6 @@ module.exports = {
     updateDepartment,
     deleteDepartment,
     getAllNameDepartment,
-    blockDepartment
+    blockDepartment,
+    getDepartmentHome,
 }

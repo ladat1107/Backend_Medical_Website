@@ -4,7 +4,7 @@ import { status } from "../utils/index";
 const getAllDisability = async () => {
     try {
         let disbility = await db.Disability.findAll({
-            where: {status: status.ACTIVE},
+            where: { status: status.ACTIVE },
             raw: true,
             nest: true,
         });
@@ -17,7 +17,7 @@ const getAllDisability = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -26,7 +26,7 @@ const getAllDisability = async () => {
 const getDisabilityById = async (disbilityId) => {
     try {
         let disbility = await db.Disability.findOne({
-            where: {id: disbilityId},
+            where: { id: disbilityId },
             raw: true,
             nest: true,
         });
@@ -39,7 +39,7 @@ const getDisabilityById = async (disbilityId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -60,18 +60,18 @@ const createDisability = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateDisability = async (data) => {
-    try{
+    try {
         let updateDisbility = await db.Disability.update({
             bodyPart: data.bodyPart,
         }, {
-            where: {id: data.id}
+            where: { id: data.id }
         });
         return {
             EC: 0,
@@ -82,7 +82,7 @@ const updateDisability = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -93,7 +93,7 @@ const deleteDisability = async (disbilityId) => {
         let deleteDisbility = await db.Disability.update({
             status: status.INACTIVE
         }, {
-            where: {id: disbilityId}
+            where: { id: disbilityId }
         });
         return {
             EC: 0,
@@ -104,7 +104,7 @@ const deleteDisability = async (disbilityId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

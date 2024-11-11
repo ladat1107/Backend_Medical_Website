@@ -2,7 +2,10 @@ import handBookService from '../services/handBookService';
 
 const getAllHandBooks = async (req, res) => {
     try {
-        let response = await handBookService.getAllHandBooks();
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 10;
+        let search = req.query.search || "";
+        let response = await handBookService.getAllHandBooks(page, limit, search);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -12,7 +15,7 @@ const getAllHandBooks = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -33,7 +36,7 @@ const getHandBooksByStatus = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -60,7 +63,7 @@ const getHandBookById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -69,7 +72,8 @@ const getHandBookById = async (req, res) => {
 const createHandBook = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
+        if (data && data.title && data.author && data.image
+            && data.htmlContent && data.markDownContent) {
             let response = await handBookService.createHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -87,7 +91,7 @@ const createHandBook = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -96,7 +100,8 @@ const createHandBook = async (req, res) => {
 const updateHandBook = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.title && data.author && data.image && data.htmlContent && data.markDownContent) {
+        if (data && data.id && data.title && data.author && data.image
+            && data.htmlContent && data.markDownContent) {
             let response = await handBookService.updateHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -114,7 +119,7 @@ const updateHandBook = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -141,17 +146,34 @@ const updateHandbookStatus = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
 }
-
+const getHandBookHome = async (req, res) => {
+    try {
+        let response = await handBookService.getHandBookHome();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllHandBooks,
     getHandBooksByStatus,
     getHandBookById,
     createHandBook,
     updateHandBook,
-    updateHandbookStatus
+    updateHandbookStatus,
+    getHandBookHome
 }

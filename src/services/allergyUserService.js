@@ -7,7 +7,7 @@ const getAllAllergyUsers = async () => {
                 model: db.User,
                 as: "allergyUserUserData",
                 attributes: ["id", "lastName", "firstName", "email", "phoneNumber", "avatar"],
-            },{
+            }, {
                 model: db.Allergy,
                 as: "allergyUserAllergyData",
                 attributes: ["id", "agent", "diseaseManifestation"],
@@ -24,7 +24,7 @@ const getAllAllergyUsers = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -33,7 +33,7 @@ const getAllAllergyUsers = async () => {
 const getAllergyUserByUserId = async (userId) => {
     try {
         let allergyUser = await db.AllergyUser.findOne({
-            where: {userId: userId},
+            where: { userId: userId },
             include: [{
                 model: db.Allergy,
                 as: "allergyUserAllergyData",
@@ -51,7 +51,7 @@ const getAllergyUserByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -60,7 +60,7 @@ const getAllergyUserByUserId = async (userId) => {
 const getAllergyUserByAllergyId = async (allergyId) => {
     try {
         let allergyUser = await db.AllergyUser.findOne({
-            where: {allergyId: allergyId},
+            where: { allergyId: allergyId },
             include: [{
                 model: db.User,
                 as: "allergyUserUserData",
@@ -78,7 +78,7 @@ const getAllergyUserByAllergyId = async (allergyId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -100,18 +100,18 @@ const createAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateAllergyUser = async (data) => {
-    try{
+    try {
         let allergyUser = await db.AllergyUser.update({
             discoveryDate: data.discoveryDate,
-        },{
-            where: {userId: data.userId, allergyId: data.allergyId},
+        }, {
+            where: { userId: data.userId, allergyId: data.allergyId },
         });
         return {
             EC: 0,
@@ -122,7 +122,7 @@ const updateAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -131,7 +131,7 @@ const updateAllergyUser = async (data) => {
 const deleteAllergyUser = async (data) => {
     try {
         await db.AllergyUser.destroy({
-            where: {userId: data.userId, allergyId: data.allergyId},
+            where: { userId: data.userId, allergyId: data.allergyId },
         });
         return {
             EC: 0,
@@ -142,7 +142,7 @@ const deleteAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

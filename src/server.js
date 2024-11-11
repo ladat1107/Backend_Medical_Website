@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import configViewEngine from './config/configViewEngine';
 import initWebRount from './router/web';
+import initPatientRount from "./router/patient"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -33,6 +34,7 @@ configViewEngine(app);
 // Initialize web routes
 
 initWebRount(app);
+initPatientRount(app)
 
 connectDB();
 

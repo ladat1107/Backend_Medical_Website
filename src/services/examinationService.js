@@ -8,7 +8,7 @@ const getExaminationById = async (id) => {
             include: [{
                 model: db.VitalSign,
                 as: 'examinationVitalSignData',
-            },{
+            }, {
                 model: db.Paraclinical,
                 as: 'examinationResultParaclincalData',
                 include: [{
@@ -65,7 +65,7 @@ const getExaminationById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -87,17 +87,17 @@ const getExaminationByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createExamination = async (data) => {
-    try{
+    try {
         let staff = await db.Staff.findOne({
-            where: { 
-                id: data.staffId 
+            where: {
+                id: data.staffId
             }
         });
 
@@ -119,18 +119,18 @@ const createExamination = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateExamination = async (data) => {
-    try{
+    try {
         let existExamination = await db.Examination.findOne({
             where: { id: data.id }
         });
-        if(!existExamination){
+        if (!existExamination) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy khám bệnh",
@@ -152,7 +152,7 @@ const updateExamination = async (data) => {
             insuranceCoverage: data.insuranceCoverage,
             comorbidities: data.comorbidities
         }, {
-            where: { id: data.id }  
+            where: { id: data.id }
         });
         return {
             EC: 0,
@@ -163,18 +163,18 @@ const updateExamination = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteExamination = async (id) => {
-    try{
+    try {
         let existExamination = await db.Examination.findOne({
             where: { id: data.id }
         });
-        if(!existExamination){
+        if (!existExamination) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy khám bệnh",
@@ -196,7 +196,7 @@ const deleteExamination = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

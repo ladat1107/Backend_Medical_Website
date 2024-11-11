@@ -16,14 +16,14 @@ const getVitalSignByExamId = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createVitalSign = async (data) => {
-    try{
+    try {
         let vitalSign = await db.VitalSign.create({
             examinationId: data.examinationId,
             height: data.height,
@@ -45,7 +45,7 @@ const createVitalSign = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -75,7 +75,7 @@ const updateVitalSign = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -95,7 +95,7 @@ const deleteVitalSign = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
