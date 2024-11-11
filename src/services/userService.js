@@ -173,7 +173,7 @@ const getUserById = async (userId) => {
                         {
                             model: db.Description,
                             as: "staffDescriptionData",
-                            attributes: ["id", "markdownContent", "htmlContent"],
+                            attributes: ["id", "markDownContent", "htmlContent"],
                         }
                     ]
                 }
@@ -359,11 +359,12 @@ const updateUser = async (data) => {
                 where: { id: data.id },
             }, { transaction });
             if (user.roleId === ROLE.ACCOUNTANT || user.roleId === ROLE.DOCTOR || user.roleId === ROLE.NURSE || user.roleId === ROLE.PHARMACIST || user.roleId === ROLE.RECEPTIONIST) {
+                console.log(data.markDownContent);
                 await db.Description.update({
-                    markdownContent: data?.markdownContent,
+                    markDownContent: data?.markDownContent,
                     htmlContent: data?.htmlContent,
                 }, {
-                    where: { id: data.id },
+                    where: { id: data.descriptionId },
                 }, { transaction });
                 await db.Staff.update({
                     price: data?.price,
@@ -375,7 +376,7 @@ const updateUser = async (data) => {
                     where: { userId: data.id },
                 }, { transaction });
                 await transaction.commit();
-                if (content.length > 0) {
+                if (content?.length > 0) {
                     console.log("Gửi mail");
                     let mail = await sendEmailNotification({
                         email: user.email,
@@ -450,7 +451,7 @@ const updateUser = async (data) => {
         await transaction.rollback();
         return {
             EC: 500,
-            EM: "Hệ thống quá tải! user",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
