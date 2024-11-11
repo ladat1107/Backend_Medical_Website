@@ -55,7 +55,7 @@ let initWebRount = (app) => {
     router.put("/user/update", userController.updateFunction)
     router.delete("/user/delete", userController.deleteFunction)
 
-    //-- User
+    //-- User   
     router.get("/getUserById", userController.getUserById)
     router.get("/getUserByCid", userController.getUserByCid)
     //------> Admin CRUD User

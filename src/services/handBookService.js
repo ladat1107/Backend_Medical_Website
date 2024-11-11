@@ -179,7 +179,7 @@ const createHandBook = async (data) => {
                 title: data.title,
                 author: data.author,
                 image: data.image,
-                shortDescription: data?.shortDescription,
+                shortDescription: data?.shortDescription || null,
                 status: status.PENDING,
                 descriptionId: descriptionId
             });
@@ -217,7 +217,7 @@ const updateHandBook = async (data) => {
                 await handBook.update({
                     title: data.title,
                     image: data.image,
-                    shortDescription: data?.shortDescription,
+                    shortDescription: data?.shortDescription || null,
                 });
                 return {
                     EC: 0,

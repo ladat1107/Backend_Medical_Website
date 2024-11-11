@@ -230,7 +230,7 @@ const createStaff = async (data, userId) => {
                 price: data?.price || 0,
                 position: positionInsert,
                 departmentId: data.departmentId,
-                shortDescription: data?.shortDescription || "",
+                shortDescription: data?.shortDescription || null,
                 specialtyId: data?.specialtyId || null,
                 status: status.ACTIVE,
                 descriptionId: descriptionId,
@@ -257,7 +257,7 @@ const updateStaff = async (data) => {
                 await staff.update({
                     price: data.price,
                     position: data.position,
-                    shortDescription: data?.shortDescription,
+                    shortDescription: data?.shortDescription || null,
                     specialtyId: data?.specialtyId,
                     departmentId: data.departmentId,
                 });

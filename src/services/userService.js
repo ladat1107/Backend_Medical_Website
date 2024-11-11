@@ -368,10 +368,10 @@ const updateUser = async (data) => {
                 }, { transaction });
                 await db.Staff.update({
                     price: data?.price,
-                    shortDescription: data?.shortDescription,
+                    shortDescription: data?.shortDescription || null,
                     position: data?.position?.toString(),
                     departmentId: data?.departmentId,
-                    specialtyId: data?.specialtyId,
+                    specialtyId: data?.specialtyId || null,
                 }, {
                     where: { userId: data.id },
                 }, { transaction });

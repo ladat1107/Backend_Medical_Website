@@ -94,10 +94,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         specialtyId: {
             type: DataTypes.INTEGER,
-            references: {
-                model: 'specialties',
-                key: 'id',
-            },
+            allowNull: true,
         },
     }, {
         sequelize,
