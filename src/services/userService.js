@@ -666,34 +666,7 @@ const getDoctorHome = async () => {
             group: ['staffId'],
             limit: 20,
             order: [[literal('examinationsCount'), 'DESC']],
-
-
         })
-        // let topDoctors = await db.User.findAll({
-        //     where: {
-        //         roleId: ROLE.DOCTOR,
-        //     },
-        //     attributes: {
-        //         include: [
-        //             [sequelize.fn('COUNT', sequelize.col('Examinations.staffId')), 'examCount']
-        //         ]
-        //     },
-        //     include: [
-        //         {
-        //             model: db.Staff,
-        //             as: "staffUserData",
-        //             include: [{
-        //                 model: db.Examination,
-        //                 as: 'examinationStaffData',
-        //                 attributes: []
-        //             }]
-        //         }
-        //     ],
-        //     group: ['User.id', 'staffUserData.id'],
-        //     order: [[sequelize.literal('examCount'), 'DESC']],
-        //     limit: 20
-        // });
-        console.log(examCount);
         return {
             EC: 0,
             EM: "Lấy thông tin bác sĩ thành công",
