@@ -3,7 +3,7 @@ import { status } from "../utils/index";
 import Sequelize from "sequelize";
 
 const getAllBeds = async () => {
-    try{
+    try {
         let bed = await db.Bed.findAll({
             where: { status: status.ACTIVE },
             raw: true,
@@ -18,14 +18,14 @@ const getAllBeds = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getBedByRoom = async (roomId) => {
-    try{
+    try {
         let bed = await db.Bed.findAll({
             where: { roomId: roomId, status: status.ACTIVE },
             include: [
@@ -38,7 +38,7 @@ const getBedByRoom = async (roomId) => {
                         as: 'roomDepartmentData',
                         attributes: ['id'],
                     }]
-                },{
+                }, {
                     model: db.Patient,
                     as: 'bedPatientData',
                     attributes: ['id', 'dateOfAdmission', 'dateOfDischarge'],
@@ -61,14 +61,14 @@ const getBedByRoom = async (roomId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getBedEmpty = async () => {
-    try{
+    try {
         let bed = await db.Bed.findAll({
             include: [
                 {
@@ -80,7 +80,7 @@ const getBedEmpty = async () => {
                         as: 'roomDepartmentData',
                         attributes: ['id'],
                     }]
-                },{
+                }, {
                     model: db.Patient,
                     as: 'bedPatientData',
                     attributes: [],
@@ -91,9 +91,9 @@ const getBedEmpty = async () => {
                     }
                 }
             ],
-            where: { 
+            where: {
                 status: status.ACTIVE
-            }, 
+            },
             raw: true,
             nest: true,
         });
@@ -106,14 +106,14 @@ const getBedEmpty = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getBedById = async (bedId) => {
-    try{
+    try {
         let bed = await db.Bed.findOne({
             where: { id: bedId, status: status.ACTIVE },
             include: [
@@ -140,7 +140,7 @@ const getBedById = async (bedId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -162,7 +162,7 @@ const createBed = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -185,7 +185,7 @@ const updateBed = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -207,7 +207,7 @@ const deleteBed = async (bedId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

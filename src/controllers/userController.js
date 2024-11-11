@@ -130,7 +130,7 @@ const getAllUser = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -157,7 +157,7 @@ const getUserById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -184,7 +184,7 @@ const getUserByCid = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -254,7 +254,7 @@ const updateUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server dddd",
+            EM: "Hệ thống quá tải! dddd",
             DT: ""
         })
     }
@@ -280,7 +280,7 @@ const blockUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -306,7 +306,7 @@ const deleteUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -428,7 +428,23 @@ const handleGetAccount = async (req, res) => {
         })
     }
 }
-
+const getDoctorHome = async (req, res) => {
+    try {
+        let response = await userService.getDoctorHome();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllUser,
     getUserById,
@@ -446,4 +462,6 @@ module.exports = {
     getFunctionById,
     handleGetAccount,
     handleConfirm,
+    getDoctorHome,
+
 }

@@ -5,7 +5,7 @@ import examinationService from "./examinationService";
 const { Op } = require('sequelize');
 
 const getAllAppointments = async () => {
-    try{
+    try {
         let appointment = await db.Appointment.findAll({
             include: [{
                 model: db.User,
@@ -33,16 +33,16 @@ const getAllAppointments = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getAllAppointmentsByDate = async (date) => {
-    try{
+    try {
         let appointment = await db.Appointment.findAll({
-            where: {date: +date},
+            where: { date: +date },
             include: [{
                 model: db.User,
                 as: 'appointmentUserData',
@@ -69,16 +69,16 @@ const getAllAppointmentsByDate = async (date) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getAppointmentByUserId = async (userId) => {
-    try{
+    try {
         let appointment = await db.Appointment.findAll({
-            where: {userId: userId},
+            where: { userId: userId },
             include: [{
                 model: db.User,
                 as: 'appointmentUserData',
@@ -105,16 +105,16 @@ const getAppointmentByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getAppointmentByStaffId = async (staffId) => {
-    try{
+    try {
         let appointment = await db.Appointment.findAll({
-            where: {staffId: staffId},
+            where: { staffId: staffId },
             include: [{
                 model: db.User,
                 as: 'appointmentUserData',
@@ -141,23 +141,23 @@ const getAppointmentByStaffId = async (staffId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const seachAppointment = async (data) => {
-    try{
-        if(!data.search) data.search = "";
-        if(data.from == '') data.from = 0;
-        if(data.to == '') data.to = getTodayTimestamp();
+    try {
+        if (!data.search) data.search = "";
+        if (data.from == '') data.from = 0;
+        if (data.to == '') data.to = getTodayTimestamp();
 
         let appointment = await db.Appointment.findAll({
             where: {
                 date: {
-                    [Op.gte]: +data.from, 
-                    [Op.lte]: +data.to,   
+                    [Op.gte]: +data.from,
+                    [Op.lte]: +data.to,
                 },
             },
             include: [{
@@ -185,7 +185,7 @@ const seachAppointment = async (data) => {
             limit: +data.limit,
             raw: true,
             nest: true,
-        });        
+        });
         return {
             EC: 0,
             EM: "Lấy thông tin lịch hẹn thành công",
@@ -195,15 +195,15 @@ const seachAppointment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const seachAppointmentWithStaffId = async (data) => {
-    try{
-        if(!data.search) data.search = "";
+    try {
+        if (!data.search) data.search = "";
 
         let fromDate = data.from ? new Date(+data.from) : new Date(0);
         let toDate = data.to ? new Date(+data.to) : new Date();
@@ -212,8 +212,8 @@ const seachAppointmentWithStaffId = async (data) => {
         let appointment = await db.Appointment.findAll({
             where: {
                 date: {
-                    [Op.gte]: fromDate, 
-                    [Op.lte]: toDate,   
+                    [Op.gte]: fromDate,
+                    [Op.lte]: toDate,
                 },
                 staffId: data.staffId,
             },
@@ -242,7 +242,7 @@ const seachAppointmentWithStaffId = async (data) => {
             limit: +data.limit,
             raw: false,
             nest: true,
-        });        
+        });
         return {
             EC: 0,
             EM: "Lấy thông tin lịch hẹn thành công",
@@ -252,14 +252,14 @@ const seachAppointmentWithStaffId = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createAppointment = async (data) => {
-    try{
+    try {
         let examinationId = await examinationService.createExamination(data);
 
         let appointment = await db.Appointment.create({
@@ -273,9 +273,9 @@ const createAppointment = async (data) => {
             examinationId: examinationId,
         });
 
-        if(!appointment) {
+        if (!appointment) {
             await db.Examination.destroy({
-                where: {id: examinationId},
+                where: { id: examinationId },
             });
             return {
                 EC: 1000,
@@ -293,16 +293,16 @@ const createAppointment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteAppointment = async (data) => {
-    try{
+    try {
         let appointment = await db.Appointment.destroy({
-            where: {userId: data.userId, staffId: data.staffId, date: data.date, cid: data.cid},
+            where: { userId: data.userId, staffId: data.staffId, date: data.date, cid: data.cid },
         });
         return {
             EC: 0,
@@ -313,7 +313,7 @@ const deleteAppointment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

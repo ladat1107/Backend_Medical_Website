@@ -2,7 +2,7 @@ import db from "../models/index";
 import { status } from "../utils/index";
 
 const getAllRelatives = async () => {
-    try{
+    try {
         let relative = await db.Relative.findAll({
             where: {
                 status: status.ACTIVE,
@@ -19,14 +19,14 @@ const getAllRelatives = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getRelativesByUserId = async (userId) => {
-    try{
+    try {
         let relative = await db.Relative.findAll({
             where: {
                 userId: userId,
@@ -44,14 +44,14 @@ const getRelativesByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getRelativeById = async (id) => {
-    try{
+    try {
         let relative = await db.Relative.findOne({
             where: {
                 id: id
@@ -68,14 +68,14 @@ const getRelativeById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createRelative = async (data) => {
-    try{
+    try {
         let relative = await db.Relative.create({
             fullName: data.fullName,
             cid: data.cid,
@@ -95,14 +95,14 @@ const createRelative = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateRelative = async (data) => {
-    try{
+    try {
         let relative = await db.Relative.update({
             fullName: data.fullName,
             cid: data.cid,
@@ -124,14 +124,14 @@ const updateRelative = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteRelative = async (id) => {
-    try{
+    try {
         let relative = await db.Relative.update({
             status: status.INACTIVE,
         }, {
@@ -148,7 +148,7 @@ const deleteRelative = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

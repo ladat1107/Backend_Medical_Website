@@ -7,7 +7,7 @@ const getAllSurgicalHistoryUser = async () => {
                 model: db.User,
                 as: 'surgicalhistoryUserUserData',
                 attributes: ['id', 'firstName', 'lastName', 'email', 'avatar'],
-            },{
+            }, {
                 model: db.SurgicalHistory,
                 as: 'surgicalhistoryUserData',
                 attributes: ['id', 'diseaseName', 'bodyPart'],
@@ -24,7 +24,7 @@ const getAllSurgicalHistoryUser = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -33,7 +33,7 @@ const getAllSurgicalHistoryUser = async () => {
 const getSurgicalHistoryUserByUserId = async (userId) => {
     try {
         let surgicalHistoryUser = await db.SurgicalhistoryUser.findAll({
-            where: { userId: userId},
+            where: { userId: userId },
             include: [{
                 model: db.SurgicalHistory,
                 as: 'surgicalhistoryUserData',
@@ -51,7 +51,7 @@ const getSurgicalHistoryUserByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -60,7 +60,7 @@ const getSurgicalHistoryUserByUserId = async (userId) => {
 const getSurgicalHistoryUserBySurgicalHistoryId = async (surgicalHistoryId) => {
     try {
         let surgicalHistoryUser = await db.SurgicalhistoryUser.findAll({
-            where: { surgicalhistoryId: surgicalHistoryId},
+            where: { surgicalhistoryId: surgicalHistoryId },
             include: [{
                 model: db.User,
                 as: 'surgicalhistoryUserUserData',
@@ -78,7 +78,7 @@ const getSurgicalHistoryUserBySurgicalHistoryId = async (surgicalHistoryId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -102,7 +102,7 @@ const createSurgicalHistoryUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -126,7 +126,7 @@ const updateSurgicalHistoryUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -146,7 +146,7 @@ const deleteSurgicalHistoryUser = async (userId, surgicalhistoryId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

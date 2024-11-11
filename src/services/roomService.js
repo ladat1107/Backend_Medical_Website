@@ -55,7 +55,7 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -90,7 +90,7 @@ const getRoomByDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -133,7 +133,7 @@ const getRoomById = async (roomId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -190,7 +190,7 @@ const createRoom = async (data) => {
         await t.rollback(); // Nếu có lỗi thì rollback transaction
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -223,9 +223,9 @@ const updateRoom = async (data) => {
                     throw new Error("Lỗi thêm dịch vụ"); // Nếu thất bại thì ném lỗi
                 }
             }
-            if(data.oldBed<data.newBed){
+            if (data.oldBed < data.newBed) {
                 let arrData = [];
-                for (let i = +data.oldBed+1; i <= +data.newBed; i++) {
+                for (let i = +data.oldBed + 1; i <= +data.newBed; i++) {
                     let name = "Giường số " + i + " - " + data.name;
                     arrData.push({
                         name: name,
@@ -250,7 +250,7 @@ const updateRoom = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -272,7 +272,7 @@ const blockRoom = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -308,7 +308,7 @@ const deleteRoom = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

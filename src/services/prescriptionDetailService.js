@@ -2,7 +2,7 @@ import db from '../models/index';
 import medicineService from './medicineService';
 
 const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
-    try{
+    try {
         let prescriptionDetail = await db.PrescriptionDetail.findAll({
             where: { prescriptionId: prescriptionId },
             include: [
@@ -23,7 +23,7 @@ const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -34,7 +34,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
         const existingDetails = await db.PrescriptionDetail.findAll({
             where: { prescriptionId },
             attributes: {
-                exclude: ['id'] 
+                exclude: ['id']
             },
         });
 
@@ -53,7 +53,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                 });
                 updatedDetails.push(existingDetail);
                 existingDetailsMap.delete(newDetail.medicineId);
-                
+
                 if (quantityChange !== 0) {
                     await medicineService.updateInventory(newDetail.medicineId, quantityChange);
                 }
@@ -88,7 +88,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
 };
 
 const createPrescriptionDetail = async (prescriptionId, data) => {
-    try{
+    try {
         let prescriptionDetail = await db.PrescriptionDetail.create({
             prescriptionId: prescriptionId,
             medicineId: data.medicineId,
@@ -97,7 +97,7 @@ const createPrescriptionDetail = async (prescriptionId, data) => {
             dosage: data.dosage,
             price: data.price
         });
-        if(prescriptionDetail){
+        if (prescriptionDetail) {
             return true;
         } else {
             return false;
@@ -109,14 +109,14 @@ const createPrescriptionDetail = async (prescriptionId, data) => {
 }
 
 const updatePrescriptionDetail = async (prescriptionId, data) => {
-    try{
+    try {
         let prescriptionDetail = await db.PrescriptionDetail.findOne({
             where: {
                 prescriptionId: prescriptionId,
                 medicineId: data.medicineId
             }
         });
-        if(prescriptionDetail){
+        if (prescriptionDetail) {
             prescriptionDetail.update({
                 quantity: data.quantity,
                 unit: data.unit,
@@ -136,14 +136,14 @@ const updatePrescriptionDetail = async (prescriptionId, data) => {
 }
 
 const deletePrescriptionDetail = async (data) => {
-    try{
+    try {
         let prescriptionDetail = await db.PrescriptionDetail.findOne({
             where: {
                 prescriptionId: data.prescriptionId,
                 medicineId: data.medicineId
             }
         });
-        if(prescriptionDetail){
+        if (prescriptionDetail) {
             prescriptionDetail.destroy();
             console.log("Delete PrescriptionDetail successfully");
             return true;

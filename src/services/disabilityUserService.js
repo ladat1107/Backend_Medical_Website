@@ -7,7 +7,7 @@ const getAllDisabilityUser = async () => {
                 model: db.User,
                 as: "disablityUserUserData",
                 attributes: ["id", "lastName", "firstName", "email", "phoneNumber", "avatar"],
-            },{
+            }, {
                 model: db.Disability,
                 as: "disablityUserDisabilityData",
                 attributes: ["id", "bodyPart"],
@@ -24,7 +24,7 @@ const getAllDisabilityUser = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -33,7 +33,7 @@ const getAllDisabilityUser = async () => {
 const getDisabilityUserByUserId = async (userId) => {
     try {
         let disabilityUser = await db.DisabilityUser.findOne({
-            where: {userId: userId},
+            where: { userId: userId },
             include: [{
                 model: db.Disability,
                 as: "disablityUserDisabilityData",
@@ -51,7 +51,7 @@ const getDisabilityUserByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -60,7 +60,7 @@ const getDisabilityUserByUserId = async (userId) => {
 const getDisabilityUserByDisabilityId = async (disabilityId) => {
     try {
         let disabilityUser = await db.DisabilityUser.findOne({
-            where: {disabilityId: disabilityId},
+            where: { disabilityId: disabilityId },
             include: [{
                 model: db.User,
                 as: "disablityUserUserData",
@@ -78,7 +78,7 @@ const getDisabilityUserByDisabilityId = async (disabilityId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -101,7 +101,7 @@ const createDisabilityUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -113,7 +113,7 @@ const updateDisabilityUser = async (data) => {
             description: data.description,
             medicalFacilityRecords: data.medicalFacilityRecords
         }, {
-            where: {userId: data.userId, disabilityId: data.disabilityId}
+            where: { userId: data.userId, disabilityId: data.disabilityId }
         });
         return {
             EC: 0,
@@ -124,7 +124,7 @@ const updateDisabilityUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -133,7 +133,7 @@ const updateDisabilityUser = async (data) => {
 const deleteDisabilityUser = async (data) => {
     try {
         await db.DisabilityUser.destroy({
-            where: {userId: data.userId, disabilityId: data.disabilityId}
+            where: { userId: data.userId, disabilityId: data.disabilityId }
         });
         return {
             EC: 0,
@@ -144,7 +144,7 @@ const deleteDisabilityUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

@@ -12,7 +12,7 @@ const getAllStaff = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -21,7 +21,7 @@ const getAllStaff = async (req, res) => {
 const getStaffbyDepartmentId = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.departmentId){
+        if (data && data.departmentId) {
             let response = await staffService.getStaffbyDepartmentId(data.departmentId);
             res.status(200).json({
                 EC: response.EC,
@@ -39,7 +39,7 @@ const getStaffbyDepartmentId = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -48,7 +48,7 @@ const getStaffbyDepartmentId = async (req, res) => {
 const getStaffById = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.id){
+        if (data && data.id) {
             let response = await staffService.getStaffById(data.id);
             res.status(200).json({
                 EC: response.EC,
@@ -66,7 +66,7 @@ const getStaffById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -75,7 +75,7 @@ const getStaffById = async (req, res) => {
 const getStaffByRole = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.roleId){
+        if (data && data.roleId) {
             let response = await staffService.getStaffByRole(data.roleId);
             res.status(200).json({
                 EC: response.EC,
@@ -93,7 +93,7 @@ const getStaffByRole = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -102,7 +102,7 @@ const getStaffByRole = async (req, res) => {
 const getStaffByName = async (req, res) => {
     try {
         let data = req.query;
-        if(data && data.name){
+        if (data && data.name) {
             let response = await staffService.getStaffByName(data.name);
             res.status(200).json({
                 EC: response.EC,
@@ -120,7 +120,7 @@ const getStaffByName = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }

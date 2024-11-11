@@ -26,7 +26,7 @@ const getAllDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -43,7 +43,7 @@ const getAllNameDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -69,7 +69,7 @@ const getDepartmentById = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -96,7 +96,7 @@ const getAllStaffInDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -123,7 +123,7 @@ const createDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -151,7 +151,7 @@ const updateDepartment = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -177,7 +177,7 @@ const deleteDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
@@ -203,12 +203,28 @@ const blockDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         })
     }
 }
-
+const getDepartmentHome = async (req, res) => {
+    try {
+        let response = await departmentService.getDepartmentHome();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllNameDepartment,
     getAllDepartment,
@@ -217,5 +233,6 @@ module.exports = {
     createDepartment,
     updateDepartment,
     deleteDepartment,
-    blockDepartment
+    blockDepartment,
+    getDepartmentHome,
 }

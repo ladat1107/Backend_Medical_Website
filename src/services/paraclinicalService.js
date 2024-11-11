@@ -2,13 +2,13 @@ import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
 
 const getParaclinicalByExamId = async (examinationId) => {
-    try{
+    try {
         let paraclinical = await db.Paraclinical.findAll({
             where: {
                 examinationId: examinationId
             }
         });
-        if(paraclinical.length === 0){
+        if (paraclinical.length === 0) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy xét nghiệm",
@@ -24,21 +24,21 @@ const getParaclinicalByExamId = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }
 }
 
 const createParaclinical = async (data) => {
-    try{
+    try {
         let examination = await db.Examination.findOne({
             where: {
                 id: data.examinationId
             }
         });
 
-        if(!examination){
+        if (!examination) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy phiên khám",
@@ -54,13 +54,13 @@ const createParaclinical = async (data) => {
             }
         });
 
-        if(existParaclinical){
+        if (existParaclinical) {
             return {
                 EC: 404,
                 EM: "Xét nghiệm đã tồn tại",
                 DT: ""
             }
-        } 
+        }
 
         let paraclinical = await db.Paraclinical.create({
             examinationId: data.examinationId,
@@ -79,19 +79,19 @@ const createParaclinical = async (data) => {
             EM: "Tạo xét nghiệm thành công",
             DT: paraclinical
         }
-        
+
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }
 }
 
 const updateParaclinical = async (data) => {
-    try{
+    try {
         let paraclinical = await db.Paraclinical.update({
             paraclinical: data.paraclinical,
             description: data.description,
@@ -112,16 +112,16 @@ const updateParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }
 }
 
 const deleteParaclinical = async (data) => {
-    try{
+    try {
         let paraclinical = await db.Paraclinical.destroy({
-            where: { 
+            where: {
                 id: +data.id,
                 examinationId: +data.examinationId
             }
@@ -135,21 +135,21 @@ const deleteParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }
 }
 
 const createOrUpdateParaclinical = async (data) => {
-    try{
+    try {
         let examination = await db.Examination.findOne({
             where: {
                 id: data.examinationId
             }
         });
 
-        if(!examination){
+        if (!examination) {
             return {
                 EC: 404,
                 EM: "Không tìm thấy phiên khám",
@@ -164,9 +164,9 @@ const createOrUpdateParaclinical = async (data) => {
             }
         });
 
-        if(existParaclinical){
+        if (existParaclinical) {
 
-            if(existParaclinical.id === data.id){
+            if (existParaclinical.id === data.id) {
                 await existParaclinical.update({
                     paraclinical: data.paraclinical,
                     description: data.description,
@@ -179,7 +179,7 @@ const createOrUpdateParaclinical = async (data) => {
                         examinationId: +data.examinationId
                     }
                 });
-    
+
                 return {
                     EC: 0,
                     EM: "Cập nhật xét nghiệm thành công",
@@ -210,12 +210,12 @@ const createOrUpdateParaclinical = async (data) => {
                 EM: "Tạo xét nghiệm thành công",
                 DT: true
             }
-        } 
+        }
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: ""
         }
     }

@@ -2,7 +2,7 @@ import db from "../models/index";
 const { Op } = require('sequelize');
 
 const getAllSchedules = async () => {
-    try{
+    try {
         let schedule = await db.Schedule.findAll({
             include: [{
                 model: db.Staff,
@@ -26,16 +26,16 @@ const getAllSchedules = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getScheduleByStaffId = async (staffId) => {
-    try{
+    try {
         let schedule = await db.Schedule.findAll({
-            where: {staffId: staffId},
+            where: { staffId: staffId },
             raw: true,
             nest: true,
         });
@@ -48,19 +48,19 @@ const getScheduleByStaffId = async (staffId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getScheduleInWeek = async (data) => {
-    try{
+    try {
         let schedule = await db.Schedule.findAll({
             where: {
                 date: {
-                    [Op.gte]: +data.from, 
-                    [Op.lte]: +data.to,   
+                    [Op.gte]: +data.from,
+                    [Op.lte]: +data.to,
                 }
             },
             include: [{
@@ -85,14 +85,14 @@ const getScheduleInWeek = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createSchedule = async (data) => {
-    try{
+    try {
         let schedule = await db.Schedule.create({
             staffId: data.staffId,
             roomId: data.roomId,
@@ -107,18 +107,18 @@ const createSchedule = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateScheduleStaff = async (data) => {
-    try{
+    try {
         let schedule = await db.Schedule.update({
             staffId: data.newStaffId
         }, {
-            where: {roomId: data.roomId, staffId: data.oldStaffId , date: data.date},
+            where: { roomId: data.roomId, staffId: data.oldStaffId, date: data.date },
         });
         return {
             EC: 0,
@@ -129,16 +129,16 @@ const updateScheduleStaff = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteSchedule = async (data) => {
-    try{
+    try {
         let schedule = await db.Schedule.destroy({
-            where: {staffId: data.staffId, roomId: data.roomId, date: data.date},
+            where: { staffId: data.staffId, roomId: data.roomId, date: data.date },
         });
         return {
             EC: 0,
@@ -149,7 +149,7 @@ const deleteSchedule = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

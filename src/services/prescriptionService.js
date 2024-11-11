@@ -8,11 +8,11 @@ const calculateTotalMoney = (details) => {
 };
 
 const getPrescriptionByExaminationId = async (examinationId) => {
-    try{
+    try {
         let prescription = await db.Prescription.findOne({
             where: { examinationId: examinationId },
             attributes: ['id', 'examinationId', 'note', 'totalMoney', 'paymentStatus'],
-            include:[{
+            include: [{
                 model: db.PrescriptionDetail,
                 as: 'prescriptionDetails',
                 attributes: {
@@ -28,7 +28,7 @@ const getPrescriptionByExaminationId = async (examinationId) => {
             }],
             nest: true,
         });
-        if(!prescription){
+        if (!prescription) {
             return {
                 EC: 1,
                 EM: "Không tìm thấy đơn thuốc",
@@ -44,7 +44,7 @@ const getPrescriptionByExaminationId = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

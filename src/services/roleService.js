@@ -2,7 +2,7 @@ import db from "../models/index";
 import { status } from "../utils/index";
 
 const getAllRoles = async () => {
-    try{
+    try {
         let role = await db.Role.findAll({
             where: {
                 status: status.ACTIVE,
@@ -19,14 +19,14 @@ const getAllRoles = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getRoleById = async (roleId) => {
-    try{
+    try {
         let role = await db.Role.findOne({
             where: {
                 id: roleId,
@@ -43,14 +43,14 @@ const getRoleById = async (roleId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createRole = async (roleData) => {
-    try{
+    try {
         let role = await db.Role.create({
             name: roleData.name,
             status: status.ACTIVE,
@@ -64,14 +64,14 @@ const createRole = async (roleData) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateRole = async (roleData) => {
-    try{
+    try {
         let role = await db.Role.update({
             name: roleData.name,
             status: roleData.status,
@@ -87,7 +87,7 @@ const updateRole = async (roleData) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

@@ -1,7 +1,7 @@
 import db from "../models/index";
 
 const getAllFamilyHistories = async () => {
-    try{
+    try {
         let familyHistory = await db.FamilyHistory.findAll({
             raw: true,
             nest: true,
@@ -15,14 +15,14 @@ const getAllFamilyHistories = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getFamilyHistoryById = async (id) => {
-    try{
+    try {
         let familyHistory = await db.FamilyHistory.findOne({
             where: {
                 id: id
@@ -39,14 +39,14 @@ const getFamilyHistoryById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getFamilyHistoriesByUserId = async (userId) => {
-    try{
+    try {
         let familyHistory = await db.FamilyHistory.findAll({
             where: {
                 userId: userId
@@ -63,14 +63,14 @@ const getFamilyHistoriesByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createFamilyHistory = async (data) => {
-    try{
+    try {
         let newFamilyHistory = await db.FamilyHistory.create({
             relationship: data.relationship,
             diseaseGroup: data.diseaseGroup,
@@ -90,14 +90,14 @@ const createFamilyHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateFamilyHistory = async (data) => {
-    try{
+    try {
         let familyHistory = await db.FamilyHistory.update({
             relationship: data.relationship,
             diseaseGroup: data.diseaseGroup,
@@ -120,14 +120,14 @@ const updateFamilyHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const deleteFamilyHistory = async (id) => {
-    try{
+    try {
         let familyHistory = await db.FamilyHistory.destroy({
             where: {
                 id: id
@@ -142,7 +142,7 @@ const deleteFamilyHistory = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }

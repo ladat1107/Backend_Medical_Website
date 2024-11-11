@@ -42,9 +42,8 @@ module.exports = (sequelize, DataTypes) => {
         model: 'descriptions',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
-    }
+    },
+    shortDescription: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Handbook',

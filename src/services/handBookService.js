@@ -4,17 +4,17 @@ import { status } from "../utils/index";
 const { Op, where } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search) => {
-    try{
+    try {
         let handBooks = await db.Handbook.findAll({
-            where: { 
+            where: {
                 status: status.ACTIVE,
                 [Op.or]: [
                     { title: { [Op.like]: `%${search}%` } },
-                    {'$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` }},
-                    {'$handbookStaffData.staffUserData.lastName$': { [Op.like]: `%${search}%` }},
+                    { '$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` } },
+                    { '$handbookStaffData.staffUserData.lastName$': { [Op.like]: `%${search}%` } },
                 ]
             },
-            include:[{
+            include: [{
                 model: db.Staff,
                 as: 'handbookStaffData',
                 attributes: ['id', 'position'],
@@ -24,13 +24,13 @@ const getAllHandBooks = async (page, limit, search) => {
                     as: 'staffUserData',
                     required: true,
                     attributes: ['firstName', 'lastName', 'email', 'avatar'],
-                },{
+                }, {
                     model: db.Department,
                     as: 'staffDepartmentData',
                     attributes: ['id', 'name']
                 }]
             }],
-            attributes: ['id', 'title', 'image', 'createdAt'],
+            attributes: ['id', 'title', 'image', 'createdAt', 'updatedAt', 'shortDescription'],
             offset: (+page - 1) * +limit,
             limit: +limit,
             raw: true,
@@ -45,25 +45,58 @@ const getAllHandBooks = async (page, limit, search) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
-
-const getHandBooksByStatus = async (handBookStatus) => {
-    try{
+const getHandBookHome = async () => {
+    try {
         let handBooks = await db.Handbook.findAll({
-            where: { status: handBookStatus },
-            include:[{
+            where: { status: status.ACTIVE },
+            include: [{
                 model: db.Staff,
                 as: 'handbookStaffData',
                 attributes: ['id', 'position'],
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['firstName', 'lastName', 'email', 'avatar'],
-                },{
+                    attributes: ['firstName', 'lastName', 'email']
+                }]
+            }],
+            order: [['updatedAt', 'DESC']],
+            limit: 20,
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin cẩm nang thành công",
+            DT: handBooks
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: "",
+        }
+
+    }
+}
+const getHandBooksByStatus = async (handBookStatus) => {
+    try {
+        let handBooks = await db.Handbook.findAll({
+            where: { status: handBookStatus },
+            include: [{
+                model: db.Staff,
+                as: 'handbookStaffData',
+                attributes: ['id', 'position'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['firstName', 'lastName', 'email', 'avatar', "shortDescription"],
+                }, {
                     model: db.Department,
                     as: 'staffDepartmentData',
                     attributes: ['id', 'name']
@@ -81,14 +114,14 @@ const getHandBooksByStatus = async (handBookStatus) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getHandBookById = async (handBookId) => {
-    try{
+    try {
         let handBook = await db.Handbook.findOne({
             where: { id: handBookId },
             include: [
@@ -106,7 +139,7 @@ const getHandBookById = async (handBookId) => {
                         model: db.User,
                         as: 'staffUserData',
                         attributes: ['firstName', 'lastName', 'email', 'avatar']
-                    },{
+                    }, {
                         model: db.Department,
                         as: 'staffDepartmentData',
                         attributes: ['id', 'name']
@@ -132,20 +165,21 @@ const getHandBookById = async (handBookId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createHandBook = async (data) => {
-    try{
+    try {
         let descriptionId = await descriptionService.createDescription(data);
-        if(descriptionId){
+        if (descriptionId) {
             let handBook = await db.Handbook.create({
                 title: data.title,
                 author: data.author,
                 image: data.image,
+                shortDescription: data?.shortDescription,
                 status: status.PENDING,
                 descriptionId: descriptionId
             });
@@ -154,7 +188,7 @@ const createHandBook = async (data) => {
                 EM: "Tạo cẩm nang thành công",
                 DT: handBook
             }
-        } else{
+        } else {
             await descriptionService.deleteDescription(descriptionId);
             return {
                 EC: 500,
@@ -162,41 +196,42 @@ const createHandBook = async (data) => {
                 DT: "",
             }
         }
-    }catch (error) {
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateHandBook = async (data) => {
-    try{
+    try {
         let handBook = await db.Handbook.findOne({
             where: { id: data.id },
-        }); 
-        if(handBook && handBook.author === data.author){
+        });
+        if (handBook && handBook.author === data.author) {
             let description = await descriptionService.updateDescription(data, handBook.descriptionId);
             if (description) {
                 await handBook.update({
                     title: data.title,
                     image: data.image,
+                    shortDescription: data?.shortDescription,
                 });
                 return {
                     EC: 0,
                     EM: "Cập nhật cẩm nang thành công",
                     DT: handBook
-                }   
-            } else{
+                }
+            } else {
                 return {
                     EC: 500,
                     EM: "Cập nhật cẩm nang thất bại",
                     DT: "",
                 }
-            } 
-        } else{
+            }
+        } else {
             return {
                 EC: 404,
                 EM: "Không tìm thấy cẩm nang/ Cẩm nang không thuộc quyền quản lý của bạn",
@@ -207,18 +242,18 @@ const updateHandBook = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updateHandbookStatus = async (data) => {
-    try{
+    try {
         let handBook = await db.Handbook.findOne({
             where: { id: data.id },
-        }); 
-        if(handBook){
+        });
+        if (handBook) {
             await handBook.update({
                 status: data.status,
             });
@@ -226,8 +261,8 @@ const updateHandbookStatus = async (data) => {
                 EC: 0,
                 EM: "Duyệt cẩm nang thành công",
                 DT: handBook
-            }   
-        } else{
+            }
+        } else {
             return {
                 EC: 404,
                 EM: "Không tìm thấy cẩm nang",
@@ -238,7 +273,7 @@ const updateHandbookStatus = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
@@ -251,4 +286,5 @@ module.exports = {
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
+    getHandBookHome,
 }

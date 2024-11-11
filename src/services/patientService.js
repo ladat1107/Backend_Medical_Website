@@ -1,14 +1,14 @@
 import db from "../models/index";
 
 const getAllPatients = async () => {
-    try{
+    try {
         let patient = await db.Patient.findAll({
             include: [
                 {
                     model: db.User,
                     as: 'patientUserData',
                     attributes: ['id', 'firstName', 'lastName'],
-                },{
+                }, {
                     model: db.Bed,
                     as: 'bedPatientData',
                     attributes: ['id'],
@@ -36,14 +36,14 @@ const getAllPatients = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getPatientById = async (patientId) => {
-    try{
+    try {
         let patient = await db.Patient.findOne({
             where: { id: patientId },
             include: [
@@ -51,7 +51,7 @@ const getPatientById = async (patientId) => {
                     model: db.User,
                     as: 'patientUserData',
                     attributes: ['id', 'firstName', 'lastName'],
-                },{
+                }, {
                     model: db.Bed,
                     as: 'bedPatientData',
                     attributes: ['id'],
@@ -79,14 +79,14 @@ const getPatientById = async (patientId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const getPatientByUserId = async (userId) => {
-    try{
+    try {
         let patient = await db.Patient.findOne({
             where: { userId: userId },
             include: [
@@ -94,7 +94,7 @@ const getPatientByUserId = async (userId) => {
                     model: db.User,
                     as: 'patientUserData',
                     attributes: ['id', 'firstName', 'lastName'],
-                },{
+                }, {
                     model: db.Bed,
                     as: 'bedPatientData',
                     attributes: ['id'],
@@ -122,14 +122,14 @@ const getPatientByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const createPatient = async (data) => {
-    try{
+    try {
         let patient = await db.Patient.create({
             dateOfAdmission: data.dateOfAdmission,
             bedId: data.bedId,
@@ -144,14 +144,14 @@ const createPatient = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
 }
 
 const updatePatient = async (data) => {
-    try{
+    try {
         let patient = await db.Patient.update({
             dateOfAdmission: data.dateOfAdmission,
             dateOfDischarge: data.dateOfDischarge,
@@ -168,7 +168,7 @@ const updatePatient = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Error from server",
+            EM: "Hệ thống quá tải!",
             DT: "",
         }
     }
