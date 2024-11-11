@@ -83,6 +83,7 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
         },
+        shortDescription: DataTypes.STRING,
         departmentId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -94,7 +95,7 @@ module.exports = (sequelize, DataTypes) => {
         specialtyId: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'specialties', 
+                model: 'specialties',
                 key: 'id',
             },
         },

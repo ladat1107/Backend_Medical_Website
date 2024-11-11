@@ -109,7 +109,7 @@ const getAllUser = async (page, limit, search, position) => {
                 {
                     model: db.Staff,
                     as: "staffUserData",
-                    attributes: ["id", "price", "position", "departmentId"],
+                    attributes: ["id", "price", "position", "departmentId", "shortDescription"],
                     include: [
                         {
                             model: db.Department,
@@ -168,7 +168,7 @@ const getUserById = async (userId) => {
                 {
                     model: db.Staff,
                     as: "staffUserData",
-                    attributes: ["id", "price", "position", "departmentId", "specialtyId"],
+                    attributes: ["id", "price", "position", "departmentId", "specialtyId", "shortDescription"],
                     include: [
                         {
                             model: db.Description,
@@ -367,6 +367,7 @@ const updateUser = async (data) => {
                 }, { transaction });
                 await db.Staff.update({
                     price: data?.price,
+                    shortDescription: data?.shortDescription,
                     position: data?.position?.toString(),
                     departmentId: data?.departmentId,
                     specialtyId: data?.specialtyId,
