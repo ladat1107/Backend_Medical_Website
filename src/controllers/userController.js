@@ -445,6 +445,56 @@ const getDoctorHome = async (req, res) => {
         })
     }
 }
+const profileInfor = async (req, res) => {
+    try {
+        let data = req.body;
+        if (!data || !data.id) {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Yêu cầu của bạn không đủ thông tin!",
+                DT: ""
+            })
+        }
+        let response = await userService.updateProfileInfor(data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const profilePassword = async (req, res) => {
+    try {
+        let data = req.body;
+        if (!data || !data.id || !data.oldPassword || !data.newPassword ) {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Yêu cầu của bạn không đủ thông tin!",
+                DT: ""
+            })
+        }
+        let response = await userService.updateProfilePassword(data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllUser,
     getUserById,
@@ -463,5 +513,7 @@ module.exports = {
     handleGetAccount,
     handleConfirm,
     getDoctorHome,
+    profileInfor,
+    profilePassword
 
 }

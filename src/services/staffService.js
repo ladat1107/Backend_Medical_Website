@@ -1,4 +1,4 @@
-import db from "../models/index";
+import db, { sequelize } from "../models/index";
 import specialty from "../models/specialty";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
@@ -274,7 +274,38 @@ const updateStaff = async (data) => {
         return false;
     }
 }
-
+const profileStaff = async (data) => {
+    let transaction = await sequelize.transaction();
+    try {
+        await db.Description.update({
+            markDownContent: data.markDownContent,
+            htmlContent: data.htmlContent
+        }, {
+            where: { id: data.descriptionId }
+        }, { transaction });
+        await db.Staff.update({
+            shortDescription: data?.shortDescription || null,
+            specialtyId: data?.specialtyId || null,
+            position: data?.position?.toString() || null,
+        }, {
+            where: { id: data.id }
+        }, { transaction });
+        await transaction.commit();
+        return {
+            EC: 0,
+            EM: "Cập nhật hồ sơ thành công",
+            DT: ""
+        }
+    } catch (error) {
+        console.log(error);
+        await transaction.rollback();
+        return {
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: ""
+        }
+    }
+}
 module.exports = {
     getAllStaff,
     getStaffbyDepartmentId,
@@ -282,5 +313,6 @@ module.exports = {
     getStaffByRole,
     getStaffByName,
     createStaff,
-    updateStaff
+    updateStaff,
+    profileStaff,
 }

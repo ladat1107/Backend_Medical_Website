@@ -58,6 +58,8 @@ let initWebRount = (app) => {
     //-- User   
     router.get("/getUserById", userController.getUserById)
     router.get("/getUserByCid", userController.getUserByCid)
+    router.put("/profileUpdateInfo", userController.profileInfor)
+    router.put("/profileUpdatePassword", userController.profilePassword)
     //------> Admin CRUD User
     router.get("/admin/getAllUser", userController.getAllUser)
     router.post("/admin/createUser", userController.createUser)
@@ -82,6 +84,8 @@ let initWebRount = (app) => {
     router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
     router.get("/getStaffByRole", staffController.getStaffByRole)
     router.get("/getStaffByName", staffController.getStaffByName)
+
+    router.put("/profileUpdateStaff", staffController.profileStaff)
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)

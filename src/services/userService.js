@@ -174,9 +174,20 @@ const getUserById = async (userId) => {
                             model: db.Description,
                             as: "staffDescriptionData",
                             attributes: ["id", "markDownContent", "htmlContent"],
-                        }
+                        },
+                        {
+                            model: db.Department,
+                            as: 'staffDepartmentData',
+                            attributes: ['id', 'name'],
+                        },
+                        {
+                            model: db.Specialty,
+                            as: 'staffSpecialtyData',
+                            attributes: ['id', 'name'],
+                        },
                     ]
-                }
+                },
+
             ],
             raw: true,
             nest: true,
@@ -684,6 +695,99 @@ const getDoctorHome = async () => {
 
     }
 }
+const updateProfileInfor = async (data) => {
+    try {
+        let [numberOfAffectedRows] = await db.User.update({
+            phoneNumber: data?.phoneNumber,
+            lastName: data?.lastName,
+            firstName: data?.firstName,
+            gender: data?.gender || null,
+            avatar: data?.avatar || null,
+            cid: data?.cid,
+            dob: data?.dob || null,
+            address: data?.address || null,
+            currentResident: data?.currentResident || null,
+            folk: data?.folk || null,
+            ABOBloodGroup: data?.ABOBloodGroup || null,
+            RHBloodGroup: data?.RHBloodGroup || null,
+            maritalStatus: data?.maritalStatus || null,
+        }, {
+            where: { id: data.id },
+        });
+        if (numberOfAffectedRows === 0) {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 0,
+                EM: "Cập nhật thông tin thành công",
+                DT: "",
+            }
+        }
+    }
+    catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: "",
+        }
+    }
+}
+const updateProfilePassword = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: { id: data.id },
+            attributes: ["password"],
+        });
+        if (user) {
+            let comparePassword = await bcrypt.compareSync(data.oldPassword, user.password);
+            if (comparePassword) {
+                let hashPassword = await hashPasswordUser(data.newPassword);
+                let [numberOfAffectedRows] = await db.User.update({
+                    password: hashPassword,
+                }, {
+                    where: { id: data.id },
+                });
+                if (numberOfAffectedRows === 0) {
+                    return {
+                        EC: 200,
+                        EM: "Cập nhật mật khẩu thất bại",
+                        DT: "",
+                    }
+                } else {
+                    return {
+                        EC: 0,
+                        EM: "Cập nhật mật khẩu thành công",
+                        DT: "",
+                    }
+                }
+            } else {
+                return {
+                    EC: 200,
+                    EM: "Mật khẩu cũ không đúng",
+                    DT: "",
+                }
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: "",
+        }
+    }
+}
 module.exports = {
     getAllUser,
     getUserById,
@@ -695,4 +799,6 @@ module.exports = {
     registerUser,
     loginUser,
     getDoctorHome,
+    updateProfileInfor,
+    updateProfilePassword,
 }

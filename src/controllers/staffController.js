@@ -125,11 +125,37 @@ const getStaffByName = async (req, res) => {
         })
     }
 }
-
+const profileStaff = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.id && data.descriptionId && data.markDownContent && data.htmlContent && data.shortDescription) {
+            let response = await staffService.profileStaff(data);
+            res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            });
+        } else {
+            return res.status(400).json({
+                EC: 400,
+                EM: "Dữ liệu không được để trống",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllStaff,
     getStaffbyDepartmentId,
     getStaffById,
     getStaffByRole,
-    getStaffByName
+    getStaffByName,
+    profileStaff
 }
