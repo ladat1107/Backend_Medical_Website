@@ -153,6 +153,8 @@ const seachAppointment = async (data) => {
         if (data.from == '') data.from = 0;
         if (data.to == '') data.to = getTodayTimestamp();
 
+        
+
         let appointment = await db.Appointment.findAll({
             where: {
                 date: {
@@ -209,6 +211,27 @@ const seachAppointmentWithStaffId = async (data) => {
         let toDate = data.to ? new Date(+data.to) : new Date();
         toDate.setHours(23, 59, 59, 999);
 
+        let totalItems = await db.Appointment.count({
+            where: {
+                date: {
+                    [Op.gte]: fromDate,
+                    [Op.lte]: toDate,
+                },
+                staffId: data.staffId,
+            },
+            include: [{
+                model: db.User,
+                as: 'appointmentUserData',
+                required: true,
+                where: {
+                    [Op.or]: [
+                        { firstName: { [Op.like]: `%${data.search}%` } },
+                        { lastName: { [Op.like]: `%${data.search}%` } },
+                    ]
+                }
+            }]
+        });
+
         let appointment = await db.Appointment.findAll({
             where: {
                 date: {
@@ -246,7 +269,10 @@ const seachAppointmentWithStaffId = async (data) => {
         return {
             EC: 0,
             EM: "Lấy thông tin lịch hẹn thành công",
-            DT: appointment
+            DT: {
+                totalItems,
+                appointment,
+            }
         }
     } catch (error) {
         console.log(error);

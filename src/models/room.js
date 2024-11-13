@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'roomId',
                 as: 'bedRoomData',
             });
+            Room.hasMany(models.Schedule, {
+                foreignKey: 'roomId',
+                as: 'scheduleRoomData',
+            })
         }
     }
     Room.init({

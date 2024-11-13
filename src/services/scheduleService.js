@@ -6,7 +6,7 @@ const getAllSchedules = async () => {
         let schedule = await db.Schedule.findAll({
             include: [{
                 model: db.Staff,
-                as: 'scheduleStaffData',
+                as: 'staffScheduleData',
                 attributes: ['id', 'departmentId'],
                 include: [{
                     model: db.User,
@@ -66,7 +66,7 @@ const getScheduleInWeek = async (data) => {
             },
             include: [{
                 model: db.Staff,
-                as: 'scheduleStaffData',
+                as: 'staffScheduleData',
                 attributes: ['id', 'departmentId'],
                 include: [{
                     model: db.User,

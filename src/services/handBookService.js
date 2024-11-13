@@ -70,18 +70,22 @@ const getAllHandBooks = async (page, limit, search) => {
             raw: true,
             nest: true,
         });
+
         return {
             EC: 0,
             EM: "Lấy thông tin cẩm nang thành công",
-            DT: handBooks
-        }
+            DT: {
+                totalItems,
+                handBooks
+            }
+        };
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
             EM: "Lỗi server!",
             DT: "",
-        }
+        };
     }
 }
 
@@ -159,8 +163,6 @@ const getHandBookHome = async () => {
             DT: "",
         }
 
-    }
-}
 const getHandBooksByStatus = async (handBookStatus) => {
     try {
         let handBooks = await db.Handbook.findAll({

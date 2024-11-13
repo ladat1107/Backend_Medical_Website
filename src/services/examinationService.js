@@ -40,9 +40,9 @@ const getExaminationById = async (id) => {
                 as: 'prescriptionExamData',
                 attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
                 include: [{
-                    model: db.PrescriptionDetail,
+                    model: db.Medicine,
                     as: 'prescriptionDetails',
-                    attributes: ['id', 'name', 'price'],
+                    attributes: ['id', 'name', 'price'],    
                     through: ['quantity', 'unit', 'dosage', 'price']
                 }],
             }],
