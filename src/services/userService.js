@@ -1,13 +1,12 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
 import { literal, Op } from 'sequelize';
-import JWTService from "../services/JWTService";
 import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
-import { ROLE } from "../utils/constraints";
+import { ROLE, TIME } from "../utils/constraints";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -20,6 +19,57 @@ let hashPasswordUser = async (password) => {
         return {
             EC: 500,
             EM: "Lỗi hệ thống",
+        }
+    }
+}
+let loginUser = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: {
+                email: data.email,
+            },
+            include: [{
+                model: db.Role,
+                as: "userRoleData",
+                attributes: ["name"],
+            }],
+            attributes: {
+                exclude: ["createdAt", "updatedAt"]
+            }
+        })
+        if (user) {
+            let comparePassword = await bcrypt.compareSync(data.password, user.password);
+            if (comparePassword) {
+                let data = {
+                    id: user.id,
+                    email: user.email,
+                    roleId: user.roleId,
+                }
+                let token = createToken(data, TIME.tokenLife);
+                let refreshToken = createToken(data, TIME.refreshToken);
+                return {
+                    EC: 0,
+                    EM: "Đăng nhập thành công",
+                    DT: {
+                        user: { id: user.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                        accessToken: token,
+                        refreshToken: refreshToken
+                    }
+                }
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Tên đăng nhập hoặc mật khẩu không đúng",
+            DT: ''
+        }
+    }
+    catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: "",
         }
     }
 }
@@ -599,52 +649,6 @@ const confirmUser = async (token) => {
             EC: 200,
             EM: "Token không hợp lệ",
             DT: "",
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
-    }
-}
-const loginUser = async (data) => {
-    try {
-        let user = await db.User.findOne({
-            where: {
-                [Op.or]: [
-                    { email: data.userLogin },
-                ]
-            },
-            attributes: {
-                exclude: ["createdAt", "updatedAt"]
-            }
-        })
-        if (user) {
-            let comparePassword = await bcrypt.compareSync(data.passwordLogin, user.password);
-            if (comparePassword) {
-                delete user.dataValues.password;
-                let data = {
-                    email: user.email,
-                    userName: user.userName,
-                    roleId: user.roleId,
-                }
-                let token = createToken(data);
-                return {
-                    EC: 0,
-                    EM: "Đăng nhập thành công",
-                    DT: {
-                        user: user,
-                        token: token,
-                    }
-                }
-            }
-        }
-        return {
-            EC: 200,
-            EM: "Tên đăng nhập hoặc mật khẩu không đúng",
-            DT: ''
         }
     } catch (error) {
         console.log(error);

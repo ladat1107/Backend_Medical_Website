@@ -1,5 +1,5 @@
 import userService from '../services/userService'
-import { PAGINATE, ROLE } from '../utils';
+import { COOKIE, PAGINATE, ROLE, TIME } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -52,27 +52,10 @@ const handleConfirm = async (req, res) => {
         })
     }
 }
-const handleLogout = (req, res) => {
-    try {
-        res.clearCookie("jwt");
-        return res.status(200).json({
-            EC: 0,
-            EM: "Đăng xuất thành công",
-            DT: ""
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
 const handleLogin = async (req, res) => {
     try {
         let data = req.body;
-        if (!data || !data.userLogin || !data.passwordLogin) {
+        if (!data || !data.email || !data.password) {
             return res.status(400).json({
                 EC: 400,
                 EM: "Dữ liệu không được trống!",
@@ -80,15 +63,15 @@ const handleLogin = async (req, res) => {
             })
         }
         let response = await userService.loginUser(data);
-        res.cookie("jwt", response.DT.token, {
+        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
             httpOnly: true,
-            maxAge: 60 * 60 * 1000
+            maxAge: TIME.cookieLife
         })
-        delete response.DT.token;
+        delete response.DT.refreshToken;
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
-            DT: response.DT.user
+            DT: response.DT
         })
     } catch (error) {
         console.log(error);
@@ -473,7 +456,7 @@ const profileInfor = async (req, res) => {
 const profilePassword = async (req, res) => {
     try {
         let data = req.body;
-        if (!data || !data.id || !data.oldPassword || !data.newPassword ) {
+        if (!data || !data.id || !data.oldPassword || !data.newPassword) {
             return res.status(200).json({
                 EC: 400,
                 EM: "Yêu cầu của bạn không đủ thông tin!",
@@ -506,7 +489,6 @@ module.exports = {
 
     handleRegisterUser,
     handleLogin,
-    handleLogout,
     updateFunction,
     deleteFunction,
     getFunctionById,

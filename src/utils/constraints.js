@@ -39,9 +39,20 @@ const ROLE = {
     RECEPTIONIST: 6,
     ACCOUNTANT: 7,
 }
+const COOKIE = {
+    refreshToken: "refreshToken"
+}
+const TIME = {
+    tokenLife: 60 * 60, // tính theo giây
+    refreshToken: 7 * 24 * 60 * 60, // tính theo giây
+    cookieLife: 7 * 24 * 60 * 60 * 1000,// tính theo milisecond
+    tokenEmail: 7 * 24 * 60 * 60, // tính theo giây
+}
 module.exports = {
     status,
     pamentStatus,
     PAGINATE,
-    ROLE
+    ROLE,
+    COOKIE,
+    TIME
 }

@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
+import { COOKIE, TIME } from "../utils";
 require('dotenv').config();
 const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm'];
-const createToken = (payload) => {
+const createToken = (payload, time) => {
     let key = process.env.SECURITY_KEY;
     let token = null;
     try {
-        token = jwt.sign(payload, key, { expiresIn: 10000 });
+        token = jwt.sign(payload, key, { expiresIn: +time });
     } catch (error) {
         console.log(error);
     }
@@ -26,24 +27,24 @@ const checkTokenWithCookie = (req, res, next) => {
         return next();
     }
 
-    if ((req.cookies && req.cookies.jwt) || req.headers.authorization.split(' ')[1]) {
-        let reqToken = req.cookies.jwt || req.headers.authorization.split(' ')[1];
+    if (req.headers.authorization.split(' ')[1]) {
+        let reqToken = req.headers.authorization.split(' ')[1];
         let reqDecoded = verifyToken(reqToken);
         if (reqDecoded !== null) {
             req.user = reqDecoded;
             req.token = reqToken;
             return next();
         } else {
-            return res.status(401).json({
-                EC: 401,
-                EM: "Unauthorized",
+            return res.status(403).json({
+                EC: 403,
+                EM: "Không có quyền truy cập",
                 DT: ""
             });
         }
     } else {
         return res.status(401).json({
             EC: 401,
-            EM: "Please login again...",
+            EM: "Vui lòng đăng nhập",
             DT: ""
         });
     }
@@ -83,9 +84,49 @@ const checkAuthentication = (req, res, next) => {
     }
 
 }
+const refreshToken = (req, res) => {
+    try {
+        let reqToken = req.cookies[COOKIE.refreshToken];
+        if (!reqToken) {
+            return res.status(200).json({
+                EC: 401,
+                EM: "Hêt phiên đăng nhập",
+                DT: ""
+            });
+        }
+        let reqDecoded = verifyToken(reqToken);
+        if (reqDecoded) {
+            let data = {
+                id: reqDecoded.id,
+                email: reqDecoded.email,
+                roleId: reqDecoded.roleId,
+            }
+            let newToken = createToken(data, TIME.tokenLife);
+            return res.status(200).json({
+                EC: 0,
+                EM: "Refresh token success",
+                DT: newToken
+            });
+        } else {
+            return res.status(200).json({
+                EC: 401,
+                EM: "Lỗi xác thực",
+                DT: ""
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server",
+            DT: ""
+        });
+    }
+}
 module.exports = {
     createToken,
     verifyToken,
     checkTokenWithCookie,
     checkAuthentication,
+    refreshToken,
 }

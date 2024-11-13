@@ -6,6 +6,8 @@ import initPatientRount from "./router/patient"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { TIME } from './utils/constraints';
+import authenRout from './router/authen';
 require('dotenv').config();
 
 const app = express();
@@ -24,7 +26,6 @@ app.use(bodyParser.urlencoded({
 }));
 
 // Initialize cookie parser
-
 app.use(cookieParser());
 
 // Configure view engine
@@ -32,7 +33,7 @@ app.use(cookieParser());
 configViewEngine(app);
 
 // Initialize web routes
-
+authenRout(app);
 initWebRount(app);
 initPatientRount(app)
 

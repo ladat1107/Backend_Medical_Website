@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer"
 require('dotenv').config();
 import { createToken } from "../Middleware/JWTAction"
+import { TIME } from "../utils";
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -17,7 +18,7 @@ const transporter = nodemailer.createTransport({
 let sendEmailConform = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let token = createToken(data);
+            let token = createToken(data, TIME.tokenEmail);
             let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/api/confirm?confirm=${token}`;
             let info = await transporter.sendMail({
                 from: "Bệnh viện Hoa sen <benhvienhoasen@gmail.com>",//process.env.GMAIL_APP, // sender address
