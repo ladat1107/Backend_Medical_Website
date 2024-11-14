@@ -1,9 +1,9 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
-const { Op, where } = require('sequelize');
+const { Op } = require('sequelize');
 
-const getAllHandBooks = async (page, limit, search) => {
+const getAllHandBooks = async (page, limit, search, filter) => {
     try {
         // Nếu có filter, chuyển thành mảng
         let filterArray = filter ? filter.split(",") : [];
@@ -46,7 +46,15 @@ const getAllHandBooks = async (page, limit, search) => {
                     { title: { [Op.like]: `%${search}%` } },
                     { '$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` } },
                     { '$handbookStaffData.staffUserData.lastName$': { [Op.like]: `%${search}%` } },
-                ]
+                ],
+                // Kiểm tra xem tags có chứa tất cả các giá trị trong filterArray
+                ...(filterArray.length > 0 && {
+                    tags: {
+                        [Op.and]: filterArray.map(tag => ({
+                            [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
+                        }))
+                    }
+                })
             },
             include: [{
                 model: db.Staff,
@@ -64,7 +72,7 @@ const getAllHandBooks = async (page, limit, search) => {
                     attributes: ['id', 'name']
                 }]
             }],
-            attributes: ['id', 'title', 'image', 'createdAt', 'updatedAt', 'shortDescription'],
+            attributes: ['id', 'title', 'image', 'createdAt', 'updatedAt', 'shortDescription', 'tags'],
             offset: (+page - 1) * +limit,
             limit: +limit,
             raw: true,
@@ -162,6 +170,8 @@ const getHandBookHome = async () => {
             EM: "Lỗi server!",
             DT: "",
         }
+    }
+}
 
 const getHandBooksByStatus = async (handBookStatus) => {
     try {
@@ -174,7 +184,7 @@ const getHandBooksByStatus = async (handBookStatus) => {
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['firstName', 'lastName', 'email', 'avatar', "shortDescription"],
+                    attributes: ['firstName', 'lastName', 'email', 'avatar', "shortDescription", 'tags'],
                 }, {
                     model: db.Department,
                     as: 'staffDepartmentData',
@@ -259,6 +269,7 @@ const createHandBook = async (data) => {
                 author: data.author,
                 image: data.image,
                 shortDescription: data?.shortDescription || null,
+                tags: data.tags || null,
                 status: status.PENDING,
                 descriptionId: descriptionId
             });
@@ -297,6 +308,7 @@ const updateHandBook = async (data) => {
                     title: data.title,
                     image: data.image,
                     shortDescription: data?.shortDescription || null,
+                    tags: data.tags || null,
                 });
                 return {
                     EC: 0,
@@ -366,4 +378,5 @@ module.exports = {
     updateHandBook,
     updateHandbookStatus,
     getHandBookHome,
+    getAllTags
 }

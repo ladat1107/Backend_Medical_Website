@@ -74,6 +74,7 @@ let initWebRount = (app) => {
     router.get("/getHandBookById", handBookController.getHandBookById)
     router.post("/createHandBook", handBookController.createHandBook)
     router.put("/updateHandBook", handBookController.updateHandBook)
+    router.get("/getAllTags", handBookController.getAllTags)
     //// ----> Admin
     router.get("/admin/getHandBooksByStatus", handBookController.getHandBooksByStatus)
     router.put("/admin/updateHandbookStatus", handBookController.updateHandbookStatus)

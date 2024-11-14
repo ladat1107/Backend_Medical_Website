@@ -5,7 +5,8 @@ const getAllHandBooks = async (req, res) => {
         let page = req.query.page || 1;
         let limit = req.query.limit || 10;
         let search = req.query.search || "";
-        let response = await handBookService.getAllHandBooks(page, limit, search);
+        let filter = req.query.filter || "";
+        let response = await handBookService.getAllHandBooks(page, limit, search, filter);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -168,6 +169,25 @@ const getHandBookHome = async (req, res) => {
         })
     }
 }
+
+const getAllTags = async (req, res) => {
+    try {
+        let response = await handBookService.getAllTags();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Hệ thống quá tải!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getAllHandBooks,
     getHandBooksByStatus,
@@ -175,5 +195,6 @@ module.exports = {
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
-    getHandBookHome
+    getHandBookHome,
+    getAllTags
 }
