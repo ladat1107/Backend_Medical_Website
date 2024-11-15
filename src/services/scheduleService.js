@@ -26,7 +26,7 @@ const getAllSchedules = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -36,6 +36,7 @@ const getScheduleByStaffId = async (staffId) => {
     try {
         let schedule = await db.Schedule.findAll({
             where: { staffId: staffId },
+            attributes: ['roomId', 'date'],
             raw: true,
             nest: true,
         });
@@ -48,7 +49,7 @@ const getScheduleByStaffId = async (staffId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -85,7 +86,7 @@ const getScheduleInWeek = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -107,7 +108,7 @@ const createSchedule = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -129,7 +130,7 @@ const updateScheduleStaff = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -149,7 +150,7 @@ const deleteSchedule = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

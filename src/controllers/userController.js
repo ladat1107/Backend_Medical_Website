@@ -113,7 +113,7 @@ const getAllUser = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -140,7 +140,7 @@ const getUserById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -167,7 +167,7 @@ const getUserByCid = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -237,7 +237,7 @@ const updateUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải! dddd",
+            EM: "Lỗi server! dddd",
             DT: ""
         })
     }
@@ -263,7 +263,7 @@ const blockUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -289,7 +289,7 @@ const deleteUser = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }

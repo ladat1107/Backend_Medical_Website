@@ -16,7 +16,7 @@ const getInsuranceById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -38,7 +38,7 @@ const getInsuranceByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -65,7 +65,7 @@ const createInsurance = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -95,7 +95,7 @@ const updateInsurance = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -117,7 +117,7 @@ const deleteInsurance = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

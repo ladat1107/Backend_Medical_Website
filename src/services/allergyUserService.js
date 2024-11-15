@@ -24,7 +24,7 @@ const getAllAllergyUsers = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -51,7 +51,7 @@ const getAllergyUserByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -78,7 +78,7 @@ const getAllergyUserByAllergyId = async (allergyId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -100,7 +100,7 @@ const createAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -122,7 +122,7 @@ const updateAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -142,7 +142,7 @@ const deleteAllergyUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

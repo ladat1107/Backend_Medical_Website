@@ -17,7 +17,7 @@ const getAllDisability = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -39,7 +39,7 @@ const getDisabilityById = async (disbilityId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -60,7 +60,7 @@ const createDisability = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -82,7 +82,7 @@ const updateDisability = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -104,7 +104,7 @@ const deleteDisability = async (disbilityId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

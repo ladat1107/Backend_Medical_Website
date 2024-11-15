@@ -17,7 +17,7 @@ const getAllSurgicalHistories = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -41,7 +41,7 @@ const getSurgicalHistoryById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -63,7 +63,7 @@ const createSurgicalHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -88,7 +88,7 @@ const updateSurgicalHistory = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -112,7 +112,7 @@ const deleteSurgicalHistory = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

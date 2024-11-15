@@ -21,7 +21,7 @@ const getConditionAtBirthById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -48,7 +48,7 @@ const getConditionAtBirthByUserId = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -75,7 +75,7 @@ const createConditionAtBirth = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -102,7 +102,7 @@ const updateConditionAtBirth = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -129,7 +129,7 @@ const deleteConditionAtBirth = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }

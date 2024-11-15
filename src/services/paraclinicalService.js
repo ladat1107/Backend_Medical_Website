@@ -24,7 +24,7 @@ const getParaclinicalByExamId = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -84,7 +84,7 @@ const createParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -112,7 +112,7 @@ const updateParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -135,7 +135,7 @@ const deleteParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -215,7 +215,7 @@ const createOrUpdateParaclinical = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }

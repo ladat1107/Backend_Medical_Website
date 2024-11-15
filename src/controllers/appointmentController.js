@@ -12,7 +12,7 @@ const getAllAppointments = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -39,7 +39,7 @@ const getAllAppointmentsByDate = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -66,7 +66,7 @@ const getAppointmentByUserId = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -93,7 +93,7 @@ const getAppointmentByStaffId = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -120,7 +120,7 @@ const searchAppointment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -147,7 +147,7 @@ const seachAppointmentWithStaffId = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -174,7 +174,7 @@ const createAppointment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -201,7 +201,7 @@ const deleteAppointment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }

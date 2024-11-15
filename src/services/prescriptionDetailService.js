@@ -23,7 +23,7 @@ const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

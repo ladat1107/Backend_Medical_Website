@@ -12,7 +12,7 @@ const getAllDisabilities = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -39,7 +39,7 @@ const getDisabilityById = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -66,7 +66,7 @@ const createDisability = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -93,7 +93,7 @@ const updateDisability = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -120,7 +120,7 @@ const deleteDisability = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }

@@ -56,7 +56,7 @@ const getAllDepartment = async (page, limit, search) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -75,7 +75,7 @@ const getDepartmentHome = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -99,7 +99,7 @@ const getAllNameDepartment = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -144,7 +144,7 @@ const getDepartmentById = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -176,7 +176,7 @@ const getAllStaffInDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -211,7 +211,7 @@ const createDepartment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -255,7 +255,7 @@ const updateDepartment = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -295,15 +295,13 @@ const blockDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
 }
 const deleteDepartment = async (departmentId) => {
     try {
-
-
         let department = await db.Department.findOne({
             where: { id: departmentId },
         });
@@ -355,7 +353,7 @@ const deleteDepartment = async (departmentId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

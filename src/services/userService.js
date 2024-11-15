@@ -200,7 +200,7 @@ const getAllUser = async (page, limit, search, position) => {
         console.error(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         };
     }
@@ -258,7 +258,7 @@ const getUserById = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -289,7 +289,7 @@ const getUserByCid = async (cid) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -381,7 +381,7 @@ const createUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -410,7 +410,7 @@ const updateUser = async (data) => {
                 lastName: data?.lastName,
                 firstName: data?.firstName,
                 cid: data?.cid,
-                dob: data?.dob,
+                dob: data?.dob || null,
                 gender: data?.gender,
                 address: data?.address,
                 currentRescident: data?.currentRescident,
@@ -420,7 +420,6 @@ const updateUser = async (data) => {
                 where: { id: data.id },
             }, { transaction });
             if (user.roleId === ROLE.ACCOUNTANT || user.roleId === ROLE.DOCTOR || user.roleId === ROLE.NURSE || user.roleId === ROLE.PHARMACIST || user.roleId === ROLE.RECEPTIONIST) {
-                console.log(data.markDownContent);
                 await db.Description.update({
                     markDownContent: data?.markDownContent,
                     htmlContent: data?.htmlContent,
@@ -512,7 +511,7 @@ const updateUser = async (data) => {
         await transaction.rollback();
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -545,7 +544,7 @@ const blockUser = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -573,7 +572,7 @@ const deleteUser = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -693,7 +692,7 @@ const getDoctorHome = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
 
@@ -736,7 +735,7 @@ const updateProfileInfor = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -787,7 +786,7 @@ const updateProfilePassword = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

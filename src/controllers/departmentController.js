@@ -26,7 +26,7 @@ const getAllDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -43,7 +43,7 @@ const getAllNameDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -69,7 +69,7 @@ const getDepartmentById = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -96,7 +96,7 @@ const getAllStaffInDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -123,7 +123,7 @@ const createDepartment = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -151,7 +151,7 @@ const updateDepartment = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -177,7 +177,7 @@ const deleteDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -203,7 +203,7 @@ const blockDepartment = async (req, res) => {
         console.log(error);
         return res.status(200).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }
@@ -220,7 +220,7 @@ const getDepartmentHome = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         })
     }

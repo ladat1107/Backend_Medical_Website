@@ -36,10 +36,6 @@ let initWebRount = (app) => {
     router.all("*", checkTokenWithCookie)
 
     router.get("/account", userController.handleGetAccount)
-    router.get("/user/getById", userController.getFunctionById)
-    //router.post("/user/create", userController.createFunction)
-    router.put("/user/update", userController.updateFunction)
-    router.delete("/user/delete", userController.deleteFunction)
 
     //-- User   
     router.get("/getUserById", userController.getUserById)
@@ -264,8 +260,7 @@ let initWebRount = (app) => {
     router.get("/getAllDisease", diseaseController.getAllDisease)
 
 
-    router.post("/admin/specialty", specialtyController.createSpecialty)
-    router.get("/admin/getSpecialtySelect", specialtyController.getSpecialtySelect)
+   
 
     return app.use("/api/", router);
 }

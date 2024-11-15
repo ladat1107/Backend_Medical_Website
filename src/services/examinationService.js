@@ -42,13 +42,8 @@ const getExaminationById = async (id) => {
                 include: [{
                     model: db.PrescriptionDetail,
                     as: 'prescriptionDetails',
-                    attributes: ['quantity', 'unit', 'dosage', 'price'],
-                    include: [{
-                        model: db.Medicine,
-                        as: 'prescriptionDetailMedicineData',
-                        attributes: ['id', 'name', 'price'],
-                    }],
-                    separate: true,
+                    attributes: ['id', 'name', 'price'],
+                    through: ['quantity', 'unit', 'dosage', 'price']
                 }],
             }],
             nest: true,
@@ -65,7 +60,7 @@ const getExaminationById = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -87,7 +82,7 @@ const getExaminationByUserId = async (userId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -119,7 +114,7 @@ const createExamination = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -163,7 +158,7 @@ const updateExamination = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -196,7 +191,7 @@ const deleteExamination = async (id) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

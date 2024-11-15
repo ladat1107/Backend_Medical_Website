@@ -13,18 +13,10 @@ const getPrescriptionByExaminationId = async (examinationId) => {
             where: { examinationId: examinationId },
             attributes: ['id', 'examinationId', 'note', 'totalMoney', 'paymentStatus'],
             include: [{
-                model: db.PrescriptionDetail,
+                model: db.Medicine,
                 as: 'prescriptionDetails',
-                attributes: {
-                    exclude: ['id', 'createdAt', 'updatedAt']  // Loại bỏ cột id nếu nó không tồn tại
-                },
-                include: [
-                    {
-                        model: db.Medicine,
-                        as: 'prescriptionDetailMedicineData',
-                        attributes: ['id', 'name', 'price'],
-                    }
-                ]
+                attributes: ['id', 'name', 'price'],
+                through: ['quantity', 'unit', 'dosage', 'price']
             }],
             nest: true,
         });
@@ -44,7 +36,7 @@ const getPrescriptionByExaminationId = async (examinationId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }

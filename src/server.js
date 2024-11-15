@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import configViewEngine from './config/configViewEngine';
 import initWebRount from './router/web';
 import initPatientRount from "./router/patient"
+import initAdminRout from "./router/admin"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -34,6 +35,7 @@ configViewEngine(app);
 
 // Initialize web routes
 authenRout(app);
+initAdminRout(app);
 initWebRount(app);
 initPatientRount(app)
 

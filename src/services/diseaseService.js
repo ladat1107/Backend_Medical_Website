@@ -35,7 +35,7 @@ const getDiseaseByName = async (name) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }
@@ -72,7 +72,7 @@ const getAllDisease = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: ""
         }
     }

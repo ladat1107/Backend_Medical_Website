@@ -5,6 +5,40 @@ const { Op, where } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search) => {
     try {
+        // Nếu có filter, chuyển thành mảng
+        let filterArray = filter ? filter.split(",") : [];
+
+        // Đếm tổng số lượng bản ghi phù hợp với điều kiện tìm kiếm
+        let totalItems = await db.Handbook.count({
+            where: {
+                status: status.ACTIVE,
+                [Op.or]: [
+                    { title: { [Op.like]: `%${search}%` } },
+                    { '$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` } },
+                    { '$handbookStaffData.staffUserData.lastName$': { [Op.like]: `%${search}%` } },
+                ],
+                // Kiểm tra xem tags có chứa tất cả các giá trị trong filterArray
+                ...(filterArray.length > 0 && {
+                    tags: {
+                        [Op.and]: filterArray.map(tag => ({
+                            [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
+                        }))
+                    }
+                })
+            },
+            include: [{
+                model: db.Staff,
+                as: 'handbookStaffData',
+                required: true,
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    required: true,
+                }]
+            }],
+        });
+
+        // Lấy danh sách bản ghi với phân trang
         let handBooks = await db.Handbook.findAll({
             where: {
                 status: status.ACTIVE,
@@ -45,11 +79,54 @@ const getAllHandBooks = async (page, limit, search) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
 }
+
+const getAllTags = async () => {
+    try {
+        let handBooks = await db.Handbook.findAll({
+            attributes: ['tags'],
+            where: {
+                status: status.ACTIVE
+            },
+            raw: true
+        });
+
+        let allTags = [];
+        handBooks.forEach(handbook => {
+            if (handbook.tags) {
+                const tags = handbook.tags.split(',').map(tag => tag.trim());
+                allTags = [...allTags, ...tags];
+            }
+        });
+
+        const tagCount = allTags.reduce((acc, tag) => {
+            acc[tag] = (acc[tag] || 0) + 1;
+            return acc;
+        }, {});
+
+        const sortedTags = Object.entries(tagCount)
+            .sort((a, b) => b[1] - a[1])
+            .map(([tag]) => tag);
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin các tag thành công",
+            DT: sortedTags
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        };
+    }
+};
+
 const getHandBookHome = async () => {
     try {
         let handBooks = await db.Handbook.findAll({
@@ -78,7 +155,7 @@ const getHandBookHome = async () => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
 
@@ -114,7 +191,7 @@ const getHandBooksByStatus = async (handBookStatus) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -165,7 +242,7 @@ const getHandBookById = async (handBookId) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -200,7 +277,7 @@ const createHandBook = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -242,7 +319,7 @@ const updateHandBook = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
@@ -273,7 +350,7 @@ const updateHandbookStatus = async (data) => {
         console.log(error);
         return {
             EC: 500,
-            EM: "Hệ thống quá tải!",
+            EM: "Lỗi server!",
             DT: "",
         }
     }
