@@ -97,48 +97,6 @@ const getAllHandBooks = async (page, limit, search, filter) => {
     }
 }
 
-const getAllTags = async () => {
-    try {
-        let handBooks = await db.Handbook.findAll({
-            attributes: ['tags'],
-            where: {
-                status: status.ACTIVE
-            },
-            raw: true
-        });
-
-        let allTags = [];
-        handBooks.forEach(handbook => {
-            if (handbook.tags) {
-                const tags = handbook.tags.split(',').map(tag => tag.trim());
-                allTags = [...allTags, ...tags];
-            }
-        });
-
-        const tagCount = allTags.reduce((acc, tag) => {
-            acc[tag] = (acc[tag] || 0) + 1;
-            return acc;
-        }, {});
-
-        const sortedTags = Object.entries(tagCount)
-            .sort((a, b) => b[1] - a[1])
-            .map(([tag]) => tag);
-
-        return {
-            EC: 0,
-            EM: "Lấy thông tin các tag thành công",
-            DT: sortedTags
-        };
-    } catch (error) {
-        console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        };
-    }
-};
-
 const getHandBookHome = async () => {
     try {
         let handBooks = await db.Handbook.findAll({
@@ -377,6 +335,5 @@ module.exports = {
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
-    getHandBookHome,
-    getAllTags
+    getHandBookHome
 }

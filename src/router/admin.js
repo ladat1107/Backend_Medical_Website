@@ -41,6 +41,76 @@ let initAdminRout = (app) => {
     router.put("/updateSpecialty", specialtyController.updateSpecialty)
     router.put("/blockSpecialty", specialtyController.blockSpecialty)
     router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
+
+    //------> Admin CRUD User
+    router.get("/getAllUser", userController.getAllUser)
+    router.post("/createUser", userController.createUser)
+    router.put("/updateUser", userController.updateUser)
+    router.put("/blockUser", userController.blockUser)
+    router.delete("/deleteUser", userController.deleteUser)
+    
+    ////-----> Admin C.U.D department
+    router.get("/getAllDepartment", departmentController.getAllDepartment)
+    router.post("/createDepartment", departmentController.createDepartment)
+    router.put("/updateDepartment", departmentController.updateDepartment)
+    router.put("/blockDepartment", departmentController.blockDepartment)
+    router.delete("/deleteDepartment", departmentController.deleteDepartment)
+    
+    //// ----> Admin
+    router.get("/getAllServiceTypes", serviceTypeController.getAllServiceTypesAdmin)
+    router.get("/getServiceSearch", serviceTypeController.getServiceSearch)
+    router.post("/createServiceType", serviceTypeController.createServiceType)
+    router.put("/updateServiceType", serviceTypeController.updateServiceType)
+    router.put("/blockServiceType", serviceTypeController.blockStatusServiceType)
+    router.delete("/deleteServiceType", serviceTypeController.deleteStatusServiceType)
+    
+    //// ----> Admin
+    router.get("/getHandBooksByStatus", handBookController.getHandBooksByStatus)
+    router.put("/updateHandbookStatus", handBookController.updateHandbookStatus)
+
+    //// ----> Admin
+    router.get("/getAllRoomAdmin", roomController.getAllRoomAdmin)
+    router.post("/createRoom", roomController.createRoom)
+    router.put("/updateRoom", roomController.updateRoom)
+    router.put("/blockRoom", roomController.blockRoom)
+    router.delete("/deleteRoom", roomController.deleteRoom)
+    
+    //// ----> Admin
+    router.post("/createBed", bedController.createBed)
+    router.put("/updateBed", bedController.updateBed)
+    router.put("/deleteBed", bedController.deleteBed)
+    
+    //// ----> Admin
+    router.post("/createPatient", patientController.createPatient)
+    router.put("/updatePatient", patientController.updatePatient)
+    
+    //// ----> Admin
+    router.post("/createRole", roleController.createRole)
+    router.put("/updateRole", roleController.updateRole)
+
+    // ----> Admin
+    router.post("/createSchedule", scheduleController.createSchedule)
+    router.put("/updateScheduleStaff", scheduleController.updateScheduleStaff)
+    router.delete("/deleteSchedule", scheduleController.deleteSchedule)
+
+    // ----> Admin
+    router.post("/createMedicine", medicineController.createMedicine)
+    router.put("/updateMedicine", medicineController.updateMedicine)
+    router.put("/deleteMedicine", medicineController.deleteMedicine)
+    
+    // ----> Admin
+    router.post("/createAllergy", allergyController.createAllergy)
+    router.put("/updateAllergy", allergyController.updateAllergy)
+    router.put("/deleteAllergy", allergyController.deleteAllergy)
+    // ----> Admin
+    router.post("/createDisability", disabilityController.createDisability)
+    router.put("/updateDisability", disabilityController.updateDisability)
+    router.put("/deleteDisability", disabilityController.deleteDisability)
+    
+    router.post("/createSurgicalHistory", surgicalHistoryController.createSurgicalHistory)
+    router.put("/updateSurgicalHistory", surgicalHistoryController.updateSurgicalHistory)
+    router.put("/deleteSurgicalHistory", surgicalHistoryController.deleteSurgicalHistory)
+
     return app.use("/api/admin/", router);
 }
 export default initAdminRout;
