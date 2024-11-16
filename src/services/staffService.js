@@ -138,6 +138,41 @@ const getStaffById = async (staffId) => {
     }
 }
 
+const getStaffNameById = async (staffId) =>{
+    try {
+        let staff = await db.Staff.findOne({
+            where: { id: +staffId },
+            include: [{
+                model: db.User,
+                as: 'staffUserData',
+                attributes: ['id', 'lastName', 'firstName'],
+            }],
+            attributes: ['id'],
+            raw: true,
+            nest: true,
+        });
+        if (staff) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin nhân viên thành công",
+                DT: staff
+            }
+        }
+        return {
+            EC: 404,
+            EM: "Không tìm thấy nhân viên",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
+
 const getStaffByRole = async (roleId) => {
     try {
         let staff = await db.Staff.findAll({
@@ -315,4 +350,5 @@ module.exports = {
     createStaff,
     updateStaff,
     profileStaff,
+    getStaffNameById
 }

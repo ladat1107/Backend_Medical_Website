@@ -9,6 +9,7 @@ import examinationController from '../controllers/examinationController';
 import vitalSignController from '../controllers/vitalSignController';
 import paraclinicalController from '../controllers/paraclinicalController';
 import appointmentController from '../controllers/appointmentController';
+import staffController from '../controllers/staffController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
@@ -17,12 +18,14 @@ let router = express.Router();
 let initDoctorRoute = (app) => {
     //router.all("*", checkTokenWithCookie, checkAuthentication)
 
-    router.post("/specialty", specialtyController.createSpecialty)
-    router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
-    router.post("/createSpecialty", specialtyController.createSpecialty)
-    router.put("/updateSpecialty", specialtyController.updateSpecialty)
-    router.put("/blockSpecialty", specialtyController.blockSpecialty)
-    router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
+    // router.post("/specialty", specialtyController.createSpecialty)
+    // router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
+    // router.post("/createSpecialty", specialtyController.createSpecialty)
+    // router.put("/updateSpecialty", specialtyController.updateSpecialty)
+    // router.put("/blockSpecialty", specialtyController.blockSpecialty)
+    // router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
+
+    router.get("/getStaffNameById", staffController.getStaffNameById)
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)

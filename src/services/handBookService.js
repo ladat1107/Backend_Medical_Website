@@ -3,7 +3,7 @@ import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
 const { Op } = require('sequelize');
 
-const getAllHandBooks = async (page, limit, search, filter) => {
+const getAllHandBooks = async (page, limit, search, staffId, filter) => {
     try {
         // Nếu có filter, chuyển thành mảng
         let filterArray = filter ? filter.split(",") : [];
@@ -24,6 +24,9 @@ const getAllHandBooks = async (page, limit, search, filter) => {
                             [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
                         }))
                     }
+                }),
+                ...(staffId && {
+                    author: staffId
                 })
             },
             include: [{
@@ -54,6 +57,9 @@ const getAllHandBooks = async (page, limit, search, filter) => {
                             [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
                         }))
                     }
+                }),
+                ...(staffId && {
+                    author: staffId
                 })
             },
             include: [{

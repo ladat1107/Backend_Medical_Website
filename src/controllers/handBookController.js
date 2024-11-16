@@ -5,8 +5,9 @@ const getAllHandBooks = async (req, res) => {
         let page = req.query.page || 1;
         let limit = req.query.limit || 10;
         let search = req.query.search || "";
+        let staffId = req.query.staffId || null;
         let filter = req.query.filter || "";
-        let response = await handBookService.getAllHandBooks(page, limit, search, filter);
+        let response = await handBookService.getAllHandBooks(page, limit, search, staffId, filter);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

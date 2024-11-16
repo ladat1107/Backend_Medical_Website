@@ -7,6 +7,7 @@ import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
 import { ROLE, TIME } from "../utils/constraints";
+import { raw } from "body-parser";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -32,10 +33,16 @@ let loginUser = async (data) => {
                 model: db.Role,
                 as: "userRoleData",
                 attributes: ["name"],
+            },{
+                model: db.Staff,
+                as: "staffUserData",
+                attributes: ["id"],
             }],
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
-            }
+            },
+            nest:true,
+            raw: true
         })
         if (user) {
             let comparePassword = await bcrypt.compareSync(data.password, user.password);
@@ -51,7 +58,7 @@ let loginUser = async (data) => {
                     EC: 0,
                     EM: "Đăng nhập thành công",
                     DT: {
-                        user: { id: user.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                        user: { id: user.id, staff: user?.staffUserData?.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
                         accessToken: token,
                         refreshToken: refreshToken
                     }

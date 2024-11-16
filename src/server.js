@@ -4,6 +4,7 @@ import configViewEngine from './config/configViewEngine';
 import initWebRount from './router/web';
 import initPatientRount from "./router/patient"
 import initAdminRout from "./router/admin"
+import initDoctorRoute from "./router/doctor"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -38,6 +39,7 @@ authenRout(app);
 initAdminRout(app);
 initWebRount(app);
 initPatientRount(app)
+initDoctorRoute(app)
 
 connectDB();
 
