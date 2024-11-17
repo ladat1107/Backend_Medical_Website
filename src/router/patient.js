@@ -27,15 +27,14 @@ import medicineController from '../controllers/medicineController';
 import prescriptionController from '../controllers/prescriptionController';
 import diseaseController from '../controllers/diseaseController';
 import specialtyController from '../controllers/specialtyController';
-
-import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import dataService from "../utils/data/dataService"
 require('dotenv').config();
 import db from "../models/index";
 
 let router = express.Router();
 let initPatientRount = (app) => {
     //router.all("*", checkTokenWithCookie, checkAuthentication)
-    
+
     //------> Specialty
     router.get("/getSpcialtyHome", specialtyController.getSpcialtyHome)
 
@@ -48,8 +47,8 @@ let initPatientRount = (app) => {
     //USER
     router.get("/getDoctorHome", userController.getDoctorHome);
 
-
-   
+    //SECTION
+    router.get("/getServicesHome", dataService.getServiceHome);
 
     return app.use("/api/", router);
 }
