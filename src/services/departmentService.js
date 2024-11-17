@@ -187,12 +187,13 @@ const createDepartment = async (data) => {
         let descriptionId = await descriptionService.createDescription(data);
         if (descriptionId) {
             let department = await db.Department.create({
-                name: data.name,
-                image: data.image,
-                deanId: data.deanId,
+                name: data?.name,
+                image: data?.image,
+                deanId: data?.deanId,
+                shortDescription: data?.shortDescription,
                 status: status.ACTIVE,
                 descriptionId: descriptionId,
-                address: data.address
+                address: data?.address
             });
             return {
                 EC: 0,
@@ -226,11 +227,12 @@ const updateDepartment = async (data) => {
             if (description) {
                 await department.update({
                     name: data.name,
-                    image: data.image,
+                    image: data?.image,
                     deanId: data.deanId,
+                    shortDescription: data?.shortDescription,
                     descriptionId: description.id,
-                    status: data.status,
-                    address: data.address
+                    status: data?.status,
+                    address: data?.address
                 });
                 return {
                     EC: 0,

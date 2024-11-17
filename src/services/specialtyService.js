@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import db from "../models";
 import { status } from "../utils";
 
@@ -9,6 +10,37 @@ let getSpecialtySelect = async () => {
                 ['id', 'value'],
                 ['name', 'label']
             ]
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin chuyên khoa thành công",
+            DT: specialtyData
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+
+    }
+}
+let getAllSpecialtyAdmin = async (page, limit, search) => {
+    try {
+        let specialtyData = await db.Specialty.findAndCountAll({
+            where: {
+                [Op.or]: [{ name: { [Op.like]: `%${search}%` } },]
+            },
+            order: [
+                ["status", "DESC"],
+                ['id']], // Sắp xếp theo ngày tạo mới nhất
+
+            // Phân trang
+            offset: (+page - 1) * +limit,
+            limit: +limit,
+            raw: false,
+            nest: true,
         });
         return {
             EC: 0,
@@ -49,8 +81,9 @@ let getSpcialtyHome = async () => {
 let createSpecialty = async (data) => {
     try {
         let specialty = await db.Specialty.create({
-            name: data.name,
-            image: data.image,
+            name: data?.name,
+            image: data?.image,
+            shortDescription: data?.shortDescription,
             status: status.ACTIVE,
         });
         if (!specialty) {
@@ -79,7 +112,8 @@ let updateSpecialty = async (data) => {
         let specialty = await db.Specialty.update({
             name: data?.name || null,
             image: data?.image || null,
-            status: data?.status || null
+            shortDescription: data?.shortDescription || null,
+            status: data?.status,
         }, {
             where: { id: data.id }
         });
@@ -149,9 +183,7 @@ let deleteSpecialty = async (data) => {
                 }
             }
             , { transaction });
-        let specialty = await db.Specialty.update({
-            status: status.INACTIVE
-        }, {
+        let specialty = await db.Specialty.destroy({
             where: { id: data.id }
         }, { transaction });
         if (specialty) {
@@ -178,6 +210,25 @@ let deleteSpecialty = async (data) => {
         }
     }
 }
+let getSpecialtyById = async (id) => {
+    try {
+        let specialtyData = await db.Specialty.findOne({
+            where: { id: id }
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin chuyên khoa thành công",
+            DT: specialtyData
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
 module.exports = {
     getSpecialtySelect,
     getSpcialtyHome,
@@ -185,4 +236,6 @@ module.exports = {
     updateSpecialty,
     blockSpecialty,
     deleteSpecialty,
+    getAllSpecialtyAdmin,
+    getSpecialtyById,
 }

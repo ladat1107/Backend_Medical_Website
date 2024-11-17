@@ -33,7 +33,7 @@ let loginUser = async (data) => {
                 model: db.Role,
                 as: "userRoleData",
                 attributes: ["name"],
-            },{
+            }, {
                 model: db.Staff,
                 as: "staffUserData",
                 attributes: ["id"],
@@ -41,8 +41,8 @@ let loginUser = async (data) => {
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
-            nest:true,
-            raw: true
+            raw: true,
+            nest: true,
         })
         if (user) {
             let comparePassword = await bcrypt.compareSync(data.password, user.password);
@@ -217,7 +217,7 @@ const getAllUser = async (page, limit, search, position) => {
 const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
-            where: { id: userId, status: status.ACTIVE },
+            where: { id: userId },
             attributes: ["id", "email", "phoneNumber", "lastName", "firstName",
                 "cid", "dob", "address", "currentResident", "gender", "avatar", "folk", "ABOBloodGroup",
                 "RHBloodGroup", "maritalStatus", "roleId", "point", "status"],
@@ -304,6 +304,7 @@ const getUserByCid = async (cid) => {
 
 const createUser = async (data) => {
     try {
+        data.password = "123456";
         if (!await checkEmail(data.email)) {
             return {
                 EC: 200,
@@ -311,7 +312,6 @@ const createUser = async (data) => {
                 DT: "",
             }
         }
-
         let hashPassword = await hashPasswordUser(data.password);
         let user = await db.User.create({
             email: data.email,
@@ -396,22 +396,21 @@ const createUser = async (data) => {
 const updateUser = async (data) => {
     let transaction = await sequelize.transaction();
     try {
-        let updateFeild = {};
-        let content = null;
-        if (data.password) {
-            updateFeild.password = await hashPasswordUser(data.password);
-            console.log(updateFeild);
-            content = `<p>Thông tin cập nhật của bạn:  </p>
-            <p>Email: ${data.email}</p>
-            <p>Mật khẩu mới: <strong>${data.password}</strong></p>
-            `
-        }
+        // let updateFeild = {};
+        // let content = null;
+        // // if (data.password) {
+        // //     updateFeild.password = await hashPasswordUser(data.password);
+        // //     console.log(updateFeild);
+        // //     content = `<p>Thông tin cập nhật của bạn:  </p>
+        // //     <p>Email: ${data.email}</p>
+        // //     <p>Mật khẩu mới: <strong>${data.password}</strong></p>
+        // //     `
+        // // }
         let user = await db.User.findOne({
             where: { id: data.id },
-        });
+        }, { transaction });
         if (user) {
             await db.User.update({
-                ...updateFeild,
                 email: data?.email,
                 phoneNumber: data?.phoneNumber,
                 lastName: data?.lastName,
@@ -426,7 +425,7 @@ const updateUser = async (data) => {
             }, {
                 where: { id: data.id },
             }, { transaction });
-            if (user.roleId === ROLE.ACCOUNTANT || user.roleId === ROLE.DOCTOR || user.roleId === ROLE.NURSE || user.roleId === ROLE.PHARMACIST || user.roleId === ROLE.RECEPTIONIST) {
+            if (data.descriptionId) { // Nếu có descriptionId thì cập nhật thông tin Staff
                 await db.Description.update({
                     markDownContent: data?.markDownContent,
                     htmlContent: data?.htmlContent,
@@ -443,67 +442,41 @@ const updateUser = async (data) => {
                     where: { userId: data.id },
                 }, { transaction });
                 await transaction.commit();
-                if (content?.length > 0) {
-                    console.log("Gửi mail");
-                    let mail = await sendEmailNotification({
-                        email: user.email,
-                        lastName: user.lastName,
-                        firstName: user.firstName,
-                        subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
-                        content: content
-                    })
-                    if (mail.EC === 0) {
-                        console.log("Gửi mail thành công");
-                        return {
-                            EC: 0,
-                            EM: "Cập nhật tài khoản thành công",
-                            DT: "",
-                        }
-                    } else {
-                        return {
-                            EC: 200,
-                            EM: "Gửi mail thông báo thất bại",
-                            DT: "",
-                        }
-                    }
-                } else {
-                    return {
-                        EC: 0,
-                        EM: "Cập nhật tài khoản thành công",
-                        DT: "",
-                    }
+                return {
+                    EC: 0,
+                    EM: "Cập nhật tài khoản thành công",
+                    DT: "",
                 }
+                // if (content?.length > 0) {
+                //     console.log("Gửi mail");
+                //     let mail = await sendEmailNotification({
+                //         email: user.email,
+                //         lastName: user.lastName,
+                //         firstName: user.firstName,
+                //         subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
+                //         content: content
+                //     })
+                //     if (mail.EC === 0) {
+                //         console.log("Gửi mail thành công");
+                //         return {
+                //             EC: 0,
+                //             EM: "Cập nhật tài khoản thành công",
+                //             DT: "",
+                //         }
+                //     } else {
+                //         return {
+                //             EC: 200,
+                //             EM: "Gửi mail thông báo thất bại",
+                //             DT: "",
+                //         }
+                //     }
+                // }
             } else {
                 await transaction.commit();
-                if (content.length > 0) {
-                    console.log("Gửi mail");
-                    let mail = await sendEmailNotification({
-                        email: user.email,
-                        lastName: user.lastName,
-                        firstName: user.firstName,
-                        subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
-                        content: content
-                    })
-                    if (mail.EC === 0) {
-                        console.log("Gửi mail thành công");
-                        return {
-                            EC: 0,
-                            EM: "Cập nhật tài khoản thành công",
-                            DT: "",
-                        }
-                    } else {
-                        return {
-                            EC: 200,
-                            EM: "Gửi mail thông báo thất bại",
-                            DT: "",
-                        }
-                    }
-                } else {
-                    return {
-                        EC: 0,
-                        EM: "Cập nhật tài khoản thành công",
-                        DT: "",
-                    }
+                return {
+                    EC: 0,
+                    EM: "Cập nhật tài khoản thành công",
+                    DT: "",
                 }
             }
         } else {
@@ -523,7 +496,6 @@ const updateUser = async (data) => {
         }
     }
 }
-
 const blockUser = async (data) => {
     try {
         let user = await db.User.update({

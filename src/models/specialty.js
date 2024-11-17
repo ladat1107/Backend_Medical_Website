@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(1000),
             allowNull: false,
         },
+        shortDescription: DataTypes.STRING(2000),
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,

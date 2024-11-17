@@ -1,5 +1,5 @@
 import userService from '../services/userService'
-import { COOKIE, PAGINATE, ROLE, TIME } from '../utils';
+import { COOKIE, PAGINATE, TIME } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -177,13 +177,12 @@ const createUser = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
-            let arr = ["email", "password", "phoneNumber", "lastName", "firstName", "cid", "roleId",
+            let arr = ["email", "phoneNumber", "lastName", "firstName", "cid", "roleId",
             ];
             if ([3, 4, 5, 6, 7].includes(data.roleId)) {
                 arr.push("markDownContent", "departmentId")
                 data.staff = true;
             }
-
             for (let i = 0; i < arr.length; i++) {
                 if (!data[arr[i]]) {
                     return res.status(400).json({

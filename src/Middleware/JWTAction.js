@@ -18,7 +18,7 @@ const verifyToken = (token) => {
     try {
         decoded = jwt.verify(token, key);
     } catch (error) {
-        console.log(error);
+        console.log("Token hết hạn hoặc không hợp lệ");
     }
     return decoded;
 }
