@@ -653,7 +653,7 @@ const getDoctorHome = async () => {
                         {
                             model: db.User,
                             as: 'staffUserData',
-                            attributes: ['id', 'lastName', 'firstName'], // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
+                            attributes: ['id', 'lastName', 'firstName', "avatar"], // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
                         }
                     ],
                 }
