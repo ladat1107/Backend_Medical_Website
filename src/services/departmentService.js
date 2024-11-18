@@ -2,6 +2,7 @@ import { Op, where } from "sequelize";
 import db from "../models/index";
 import { status } from "../utils/index";
 import descriptionService from "./descriptionService";
+import { raw } from "body-parser";
 
 const getAllDepartment = async (page, limit, search) => {
     try {
@@ -124,10 +125,23 @@ const getDepartmentById = async (departmentId) => {
                     as: 'staffUserData',
                     attributes: ['firstName', 'lastName', 'email', 'avatar'],
                 }]
+            }, {
+                model: db.Staff,
+                as: 'staffDepartmentData',
+                attributes: ['id', 'position', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar'],
+                    where: { status: status.ACTIVE },
+                }],
+                raw: true,
+                nest: true,
             }],
             raw: true,
             nest: true,
         });
+        console.log(department);
         if (department) {
             return {
                 EC: 0,

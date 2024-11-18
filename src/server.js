@@ -31,7 +31,6 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 
 // Configure view engine
-
 configViewEngine(app);
 
 // Initialize web routes
