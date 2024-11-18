@@ -135,13 +135,10 @@ const getDepartmentById = async (departmentId) => {
                     attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar'],
                     where: { status: status.ACTIVE },
                 }],
-                raw: true,
-                nest: true,
             }],
-            raw: true,
+            raw: false,
             nest: true,
         });
-        console.log(department);
         if (department) {
             return {
                 EC: 0,

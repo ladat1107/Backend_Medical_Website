@@ -60,7 +60,7 @@ let getAllSpecialtyAdmin = async (page, limit, search) => {
 let getSpcialtyHome = async () => {
     try {
         let specialtyData = await db.Specialty.findAll({
-            where: { status: 1 },
+            where: { status: status.ACTIVE },
             attributes: ["id", "name", "image"]
         });
         return {
@@ -213,7 +213,26 @@ let deleteSpecialty = async (data) => {
 let getSpecialtyById = async (id) => {
     try {
         let specialtyData = await db.Specialty.findOne({
-            where: { id: id }
+            where: { id: id, status: status.ACTIVE },
+            include: [
+                {
+                    model: db.Staff,
+                    as: "staffSpecialtyData",
+                    attributes: ["id", "price", "position"],
+                    include: [
+                        {
+                            model: db.User,
+                            as: "staffUserData",
+                            attributes: ["id", "lastName", "firstName", "avatar"],
+                        },
+                        {
+                            model: db.Department,
+                            as: "staffDepartmentData",
+                            attributes: ["id", "name"],
+                        }
+                    ]
+                }
+            ]
         });
         return {
             EC: 0,

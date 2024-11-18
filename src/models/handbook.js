@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     shortDescription: DataTypes.STRING,
+    view: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Handbook',
