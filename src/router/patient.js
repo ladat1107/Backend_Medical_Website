@@ -43,6 +43,7 @@ let initPatientRount = (app) => {
 
     // HANDBOOK
     router.get("/getHandBookHome", handBookController.getHandBookHome);
+    router.get("/getHandBookByDeparment", handBookController.getHandBookDeparment);
 
     //USER
     router.get("/getDoctorHome", userController.getDoctorHome);

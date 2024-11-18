@@ -1,7 +1,7 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
-const { Op } = require('sequelize');
+const { Op, or } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search, staffId, filter) => {
     try {
@@ -333,7 +333,47 @@ const updateHandbookStatus = async (data) => {
         }
     }
 }
+const getHandBookDeparment = async (departmentId) => {
+    try {
+        let handBooks = await db.Handbook.findAll({
+            include: [{
+                model: db.Staff,
+                as: 'handbookStaffData',
+                where: { departmentId: departmentId },
+                require: true,
+                attributes: ['position'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['firstName', 'lastName', 'email', 'avatar']
+                }, {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    require: true,
+                    attributes: ['id', 'name'],
 
+                }],
+            }],
+            where: { status: status.ACTIVE },
+            limit: 20,
+            order: [["view", "DESC"]],
+            raw: false,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin cẩm nang thành công",
+            DT: handBooks
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
 module.exports = {
     getAllHandBooks,
     getHandBooksByStatus,
@@ -341,5 +381,6 @@ module.exports = {
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
-    getHandBookHome
+    getHandBookHome,
+    getHandBookDeparment,
 }

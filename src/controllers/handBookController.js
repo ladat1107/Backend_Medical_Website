@@ -170,7 +170,32 @@ const getHandBookHome = async (req, res) => {
         })
     }
 }
-
+const getHandBookDeparment = async (req, res) => {
+    try {
+        let data = req.query;
+        if (data && data.departmentId) {
+            let response = await handBookService.getHandBookDeparment(data.departmentId);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllHandBooks,
     getHandBooksByStatus,
@@ -178,5 +203,6 @@ module.exports = {
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
-    getHandBookHome
+    getHandBookHome,
+    getHandBookDeparment,
 }

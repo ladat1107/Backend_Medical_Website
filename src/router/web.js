@@ -35,6 +35,8 @@ let router = express.Router();
 let initWebRount = (app) => {
     // router.all("*", checkTokenWithCookie)
 
+    
+
     router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
     router.get("/getSpecialtyById", specialtyController.getSpecialtyById)
 
