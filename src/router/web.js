@@ -27,7 +27,7 @@ import medicineController from '../controllers/medicineController';
 import prescriptionController from '../controllers/prescriptionController';
 import diseaseController from '../controllers/diseaseController';
 import specialtyController from '../controllers/specialtyController';
-
+import { getServiceHome } from "../utils/data/dataService"
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 
@@ -35,14 +35,28 @@ let router = express.Router();
 let initWebRount = (app) => {
     // router.all("*", checkTokenWithCookie)
 
-    
+    //------> Specialty
+    router.get("/getSpcialtyHome", specialtyController.getSpcialtyHome)
+
+    // DEPARTMENT
+    router.get("/getDepartmenHome", departmentController.getDepartmentHome);
+
+    // HANDBOOK
+    router.get("/getHandBookHome", handBookController.getHandBookHome);
+    router.get("/getHandBookByDeparment", handBookController.getHandBookDeparment);
+
+    //USER
+
+    //SECTION
+    router.get("/getServicesHome", getServiceHome);
 
     router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
     router.get("/getSpecialtyById", specialtyController.getSpecialtyById)
 
     //-- User   
     router.get("/getUserById", userController.getUserById)
-    router.get("/getUserByCid", userController.getUserByCid)
+    router.get("/getUserByCid", userController.getUserByCid)    
+    router.get("/getDoctorHome", userController.getDoctorHome);
     router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
 

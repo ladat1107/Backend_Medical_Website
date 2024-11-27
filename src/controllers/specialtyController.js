@@ -38,7 +38,7 @@ let createSpecialty = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.name || !data.image) {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Thiếu thông tin",
                 DT: ""
@@ -63,7 +63,7 @@ let updateSpecialty = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Thiếu thông tin",
                 DT: ""
@@ -88,7 +88,7 @@ let blockSpecialty = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Thiếu thông tin",
                 DT: ""
@@ -113,7 +113,7 @@ let deleteSpecialty = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Thiếu thông tin",
                 DT: ""
@@ -167,7 +167,7 @@ let getSpecialtyById = async (req, res) => {
     try {
         let data = req.query;
         if (!data || !data.id) {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Thiếu thông tin",
                 DT: ""

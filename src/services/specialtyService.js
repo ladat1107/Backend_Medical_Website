@@ -5,7 +5,7 @@ import { status } from "../utils";
 let getSpecialtySelect = async () => {
     try {
         let specialtyData = await db.Specialty.findAll({
-            where: { status: 1 },
+            where: { status: status.ACTIVE },
             attributes: [
                 ['id', 'value'],
                 ['name', 'label']

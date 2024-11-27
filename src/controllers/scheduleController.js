@@ -29,7 +29,7 @@ const getScheduleByStaffId = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -56,7 +56,7 @@ const getScheduleInWeek = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -83,7 +83,7 @@ const createSchedule = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -110,7 +110,7 @@ const updateScheduleStaff = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -137,7 +137,7 @@ const deleteSchedule = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -152,12 +152,15 @@ const deleteSchedule = async (req, res) => {
         })
     }
 }
+const arrangSchedule = async (req, res) => {
 
+}
 module.exports = {
     getAllSchedules,
     getScheduleByStaffId,
     getScheduleInWeek,
     createSchedule,
     updateScheduleStaff,
-    deleteSchedule
+    deleteSchedule,
+    arrangSchedule,
 }

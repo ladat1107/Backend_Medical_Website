@@ -32,7 +32,7 @@ import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTActi
 require('dotenv').config();
 
 let router = express.Router();
-let initAdminRout = (app) => {
+let initAdminRoute = (app) => {
     //router.all("*", checkTokenWithCookie, checkAuthentication)
     //------> Admin CRUD Specialty
     router.get("/getAllSpecialtyAdmin", specialtyController.getAllSpecialtyAdmin)
@@ -64,7 +64,7 @@ let initAdminRout = (app) => {
     router.delete("/deleteServiceType", serviceTypeController.deleteStatusServiceType)
 
     //// ----> Admin
-    router.get("/getHandBooksByStatus", handBookController.getHandBooksByStatus)
+    router.get("/getHandbookAdmin", handBookController.getHandBooksAdmin)
     router.put("/updateHandbookStatus", handBookController.updateHandbookStatus)
 
     //// ----> Admin
@@ -88,6 +88,7 @@ let initAdminRout = (app) => {
     router.put("/updateRole", roleController.updateRole)
 
     // ----> Admin
+    router.post("/arrangSchedule", scheduleController.arrangSchedule)
     router.post("/createSchedule", scheduleController.createSchedule)
     router.put("/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/deleteSchedule", scheduleController.deleteSchedule)
@@ -112,4 +113,4 @@ let initAdminRout = (app) => {
 
     return app.use("/api/admin/", router);
 }
-export default initAdminRout;
+export default initAdminRoute;

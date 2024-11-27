@@ -3,7 +3,7 @@ import userController from '../controllers/userController';
 import { refreshToken } from "../Middleware/JWTAction"
 require('dotenv').config();
 let router = express.Router();
-let authenRout = (app) => {
+let authenRoute = (app) => {
     app.get('/', async (req, res) => {
         try {
             res.send('Hello! This is medical server website.');
@@ -18,4 +18,4 @@ let authenRout = (app) => {
     router.get("/refreshToken", refreshToken)
     return app.use("/", router);
 }
-export default authenRout;
+export default authenRoute;
