@@ -57,8 +57,7 @@ const getExaminationByUserId = async (req, res) => {
 const createExamination = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.userId && data.staffId && data.symptom && data.diseaseName
-            && data.price && data.insuranceCoverage
+        if (data && data.userId && data.staffId && data.symptom 
         ) {
             let response = await examinationService.createExamination(data);
             return res.status(200).json({
@@ -86,10 +85,11 @@ const createExamination = async (req, res) => {
 const updateExamination = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.symptom && data.diseaseName
-            && data.treatmentResult && data.admissionDate && data.dischargeDate && data.reason
-            && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price !== undefined
-            && data.special !== undefined && data.insuranceCoverage
+        if (data && data.id 
+            // && data.symptom && data.diseaseName
+            // && data.treatmentResult && data.admissionDate && data.dischargeDate && data.reason
+            // && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price !== undefined
+            // && data.special !== undefined && data.insuranceCoverage
         ) {
             let response = await examinationService.updateExamination(data);
             return res.status(200).json({
@@ -141,10 +141,38 @@ const deleteExamination = async (req, res) => {
     }
 }
 
+const getExaminations = async (req, res) => {
+    try {
+        let date = req.query.date || null;
+        let status = req.query.status || null;
+        let is_appointment = req.query.is_appointment || null;
+        let time = req.query.time || null;
+        
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 20;
+        let search = req.query.search || '';
+
+        let response = await examinationService.getExaminations(date, status, is_appointment, +page, +limit, search, time);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getExaminationById,
     getExaminationByUserId,
     createExamination,
     updateExamination,
-    deleteExamination
+    deleteExamination,
+    getExaminations
 }

@@ -23,6 +23,7 @@ const verifyToken = (token) => {
     return decoded;
 }
 const checkTokenWithCookie = (req, res, next) => {
+    const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm'];
     if (defaultUrl.includes(req.path)) {
         return next();
     }
@@ -48,9 +49,8 @@ const checkTokenWithCookie = (req, res, next) => {
             DT: ""
         });
     }
-
-
 }
+
 const checkAuthentication = (req, res, next) => {
     if (defaultUrl.includes(req.path) || req.path === "/account") {
         return next();

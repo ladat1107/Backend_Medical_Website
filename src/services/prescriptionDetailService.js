@@ -31,6 +31,8 @@ const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
 
 const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
     try {
+
+
         const existingDetails = await db.PrescriptionDetail.findAll({
             where: { prescriptionId },
             attributes: {
@@ -38,7 +40,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
             },
         });
 
-        const existingDetailsMap = new Map(existingDetails.map(detail => [detail.medicineId, detail]));
+        const existingDetailsMap = new Map(existingDetails.map(detail => [detail.medicineId, detail]));   
         const updatedDetails = [];
 
         for (const newDetail of newDetails) {
@@ -77,6 +79,8 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
             EM: "Cập nhật chi tiết đơn thuốc thành công",
             DT: updatedDetails
         };
+
+        
     } catch (error) {
         console.log(error);
         return {

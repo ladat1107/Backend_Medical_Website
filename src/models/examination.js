@@ -97,7 +97,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         special: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(100),
             allowNull: true,
         },
         insuranceCoverage: {
@@ -108,6 +108,26 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(45),
             allowNull: true,
         },
+        roomName: {
+            type: DataTypes.STRING(256),
+            allowNull: true,
+        },
+        number: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        time:{
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        visit_status: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        is_appointment:{
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
     }, {
         sequelize,
         modelName: 'Examination',
