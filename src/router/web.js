@@ -59,6 +59,7 @@ let initWebRount = (app) => {
     router.get("/getDoctorHome", userController.getDoctorHome);
     router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
+    router.get("/getUserInsuarance", userController.getUserInsuarance)
 
     //-- Department
     router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)

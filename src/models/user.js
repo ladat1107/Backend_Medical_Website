@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.hasOne(models.Insurance, {
         foreignKey: 'userId',
-        as: 'userInsuranceData',
+        as: 'userInsuranceData', // Phải đồng nhất với alias khi truy vấn
       });
       User.hasOne(models.ConditionAtBirth, {
         foreignKey: 'userId',

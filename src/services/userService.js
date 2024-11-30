@@ -313,6 +313,13 @@ const createUser = async (data) => {
                 DT: "",
             }
         }
+        if(!await checkCid(data.cid)){
+            return {
+                EC: 200,
+                EM: "CMND/CCCD đã tồn tại",
+                DT: "",
+            }
+        }
         let hashPassword = await hashPasswordUser(data.password);
         let user = await db.User.create({
             email: data.email,
@@ -771,6 +778,44 @@ const updateProfilePassword = async (data) => {
         }
     }
 }
+
+const getUserInsuarance = async (userId) => {
+    try {
+        let insurance = await db.User.findOne({
+            where: { id: userId },
+            attributes: ["id", "firstName", "lastName", "email"],
+            include: [
+                {
+                    model: db.Insurance,
+                    as: "userInsuranceData",
+                    attributes: ["id", "insuranceCode", "dateOfIssue", "exp", "benefitLevel", "residentialCode", "initialHealthcareRegistrationCode", "continuousFiveYearPeriod"],
+                },
+            ],
+        });
+        
+        if (insurance) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin bảo hiểm thành công",
+                DT: insurance,
+            };
+        }
+
+        return {
+            EC: 404,
+            EM: "Không tìm thấy bảo hiểm cho người dùng này",
+            DT: null,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: null,
+        };
+    }
+}
+
 module.exports = {
     getAllUser,
     getUserById,
@@ -784,4 +829,5 @@ module.exports = {
     getDoctorHome,
     updateProfileInfor,
     updateProfilePassword,
+    getUserInsuarance
 }

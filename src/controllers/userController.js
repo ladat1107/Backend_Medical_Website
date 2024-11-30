@@ -477,6 +477,34 @@ const profilePassword = async (req, res) => {
         })
     }
 }
+
+const getUserInsuarance = async (req, res) => {
+    try {
+        let data = req.query;
+        if (data && data.userId) {
+            let response = await userService.getUserInsuarance(data.userId);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getAllUser,
     getUserById,
@@ -485,6 +513,7 @@ module.exports = {
     updateUser,
     blockUser,
     deleteUser,
+    getUserInsuarance,
 
     handleRegisterUser,
     handleLogin,

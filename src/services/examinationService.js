@@ -1,6 +1,6 @@
 import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
-const { Op, ConnectionTimedOutError } = require('sequelize');
+const { Op, ConnectionTimedOutError, Sequelize } = require('sequelize');
 
 const getExaminationById = async (id) => {
     try {
@@ -129,7 +129,7 @@ const createExamination = async (data) => {
             symptom: data.symptom,
             admissionDate: new Date(),
             dischargeDate: new Date(),
-            status: status.WAITING,
+            status: data.status,
             paymentDoctorStatus: pamentStatus.UNPAID,
 
             price: staff.price,
@@ -330,6 +330,16 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
             limit,
             offset,
             order: [
+                [
+                    Sequelize.literal(
+                        `CASE 
+                            WHEN special IN ('old', 'children', 'disabled', 'pregnant') THEN 1 
+                            WHEN special = 'normal' THEN 2 
+                            ELSE 3 
+                        END`
+                    ),
+                    'ASC',
+                ],
                 ['visit_status', 'ASC'],
                 ['createdAt', 'ASC']],
             distinct: true // Ensures correct count with joins
@@ -356,7 +366,7 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
             DT: '',
         };
     }
-}; 
+};
 
 module.exports = {
     getExaminationById,

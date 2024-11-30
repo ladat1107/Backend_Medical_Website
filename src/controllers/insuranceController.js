@@ -57,7 +57,7 @@ const getInsuranceByUserId = async (req, res) => {
 const createInsurance = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod && data.userId) {
+        if (data && data.insuranceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod && data.userId) {
             let response = await insuranceService.createInsurance(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -84,7 +84,7 @@ const createInsurance = async (req, res) => {
 const updateInsurance = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.insuanceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod) {
+        if (data && data.id && data.insuranceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod) {
             let response = await insuranceService.updateInsurance(data);
             return res.status(200).json({
                 EC: response.EC,
