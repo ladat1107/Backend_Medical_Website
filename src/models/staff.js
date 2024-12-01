@@ -61,7 +61,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         price: {
             type: DataTypes.DOUBLE,
-            allowNull: false,
         },
         position: {
             type: DataTypes.STRING,

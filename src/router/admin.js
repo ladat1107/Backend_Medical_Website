@@ -50,6 +50,7 @@ let initAdminRoute = (app) => {
 
     ////-----> Admin C.U.D department
     router.get("/getAllDepartment", departmentController.getAllDepartment)
+    router.get("/getDepartmentDuty", departmentController.getDepartmentDuty)
     router.post("/createDepartment", departmentController.createDepartment)
     router.put("/updateDepartment", departmentController.updateDepartment)
     router.put("/blockDepartment", departmentController.blockDepartment)
@@ -90,6 +91,7 @@ let initAdminRoute = (app) => {
     // ----> Admin
     router.post("/arrangSchedule", scheduleController.arrangSchedule)
     router.post("/createSchedule", scheduleController.createSchedule)
+    router.get("/getAllSchedules", scheduleController.getAllSchedulesAdmin)
     router.put("/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/deleteSchedule", scheduleController.deleteSchedule)
 

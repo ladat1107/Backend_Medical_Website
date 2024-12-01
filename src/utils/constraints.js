@@ -4,7 +4,13 @@ const status = {
     ACTIVE: 1,
     INACTIVE: 0
 }
-
+const typeRoom = {
+    CLINIC: 2,
+    DUTY: 1,
+}
+const department = {
+    CLINIC: 2,
+}
 const pamentStatus = {
     UNPAID: 0,
     PENDING: 1,
@@ -50,6 +56,8 @@ const TIME = {
 }
 module.exports = {
     status,
+    typeRoom,
+    department,
     pamentStatus,
     PAGINATE,
     ROLE,

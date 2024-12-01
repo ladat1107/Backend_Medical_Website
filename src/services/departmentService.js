@@ -1,6 +1,6 @@
 import { Op, where } from "sequelize";
 import db from "../models/index";
-import { status } from "../utils/index";
+import { status, typeRoom } from "../utils/index";
 import descriptionService from "./descriptionService";
 import { raw } from "body-parser";
 
@@ -50,6 +50,48 @@ const getAllDepartment = async (page, limit, search) => {
             nest: true,
         });
         department.count = countDepartment;
+        return {
+            EC: 0,
+            EM: "Lấy thông tin phòng ban thành công",
+            DT: department
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
+const getDepartmentDuty = async () => {
+    try {
+        let department = await db.Department.findAll({
+            where: { status: status.ACTIVE },
+            include: [
+                {
+                    model: db.Room,
+                    as: 'roomData',
+                    where: { status: status.ACTIVE, },
+                    required: true,
+                    include: [
+                        {
+                            model: db.ServiceType,
+                            as: 'serviceData',
+                            attributes: [],
+                            where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY] } },
+                            through: { attributes: [] },
+                        },
+                    ],
+                    attributes: ['id', "name"],
+                    raw: true,
+                },
+            ],
+            attributes: ['id', 'name'],
+            order: [['name']], // Sắp xếp theo ngày tạo mới nhất
+            raw: false,
+            nest: true,
+        });
         return {
             EC: 0,
             EM: "Lấy thông tin phòng ban thành công",
@@ -376,6 +418,7 @@ const deleteDepartment = async (departmentId) => {
 
 module.exports = {
     getAllDepartment,
+    getDepartmentDuty,
     getDepartmentById,
     getAllStaffInDepartment,
     createDepartment,

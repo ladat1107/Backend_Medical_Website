@@ -60,7 +60,6 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
         }
     }
 }
-
 const getRoomByDepartment = async (departmentId) => {
     try {
         let room = await db.Room.findAll({

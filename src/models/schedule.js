@@ -18,13 +18,11 @@ module.exports = (sequelize, DataTypes) => {
     Schedule.init({
         staffId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'staffs',
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
             primaryKey: true,
         },
         roomId: {
@@ -34,13 +32,11 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'rooms', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
                 key: 'id',
             },
-            onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
             primaryKey: true,
         },
         date: {
             type: DataTypes.DATE,
-            allowNull: true,
+            allowNull: false,
             primaryKey: true,
         },
 
