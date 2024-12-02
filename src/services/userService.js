@@ -8,6 +8,7 @@ import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
 import { ROLE, TIME } from "../utils/constraints";
 import { raw } from "body-parser";
+import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -278,6 +279,11 @@ const getUserByCid = async (cid) => {
             where: { cid: cid },
             attributes: ["id", "phoneNumber", "lastName", "firstName",
                 "cid", "dob", "gender",],
+            include: [{
+                model: db.Insurance,
+                as: "userInsuranceData",
+                attributes: ["insuranceCode"]
+            }],
             raw: true,
             nest: true,
         });
@@ -306,7 +312,8 @@ const getUserByCid = async (cid) => {
 const createUser = async (data) => {
     try {
         data.password = "123456";
-        if (!await checkEmail(data.email)) {
+
+        if (data.email && !await checkEmail(data.email)) {
             return {
                 EC: 200,
                 EM: "Email đã tồn tại",
@@ -322,15 +329,37 @@ const createUser = async (data) => {
         }
         let hashPassword = await hashPasswordUser(data.password);
         let user = await db.User.create({
-            email: data.email,
+            email: data.email ? data.email : null,
             password: hashPassword,
-            phoneNumber: data.phoneNumber,
+            phoneNumber: data.phoneNumber ? data.phoneNumber : null,
             lastName: data.lastName,
             firstName: data.firstName,
             cid: data.cid,
             status: status.ACTIVE,
-            roleId: data.roleId
+            roleId: data.roleId,
+            dob: data.dob || null,
+            address: data.address || null,
         });
+        console.log(user);
+        let insurance = null;
+        if(data.insuranceCode && user){
+            insurance = await db.Insurance.create({
+                insuranceCode: data.insuranceCode,
+                benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
+                userId: user.id
+            });
+            if(!insurance){
+                await db.User.destroy({
+                    where: { id: user.id }
+                });
+                return {
+                    EC: 200,
+                    EM: "Tạo tài khoản thất bại",
+                    DT: "",
+                }
+            }
+        }
+        console.log(data.staff);
         if (data.staff) {
             const staff = await staffService.createStaff(data, user.id);
             if (!staff) {
@@ -361,14 +390,13 @@ const createUser = async (data) => {
                 } else {
                     return {
                         EC: 200,
-                        EM: "Gửi mail thông báo thất bại",
+                        EM: "Gửi email thất bại",
                         DT: "",
                     }
                 }
-
             }
         } else {
-            if (user) {
+            if (user && data.email) {
                 let mail = await sendEmailNotification({
                     email: user.email,
                     lastName: user.lastName,
@@ -388,6 +416,15 @@ const createUser = async (data) => {
                         EM: "Gửi mail thông báo thất bại",
                         DT: "",
                     }
+                }
+            } else {
+                return {
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
+                    DT: {
+                        user,
+                        insurance 
+                    },
                 }
             }
         }

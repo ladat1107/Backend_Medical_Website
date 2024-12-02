@@ -171,6 +171,9 @@ let initWebRount = (app) => {
     router.put("/updateInsuarance", insuranceController.updateInsurance)
     router.delete("/deleteInsuarance", insuranceController.deleteInsurance)
 
+    //-- Create User
+    router.post("/createUser", userController.createUser)
+
     return app.use("/api/", router);
 }
 export default initWebRount;

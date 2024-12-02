@@ -18,15 +18,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         dateOfIssue: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         exp: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         benefitLevel: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         residentialCode: {
             type: DataTypes.STRING(45),

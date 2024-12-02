@@ -5,7 +5,7 @@ const { Op, ConnectionTimedOutError, Sequelize } = require('sequelize');
 const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
-            where: { id: +id, status: status.ACTIVE },
+            where: { id: +id },
             include: [{
                 model: db.VitalSign,
                 as: 'examinationVitalSignData',
@@ -277,9 +277,9 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
         }
 
         // Appointment filter
-        if (is_appointment) {
-            whereCondition.is_appointment = is_appointment;
-        }
+        // if (is_appointment) {
+        //     whereCondition.is_appointment = is_appointment;
+        // }
 
         // Time filter
         if (time) {
@@ -294,7 +294,15 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
             ]
         } : {};
 
-        const offset = (page - 1) * limit;
+        let offset, limit_query;
+        if (status === 2) {
+            // Nếu status là 2, không phân trang
+            offset = 0;
+            limit_query = null;
+        } else {
+            offset = (page - 1) * limit;
+            limit_query = limit;
+        }
 
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
@@ -306,6 +314,11 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                     model: db.User,
                     as: 'userExaminationData',
                     attributes: ['id', 'firstName', 'lastName', 'email'],
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }],
                     // Add search condition to include
                     where: search ? {
                         [Op.or]: [
@@ -322,12 +335,12 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                         {
                             model: db.User,
                             as: 'staffUserData',
-                            attributes: ['firstName', 'lastName'],
+                            attributes: ['firstName', 'lastName']
                         },
                     ],
                 },
             ],
-            limit,
+            limit: limit_query,
             offset,
             order: [
                 [

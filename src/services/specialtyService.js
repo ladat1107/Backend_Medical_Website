@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import db from "../models";
 import { status } from "../utils";
 
@@ -252,71 +252,66 @@ let getSpecialtyById = async (id) => {
 const getSpecialtiesByDepartment = async () => {
     try {
         let roomsWithSpecialties = await db.Room.findAll({
-            attributes: ['id', 'name'], // Chỉ lấy mã phòng (id)
+            attributes: ['id', 'name'],
             where: {
-                departmentId: 2, // Điều kiện departmentId = 2
+                departmentId: 2,
             },
             include: [
                 {
                     model: db.Specialty,
-                    as: 'specialtyData', // Liên kết Specialty qua medicalExamination
-                    attributes: ['name'], // Lấy tên của Specialty
+                    as: 'specialtyData',
+                    attributes: ['name'],
                 },
                 {
                     model: db.Schedule,
-                    as: 'scheduleRoomData', // Liên kết với Schedule
-                    attributes: ['staffId', 'date'], // Lấy staffId và date
+                    as: 'scheduleRoomData',
+                    attributes: ['staffId', 'date'],
                     where: {
                         date: {
-                            [db.Sequelize.Op.gte]: new Date().setHours(0, 0, 0, 0), // Lọc theo ngày hiện tại
-                            [db.Sequelize.Op.lte]: new Date().setHours(23, 59, 59, 999), // Lọc theo ngày hôm nay
+                            [db.Sequelize.Op.gte]: new Date().setHours(0, 0, 0, 0),
+                            [db.Sequelize.Op.lte]: new Date().setHours(23, 59, 59, 999),
                         },
                     },
                     include: [
                         {
                             model: db.Staff,
-                            as: 'staffScheduleData', // Liên kết với bảng Staff
-                            attributes: ['id', 'price'], // Chỉ lấy ID của staff
+                            as: 'staffScheduleData',
+                            attributes: ['id', 'price'],
                             include: [
                                 {
-                                    model: db.User, // Liên kết với bảng User
-                                    as: 'staffUserData', // Quan hệ Staff -> User
-                                    attributes: ['lastName', 'firstName'], // Lấy lastName và firstName từ User
+                                    model: db.User,
+                                    as: 'staffUserData',
+                                    attributes: ['lastName', 'firstName'],
+                                    where: {
+                                        roleId: 3 // Bác sĩ
+                                    },
+                                    required: true, 
                                 }
-                            ]
+                            ],
+                            required: true, 
                         },
                     ],
-                    required: false, // Chỉ lấy những phòng có lịch trực trong ngày hôm nay
+                    required: true, 
                 },
             ],
-            raw: true, // Trả dữ liệu dạng JSON
-            nest: true, // Tạo cấu trúc dữ liệu rõ ràng hơn
+            raw: true,
+            nest: true,
         });
 
-        // Duyệt qua các phòng và bổ sung thông tin staff
-        let updatedRooms = roomsWithSpecialties.map(room => {
-            const staffUserData = room.scheduleRoomData?.staffScheduleData?.staffUserData;
-            const staffId = room.scheduleRoomData?.staffScheduleData?.id; // Lấy staffId từ staffScheduleData
-            const staffName = staffUserData.lastName && staffUserData.firstName
-                ? `${staffUserData.lastName} ${staffUserData.firstName}`
-                : 'Chưa có bác sĩ';
-            const staffPrice = room.scheduleRoomData?.staffScheduleData?.price;
-
-            return {
-                id: room.id,
-                name: room.name,
-                specialty: room.specialtyData.name, // Lấy tên chuyên khoa
-                staffId: staffId || 1, // Lấy staffId, nếu không có thì trả về "Chưa có staffId"
-                staffName: staffName, // Tên nhân viên (nếu có)
-                staffPrice: staffPrice || 0, // Giá khám của nhân viên (nếu có)
-                scheduleDate: room.scheduleRoomData.date, // Ngày lịch phòng (nếu có)
-            };
-        });
+        let updatedRooms = roomsWithSpecialties.map(room => ({
+            id: room.id,
+            name: room.name,
+            specialty: room.specialtyData.name,
+            staffId: room.scheduleRoomData.staffScheduleData.id,
+            staffName: `${room.scheduleRoomData.staffScheduleData.staffUserData.lastName} ${room.scheduleRoomData.staffScheduleData.staffUserData.firstName}`,
+            staffPrice: room.scheduleRoomData.staffScheduleData.price || 0,
+            scheduleDate: room.scheduleRoomData.date,
+        }));
 
         return {
             EC: 0,
             EM: "Lấy thông tin thành công",
-            DT: updatedRooms, // Trả lại dữ liệu đã được xử lý
+            DT: updatedRooms,
         };
     } catch (error) {
         console.error(error);

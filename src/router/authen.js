@@ -16,6 +16,6 @@ let authenRoute = (app) => {
     router.post("/registerUser", userController.handleRegisterUser)
     router.post("/handleLogin", userController.handleLogin)
     router.get("/refreshToken", refreshToken)
-    return app.use("/", router);
+    return app.use("/api/", router);
 }
 export default authenRoute;

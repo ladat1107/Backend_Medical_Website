@@ -43,7 +43,6 @@ let initAdminRoute = (app) => {
 
     //------> Admin CRUD User
     router.get("/getAllUser", userController.getAllUser)
-    router.post("/createUser", userController.createUser)
     router.put("/updateUser", userController.updateUser)
     router.put("/blockUser", userController.blockUser)
     router.delete("/deleteUser", userController.deleteUser)
