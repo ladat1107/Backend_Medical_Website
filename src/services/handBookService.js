@@ -1,7 +1,7 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
-const { Op } = require('sequelize');
+const { Op, or } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search, staffId, filter) => {
     try {
@@ -137,31 +137,49 @@ const getHandBookHome = async () => {
     }
 }
 
-const getHandBooksByStatus = async (handBookStatus) => {
+const getHandbookAdmin = async (page, limit, search, status, filter) => {
     try {
-        let handBooks = await db.Handbook.findAll({
-            where: { status: handBookStatus },
+        let whereCondition = {};
+        let filterArray = filter ? filter.split(",") : [];
+        // Kiểm tra điều kiện departmentId
+        if (status) {
+            whereCondition.status = status;
+        }
+        let handbooks = await db.Handbook.findAndCountAll({
+            where: {
+                [Op.or]: [
+                    { title: { [Op.like]: `%${search}%` } },
+                    { shortDescription: { [Op.like]: `%${search}%` } },
+                ],
+                ...(filterArray.length > 0 && {
+                    tags: {
+                        [Op.and]: filterArray.map(tag => ({
+                            [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
+                        }))
+                    }
+                }),
+                ...whereCondition,
+            },
             include: [{
                 model: db.Staff,
                 as: 'handbookStaffData',
-                attributes: ['id', 'position'],
+                required: true,
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['firstName', 'lastName', 'email', 'avatar', "shortDescription", 'tags'],
-                }, {
-                    model: db.Department,
-                    as: 'staffDepartmentData',
-                    attributes: ['id', 'name']
+                    required: true,
                 }]
             }],
-            raw: true,
+            order: [['updatedAt', 'DESC']],
+            offset: (page - 1) * limit,
+            limit: limit,
+            raw: false,
             nest: true,
         });
         return {
             EC: 0,
-            EM: "Lấy thông tin cẩm nang thành công",
-            DT: handBooks
+            EM: "Lấy thông tin thành công",
+            DT: handbooks
         }
     } catch (error) {
         console.log(error);
@@ -333,13 +351,54 @@ const updateHandbookStatus = async (data) => {
         }
     }
 }
+const getHandBookDeparment = async (departmentId) => {
+    try {
+        let handBooks = await db.Handbook.findAll({
+            include: [{
+                model: db.Staff,
+                as: 'handbookStaffData',
+                where: { departmentId: departmentId },
+                require: true,
+                attributes: ['position'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['firstName', 'lastName', 'email', 'avatar']
+                }, {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    require: true,
+                    attributes: ['id', 'name'],
 
+                }],
+            }],
+            where: { status: status.ACTIVE },
+            limit: 20,
+            order: [["view", "DESC"]],
+            raw: false,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin cẩm nang thành công",
+            DT: handBooks
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
 module.exports = {
     getAllHandBooks,
-    getHandBooksByStatus,
     getHandBookById,
     createHandBook,
     updateHandBook,
     updateHandbookStatus,
-    getHandBookHome
+    getHandBookHome,
+    getHandBookDeparment,
+    getHandbookAdmin,
 }

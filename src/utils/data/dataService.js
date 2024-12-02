@@ -1,4 +1,4 @@
-let getServiceHome = (req, res) => {
+export const getServiceHome = (req, res) => {
     try {
         let data = [
             {
@@ -274,8 +274,4 @@ let getServiceHome = (req, res) => {
             DT: ""
         });
     }
-}
-
-module.exports = {
-    getServiceHome
 }

@@ -29,7 +29,7 @@ const getScheduleByStaffId = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -56,7 +56,7 @@ const getScheduleInWeek = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -75,20 +75,12 @@ const getScheduleInWeek = async (req, res) => {
 const createSchedule = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.staffId && data.roomId && data.date) {
-            let response = await scheduleService.createSchedule(data);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
-        } else {
-            return res.status(400).json({
-                EC: 400,
-                EM: "Dữ liệu không được để trống",
-                DT: ""
-            })
-        }
+        let response = await scheduleService.createSchedule(data);
+        res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -98,7 +90,6 @@ const createSchedule = async (req, res) => {
         })
     }
 }
-
 const updateScheduleStaff = async (req, res) => {
     try {
         let data = req.body;
@@ -110,7 +101,7 @@ const updateScheduleStaff = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -125,7 +116,6 @@ const updateScheduleStaff = async (req, res) => {
         })
     }
 }
-
 const deleteSchedule = async (req, res) => {
     try {
         let data = req.body;
@@ -137,7 +127,7 @@ const deleteSchedule = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -152,12 +142,48 @@ const deleteSchedule = async (req, res) => {
         })
     }
 }
-
+const arrangSchedule = async (req, res) => {
+    try {
+        let data = req.body;
+        let response = await scheduleService.arrangeSchedule(data);
+        res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+const getAllSchedulesAdmin = async (req, res) => {
+    try {
+        let response = await scheduleService.getAllSchedulesAdmin(req.query);
+        res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
 module.exports = {
+    getAllSchedulesAdmin,
     getAllSchedules,
     getScheduleByStaffId,
     getScheduleInWeek,
     createSchedule,
     updateScheduleStaff,
-    deleteSchedule
+    deleteSchedule,
+    arrangSchedule,
 }

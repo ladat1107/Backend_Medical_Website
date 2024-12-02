@@ -2,13 +2,11 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import configViewEngine from './config/configViewEngine';
 import initWebRount from './router/web';
-import initPatientRount from "./router/patient"
-import initAdminRout from "./router/admin"
+import initAdminRoute from "./router/admin"
 import initDoctorRoute from "./router/doctor"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { TIME } from './utils/constraints';
 import authenRout from './router/authen';
 require('dotenv').config();
 
@@ -35,9 +33,8 @@ configViewEngine(app);
 
 // Initialize web routes
 authenRout(app);
-initAdminRout(app);
+initAdminRoute(app);
 initWebRount(app);
-initPatientRount(app)
 initDoctorRoute(app)
 
 connectDB();

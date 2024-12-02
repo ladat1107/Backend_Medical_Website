@@ -31,7 +31,6 @@ const getAllRoomAdmin = async (req, res) => {
         })
     }
 }
-
 const getRoomByDepartment = async (req, res) => {
     try {
         let data = req.query;

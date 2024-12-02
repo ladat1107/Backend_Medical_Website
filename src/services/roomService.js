@@ -10,6 +10,7 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
         if (searchDepartment != 0) {
             whereCondition.departmentId = searchDepartment;
         }
+        let countRoom = await db.Room.count();
         let room = await db.Room.findAndCountAll({
             where: {
                 ...whereCondition,
@@ -25,7 +26,6 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
                     model: db.Bed,
                     as: 'bedRoomData',
                     required: false,
-                    raw: true,
                 },
                 {
                     model: db.ServiceType,
@@ -45,7 +45,7 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
             raw: false,
             nest: true,
         });
-        room.count = room.rows.length;
+        room.count = countRoom;
         return {
             EC: 0,
             EM: "Lấy thông tin phòng thành công",
@@ -60,7 +60,6 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
         }
     }
 }
-
 const getRoomByDepartment = async (departmentId) => {
     try {
         let room = await db.Room.findAll({

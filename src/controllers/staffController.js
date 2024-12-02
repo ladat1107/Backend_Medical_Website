@@ -29,7 +29,7 @@ const getStaffbyDepartmentId = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -56,7 +56,7 @@ const getStaffById = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -83,7 +83,7 @@ const getStaffNameById = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -110,7 +110,7 @@ const getStaffByRole = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -137,7 +137,7 @@ const getStaffByName = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""
@@ -163,7 +163,7 @@ const profileStaff = async (req, res) => {
                 DT: response.DT
             });
         } else {
-            return res.status(400).json({
+            return res.status(200).json({
                 EC: 400,
                 EM: "Dữ liệu không được để trống",
                 DT: ""

@@ -154,6 +154,7 @@ const getAllUser = async (page, limit, search, position) => {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
                             { lastName: { [Op.like]: `%${search}%` } },
+                            Sequelize.literal(`CONCAT(lastName, ' ', firstName) LIKE '%${search}%'`),
                             { email: { [Op.like]: `%${search}%` } },
                             { phoneNumber: { [Op.like]: `%${search}%` } },
                             { cid: { [Op.like]: `%${search}%` } },
@@ -433,7 +434,7 @@ const updateUser = async (data) => {
                     where: { id: data.descriptionId },
                 }, { transaction });
                 await db.Staff.update({
-                    price: data?.price,
+                    price: data?.price || null,
                     shortDescription: data?.shortDescription || null,
                     position: data?.position?.toString(),
                     departmentId: data?.departmentId,
