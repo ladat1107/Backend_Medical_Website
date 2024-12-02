@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.hasOne(models.Insurance, {
         foreignKey: 'userId',
-        as: 'userInsuranceData',
+        as: 'userInsuranceData', // Phải đồng nhất với alias khi truy vấn
       });
       User.hasOne(models.ConditionAtBirth, {
         foreignKey: 'userId',
@@ -83,7 +83,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     cid: {
@@ -109,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     phoneNumber: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     avatar: {

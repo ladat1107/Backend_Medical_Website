@@ -44,6 +44,7 @@ const getPrescriptionByExaminationId = async (examinationId) => {
 
 const upsertPrescription = async (data) => {
     try {
+        
         let [prescription, created] = await db.Prescription.findOrCreate({
             where: { examinationId: data.examinationId, status: status.ACTIVE },
             defaults: {
@@ -70,13 +71,13 @@ const upsertPrescription = async (data) => {
                 EM: "Cập nhật chi tiết đơn thuốc không thành công",
                 DT: "",
             };
+        } else {
+            return {
+                EC: 0,
+                EM: created ? "Tạo đơn thuốc thành công" : "Cập nhật đơn thuốc thành công",
+                DT: true
+            };
         }
-
-        return {
-            EC: 0,
-            EM: created ? "Tạo đơn thuốc thành công" : "Cập nhật đơn thuốc thành công",
-            DT: true
-        };
 
     } catch (error) {
         console.log(error);

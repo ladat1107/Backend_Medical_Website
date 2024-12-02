@@ -286,7 +286,7 @@ const seachAppointmentWithStaffId = async (data) => {
 
 const createAppointment = async (data) => {
     try {
-        let examinationId = await examinationService.createExamination(data);
+        let examinationResponse = await examinationService.createExamination(data);
 
         let appointment = await db.Appointment.create({
             userId: data.userId,
@@ -296,12 +296,12 @@ const createAppointment = async (data) => {
             cid: data.cid,
             symptom: data.symptom,
             specialNote: data.specialNote,
-            examinationId: examinationId,
+            examinationId: examinationResponse.DT.id,
         });
 
         if (!appointment) {
             await db.Examination.destroy({
-                where: { id: examinationId },
+                where: { id: examinationResponse.DT.id },
             });
             return {
                 EC: 1000,

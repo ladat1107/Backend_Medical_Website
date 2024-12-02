@@ -26,6 +26,11 @@ const getInsuranceByUserId = async (userId) => {
     try {
         let insuarance = await db.Insurance.findOne({
             where: { userId: userId },
+            include: [{
+                model: db.User,
+                as: 'insuranceUserData',
+                attributes: ['id', 'firstName', 'lastName', 'email'],
+            }],
             raw: true,
             nest: true,
         });
@@ -47,7 +52,7 @@ const getInsuranceByUserId = async (userId) => {
 const createInsurance = async (data) => {
     try {
         let insuarance = await db.Insurance.create({
-            insuanceCode: data.insuanceCode,
+            insuranceCode: data.insuranceCode,
             dateOfIssue: data.dateOfIssue,
             exp: data.exp,
             benefitLevel: data.benefitLevel,
@@ -74,7 +79,7 @@ const createInsurance = async (data) => {
 const updateInsurance = async (data) => {
     try {
         let insuarance = await db.Insurance.update({
-            insuanceCode: data.insuanceCode,
+            insuranceCode: data.insuranceCode,
             dateOfIssue: data.dateOfIssue,
             exp: data.exp,
             benefitLevel: data.benefitLevel,

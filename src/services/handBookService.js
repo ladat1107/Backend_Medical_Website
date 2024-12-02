@@ -283,31 +283,39 @@ const updateHandBook = async (data) => {
         let handBook = await db.Handbook.findOne({
             where: { id: data.id },
         });
-        if (handBook && handBook.author === data.author) {
-            let description = await descriptionService.updateDescription(data, handBook.descriptionId);
-            if (description) {
-                await handBook.update({
-                    title: data.title,
-                    image: data.image,
-                    shortDescription: data?.shortDescription || null,
-                    tags: data.tags || null,
-                });
-                return {
-                    EC: 0,
-                    EM: "Cập nhật cẩm nang thành công",
-                    DT: handBook
+        if (handBook) {
+            if(handBook.author === data.author){
+                let description = await descriptionService.updateDescription(data, handBook.descriptionId);
+                if (description) {
+                    await handBook.update({
+                        title: data.title,
+                        image: data.image,
+                        shortDescription: data?.shortDescription || null,
+                        tags: data.tags || null,
+                    });
+                    return {
+                        EC: 0,
+                        EM: "Cập nhật cẩm nang thành công",
+                        DT: handBook
+                    }
+                } else {
+                    return {
+                        EC: 500,
+                        EM: "Cập nhật cẩm nang thất bại",
+                        DT: "",
+                    }
                 }
             } else {
                 return {
-                    EC: 500,
-                    EM: "Cập nhật cẩm nang thất bại",
+                    EC: 403,
+                    EM: "Cẩm nang không thuộc quyền sở hữu của bạn",
                     DT: "",
                 }
-            }
+            } 
         } else {
             return {
                 EC: 404,
-                EM: "Không tìm thấy cẩm nang/ Cẩm nang không thuộc quyền quản lý của bạn",
+                EM: "Không tìm thấy cẩm nang",
                 DT: "",
             }
         }

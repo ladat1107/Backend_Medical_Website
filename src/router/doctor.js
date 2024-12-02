@@ -82,6 +82,9 @@ let initDoctorRoute = (app) => {
     router.post("/createAppointment", appointmentController.createAppointment)
     router.delete("/deleteAppointment", appointmentController.deleteAppointment)
 
+    //examination
+    router.get("/getExaminations", examinationController.getExaminations)
+
     return app.use("/api/", router);
 }
 export default initDoctorRoute;

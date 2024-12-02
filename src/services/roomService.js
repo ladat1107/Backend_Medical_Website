@@ -312,6 +312,7 @@ const deleteRoom = async (id) => {
         }
     }
 }
+
 module.exports = {
     getAllRooms,
     getRoomByDepartment,

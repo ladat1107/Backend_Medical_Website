@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import db from "../models";
 import { status } from "../utils";
 
@@ -248,6 +248,81 @@ let getSpecialtyById = async (id) => {
         }
     }
 }
+
+const getSpecialtiesByDepartment = async () => {
+    try {
+        let roomsWithSpecialties = await db.Room.findAll({
+            attributes: ['id', 'name'],
+            where: {
+                departmentId: 2,
+            },
+            include: [
+                {
+                    model: db.Specialty,
+                    as: 'specialtyData',
+                    attributes: ['name'],
+                },
+                {
+                    model: db.Schedule,
+                    as: 'scheduleRoomData',
+                    attributes: ['staffId', 'date'],
+                    where: {
+                        date: {
+                            [db.Sequelize.Op.gte]: new Date().setHours(0, 0, 0, 0),
+                            [db.Sequelize.Op.lte]: new Date().setHours(23, 59, 59, 999),
+                        },
+                    },
+                    include: [
+                        {
+                            model: db.Staff,
+                            as: 'staffScheduleData',
+                            attributes: ['id', 'price'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'staffUserData',
+                                    attributes: ['lastName', 'firstName'],
+                                    where: {
+                                        roleId: 3 // Bác sĩ
+                                    },
+                                    required: true, 
+                                }
+                            ],
+                            required: true, 
+                        },
+                    ],
+                    required: true, 
+                },
+            ],
+            raw: true,
+            nest: true,
+        });
+
+        let updatedRooms = roomsWithSpecialties.map(room => ({
+            id: room.id,
+            name: room.name,
+            specialty: room.specialtyData.name,
+            staffId: room.scheduleRoomData.staffScheduleData.id,
+            staffName: `${room.scheduleRoomData.staffScheduleData.staffUserData.lastName} ${room.scheduleRoomData.staffScheduleData.staffUserData.firstName}`,
+            staffPrice: room.scheduleRoomData.staffScheduleData.price || 0,
+            scheduleDate: room.scheduleRoomData.date,
+        }));
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin thành công",
+            DT: updatedRooms,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+};
+
 module.exports = {
     getSpecialtySelect,
     getSpcialtyHome,
@@ -257,4 +332,5 @@ module.exports = {
     deleteSpecialty,
     getAllSpecialtyAdmin,
     getSpecialtyById,
+    getSpecialtiesByDepartment
 }

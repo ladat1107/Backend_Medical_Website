@@ -37,6 +37,11 @@ const getScheduleByStaffId = async (staffId) => {
         let schedule = await db.Schedule.findAll({
             where: { staffId: staffId },
             attributes: ['roomId', 'date'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: ['id', 'name'],
+            }],
             raw: true,
             nest: true,
         });

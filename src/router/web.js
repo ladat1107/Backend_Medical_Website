@@ -59,6 +59,7 @@ let initWebRount = (app) => {
     router.get("/getDoctorHome", userController.getDoctorHome);
     router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
+    router.get("/getUserInsuarance", userController.getUserInsuarance)
 
     //-- Department
     router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
@@ -169,6 +170,9 @@ let initWebRount = (app) => {
     router.post("/createInsuarance", insuranceController.createInsurance)
     router.put("/updateInsuarance", insuranceController.updateInsurance)
     router.delete("/deleteInsuarance", insuranceController.deleteInsurance)
+
+    //-- Create User
+    router.post("/createUser", userController.createUser)
 
     return app.use("/api/", router);
 }

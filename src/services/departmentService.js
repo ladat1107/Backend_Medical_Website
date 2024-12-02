@@ -416,6 +416,8 @@ const deleteDepartment = async (departmentId) => {
     }
 }
 
+const getOutpatientDepartments = async () => {}
+
 module.exports = {
     getAllDepartment,
     getDepartmentDuty,

@@ -7,26 +7,26 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             Insurance.belongsTo(models.User, {
                 foreignKey: 'userId',
-                as: 'insuranceUserData',
+                as: 'insuranceUserData', // Phải đồng nhất với alias khi truy vấn
             });
         }
     }
     Insurance.init({
-        insuanceCode: {
+        insuranceCode: {
             type: DataTypes.STRING(45),
             allowNull: false,
         },
         dateOfIssue: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         exp: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         benefitLevel: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         residentialCode: {
             type: DataTypes.STRING(45),
