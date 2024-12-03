@@ -3,7 +3,7 @@ import { COOKIE, PAGINATE, TIME } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
-        if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid || !data.currentResident || !data.dob) {
+        if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid) {
             return res.status(200).json({
                 EC: 400,
                 EM: "Yêu cầu của bạn không đủ thông tin!",
@@ -28,9 +28,9 @@ const handleRegisterUser = async (req, res) => {
 }
 const handleConfirm = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.confirm) {
-            let response = await userService.confirmUser(data.confirm);
+        let data = req.body;
+        if (data && data.token) {
+            let response = await userService.confirmUser(data.token);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -44,6 +44,33 @@ const handleConfirm = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const handleForgotPassword = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.email) {
+            let response = await userService.forgotPassword(data.email);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Yêu cầu của bạn không đủ thông tin!",
+                DT: ""
+            })
+        }
+    }
+    catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -513,7 +540,7 @@ module.exports = {
     blockUser,
     deleteUser,
     getUserInsuarance,
-
+    handleForgotPassword,
     handleRegisterUser,
     handleLogin,
     updateFunction,

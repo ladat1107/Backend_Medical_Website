@@ -1,13 +1,12 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { literal, Op } from 'sequelize';
+import { literal, Op, where } from 'sequelize';
 import { sendEmailConform } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
 import { ROLE, TIME } from "../utils/constraints";
-import { raw } from "body-parser";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
@@ -86,7 +85,6 @@ const checkEmail = async (email) => {
         let user = await db.User.findOne({
             where: { email: email }
         });
-
         if (user) {
             return false;
         }
@@ -121,6 +119,39 @@ const checkCid = async (cid) => {
     }
 }
 
+const checkDuplicateFields = async (email, phoneNumber, cid) => {
+    try {
+        const result = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    { email },
+                    { phoneNumber },
+                    { cid }
+                ]
+            },
+            attributes: ['email', 'phoneNumber', 'cid'] // Chỉ lấy các trường cần thiết
+        });
+
+        if (!result) {
+            return { isDuplicate: false, duplicateField: null };
+        }
+
+        // Kiểm tra trường nào bị trùng
+        let duplicateField = null;
+        if (result.email === email) {
+            duplicateField = 'Email đã tồn tại';
+        } else if (result.phoneNumber === phoneNumber) {
+            duplicateField = 'Số điện thoại đã tồn tại';
+        } else if (result.cid === cid) {
+            duplicateField = 'CMND/CCCD đã tồn tại';
+        }
+
+        return { isDuplicate: true, duplicateField };
+    } catch (error) {
+        console.error("Error checking duplicates:", error);
+        throw error;
+    }
+};
 const getAllUser = async (page, limit, search, position) => {
     try {
         let defaultPositions = [1, 3, 4, 5, 6, 7];
@@ -214,8 +245,6 @@ const getAllUser = async (page, limit, search, position) => {
         };
     }
 };
-
-
 const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
@@ -272,7 +301,6 @@ const getUserById = async (userId) => {
         }
     }
 }
-
 const getUserByCid = async (cid) => {
     try {
         let user = await db.User.findOne({
@@ -308,7 +336,6 @@ const getUserByCid = async (cid) => {
         }
     }
 }
-
 const createUser = async (data) => {
     try {
         data.password = "123456";
@@ -320,7 +347,7 @@ const createUser = async (data) => {
                 DT: "",
             }
         }
-        if(!await checkCid(data.cid)){
+        if (!await checkCid(data.cid)) {
             return {
                 EC: 200,
                 EM: "CMND/CCCD đã tồn tại",
@@ -342,13 +369,13 @@ const createUser = async (data) => {
         });
         console.log(user);
         let insurance = null;
-        if(data.insuranceCode && user){
+        if (data.insuranceCode && user) {
             insurance = await db.Insurance.create({
                 insuranceCode: data.insuranceCode,
                 benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
                 userId: user.id
             });
-            if(!insurance){
+            if (!insurance) {
                 await db.User.destroy({
                     where: { id: user.id }
                 });
@@ -359,7 +386,6 @@ const createUser = async (data) => {
                 }
             }
         }
-        console.log(data.staff);
         if (data.staff) {
             const staff = await staffService.createStaff(data, user.id);
             if (!staff) {
@@ -423,7 +449,7 @@ const createUser = async (data) => {
                     EM: "Thêm người dùng thành công",
                     DT: {
                         user,
-                        insurance 
+                        insurance
                     },
                 }
             }
@@ -441,16 +467,6 @@ const createUser = async (data) => {
 const updateUser = async (data) => {
     let transaction = await sequelize.transaction();
     try {
-        // let updateFeild = {};
-        // let content = null;
-        // // if (data.password) {
-        // //     updateFeild.password = await hashPasswordUser(data.password);
-        // //     console.log(updateFeild);
-        // //     content = `<p>Thông tin cập nhật của bạn:  </p>
-        // //     <p>Email: ${data.email}</p>
-        // //     <p>Mật khẩu mới: <strong>${data.password}</strong></p>
-        // //     `
-        // // }
         let user = await db.User.findOne({
             where: { id: data.id },
         }, { transaction });
@@ -492,30 +508,6 @@ const updateUser = async (data) => {
                     EM: "Cập nhật tài khoản thành công",
                     DT: "",
                 }
-                // if (content?.length > 0) {
-                //     console.log("Gửi mail");
-                //     let mail = await sendEmailNotification({
-                //         email: user.email,
-                //         lastName: user.lastName,
-                //         firstName: user.firstName,
-                //         subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
-                //         content: content
-                //     })
-                //     if (mail.EC === 0) {
-                //         console.log("Gửi mail thành công");
-                //         return {
-                //             EC: 0,
-                //             EM: "Cập nhật tài khoản thành công",
-                //             DT: "",
-                //         }
-                //     } else {
-                //         return {
-                //             EC: 200,
-                //             EM: "Gửi mail thông báo thất bại",
-                //             DT: "",
-                //         }
-                //     }
-                // }
             } else {
                 await transaction.commit();
                 return {
@@ -601,13 +593,13 @@ const deleteUser = async (userId) => {
         }
     }
 }
-
 const registerUser = async (data) => {
     try {
-        if (await checkEmail(data.email) == false) {
+        let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
+        if (checkExist?.isDuplicate) {
             return {
                 EC: 200,
-                EM: "Email đã tồn tại",
+                EM: checkExist.duplicateField,
                 DT: "",
             }
         }
@@ -615,7 +607,57 @@ const registerUser = async (data) => {
         sendEmailConform({ ...data, password: passwordHash });
         return {
             EC: 0,
-            EM: "Đăng ký thành công",
+            EM: "Vui lòng nhấn xác nhận trong email để hoàn tất đăng ký!",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Đã xảy ra lỗi",
+            DT: "",
+        }
+    }
+}
+const confirmUser = async (token) => {
+    try {
+        let data = await verifyToken(token);
+        if (data) {
+            let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
+            if (checkExist?.isDuplicate) {
+                return {
+                    EC: 1,
+                    EM: "Tài khoản đã tồn tại. Bạn có thể đăng nhập",
+                    DT: "",
+                }
+            }
+            let user = await db.User.create({
+                email: data.email,
+                password: data.password,
+                lastName: data.lastName,
+                firstName: data.firstName,
+                phoneNumber: data.phoneNumber,
+                cid: data.cid,
+                roleId: ROLE.PATIENT,
+                status: status.ACTIVE,
+            })
+            if (user) {
+                return {
+                    EC: 0,
+                    EM: "Chúc mừng bạn đã trở thành thành viên của chúng tôi",
+                    DT: "",
+                }
+            } else {
+                return {
+                    EC: 200,
+                    EM: "Vui lòng đăng ký lại",
+                    DT: "",
+                }
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Quá hạn xác nhận",
             DT: "",
         }
     } catch (error) {
@@ -627,51 +669,53 @@ const registerUser = async (data) => {
         }
     }
 }
-const confirmUser = async (token) => {
+const forgotPassword = async (email) => {
     try {
-        let data = await verifyToken(token);
-
-        if (data) {
-            console.log("gửi mail thành công");
-            if (await checkEmail(data.email) == false) {
-                return {
-                    EC: 200,
-                    EM: "Bạn đã đăng ký tài khoản này",
-                    DT: "",
-                }
+        let password = "123456";
+        let user = await db.User.findOne({ where: { email: email } });
+        if (!user) {
+            return {
+                EC: 200,
+                EM: "Email không tồn tại",
+                DT: "",
             }
-            let user = await db.User.create({
-                email: data.email,
-                password: data.password,
-                lastName: data.lastName,
-                firstName: data.firstName,
-                phoneNumber: data.phoneNumber,
-                cid: data.cid,
-                currentResident: data.currentResident,
-                dob: data.dob,
-                folk: data.folk,
-                point: 0,
-                roleId: 1,
-                status: 1,
+        }
+        let hashPassword = await hashPasswordUser(password);
+        let [updatedRows] = await db.User.update(
+            { password: hashPassword },
+            { where: { email: email } }
+        );
+        if (updatedRows) {
+            let content = `<p>Thông tin cập nhật của bạn:  </p>
+            <p>Email: ${email}</p>
+            <p>Mật khẩu mới: <strong>${password}</strong></p>
+            `
+            let mail = await sendEmailNotification({
+                email: user.email,
+                lastName: user.lastName,
+                firstName: user.firstName,
+                subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
+                content: content
             })
-            if (user) {
+            if (mail.EC === 0) {
                 return {
                     EC: 0,
-                    EM: "Đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ",
+                    EM: "Mật khẩu mới đã được gửi vào email của bạn",
                     DT: "",
                 }
             } else {
                 return {
                     EC: 200,
-                    EM: "Đăng ký thất bại",
+                    EM: "Có lỗi xảy ra",
                     DT: "",
                 }
             }
-        }
-        return {
-            EC: 200,
-            EM: "Token không hợp lệ",
-            DT: "",
+        } else {
+            return {
+                EC: 200,
+                EM: "Có lỗi xảy ra",
+                DT: "",
+            }
         }
     } catch (error) {
         console.log(error);
@@ -829,7 +873,7 @@ const getUserInsuarance = async (userId) => {
                 },
             ],
         });
-        
+
         if (insurance) {
             return {
                 EC: 0,
@@ -866,5 +910,7 @@ module.exports = {
     getDoctorHome,
     updateProfileInfor,
     updateProfilePassword,
-    getUserInsuarance
+    getUserInsuarance,
+    confirmUser,
+    forgotPassword,
 }

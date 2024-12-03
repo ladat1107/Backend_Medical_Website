@@ -3,15 +3,19 @@ import descriptionService from "./descriptionService";
 import { status } from "../utils/index";
 const { Op, or } = require('sequelize');
 
-const getAllHandBooks = async (page, limit, search, staffId, filter) => {
+const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind) => {
     try {
         // Nếu có filter, chuyển thành mảng
-        let filterArray = filter ? filter.split(",") : [];
 
+        let filterArray = filter ? filter.split(",") : [];
+        let whereCondition = {};
+        if (statusFind) {
+            console.log("staffId", statusFind);
+            whereCondition.status = statusFind;
+        }
         // Đếm tổng số lượng bản ghi phù hợp với điều kiện tìm kiếm
         let totalItems = await db.Handbook.count({
             where: {
-                status: status.ACTIVE,
                 [Op.or]: [
                     { title: { [Op.like]: `%${search}%` } },
                     { '$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` } },
@@ -27,7 +31,8 @@ const getAllHandBooks = async (page, limit, search, staffId, filter) => {
                 }),
                 ...(staffId && {
                     author: staffId
-                })
+                }),
+                ...whereCondition
             },
             include: [{
                 model: db.Staff,
@@ -44,7 +49,6 @@ const getAllHandBooks = async (page, limit, search, staffId, filter) => {
         // Lấy danh sách bản ghi với phân trang
         let handBooks = await db.Handbook.findAll({
             where: {
-                status: status.ACTIVE,
                 [Op.or]: [
                     { title: { [Op.like]: `%${search}%` } },
                     { '$handbookStaffData.staffUserData.firstName$': { [Op.like]: `%${search}%` } },
@@ -60,7 +64,8 @@ const getAllHandBooks = async (page, limit, search, staffId, filter) => {
                 }),
                 ...(staffId && {
                     author: staffId
-                })
+                }),
+                ...whereCondition
             },
             include: [{
                 model: db.Staff,
@@ -284,7 +289,7 @@ const updateHandBook = async (data) => {
             where: { id: data.id },
         });
         if (handBook) {
-            if(handBook.author === data.author){
+            if (handBook.author === data.author) {
                 let description = await descriptionService.updateDescription(data, handBook.descriptionId);
                 if (description) {
                     await handBook.update({
@@ -311,7 +316,7 @@ const updateHandBook = async (data) => {
                     EM: "Cẩm nang không thuộc quyền sở hữu của bạn",
                     DT: "",
                 }
-            } 
+            }
         } else {
             return {
                 EC: 404,

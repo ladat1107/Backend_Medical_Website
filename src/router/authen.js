@@ -15,6 +15,8 @@ let authenRoute = (app) => {
     });
     router.post("/registerUser", userController.handleRegisterUser)
     router.post("/handleLogin", userController.handleLogin)
+    router.post("/confirmUser", userController.handleConfirm)
+    router.post("/forgotPassword", userController.handleForgotPassword)
     router.get("/refreshToken", refreshToken)
     return app.use("/api/", router);
 }
