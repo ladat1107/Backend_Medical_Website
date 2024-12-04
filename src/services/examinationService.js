@@ -27,6 +27,11 @@ const getExaminationById = async (id) => {
                 model: db.User,
                 as: 'userExaminationData',
                 attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
+                include: [{
+                    model: db.Insurance,
+                    as: "userInsuranceData",
+                    attributes: ["insuranceCode"]
+                }],
             }, {
                 model: db.Staff,
                 as: 'examinationStaffData',
@@ -242,7 +247,7 @@ const deleteExamination = async (id) => {
     }
 }
 
-const getExaminations = async (date, status, is_appointment, page, limit, search, time) => {
+const getExaminations = async (date, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
         
@@ -270,6 +275,11 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                 status: 2,
             }
         });
+
+        // Staff ID filter
+        if (staffId) {
+            whereCondition.staffId = staffId;
+        }
 
         // Status filter
         if (status) {
@@ -313,7 +323,7 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email'],
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -351,7 +361,7 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                             ELSE 3 
                         END`
                     ),
-                    'ASC',
+                    'ASC'
                 ],
                 ['visit_status', 'ASC'],
                 ['createdAt', 'ASC']],

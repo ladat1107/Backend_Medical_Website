@@ -145,6 +145,7 @@ const getExaminations = async (req, res) => {
     try {
         let date = req.query.date || null;
         let status = req.query.status || null;
+        let staffId = req.query.staffId || null;
         let is_appointment = req.query.is_appointment || null;
         let time = req.query.time || null;
         
@@ -152,7 +153,7 @@ const getExaminations = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await examinationService.getExaminations(date, status, is_appointment, +page, +limit, search, time);
+        let response = await examinationService.getExaminations(date, status, staffId, +page, +limit, search, time);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

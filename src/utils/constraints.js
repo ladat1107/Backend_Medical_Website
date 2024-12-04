@@ -1,7 +1,8 @@
 const status = {
-    DONE: 6, // đã khám
-    EXAMINING: 5, // đang khám
-    WAITING: 4, // chờ khám
+    DONE: 7, // đã khám
+    EXAMINING: 6, // đang khám
+    PAID: 5, // đã thanh toán chờ để khám
+    WAITING: 4, // chờ thanh toán
     REJECT: 3, // không duyệt
     PENDING: 2, // chờ duyệt << sẽ để thêm ở exam để nhân viên tiếp nhận lấy ra --> nhân viên tiếp nhận ok thì chuyển lên 4
     ACTIVE: 1,
