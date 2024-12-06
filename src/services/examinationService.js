@@ -1,67 +1,83 @@
 import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
-const { Op, ConnectionTimedOutError, Sequelize } = require('sequelize');
+const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
 
 const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
             where: { id: +id },
-            include: [{
-                model: db.VitalSign,
-                as: 'examinationVitalSignData',
-            }, {
-                model: db.Paraclinical,
-                as: 'examinationResultParaclincalData',
-                include: [{
+            include: [
+                {
+                    model: db.VitalSign,
+                    as: 'examinationVitalSignData',
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'examinationResultParaclincalData',
+                    include: [
+                        {
+                            model: db.Staff,
+                            as: 'doctorParaclinicalData',
+                            attributes: ['id', 'departmentId'],
+                            include: [{
+                                model: db.User,
+                                as: 'staffUserData',
+                                attributes: ['id', 'lastName', 'firstName'],
+                            }],
+                        },
+                        {
+                            model: db.Room,
+                            as: 'roomParaclinicalData',
+                            attributes: ['id', 'name'],
+                        },
+                        {
+                            model: db.ServiceType,
+                            as: 'paraclinicalData',
+                            attributes: ['id', 'name', 'price'],
+                        }
+                    ],
+                    separate: true,
+                },
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }],
+                },
+                {
                     model: db.Staff,
-                    as: 'doctorParaclinicalData',
+                    as: 'examinationStaffData',
                     attributes: ['id', 'departmentId'],
                     include: [{
                         model: db.User,
                         as: 'staffUserData',
                         attributes: ['id', 'lastName', 'firstName'],
                     }],
-                }],
-                separate: true,
-            }, {
-                model: db.User,
-                as: 'userExaminationData',
-                attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
-                include: [{
-                    model: db.Insurance,
-                    as: "userInsuranceData",
-                    attributes: ["insuranceCode"]
-                }],
-            }, {
-                model: db.Staff,
-                as: 'examinationStaffData',
-                attributes: ['id', 'departmentId'],
-                include: [{
-                    model: db.User,
-                    as: 'staffUserData',
-                    attributes: ['id', 'lastName', 'firstName'],
-                }],
-            }, {
-                model: db.Prescription,
-                as: 'prescriptionExamData',
-                attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
-                include: [{
-                    model: db.Medicine,
-                    as: 'prescriptionDetails',
-                    attributes: ['id', 'name', 'price'],    
-                    through: ['quantity', 'unit', 'dosage', 'price']
-                }],
-            }],
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionExamData',
+                    attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                    include: [{
+                        model: db.Medicine,
+                        as: 'prescriptionDetails',
+                        attributes: ['id', 'name', 'price'],
+                        through: ['quantity', 'unit', 'dosage', 'price']
+                    }],
+                }
+            ],
             nest: true,
         });
-
-        // examination = examination.get({ plain: true });
 
         return {
             EC: 0,
             EM: "Lấy thông tin khám bệnh thành công",
             DT: examination
-        }
+        };
     } catch (error) {
         console.log(error);
         return {

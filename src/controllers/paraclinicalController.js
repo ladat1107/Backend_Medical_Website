@@ -27,11 +27,40 @@ const getParaclinicalByExamId = async (req, res) => {
     }
 }
 
+const createRequestParaclinical = async (req, res) => {
+    try{
+        let data = req.body;
+        if(data && data.examinationId && data.listParaclinicals){
+            let response = await paraclinicalService.createRequestParaclinical(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 const createParaclinical = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.paraclinical && data.description
-            && data.result && data.image && data.price && data.doctorId) {
+        if (data && data.examinationId && data.paraclinical && data.price
+            // && data.description
+            // && data.result && data.image && data.doctorId
+        ) {
             let response = await paraclinicalService.createParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -144,5 +173,6 @@ module.exports = {
     createParaclinical,
     updateParaclinical,
     deleteParaclinical,
-    createOrUpdateParaclinical
+    createOrUpdateParaclinical,
+    createRequestParaclinical
 }

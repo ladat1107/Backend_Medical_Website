@@ -234,6 +234,30 @@ const deleteStatusServiceType = async (id) => {
         }
     }
 }
+
+const getServiceLaboratory = async () => {
+    try {
+        let serviceType = await db.ServiceType.findAll({
+            where: { status: status.ACTIVE, isLaboratory: 0 },
+            attributes: ['id', 'name', 'price', 'description'],
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin loại phòng thành công",
+            DT: serviceType
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
+
 module.exports = {
     getAllServiceTypes,
     getAllServiceTypesAdmin,
@@ -242,5 +266,6 @@ module.exports = {
     createServiceType,
     updateServiceType,
     blockStatusServiceType,
-    deleteStatusServiceType
+    deleteStatusServiceType,
+    getServiceLaboratory
 }

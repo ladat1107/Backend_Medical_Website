@@ -71,6 +71,7 @@ let initDoctorRoute = (app) => {
     router.put("/updateParaclinical", paraclinicalController.updateParaclinical)
     router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
     router.post("/createOrUpdateParaclinical", paraclinicalController.createOrUpdateParaclinical)
+    router.post("/createRequestParaclinical", paraclinicalController.createRequestParaclinical)
     
     //-- Appointment
     router.get("/getAllAppointments", appointmentController.getAllAppointments)

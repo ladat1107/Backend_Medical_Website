@@ -175,6 +175,8 @@ let initWebRount = (app) => {
     router.post("/createUser", userController.createUser)
 
     router.get("/getSpecialtiesByDepartment", specialtyController.getSpecialtiesByDepartment)
+    router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
+    router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
 
     return app.use("/api/", router);
 }

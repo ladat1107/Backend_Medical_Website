@@ -200,6 +200,24 @@ const deleteStatusServiceType = async (req, res) => {
     }
 }
 
+const getServiceLaboratory = async (req, res) => {
+    try {
+        let response = await serviceTypeService.getServiceLaboratory();
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getAllServiceTypes,
     getServiceTypeById,
@@ -209,4 +227,5 @@ module.exports = {
     deleteStatusServiceType,
     getAllServiceTypesAdmin,
     getServiceSearch,
+    getServiceLaboratory
 }

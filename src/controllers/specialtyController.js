@@ -207,6 +207,25 @@ const getSpecialtiesByDepartment = async (req, res) => {
     }
 }
 
+const getSpecialtiesByLaboratory = async (req, res) => {
+    try {
+        const labId = req.query.labId;
+        let response = await specialtyService.getSpecialtiesByLaboratory(labId);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
+
 module.exports = {
     createSpecialty,
     getSpecialtySelect,
@@ -216,5 +235,6 @@ module.exports = {
     deleteSpecialty,
     getAllSpecialtyAdmin,
     getSpecialtyById,
-    getSpecialtiesByDepartment
+    getSpecialtiesByDepartment,
+    getSpecialtiesByLaboratory
 }

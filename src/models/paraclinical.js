@@ -13,13 +13,17 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'doctorId',
                 as: 'doctorParaclinicalData',
             });
+            Paraclinical.belongsTo(models.Room, {
+                foreignKey: 'roomId',
+                as: 'roomParaclinicalData',
+            });
+            Paraclinical.belongsTo(models.ServiceType, {
+                foreignKey: 'paraclinical',
+                as: 'paraclinicalData',
+            });
         }
     }
     Paraclinical.init({
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-        },
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -34,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         paraclinical: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            references: {
+                model: 'servicetypes', // Tên bảng tham chiếu
+                key: 'id',
+            }
         },
         description: {
             type: DataTypes.STRING(100),
@@ -64,6 +72,16 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             references: {
                 model: 'staffs', // Tên bảng tham chiếu
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
+        },
+        roomId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'rooms', // T
                 key: 'id',
             },
             onUpdate: 'CASCADE',
