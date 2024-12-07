@@ -1,4 +1,5 @@
-import db from "../models/index";
+import { Op } from "sequelize";
+import db, { Sequelize } from "../models/index";
 import { status, pamentStatus } from "../utils/index";
 const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
 
@@ -266,12 +267,12 @@ const deleteExamination = async (id) => {
 const getExaminations = async (date, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
-        
+
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
             };
@@ -286,7 +287,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
 
         const totalAppointment = await db.Examination.count({
             where: {
-                ...whereCondition,  
+                ...whereCondition,
                 is_appointment: 1,
                 status: 2,
             }
@@ -406,12 +407,63 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         };
     }
 };
+const getScheduleApoinment = async (filter) => {
+    try {
+        let listDate = filter?.date || [];
+        const formattedDates = listDate.map((date) => new Date(date).toISOString().split("T")[0]);
+        // Thực hiện truy vấn
+        // const results = await db.Examination.findAll({
+        //     attributes: [
+        //         "time",
+        //         [Sequelize.literal("DATE(createdAt)"), "date"], // Lấy chỉ phần ngày từ `createdAt`
+        //     ],
+        //     where: {
+        //         [Op.and]: [
+        //             Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: formattedDates }), // So sánh phần ngày của `createdAt`
+        //             { is_appointment: true }, // Chỉ lấy các bản ghi đã hẹn
+        //         ],
+        //     },
+        //     raw: true, // Trả về kết quả thô
+        // });
+        // // Chuyển đổi kết quả thành định dạng đơn giản
+        const results = await db.Examination.findAll({
+            attributes: [
+                [Sequelize.literal("DATE(createdAt)"), "date"], // Lấy phần ngày từ `createdAt`
+                "time", // Giữ lại cột `time`
+                [Sequelize.fn("COUNT", Sequelize.col("time")), "count"], // Đếm số lần xuất hiện của mỗi `time`
+            ],
+            where: {
+                [Op.and]: [
+                    Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: formattedDates }), // So sánh phần ngày của `createdAt`
+                    { is_appointment: true }, // Chỉ lấy các bản ghi đã hẹn
+                ],
+            },
+            group: ["date", "time"], // Nhóm theo ngày và time
+            raw: true, // Trả về kết quả dạng thô
+        });
 
+        return {
+            EC: 0,
+            EM: "Lấy dữ liệu thành công",
+            DT: results,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        }
+
+    }
+
+}
 module.exports = {
     getExaminationById,
     getExaminationByUserId,
     createExamination,
     updateExamination,
     deleteExamination,
-    getExaminations
+    getExaminations,
+    getScheduleApoinment,
 }

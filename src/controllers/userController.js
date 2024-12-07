@@ -438,7 +438,7 @@ const handleGetAccount = async (req, res) => {
 }
 const getDoctorHome = async (req, res) => {
     try {
-        let response = await userService.getDoctorHome();
+        let response = await userService.getDoctorHome(req.query);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

@@ -58,11 +58,18 @@ let getAllSpecialtyAdmin = async (page, limit, search) => {
 
     }
 }
-let getSpcialtyHome = async () => {
+let getSpcialtyHome = async (filter) => {
     try {
+        let search = filter?.search || "";
+        console.log(search);
         let specialtyData = await db.Specialty.findAll({
-            where: { status: status.ACTIVE },
-            attributes: ["id", "name", "image"]
+            where: {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` }, },
+                    { shortDescription: { [Op.like]: `%${search}%` } }
+                ],
+                status: status.ACTIVE,
+            }
         });
         return {
             EC: 0,
@@ -125,11 +132,7 @@ let updateSpecialty = async (data) => {
                 DT: ""
             }
         }
-        return {
-            EC: 0,
-            EM: "Cập nhật chuyên khoa thành công",
-            DT: specialty
-        }
+
     } catch (error) {
         console.log(error);
         return {
@@ -286,13 +289,13 @@ const getSpecialtiesByDepartment = async () => {
                                     where: {
                                         roleId: 3 // Bác sĩ
                                     },
-                                    required: true, 
+                                    required: true,
                                 }
                             ],
-                            required: true, 
+                            required: true,
                         },
                     ],
-                    required: true, 
+                    required: true,
                 },
             ],
             raw: true,

@@ -1,13 +1,13 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
-import { status } from "../utils/index";
-const { Op, or } = require('sequelize');
+import { ROLE, status } from "../utils/index";
+const { Op, or, where } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind) => {
     try {
         // Nếu có filter, chuyển thành mảng
 
-        let filterArray = filter ? filter.split(",") : [];
+        let filterArray = filter ? filter?.split(",") : [];
         let whereCondition = {};
         if (statusFind) {
             console.log("staffId", statusFind);
@@ -108,12 +108,29 @@ const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind)
     }
 }
 
-const getHandBookHome = async () => {
+const getHandBookHome = async (filter) => {
     try {
+        let condition = {};
+        let limit = filter?.limtit || 100;
+        console.log("filter", filter);
+        let filterArray = filter.tags ? filter.tags?.split(",") : [];
+        if (filter.departmentId) {
+            condition.departmentId = filter.departmentId;
+        }
         let handBooks = await db.Handbook.findAll({
-            where: { status: status.ACTIVE },
+            where: {
+                status: status.ACTIVE,
+                ...(filterArray.length > 0 && {
+                    tags: {
+                        [Op.or]: filterArray.map(tag => ({
+                            [Op.like]: `%${tag}%` // Mỗi giá trị trong filterArray sẽ được kiểm tra với tags
+                        }))
+                    }
+                }),
+            },
             include: [{
                 model: db.Staff,
+                where: { ...condition },
                 as: 'handbookStaffData',
                 attributes: ['id', 'position'],
                 include: [{
@@ -122,8 +139,8 @@ const getHandBookHome = async () => {
                     attributes: ['firstName', 'lastName', 'email']
                 }]
             }],
-            order: [['updatedAt', 'DESC']],
-            limit: 20,
+            order: [['view']],
+            limit: limit,
             raw: true,
             nest: true,
         });
@@ -196,7 +213,7 @@ const getHandbookAdmin = async (page, limit, search, status, filter) => {
     }
 }
 
-const getHandBookById = async (handBookId) => {
+const getHandBookById = async (handBookId, role) => {
     try {
         let handBook = await db.Handbook.findOne({
             where: { id: handBookId },
@@ -225,6 +242,11 @@ const getHandBookById = async (handBookId) => {
             raw: true,
             nest: true,
         });
+        if (role === ROLE.PATIENT) {
+            await handBook.update({
+                view: handBook.view + 1
+            });
+        }
         if (handBook) {
             return {
                 EC: 0,
@@ -364,47 +386,6 @@ const updateHandbookStatus = async (data) => {
         }
     }
 }
-const getHandBookDeparment = async (departmentId) => {
-    try {
-        let handBooks = await db.Handbook.findAll({
-            include: [{
-                model: db.Staff,
-                as: 'handbookStaffData',
-                where: { departmentId: departmentId },
-                require: true,
-                attributes: ['position'],
-                include: [{
-                    model: db.User,
-                    as: 'staffUserData',
-                    attributes: ['firstName', 'lastName', 'email', 'avatar']
-                }, {
-                    model: db.Department,
-                    as: 'staffDepartmentData',
-                    require: true,
-                    attributes: ['id', 'name'],
-
-                }],
-            }],
-            where: { status: status.ACTIVE },
-            limit: 20,
-            order: [["view", "DESC"]],
-            raw: false,
-            nest: true,
-        });
-        return {
-            EC: 0,
-            EM: "Lấy thông tin cẩm nang thành công",
-            DT: handBooks
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
-    }
-}
 module.exports = {
     getAllHandBooks,
     getHandBookById,
@@ -412,6 +393,5 @@ module.exports = {
     updateHandBook,
     updateHandbookStatus,
     getHandBookHome,
-    getHandBookDeparment,
     getHandbookAdmin,
 }

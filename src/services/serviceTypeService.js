@@ -128,6 +128,7 @@ const createServiceType = async (data) => {
             price: data.price,
             status: status.ACTIVE,
             description: data?.description || "",
+            isLaboratory: data?.isLaboratory ? 1 : 0,
         });
         return {
             EC: 0,
@@ -150,6 +151,7 @@ const updateServiceType = async (data) => {
             name: data.name,
             price: data.price,
             description: data.description,
+            isLaboratory: data.isLaboratory ? 1 : 0,
             status: data.status,
         }, {
             where: { id: data.id }

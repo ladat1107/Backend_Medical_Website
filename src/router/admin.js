@@ -33,7 +33,7 @@ require('dotenv').config();
 
 let router = express.Router();
 let initAdminRoute = (app) => {
-    //router.all("*", checkTokenWithCookie, checkAuthentication)
+    router.all("*", checkTokenWithCookie)
     //------> Admin CRUD Specialty
     router.get("/getAllSpecialtyAdmin", specialtyController.getAllSpecialtyAdmin)
     router.post("/createSpecialty", specialtyController.createSpecialty)

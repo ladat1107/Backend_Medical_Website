@@ -16,7 +16,7 @@ require('dotenv').config();
 
 let router = express.Router();
 let initDoctorRoute = (app) => {
-    //router.all("*", checkTokenWithCookie, checkAuthentication)
+    router.all("*", checkTokenWithCookie)
 
     // router.post("/specialty", specialtyController.createSpecialty)
     // router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
@@ -32,12 +32,12 @@ let initDoctorRoute = (app) => {
     router.get("/getHandBookById", handBookController.getHandBookById)
     router.post("/createHandBook", handBookController.createHandBook)
     router.put("/updateHandBook", handBookController.updateHandBook)
-    
+
     //-- Schedule
     router.get("/getAllSchedules", scheduleController.getAllSchedules)
     router.get("/getScheduleByStaffId", scheduleController.getScheduleByStaffId)
     router.get("/getScheduleInWeek", scheduleController.getScheduleInWeek)
-    
+
     //-- Prescription
     router.get("/getPrescriptionByExaminationId", prescriptionController.getPrescriptionByExaminationId)
     router.post("/upsertPrescription", prescriptionController.upsertPrescription)
@@ -45,7 +45,7 @@ let initDoctorRoute = (app) => {
     //-- Disease
     router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
     router.get("/getAllDisease", diseaseController.getAllDisease)
-    
+
     //-- Medicine
     router.get("/getAllMedicines", medicineController.getAllMedicines)
     router.get("/getAllMedicinesForExam", medicineController.getAllMedicinesForExam)

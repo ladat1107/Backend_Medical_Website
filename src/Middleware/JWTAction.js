@@ -18,12 +18,11 @@ const verifyToken = (token) => {
     try {
         decoded = jwt.verify(token, key);
     } catch (error) {
-        console.log("Token hết hạn hoặc không hợp lệ");
+        console.log("Token hết hạn hoặc không hợp lệ1");
     }
     return decoded;
 }
 const checkTokenWithCookie = (req, res, next) => {
-    const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm'];
     if (defaultUrl.includes(req.path)) {
         return next();
     }
@@ -86,6 +85,7 @@ const checkAuthentication = (req, res, next) => {
 }
 const refreshToken = (req, res) => {
     try {
+        console.log("refreshToken");
         let reqToken = req.cookies[COOKIE.refreshToken];
         if (!reqToken) {
             return res.status(200).json({
@@ -100,6 +100,7 @@ const refreshToken = (req, res) => {
                 id: reqDecoded.id,
                 email: reqDecoded.email,
                 roleId: reqDecoded.roleId,
+                staff: reqDecoded?.staff,
             }
             let newToken = createToken(data, TIME.tokenLife);
             return res.status(200).json({

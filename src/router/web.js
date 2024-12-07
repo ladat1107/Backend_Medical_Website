@@ -29,6 +29,7 @@ import diseaseController from '../controllers/diseaseController';
 import specialtyController from '../controllers/specialtyController';
 import { getServiceHome } from "../utils/data/dataService"
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import { getDataByDepartment } from '../services/staffService';
 require('dotenv').config();
 
 let router = express.Router();
@@ -43,9 +44,8 @@ let initWebRount = (app) => {
 
     // HANDBOOK
     router.get("/getHandBookHome", handBookController.getHandBookHome);
-    router.get("/getHandBookByDeparment", handBookController.getHandBookDeparment);
-
-    //USER
+    //EXAMINATION
+    router.get("/getScheduleApoinment", examinationController.getScheduleApoinment);
 
     //SECTION
     router.get("/getServicesHome", getServiceHome);
@@ -55,7 +55,7 @@ let initWebRount = (app) => {
 
     //-- User   
     router.get("/getUserById", userController.getUserById)
-    router.get("/getUserByCid", userController.getUserByCid)    
+    router.get("/getUserByCid", userController.getUserByCid)
     router.get("/getDoctorHome", userController.getDoctorHome);
     router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
@@ -65,6 +65,7 @@ let initWebRount = (app) => {
     router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
     router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
+
     ////-----> Admin C.U.D department
     router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.post("/admin/createDepartment", departmentController.createDepartment)
@@ -75,9 +76,10 @@ let initWebRount = (app) => {
     //-- Staff
     router.get("/getAllStaff", staffController.getAllStaff)
     router.get("/getStaffById", staffController.getStaffById)
-    router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
+    // router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
     router.get("/getStaffByRole", staffController.getStaffByRole)
     router.get("/getStaffByName", staffController.getStaffByName)
+
 
     router.put("/profileUpdateStaff", staffController.profileStaff)
 

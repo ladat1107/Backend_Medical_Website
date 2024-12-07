@@ -115,6 +115,7 @@ module.exports = (sequelize, DataTypes) => {
     avatar: {
       type: DataTypes.STRING(1000),
       allowNull: true,
+      defaultValue: "https://md.surehis.com/File/Lawyer_LawOffice/avatar%20bs%20covid_02.png"
     },
     status: {
       type: DataTypes.INTEGER,

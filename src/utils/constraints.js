@@ -56,7 +56,7 @@ const TIME = {
     tokenLife: 60 * 60, // tính theo giây
     refreshToken: 7 * 24 * 60 * 60, // tính theo giây
     cookieLife: 7 * 24 * 60 * 60 * 1000,// tính theo milisecond
-    tokenEmail: 3 * 60 * 60, // tính theo giây
+    tokenEmail: 3 * 60, // tính theo giây
 }
 module.exports = {
     status,

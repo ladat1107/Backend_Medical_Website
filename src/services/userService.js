@@ -6,7 +6,7 @@ import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
-import { ROLE, TIME } from "../utils/constraints";
+import { ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
@@ -51,6 +51,7 @@ let loginUser = async (data) => {
                     id: user.id,
                     email: user.email,
                     roleId: user.roleId,
+                    staff: user?.staffUserData?.id
                 }
                 let token = createToken(data, TIME.tokenLife);
                 let refreshToken = createToken(data, TIME.refreshToken);
@@ -726,46 +727,100 @@ const forgotPassword = async (email) => {
         }
     }
 }
-const getDoctorHome = async () => {
+
+const getDoctorHome = async (filter) => {
     try {
-        let examCount = await db.Examination.findAll({
-            attributes: [
-                'staffId',
-                [Sequelize.fn('COUNT', Sequelize.col('staffId')), 'examinationsCount']
-            ],
+        // Khởi tạo điều kiện và tùy chọn include
+        const condition = {};
+        const includeOption = [];
+        const search = filter?.search || "";
+
+        // Xử lý filter.date
+        if (filter?.date) {
+            includeOption.push({
+                model: db.Schedule,
+                as: 'staffScheduleData',
+                where: {
+                    date: { [Op.gte]: new Date() },
+                },
+                include: [
+                    {
+                        model: db.Room,
+                        as: 'scheduleRoomData',
+                        where: { departmentId: typeRoom.CLINIC, },
+                        attributes: [],
+                    },
+                ],
+                attributes: ['date'],
+                raw: true,
+            });
+        }
+        // Áp dụng các bộ lọc departmentId và specialtyId
+        if (filter?.departmentId) {
+            condition.departmentId = filter.departmentId;
+        }
+        if (filter?.specialtyId) {
+            condition.specialtyId = +filter.specialtyId;
+        }
+
+        // Truy vấn danh sách staff
+        const listStaff = await db.Staff.findAll({
             include: [
                 {
-                    model: db.Staff,
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        roleId: ROLE.DOCTOR,
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            Sequelize.literal(`CONCAT(lastName, ' ', firstName) LIKE '%${search}%'`),
+                        ],
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Specialty,
+                    as: 'staffSpecialtyData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Examination,
                     as: 'examinationStaffData',
-                    attributes: ['id', 'position', "userId"],
-                    include: [
-                        {
-                            model: db.User,
-                            as: 'staffUserData',
-                            attributes: ['id', 'lastName', 'firstName', "avatar"], // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
-                        }
-                    ],
-                }
+                    attributes: ['id'],
+                },
+                ...includeOption, // Thêm lịch theo điều kiện date
             ],
-            group: ['staffId'],
-            limit: 20,
-            order: [[literal('examinationsCount'), 'DESC']],
-        })
+            where: {
+                status: status.ACTIVE,
+                ...condition,
+            },
+            attributes: ['id', 'position', 'userId', 'price'],
+
+            nest: true,
+        });
+
+        // Trả về kết quả
         return {
             EC: 0,
             EM: "Lấy thông tin bác sĩ thành công",
-            DT: examCount
+            DT: listStaff,
         };
     } catch (error) {
-        console.log(error);
+        console.error("Lỗi server:", error);
         return {
             EC: 500,
             EM: "Lỗi server!",
             DT: "",
-        }
-
+        };
     }
-}
+};
+
 const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
@@ -859,7 +914,6 @@ const updateProfilePassword = async (data) => {
         }
     }
 }
-
 const getUserInsuarance = async (userId) => {
     try {
         let insurance = await db.User.findOne({
