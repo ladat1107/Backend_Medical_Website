@@ -1,5 +1,5 @@
 const status = {
-    DONE: 7, // đã khám
+    DONE: 7, // đã khám xong
     EXAMINING: 6, // đang khám
     PAID: 5, // đã thanh toán chờ để khám
     WAITING: 4, // chờ thanh toán

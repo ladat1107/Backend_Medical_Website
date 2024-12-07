@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import db from "../models/index";
 import room from "../models/room";
 import { status, pamentStatus } from "../utils/index";
@@ -69,8 +70,9 @@ const createRequestParaclinical = async (data) => {
                 let dataParaclinical = {
                     examinationId: data.examinationId,
                     paraclinical: item.id,
+                    paracName: item.label,
                     price: item.price,
-                    status: status.ACTIVE,
+                    status: status.WAITING,
                     paymentStatus: pamentStatus.UNPAID,
                     doctorId: roomData.staffId,
                     roomId: roomData.id
@@ -164,17 +166,16 @@ const createParaclinical = async (data) => {
 
 const updateParaclinical = async (data) => {
     try {
-        let paraclinical = await db.Paraclinical.update({
-            paraclinical: data.paraclinical,
-            description: data.description,
-            result: data.result,
-            image: data.image,
-            price: data.price
-        }, {
-            where: {
-                id: data.id
+        const { id, ...updateData } = data; // Tách id ra khỏi data
+
+        let paraclinical = await db.Paraclinical.update(
+            updateData, // Chỉ truyền các dữ liệu cần update
+            {
+                where: {
+                    id: id // Sử dụng id đã tách để làm điều kiện
+                }
             }
-        });
+        );
         return {
             EC: 0,
             EM: "Cập nhật xét nghiệm thành công",
@@ -288,10 +289,136 @@ const createOrUpdateParaclinical = async (data) => {
         return {
             EC: 500,
             EM: "Lỗi server!",
-            DT: ""
+            DT: ""  
         }
     }
 }
+
+
+const getParaclinicals = async (date, status, staffId, page, limit, search) => {
+    try {
+        const whereCondition = {};
+        
+        // Date filter
+        if (date) {
+            const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
+            const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
+        
+            whereCondition.createdAt = {
+                [Op.between]: [startOfDay, endOfDay],
+            };
+        }
+
+        // // Staff ID filter
+        // if (staffId) {
+        //     whereCondition.staffId = staffId;
+        // }
+
+        // Status filter
+        if (status) {
+            whereCondition.status = status;
+        }
+        // Search filter (across user's first and last name)
+        // const searchCondition = search ? {
+        //     [Op.or]: [
+        //         { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
+        //         { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
+        //     ]
+        // } : {};
+
+        let offset, limit_query;
+        if (status === 2) {
+            // Nếu status là 2, không phân trang
+            offset = 0;
+            limit_query = null;
+        } else {
+            offset = (page - 1) * limit;
+            limit_query = limit;
+        }
+
+        const { count, rows: paraclinicals } = await db.Paraclinical.findAndCountAll({
+            where: {
+                ...whereCondition,
+                // ...searchCondition
+            },
+            include: [
+                {
+                    model: db.Examination,
+                    as: 'examinationResultParaclincalData',
+                    attributes: ['special'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'userExaminationData',
+                            attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
+                            include: [{
+                                model: db.Insurance,
+                                as: "userInsuranceData",
+                                attributes: ["insuranceCode"]
+                            }],
+                            // Add search condition to include
+                            where: search ? {
+                                [Op.or]: [
+                                    { firstName: { [Op.like]: `%${search}%` } },
+                                    { lastName: { [Op.like]: `%${search}%` } }
+                                ]
+                            } : {},
+                            required: true
+                        },
+                    ],
+                    required: true
+                },
+                {
+                    model: db.Staff,
+                    as: 'doctorParaclinicalData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                    ],
+                    ...(staffId ? { where: { id: staffId }, required: true } : {}),
+                },
+                {
+                    model: db.Room,
+                    as: 'roomParaclinicalData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.ServiceType,
+                    as: 'paraclinicalData',
+                    attributes: ['name', 'price']
+                }
+            ],
+            limit: limit_query,
+            offset,
+            order: [
+                ['createdAt', 'ASC']],
+            distinct: true // Ensures correct count with joins
+        });
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công!',
+            DT: {
+                totalItems: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page,
+                examinations: paraclinicals,
+
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching paraclinicals:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+};
 
 module.exports = {
     getParaclinicalByExamId,
@@ -299,5 +426,6 @@ module.exports = {
     updateParaclinical,
     deleteParaclinical,
     createOrUpdateParaclinical,
-    createRequestParaclinical
+    createRequestParaclinical,
+    getParaclinicals
 }

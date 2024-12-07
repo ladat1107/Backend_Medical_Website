@@ -65,6 +65,10 @@ const upsertPrescription = async (data) => {
 
         let prescriptionDetail = await prescriptionDetailService.upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
 
+        if(prescriptionDetail.EC !== 0) {
+            return prescriptionDetail;
+        }
+
         if (!prescriptionDetail) {
             return {
                 EC: 1,

@@ -87,8 +87,11 @@ const createParaclinical = async (req, res) => {
 const updateParaclinical = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.paraclinical && data.description
-            && data.result && data.image && data.price) {
+        if (data && data.id 
+            // && data.paraclinical 
+            // && data.description
+            // && data.result && data.image && data.price
+        ) {
             let response = await paraclinicalService.updateParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -168,11 +171,66 @@ const createOrUpdateParaclinical = async (req, res) => {
     }
 }
 
+const getExaminations = async (req, res) => {
+    try {
+        let date = req.query.date || null;
+        let status = req.query.status || null;
+        let staffId = req.query.staffId || null;
+        let is_appointment = req.query.is_appointment || null;
+        let time = req.query.time || null;
+        
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 20;
+        let search = req.query.search || '';
+
+        let response = await examinationService.getExaminations(date, status, staffId, +page, +limit, search, time);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
+const getParaclinicals = async (req, res) => {
+    try {
+        let date = req.query.date || null;
+        let status = req.query.status || null;
+        let staffId = req.query.staffId || null;
+        
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 20;
+        let search = req.query.search || '';
+
+        let response = await paraclinicalService.getParaclinicals(date, status, staffId, +page, +limit, search);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getParaclinicalByExamId,
     createParaclinical,
     updateParaclinical,
     deleteParaclinical,
     createOrUpdateParaclinical,
-    createRequestParaclinical
+    createRequestParaclinical,
+    getParaclinicals
 }

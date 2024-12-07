@@ -24,12 +24,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Paraclinical.init({
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
         examinationId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
                 model: 'examinations', // Tên bảng tham chiếu
-                key: 'id',
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
@@ -87,6 +91,10 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
+        paracName: {
+            type: DataTypes.STRING(512),
+            allowNull: true,
+        }
     }, {
         sequelize,
         modelName: 'Paraclinical',

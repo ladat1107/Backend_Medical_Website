@@ -32,6 +32,40 @@ const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
 const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
     try {
 
+        for (const newDetail of newDetails) {
+            const medicine = await db.Medicine.findByPk(newDetail.medicineId);
+            
+            if (!medicine) {
+                return {
+                    EC: 404,
+                    EM: `Không tìm thấy thuốc có ID: ${newDetail.medicineId}`,
+                    DT: "",
+                };
+            }
+
+            // Kiểm tra số lượng tồn kho
+            const existingDetail = await db.PrescriptionDetail.findOne({
+                where: { 
+                    prescriptionId, 
+                    medicineId: newDetail.medicineId 
+                }
+            });
+
+            // Tính toán số lượng cần thêm/giảm
+            const quantityChange = existingDetail 
+                ? newDetail.quantity - existingDetail.quantity 
+                : newDetail.quantity;
+
+            // Kiểm tra nếu số lượng yêu cầu vượt quá số lượng tồn kho
+            if (medicine.inventory < Math.abs(quantityChange)) {
+                return {
+                    EC: 400,
+                    EM: `Thuốc ${medicine.name} không đủ số lượng. Tồn kho: ${medicine.inventory}, Yêu cầu: ${Math.abs(quantityChange)}`,
+                    DT: "",
+                };
+            }
+        }
+
 
         const existingDetails = await db.PrescriptionDetail.findAll({
             where: { prescriptionId },

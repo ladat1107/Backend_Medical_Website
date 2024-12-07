@@ -146,7 +146,6 @@ const getExaminations = async (req, res) => {
         let date = req.query.date || null;
         let status = req.query.status || null;
         let staffId = req.query.staffId || null;
-        let is_appointment = req.query.is_appointment || null;
         let time = req.query.time || null;
 
         let page = req.query.page || 1;
@@ -168,6 +167,32 @@ const getExaminations = async (req, res) => {
         })
     }
 }
+
+const getListToPay = async (req, res) => {
+    try {
+        let date = req.query.date || null;
+        let statusPay = req.query.statusPay || null;
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 20;
+        let search = req.query.search || '';
+
+        let response = await examinationService.getListToPay(date, statusPay, +page, +limit, search);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 const getScheduleApoinment = async (req, res) => {
     try {
         let data = req.query;
@@ -193,5 +218,6 @@ module.exports = {
     updateExamination,
     deleteExamination,
     getExaminations,
+    getListToPay
     getScheduleApoinment,
 }

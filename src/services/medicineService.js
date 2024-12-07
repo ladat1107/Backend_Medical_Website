@@ -169,6 +169,7 @@ const updateMedicine = async (data) => {
 
 const updateInventory = async (medicineId, quantityChange) => {
     const medicine = await db.Medicine.findByPk(medicineId);
+
     if (medicine) {
         await medicine.update({
             inventory: medicine.inventory - quantityChange
