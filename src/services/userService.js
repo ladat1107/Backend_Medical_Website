@@ -8,6 +8,7 @@ import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
 import { ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import dayjs from "dayjs";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -734,8 +735,6 @@ const getDoctorHome = async (filter) => {
         const condition = {};
         const includeOption = [];
         const search = filter?.search || "";
-
-        // Xử lý filter.date
         if (filter?.date) {
             includeOption.push({
                 model: db.Schedule,
@@ -751,7 +750,8 @@ const getDoctorHome = async (filter) => {
                         attributes: [],
                     },
                 ],
-                attributes: ['date'],
+                required: true,
+                attributes: ['date', "roomId", "staffId"],
                 raw: true,
             });
         }
@@ -765,6 +765,10 @@ const getDoctorHome = async (filter) => {
 
         // Truy vấn danh sách staff
         const listStaff = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE,
+                ...condition,
+            },
             include: [
                 {
                     model: db.User,
@@ -796,12 +800,7 @@ const getDoctorHome = async (filter) => {
                 },
                 ...includeOption, // Thêm lịch theo điều kiện date
             ],
-            where: {
-                status: status.ACTIVE,
-                ...condition,
-            },
             attributes: ['id', 'position', 'userId', 'price'],
-
             nest: true,
         });
 

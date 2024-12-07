@@ -1,5 +1,5 @@
-import { Op } from "sequelize";
-import db, { Sequelize } from "../models/index";
+// import { Op, Sequelize } from "sequelize";
+import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
 const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
 
@@ -410,32 +410,17 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
 const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
-        const formattedDates = listDate.map((date) => new Date(date).toISOString().split("T")[0]);
-        // Thực hiện truy vấn
-        // const results = await db.Examination.findAll({
-        //     attributes: [
-        //         "time",
-        //         [Sequelize.literal("DATE(createdAt)"), "date"], // Lấy chỉ phần ngày từ `createdAt`
-        //     ],
-        //     where: {
-        //         [Op.and]: [
-        //             Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: formattedDates }), // So sánh phần ngày của `createdAt`
-        //             { is_appointment: true }, // Chỉ lấy các bản ghi đã hẹn
-        //         ],
-        //     },
-        //     raw: true, // Trả về kết quả thô
-        // });
-        // // Chuyển đổi kết quả thành định dạng đơn giản
         const results = await db.Examination.findAll({
             attributes: [
                 [Sequelize.literal("DATE(createdAt)"), "date"], // Lấy phần ngày từ `createdAt`
-                "time", // Giữ lại cột `time`
+                "time",
                 [Sequelize.fn("COUNT", Sequelize.col("time")), "count"], // Đếm số lần xuất hiện của mỗi `time`
             ],
             where: {
                 [Op.and]: [
-                    Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: formattedDates }), // So sánh phần ngày của `createdAt`
-                    { is_appointment: true }, // Chỉ lấy các bản ghi đã hẹn
+                    Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: listDate }), // So sánh phần ngày của `createdAt`
+                    { is_appointment: 1 }, // Chỉ lấy các bản ghi đã hẹn
+                    { status: status.PENDING },
                 ],
             },
             group: ["date", "time"], // Nhóm theo ngày và time
