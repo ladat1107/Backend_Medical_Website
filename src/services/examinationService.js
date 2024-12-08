@@ -412,13 +412,13 @@ const getScheduleApoinment = async (filter) => {
         let listDate = filter?.date || [];
         const results = await db.Examination.findAll({
             attributes: [
-                [Sequelize.literal("DATE(createdAt)"), "date"], // Lấy phần ngày từ `createdAt`
+                [Sequelize.literal("DATE(admissionDate)"), "date"], // Lấy phần ngày từ `createdAt`
                 "time",
                 [Sequelize.fn("COUNT", Sequelize.col("time")), "count"], // Đếm số lần xuất hiện của mỗi `time`
             ],
             where: {
                 [Op.and]: [
-                    Sequelize.where(Sequelize.literal("DATE(createdAt)"), { [Op.in]: listDate }), // So sánh phần ngày của `createdAt`
+                    Sequelize.where(Sequelize.literal("DATE(admissionDate)"), { [Op.in]: listDate }), // So sánh phần ngày của `createdAt`
                     { is_appointment: 1 }, // Chỉ lấy các bản ghi đã hẹn
                     { status: status.PENDING },
                 ],

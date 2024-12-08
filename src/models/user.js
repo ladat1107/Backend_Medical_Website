@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'roleId',
         as: 'userRoleData',
       });
+      User.belongsTo(models.Folk, {
+        foreignKey: 'folk',
+        as: 'folkData',
+      });
     }
   }
   User.init({
@@ -124,6 +128,10 @@ module.exports = (sequelize, DataTypes) => {
     folk: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: 'folks', // Tên bảng tham chiếu
+        key: 'id',
+      },
     },
     ABOBloodGroup: {
       type: DataTypes.INTEGER,

@@ -150,6 +150,9 @@ const getUserById = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
+            if (data.id === "null") {
+                data.id = req.user.id;
+            }
             let response = await userService.getUserById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -456,12 +459,8 @@ const getDoctorHome = async (req, res) => {
 const profileInfor = async (req, res) => {
     try {
         let data = req.body;
-        if (!data || !data.id) {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Yêu cầu của bạn không đủ thông tin!",
-                DT: ""
-            })
+        if (data.id === "null") {
+            data.id = req.user.id;
         }
         let response = await userService.updateProfileInfor(data);
         return res.status(200).json({
@@ -530,7 +529,58 @@ const getUserInsuarance = async (req, res) => {
         })
     }
 }
-
+const confirmBooking = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.profile && data.doctor && data.schedule) {
+            let response = await userService.confirmBooking(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const confirmTokenBooking = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.token) {
+            let response = await userService.confirmTokenBooking(data.token);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Không thể xác nhận lịch khám!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
 module.exports = {
     getAllUser,
     getUserById,
@@ -550,6 +600,7 @@ module.exports = {
     handleConfirm,
     getDoctorHome,
     profileInfor,
-    profilePassword
-
+    profilePassword,
+    confirmBooking,
+    confirmTokenBooking,
 }

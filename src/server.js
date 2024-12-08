@@ -1,13 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import configViewEngine from './config/configViewEngine';
-import initWebRount from './router/web';
 import initAdminRoute from "./router/admin"
 import initDoctorRoute from "./router/doctor"
 import connectDB from './config/connectDB';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authenRout from './router/authen';
+import initWebAuthenRounte from './router/webAuthen';
+import authenRoute from './router/authen';
+import initWebRounte from './router/web';
 require('dotenv').config();
 
 const app = express();
@@ -32,9 +33,10 @@ app.use(cookieParser());
 configViewEngine(app);
 
 // Initialize web routes
-authenRout(app);
+authenRoute(app);
+initWebAuthenRounte(app);
 initAdminRoute(app);
-initWebRount(app);
+initWebRounte(app);
 initDoctorRoute(app)
 
 connectDB();

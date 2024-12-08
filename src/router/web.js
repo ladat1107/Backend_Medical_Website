@@ -30,10 +30,11 @@ import specialtyController from '../controllers/specialtyController';
 import { getServiceHome } from "../utils/data/dataService"
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 import { getDataByDepartment } from '../services/staffService';
+import { getDistrict, getFolk, getProvince } from '../services/addressService';
 require('dotenv').config();
 
 let router = express.Router();
-let initWebRount = (app) => {
+let initWebRounte = (app) => {
     // router.all("*", checkTokenWithCookie)
 
     //------> Specialty
@@ -47,6 +48,10 @@ let initWebRount = (app) => {
     //EXAMINATION
     router.get("/getScheduleApoinment", examinationController.getScheduleApoinment);
 
+    //FOLK
+    router.get("/getFolk", getFolk);
+    router.get("/getProvince", getProvince);
+    router.get("/getDistrict", getDistrict);
     //SECTION
     router.get("/getServicesHome", getServiceHome);
 
@@ -54,10 +59,10 @@ let initWebRount = (app) => {
     router.get("/getSpecialtyById", specialtyController.getSpecialtyById)
 
     //-- User   
+
     router.get("/getUserById", userController.getUserById)
     router.get("/getUserByCid", userController.getUserByCid)
     router.get("/getDoctorHome", userController.getDoctorHome);
-    router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
     router.get("/getUserInsuarance", userController.getUserInsuarance)
 
@@ -182,4 +187,4 @@ let initWebRount = (app) => {
 
     return app.use("/api/", router);
 }
-export default initWebRount;
+export default initWebRounte;

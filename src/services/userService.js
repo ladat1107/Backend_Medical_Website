@@ -1,12 +1,12 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { literal, Op, where } from 'sequelize';
-import { sendEmailConform } from "../services/emailService";
+import { Op } from 'sequelize';
+import { sendEmailConform1 } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
-import { ROLE, TIME, typeRoom } from "../utils/constraints";
+import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import dayjs from "dayjs";
 require('dotenv').config();
@@ -606,7 +606,8 @@ const registerUser = async (data) => {
             }
         }
         let passwordHash = await hashPasswordUser(data.password)
-        sendEmailConform({ ...data, password: passwordHash });
+        let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/login?confirm=`
+        sendEmailConform({ ...data, password: passwordHash }, urlRedirect);
         return {
             EC: 0,
             EM: "Vui lòng nhấn xác nhận trong email để hoàn tất đăng ký!",
@@ -747,7 +748,7 @@ const getDoctorHome = async (filter) => {
                         model: db.Room,
                         as: 'scheduleRoomData',
                         where: { departmentId: typeRoom.CLINIC, },
-                        attributes: [],
+                        attributes: ['name'],
                     },
                 ],
                 required: true,
@@ -819,7 +820,6 @@ const getDoctorHome = async (filter) => {
         };
     }
 };
-
 const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
@@ -949,7 +949,185 @@ const getUserInsuarance = async (userId) => {
         };
     }
 }
+const confirmBooking = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: { cid: data.profile.cid },
+        });
+        if (!user) {
+            data.profile.bookFor = true;
+        } else {
+            let examination = await db.Examination.findAll({
+                where: {
+                    userId: user.id,
+                    admissionDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                }
+            });
+            if (examination.length > 0) {
+                return {
+                    EC: 200,
+                    EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                    DT: "",
+                }
+            }
+        }
+        let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/appointmentList?confirm=`
+        let mail = await sendEmailConform1(data, urlRedirect);
+        if (mail.errCode === 200) {
+            return {
+                EC: 0,
+                EM: "Vui lòng kiểm tra email để xác nhận lich khám",
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Có lỗi xảy ra. Vui lòng thử lại sau",
+                DT: "",
+            }
+        }
 
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+}
+const confirmTokenBooking = async (token) => {
+    let transaction = await sequelize.transaction();
+    try {
+        let data = await verifyToken(token);
+
+        if (data) {
+            let user;
+            let examinationCount = await db.Examination.findAll({
+                where: {
+                    admissionDate: new Date(data.schedule.date),
+                    time: data.schedule.time.value,
+                    status: status.PENDING,
+                    is_appointment: 1,
+                },
+            });
+            if (examinationCount.length >= 6) {
+                return {
+                    EC: 200,
+                    EM: "Lịch khám đã đượt đặt hết",
+                    DT: "",
+                }
+            }
+            let staff = await db.Staff.findOne({
+                where: { id: data.doctor.id },
+                attributes: ["id", "price"],
+            });
+            if (!staff) {
+                return {
+                    EC: 200,
+                    EM: "Đặt lịch khám thất bại! Không tìm thấy bác sĩ",
+                    DT: "",
+                }
+            }
+            if (data.profile.bookFor) {
+                let password = "123456";
+                let hashPassword = await hashPasswordUser(password);
+                user = await db.User.create({
+                    password: hashPassword,
+                    lastName: data.profile.lastName,
+                    firstName: data.profile.firstName,
+                    gender: data.profile.gender,
+                    cid: data.profile.cid,
+                    folk: data.profile.folk,
+                    status: status.ACTIVE,
+                    roleId: ROLE.PATIENT,
+                    dob: dayjs(data.profile.dob) || null,
+                    currentResident: data.profile.address || null,
+                }, { transaction });
+            } else {
+                user = await db.User.findOne({
+                    where: { cid: data.profile.cid },
+                });
+                let examination = await db.Examination.findAll({
+                    where: {
+                        userId: user.id,
+                        admissionDate: new Date(data.schedule.date),
+                        status: status.PENDING,
+                    }
+                });
+                if (examination.length > 0) {
+                    return {
+                        EC: 200,
+                        EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                        DT: "",
+                    }
+                }
+            }
+            if (user && staff) {
+                let examination = await db.Examination.create({
+                    userId: user.id,
+                    staffId: staff.id,
+                    symptom: data.profile.symptom,
+                    admissionDate: new Date(data.schedule.date),
+                    dischargeDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                    paymentDoctorStatus: pamentStatus.UNPAID,
+
+                    price: staff.price,
+                    // special: data?.special,
+                    // insuranceCoverage: data?.insuranceCoverage,
+                    // comorbidities: data.comorbidities,
+
+                    // Số vào phòng bác sĩ (number) và tên phòng (roomName)
+                    // number: nextNumber,
+                    // roomName: data.roomName,
+
+                    // Thông tin cho người đặt trước
+                    time: +data.schedule.time.value,
+                    visit_status: 0,
+                    is_appointment: 0,
+                }, { transaction });
+                if (examination) {
+                    await transaction.commit();
+                    return {
+                        EC: 0,
+                        EM: "Đặt lịch khám thành công",
+                        DT: "",
+                    }
+                } else {
+                    await transaction.rollback();
+                    return {
+                        EC: 200,
+                        EM: "Đặt lịch khám thất bại",
+                        DT: "",
+                    }
+                }
+            } else {
+                await transaction.rollback();
+                return {
+                    EC: 200,
+                    EM: "Không tìm thấy người dùng",
+                    DT: "",
+                }
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Quá hạn xác nhận",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        await transaction.rollback();
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+}
 module.exports = {
     getAllUser,
     getUserById,
@@ -966,4 +1144,6 @@ module.exports = {
     getUserInsuarance,
     confirmUser,
     forgotPassword,
+    confirmBooking,
+    confirmTokenBooking,
 }
