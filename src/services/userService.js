@@ -1128,6 +1128,73 @@ const confirmTokenBooking = async (token) => {
         };
     }
 }
+const getMedicalHistories = async (userId) => {
+    try {
+        let medicalHistories = await db.User.findAll({
+            where: { id: userId },
+            include: [
+                {
+                    model: db.Examination,
+                    as: "userExaminationData",
+                    include: [
+                        {
+                            model: db.VitalSign,
+                            as: 'examinationVitalSignData',
+                        },
+                        {
+                            model: db.Paraclinical,
+                            as: 'examinationResultParaclincalData',
+                            include: [
+                                {
+                                    model: db.Room,
+                                    as: 'roomParaclinicalData',
+                                    attributes: ['id', 'name'],
+                                },
+                                {
+                                    model: db.ServiceType,
+                                    as: 'paraclinicalData',
+                                    attributes: ['id', 'name', 'price'],
+                                }
+                            ],
+                            separate: true,
+                        },
+                        {
+                            model: db.Prescription,
+                            as: 'prescriptionExamData',
+                            attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                            include: [{
+                                model: db.Medicine,
+                                as: 'prescriptionDetails',
+                                attributes: ['id', 'name', 'price'],
+                                through: ['quantity', 'unit', 'dosage', 'price']
+                            }],
+                        }
+                    ],
+                    nest: true,
+                },
+                {
+                    model: db.Insurance,
+                    as: 'userInsuranceData',
+                }
+            ],
+            order: [["createdAt", "DESC"]],
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch sử khám bệnh thành công",
+            DT: medicalHistories,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: null,
+        };
+    }
+}
+
 module.exports = {
     getAllUser,
     getUserById,
@@ -1142,6 +1209,7 @@ module.exports = {
     updateProfileInfor,
     updateProfilePassword,
     getUserInsuarance,
+    getMedicalHistories
     confirmUser,
     forgotPassword,
     confirmBooking,

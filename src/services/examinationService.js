@@ -450,22 +450,13 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         }
 
         // Status filter
-        if (statusPay) {
+        if (statusPay <= 4) {
             whereConditionExamination.status = statusPay;
             whereConditionParaclinical.status = statusPay;
+        } else if(statusPay > 4) {
+            whereConditionExamination.status = { [Op.gte]: statusPay };
+            whereConditionParaclinical.status = { [Op.gte]: statusPay };
         }
-
-        // Optional search filter (adjust fields as needed)
-        // if (search) {
-        //     whereConditionExamination[Op.or] = [
-        //         { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-        //         { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } },
-        //     ];
-        //     whereConditionParaclinical[Op.or] = [
-        //         { '$examinationResultParaclincalData.userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-        //         { '$examinationResultParaclincalData.userExaminationData.lastName$': { [Op.like]: `%${search}%` } },
-        //     ];
-        // }
 
         // Pagination
         const pageNum = page || 1;
@@ -481,18 +472,18 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                     model: db.User,
                     as: 'userExaminationData',
                     attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
-                    include: [{
-                        model: db.Insurance,
-                        as: "userInsuranceData",
-                        attributes: ["insuranceCode"]
-                    }],
                     // Add search condition to include
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
                             { lastName: { [Op.like]: `%${search}%` } }
                         ]
-                    } : {}
+                    } : {},
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }]
                 },
                 {
                     model: db.Staff,
@@ -535,9 +526,11 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                                     { firstName: { [Op.like]: `%${search}%` } },
                                     { lastName: { [Op.like]: `%${search}%` } }
                                 ]
-                            } : {}
+                            } : {},
+                            required: true,
                         },
                     ],
+                    required: true,
                 },
                 {
                     model: db.Staff,
@@ -577,6 +570,8 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                 userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
             }))
         ];
+
+        const totalItems = combinedList.length;
         
         // Explicitly sort the combined list
         combinedList.sort((itemA, itemB) => {
@@ -588,10 +583,6 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         // Slice to pagination limit
         const paginatedList = combinedList.slice(offset, offset + limitNum);
 
-        // Count total records for pagination
-        const examinationCount = await db.Examination.count({ where: whereConditionExamination });
-        const paraclinicalCount = await db.Paraclinical.count({ where: whereConditionParaclinical });
-
         return {
             EC: 0,
             EM: 'Lấy danh sách thành công',
@@ -600,9 +591,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                 pagination: {
                     page: pageNum,
                     limit: limitNum,
-                    totalExaminations: examinationCount,
-                    totalParaclinicals: paraclinicalCount,
-                    totalItems: examinationCount + paraclinicalCount
+                    totalItems: totalItems
                 }
             }
         };

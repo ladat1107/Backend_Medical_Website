@@ -87,6 +87,8 @@ let initDoctorRoute = (app) => {
     router.get("/getExaminations", examinationController.getExaminations)
     router.get("/getListToPay", examinationController.getListToPay)
     router.get("/getParaclinicals", paraclinicalController.getParaclinicals)
+    router.get("/getPrescriptions", prescriptionController.getPrescriptions)
+    router.put("/updatePrescription", prescriptionController.updatePrescription)
 
     return app.use("/api/", router);
 }
