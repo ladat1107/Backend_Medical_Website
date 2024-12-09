@@ -218,6 +218,6 @@ module.exports = {
     updateExamination,
     deleteExamination,
     getExaminations,
-    getListToPay
-    getScheduleApoinment,
+    getListToPay,
+    getScheduleApoinment
 }

@@ -629,7 +629,7 @@ module.exports = {
     getDoctorHome,
     profileInfor,
     profilePassword,
-    getMedicalHistories
+    getMedicalHistories,
     confirmBooking,
     confirmTokenBooking,
 }

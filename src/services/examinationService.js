@@ -429,6 +429,23 @@ const getScheduleApoinment = async (filter) => {
             group: ["date", "time"], // Nhóm theo ngày và time
             raw: true, // Trả về kết quả dạng thô
         });
+        return {
+            EC: 0,
+            EM: "Lấy dữ liệu thành công",
+            DT: results,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        }
+
+    }
+
+}
+
 
 const getListToPay = async (date, statusPay, page, limit, search) => {
     try {
@@ -604,25 +621,6 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
             DT: '',
         };
     }
-}
-
-
-
-        return {
-            EC: 0,
-            EM: "Lấy dữ liệu thành công",
-            DT: results,
-        };
-    } catch (error) {
-        console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
-
-    }
-
 }
 module.exports = {
     getExaminationById,

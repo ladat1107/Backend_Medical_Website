@@ -1209,7 +1209,7 @@ module.exports = {
     updateProfileInfor,
     updateProfilePassword,
     getUserInsuarance,
-    getMedicalHistories
+    getMedicalHistories,
     confirmUser,
     forgotPassword,
     confirmBooking,
