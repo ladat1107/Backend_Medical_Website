@@ -30,20 +30,14 @@ const getExaminationById = async (req, res) => {
 const getExaminationByUserId = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.userId) {
-            let response = await examinationService.getExaminationByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
+        let userId = req.user.id;
+        let response = await examinationService.getExaminationByUserId(userId, data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -116,9 +110,9 @@ const updateExamination = async (req, res) => {
 
 const deleteExamination = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.id) {
-            let response = await examinationService.deleteExamination(data.id);
+        const { id } = req.query;
+        if (id) {
+            let response = await examinationService.deleteExamination(id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,

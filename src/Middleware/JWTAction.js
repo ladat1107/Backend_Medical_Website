@@ -26,7 +26,6 @@ const checkTokenWithCookie = (req, res, next) => {
     if (defaultUrl.includes(req.path)) {
         return next();
     }
-
     if (req.headers.authorization.split(' ')[1]) {
         let reqToken = req.headers.authorization.split(' ')[1];
         let reqDecoded = verifyToken(reqToken);
