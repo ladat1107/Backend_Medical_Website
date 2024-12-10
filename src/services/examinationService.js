@@ -441,9 +441,7 @@ const getScheduleApoinment = async (filter) => {
             EM: "Lỗi server!",
             DT: ""
         }
-
     }
-
 }
 
 

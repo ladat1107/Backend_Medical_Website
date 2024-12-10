@@ -1175,6 +1175,10 @@ const getMedicalHistories = async (userId) => {
                 {
                     model: db.Insurance,
                     as: 'userInsuranceData',
+                },
+                {
+                    model: db.Folk,
+                    as: 'folkData'
                 }
             ],
             order: [["createdAt", "DESC"]],
