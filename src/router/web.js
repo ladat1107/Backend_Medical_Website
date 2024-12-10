@@ -35,7 +35,6 @@ require('dotenv').config();
 
 let router = express.Router();
 let initWebRounte = (app) => {
-    // router.all("*", checkTokenWithCookie)
 
     //------> Specialty
     router.get("/getSpcialtyHome", specialtyController.getSpcialtyHome)
@@ -45,6 +44,8 @@ let initWebRounte = (app) => {
 
     // HANDBOOK
     router.get("/getHandBookHome", handBookController.getHandBookHome);
+
+    router.get("/getHandBookById", handBookController.getHandBookById)
     //EXAMINATION
     router.get("/getScheduleApoinment", examinationController.getScheduleApoinment);
 

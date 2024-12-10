@@ -34,9 +34,11 @@ configViewEngine(app);
 
 // Initialize web routes
 authenRoute(app);
+
+initWebRounte(app);
+initWebRounte(app);
 initWebAuthenRounte(app);
 initAdminRoute(app);
-initWebRounte(app);
 initDoctorRoute(app)
 
 connectDB();

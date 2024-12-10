@@ -29,7 +29,6 @@ let initDoctorRoute = (app) => {
 
     //--  HandBook
     router.get("/getAllHandBooks", handBookController.getAllHandBooks)
-    router.get("/getHandBookById", handBookController.getHandBookById)
     router.post("/createHandBook", handBookController.createHandBook)
     router.put("/updateHandBook", handBookController.updateHandBook)
 
@@ -72,7 +71,7 @@ let initDoctorRoute = (app) => {
     router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
     router.post("/createOrUpdateParaclinical", paraclinicalController.createOrUpdateParaclinical)
     router.post("/createRequestParaclinical", paraclinicalController.createRequestParaclinical)
-    
+
     //-- Appointment
     router.get("/getAllAppointments", appointmentController.getAllAppointments)
     router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)

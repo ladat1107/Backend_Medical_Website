@@ -1,7 +1,7 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
 import { ROLE, status } from "../utils/index";
-const { Op, or, where } = require('sequelize');
+const { Op, } = require('sequelize');
 
 const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind) => {
     try {
@@ -242,9 +242,11 @@ const getHandBookById = async (handBookId, role) => {
             raw: true,
             nest: true,
         });
-        if (role === ROLE.PATIENT) {
-            await handBook.update({
-                view: handBook.view + 1
+        if (role === ROLE.PATIENT && handBook) {
+            await db.Handbook.update({
+                view: +handBook?.view + 1
+            }, {
+                where: { id: handBookId }
             });
         }
         if (handBook) {
