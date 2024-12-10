@@ -128,6 +128,7 @@ const createServiceType = async (data) => {
             price: data.price,
             status: status.ACTIVE,
             description: data?.description || "",
+            isLaboratory: data?.isLaboratory ? 1 : 0,
         });
         return {
             EC: 0,
@@ -150,6 +151,7 @@ const updateServiceType = async (data) => {
             name: data.name,
             price: data.price,
             description: data.description,
+            isLaboratory: data.isLaboratory ? 1 : 0,
             status: data.status,
         }, {
             where: { id: data.id }
@@ -234,6 +236,30 @@ const deleteStatusServiceType = async (id) => {
         }
     }
 }
+
+const getServiceLaboratory = async () => {
+    try {
+        let serviceType = await db.ServiceType.findAll({
+            where: { status: status.ACTIVE, isLaboratory: 0 },
+            attributes: ['id', 'name', 'price', 'description'],
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin loại phòng thành công",
+            DT: serviceType
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        }
+    }
+}
+
 module.exports = {
     getAllServiceTypes,
     getAllServiceTypesAdmin,
@@ -242,5 +268,6 @@ module.exports = {
     createServiceType,
     updateServiceType,
     blockStatusServiceType,
-    deleteStatusServiceType
+    deleteStatusServiceType,
+    getServiceLaboratory
 }

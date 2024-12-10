@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'roleId',
         as: 'userRoleData',
       });
+      User.belongsTo(models.Folk, {
+        foreignKey: 'folk',
+        as: 'folkData',
+      });
     }
   }
   User.init({
@@ -115,6 +119,7 @@ module.exports = (sequelize, DataTypes) => {
     avatar: {
       type: DataTypes.STRING(1000),
       allowNull: true,
+      defaultValue: "https://md.surehis.com/File/Lawyer_LawOffice/avatar%20bs%20covid_02.png"
     },
     status: {
       type: DataTypes.INTEGER,
@@ -123,6 +128,10 @@ module.exports = (sequelize, DataTypes) => {
     folk: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: 'folks', // Tên bảng tham chiếu
+        key: 'id',
+      },
     },
     ABOBloodGroup: {
       type: DataTypes.INTEGER,

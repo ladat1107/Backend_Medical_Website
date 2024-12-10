@@ -1,7 +1,8 @@
 const status = {
-    DONE: 6, // đã khám
-    EXAMINING: 5, // đang khám
-    WAITING: 4, // chờ khám
+    DONE: 7, // đã khám xong
+    EXAMINING: 6, // đang khám
+    PAID: 5, // đã thanh toán chờ để khám
+    WAITING: 4, // chờ thanh toán
     REJECT: 3, // không duyệt
     PENDING: 2, // chờ duyệt << sẽ để thêm ở exam để nhân viên tiếp nhận lấy ra --> nhân viên tiếp nhận ok thì chuyển lên 4
     ACTIVE: 1,
@@ -55,7 +56,7 @@ const TIME = {
     tokenLife: 60 * 60, // tính theo giây
     refreshToken: 7 * 24 * 60 * 60, // tính theo giây
     cookieLife: 7 * 24 * 60 * 60 * 1000,// tính theo milisecond
-    tokenEmail: 7 * 24 * 60 * 60, // tính theo giây
+    tokenEmail: 3 * 60, // tính theo giây
 }
 module.exports = {
     status,

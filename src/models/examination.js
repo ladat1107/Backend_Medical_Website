@@ -127,7 +127,11 @@ module.exports = (sequelize, DataTypes) => {
         is_appointment:{
             type: DataTypes.INTEGER,
             allowNull: true,
-        }
+        },
+        insuaranceCode:{
+            type: DataTypes.STRING(45),
+            allowNull: true,
+        },
     }, {
         sequelize,
         modelName: 'Examination',

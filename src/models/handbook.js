@@ -44,7 +44,10 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     shortDescription: DataTypes.STRING,
-    view: DataTypes.INTEGER,
+    view: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    }
   }, {
     sequelize,
     modelName: 'Handbook',

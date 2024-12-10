@@ -33,12 +33,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
-        paymentStatus: {
+        paymentStatus: { //bỏ
             type: DataTypes.INTEGER,
             allowNull: false,
         },
         status: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.INTEGER, // 0 - delete, 1 - unpay, 2 - paid
             allowNull: false,
         },
     }, {

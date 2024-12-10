@@ -30,7 +30,11 @@ module.exports = (sequelize, DataTypes) => {
             Room.hasMany(models.Schedule, {
                 foreignKey: 'roomId',
                 as: 'scheduleRoomData',
-            })
+            });
+            Room.hasMany(models.Paraclinical, {
+                foreignKey: 'roomId',
+                as: 'roomParaclinicalData',
+            });
         }
     }
     Room.init({
@@ -48,14 +52,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'departments', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'departments', 
                 key: 'id',
             },
         },
         medicalExamination: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'speciaties', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
+                model: 'speciaties', 
                 key: 'id',
             },
         },

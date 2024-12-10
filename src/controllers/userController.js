@@ -3,7 +3,7 @@ import { COOKIE, PAGINATE, TIME } from '../utils';
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
-        if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid || !data.currentResident || !data.dob) {
+        if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid) {
             return res.status(200).json({
                 EC: 400,
                 EM: "Yêu cầu của bạn không đủ thông tin!",
@@ -28,9 +28,9 @@ const handleRegisterUser = async (req, res) => {
 }
 const handleConfirm = async (req, res) => {
     try {
-        let data = req.query;
-        if (data && data.confirm) {
-            let response = await userService.confirmUser(data.confirm);
+        let data = req.body;
+        if (data && data.token) {
+            let response = await userService.confirmUser(data.token);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -44,6 +44,33 @@ const handleConfirm = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const handleForgotPassword = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.email) {
+            let response = await userService.forgotPassword(data.email);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Yêu cầu của bạn không đủ thông tin!",
+                DT: ""
+            })
+        }
+    }
+    catch (error) {
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -123,6 +150,9 @@ const getUserById = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
+            if (data.id === "null") {
+                data.id = req.user.id;
+            }
             let response = await userService.getUserById(data.id);
             return res.status(200).json({
                 EC: response.EC,
@@ -411,7 +441,7 @@ const handleGetAccount = async (req, res) => {
 }
 const getDoctorHome = async (req, res) => {
     try {
-        let response = await userService.getDoctorHome();
+        let response = await userService.getDoctorHome(req.query);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -429,12 +459,8 @@ const getDoctorHome = async (req, res) => {
 const profileInfor = async (req, res) => {
     try {
         let data = req.body;
-        if (!data || !data.id) {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Yêu cầu của bạn không đủ thông tin!",
-                DT: ""
-            })
+        if (data.id === "null") {
+            data.id = req.user.id;
         }
         let response = await userService.updateProfileInfor(data);
         return res.status(200).json({
@@ -503,6 +529,85 @@ const getUserInsuarance = async (req, res) => {
         })
     }
 }
+const confirmBooking = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.profile && data.doctor && data.schedule) {
+            let response = await userService.confirmBooking(data);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const confirmTokenBooking = async (req, res) => {
+    try {
+        let data = req.body;
+        if (data && data.token) {
+            let response = await userService.confirmTokenBooking(data.token);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Không thể xác nhận lịch khám!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+
+const getMedicalHistories = async (req, res) => {
+    try{
+        let data = req.query;
+        if(data && data.userId){
+            let response = await userService.getMedicalHistories(data.userId);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        }else{
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
 
 module.exports = {
     getAllUser,
@@ -513,7 +618,7 @@ module.exports = {
     blockUser,
     deleteUser,
     getUserInsuarance,
-
+    handleForgotPassword,
     handleRegisterUser,
     handleLogin,
     updateFunction,
@@ -523,6 +628,8 @@ module.exports = {
     handleConfirm,
     getDoctorHome,
     profileInfor,
-    profilePassword
-
+    profilePassword,
+    getMedicalHistories,
+    confirmBooking,
+    confirmTokenBooking,
 }

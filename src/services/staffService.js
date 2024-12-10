@@ -62,9 +62,9 @@ const getStaffbyDepartmentId = async (departmentId) => {
                 as: 'staffDepartmentData',
                 attributes: ['name']
             }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
+                model: db.Handbook,
+                as: 'staffHandbookData',
+                attributes: ['id', 'title', 'image', 'createdAt', "shortDescription"],
             }],
             raw: true,
             nest: true,
@@ -138,7 +138,7 @@ const getStaffById = async (staffId) => {
     }
 }
 
-const getStaffNameById = async (staffId) =>{
+const getStaffNameById = async (staffId) => {
     try {
         let staff = await db.Staff.findOne({
             where: { id: +staffId },
@@ -340,6 +340,9 @@ const profileStaff = async (data) => {
             DT: ""
         }
     }
+}
+const getDataByDepartment = async (req, res) => {
+
 }
 module.exports = {
     getAllStaff,

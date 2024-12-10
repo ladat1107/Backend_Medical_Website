@@ -29,10 +29,12 @@ import diseaseController from '../controllers/diseaseController';
 import specialtyController from '../controllers/specialtyController';
 import { getServiceHome } from "../utils/data/dataService"
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import { getDataByDepartment } from '../services/staffService';
+import { getDistrict, getFolk, getProvince } from '../services/addressService';
 require('dotenv').config();
 
 let router = express.Router();
-let initWebRount = (app) => {
+let initWebRounte = (app) => {
     // router.all("*", checkTokenWithCookie)
 
     //------> Specialty
@@ -43,10 +45,13 @@ let initWebRount = (app) => {
 
     // HANDBOOK
     router.get("/getHandBookHome", handBookController.getHandBookHome);
-    router.get("/getHandBookByDeparment", handBookController.getHandBookDeparment);
+    //EXAMINATION
+    router.get("/getScheduleApoinment", examinationController.getScheduleApoinment);
 
-    //USER
-
+    //FOLK
+    router.get("/getFolk", getFolk);
+    router.get("/getProvince", getProvince);
+    router.get("/getDistrict", getDistrict);
     //SECTION
     router.get("/getServicesHome", getServiceHome);
 
@@ -54,10 +59,10 @@ let initWebRount = (app) => {
     router.get("/getSpecialtyById", specialtyController.getSpecialtyById)
 
     //-- User   
+
     router.get("/getUserById", userController.getUserById)
-    router.get("/getUserByCid", userController.getUserByCid)    
+    router.get("/getUserByCid", userController.getUserByCid)
     router.get("/getDoctorHome", userController.getDoctorHome);
-    router.put("/profileUpdateInfo", userController.profileInfor)
     router.put("/profileUpdatePassword", userController.profilePassword)
     router.get("/getUserInsuarance", userController.getUserInsuarance)
 
@@ -65,6 +70,7 @@ let initWebRount = (app) => {
     router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
     router.get("/getDepartmentById", departmentController.getDepartmentById)
     router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
+
     ////-----> Admin C.U.D department
     router.get("/getAllDepartment", departmentController.getAllDepartment)
     router.post("/admin/createDepartment", departmentController.createDepartment)
@@ -75,9 +81,10 @@ let initWebRount = (app) => {
     //-- Staff
     router.get("/getAllStaff", staffController.getAllStaff)
     router.get("/getStaffById", staffController.getStaffById)
-    router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
+    // router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
     router.get("/getStaffByRole", staffController.getStaffByRole)
     router.get("/getStaffByName", staffController.getStaffByName)
+
 
     router.put("/profileUpdateStaff", staffController.profileStaff)
 
@@ -174,6 +181,12 @@ let initWebRount = (app) => {
     //-- Create User
     router.post("/createUser", userController.createUser)
 
+    router.get("/getSpecialtiesByDepartment", specialtyController.getSpecialtiesByDepartment)
+    router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
+    router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
+
+    router.get("/getMedicalHistories", userController.getMedicalHistories)
+
     return app.use("/api/", router);
 }
-export default initWebRount;
+export default initWebRounte;

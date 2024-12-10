@@ -1,62 +1,85 @@
+import { raw } from "body-parser";
 import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
-const { Op, ConnectionTimedOutError, Sequelize } = require('sequelize');
+const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
+
 
 const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
             where: { id: +id },
-            include: [{
-                model: db.VitalSign,
-                as: 'examinationVitalSignData',
-            }, {
-                model: db.Paraclinical,
-                as: 'examinationResultParaclincalData',
-                include: [{
+            include: [
+                {
+                    model: db.VitalSign,
+                    as: 'examinationVitalSignData',
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'examinationResultParaclincalData',
+                    include: [
+                        {
+                            model: db.Staff,
+                            as: 'doctorParaclinicalData',
+                            attributes: ['id', 'departmentId'],
+                            include: [{
+                                model: db.User,
+                                as: 'staffUserData',
+                                attributes: ['id', 'lastName', 'firstName'],
+                            }],
+                        },
+                        {
+                            model: db.Room,
+                            as: 'roomParaclinicalData',
+                            attributes: ['id', 'name'],
+                        },
+                        {
+                            model: db.ServiceType,
+                            as: 'paraclinicalData',
+                            attributes: ['id', 'name', 'price'],
+                        }
+                    ],
+                    separate: true,
+                },
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }],
+                },
+                {
                     model: db.Staff,
-                    as: 'doctorParaclinicalData',
+                    as: 'examinationStaffData',
                     attributes: ['id', 'departmentId'],
                     include: [{
                         model: db.User,
                         as: 'staffUserData',
                         attributes: ['id', 'lastName', 'firstName'],
                     }],
-                }],
-                separate: true,
-            }, {
-                model: db.User,
-                as: 'userExaminationData',
-                attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
-            }, {
-                model: db.Staff,
-                as: 'examinationStaffData',
-                attributes: ['id', 'departmentId'],
-                include: [{
-                    model: db.User,
-                    as: 'staffUserData',
-                    attributes: ['id', 'lastName', 'firstName'],
-                }],
-            }, {
-                model: db.Prescription,
-                as: 'prescriptionExamData',
-                attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
-                include: [{
-                    model: db.Medicine,
-                    as: 'prescriptionDetails',
-                    attributes: ['id', 'name', 'price'],    
-                    through: ['quantity', 'unit', 'dosage', 'price']
-                }],
-            }],
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionExamData',
+                    attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                    include: [{
+                        model: db.Medicine,
+                        as: 'prescriptionDetails',
+                        attributes: ['id', 'name', 'price'],
+                        through: ['quantity', 'unit', 'dosage', 'price']
+                    }],
+                }
+            ],
             nest: true,
         });
-
-        // examination = examination.get({ plain: true });
 
         return {
             EC: 0,
             EM: "Lấy thông tin khám bệnh thành công",
             DT: examination
-        }
+        };
     } catch (error) {
         console.log(error);
         return {
@@ -70,7 +93,7 @@ const getExaminationById = async (id) => {
 const getExaminationByUserId = async (userId) => {
     try {
         let examinations = await db.Examination.findAll({
-            where: { userId: userId, status: status.ACTIVE },
+            where: { userId: userId },
             raw: true,
             nest: true,
         });
@@ -145,6 +168,7 @@ const createExamination = async (data) => {
             time: data.time,
             visit_status: data.visit_status ? data.visit_status : 0,
             is_appointment: data.is_appointment ? data.is_appointment : 0,
+            insuaranceCode: data.insuaranceCode ? data.insuaranceCode : null,
         });
 
         return {
@@ -190,6 +214,7 @@ const updateExamination = async (data) => {
             insuranceCoverage: data.insuranceCoverage,
             comorbidities: data.comorbidities,
             visit_status: data.visit_status ? data.visit_status : 0,
+            insuaranceCode: data.insuaranceCode,
             status: data.status,
         }, {
             where: { id: data.id }
@@ -242,15 +267,15 @@ const deleteExamination = async (id) => {
     }
 }
 
-const getExaminations = async (date, status, is_appointment, page, limit, search, time) => {
+const getExaminations = async (date, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
-        
+
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
             };
@@ -265,11 +290,16 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
 
         const totalAppointment = await db.Examination.count({
             where: {
-                ...whereCondition,  
+                ...whereCondition,
                 is_appointment: 1,
                 status: 2,
             }
         });
+
+        // Staff ID filter
+        if (staffId) {
+            whereCondition.staffId = staffId;
+        }
 
         // Status filter
         if (status) {
@@ -313,7 +343,7 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email'],
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -351,7 +381,7 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
                             ELSE 3 
                         END`
                     ),
-                    'ASC',
+                    'ASC'
                 ],
                 ['visit_status', 'ASC'],
                 ['createdAt', 'ASC']],
@@ -380,12 +410,223 @@ const getExaminations = async (date, status, is_appointment, page, limit, search
         };
     }
 };
+const getScheduleApoinment = async (filter) => {
+    try {
+        let listDate = filter?.date || [];
+        const results = await db.Examination.findAll({
+            attributes: [
+                [Sequelize.literal("DATE(admissionDate)"), "date"], // Lấy phần ngày từ `createdAt`
+                "time",
+                [Sequelize.fn("COUNT", Sequelize.col("time")), "count"], // Đếm số lần xuất hiện của mỗi `time`
+            ],
+            where: {
+                [Op.and]: [
+                    Sequelize.where(Sequelize.literal("DATE(admissionDate)"), { [Op.in]: listDate }), // So sánh phần ngày của `createdAt`
+                    { is_appointment: 1 }, // Chỉ lấy các bản ghi đã hẹn
+                    { status: status.PENDING },
+                ],
+            },
+            group: ["date", "time"], // Nhóm theo ngày và time
+            raw: true, // Trả về kết quả dạng thô
+        });
+        return {
+            EC: 0,
+            EM: "Lấy dữ liệu thành công",
+            DT: results,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        }
+    }
+}
 
+
+const getListToPay = async (date, statusPay, page, limit, search) => {
+    try {
+        // Prepare base where conditions
+        const whereConditionExamination = {};
+        const whereConditionParaclinical = {};
+        
+        // Date filter
+        if (date) {
+            const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Start of day
+            const endOfDay = new Date(date).setHours(23, 59, 59, 999); // End of day
+
+            whereConditionExamination.createdAt = {
+                [Op.between]: [startOfDay, endOfDay],
+            };
+            whereConditionParaclinical.createdAt = {
+                [Op.between]: [startOfDay, endOfDay],
+            };
+        }
+
+        // Status filter
+        if (statusPay <= 4) {
+            whereConditionExamination.status = statusPay;
+            whereConditionParaclinical.status = statusPay;
+        } else if(statusPay > 4) {
+            whereConditionExamination.status = { [Op.gte]: statusPay };
+            whereConditionParaclinical.status = { [Op.gte]: statusPay };
+        }
+
+        // Pagination
+        const pageNum = page || 1;
+        const limitNum = limit || 10;
+        const offset = (pageNum - 1) * limitNum;
+
+        // Fetch data with associations
+        const examinations = await db.Examination.findAll({
+            where: whereConditionExamination,
+            attributes: ['id', 'userId', 'staffId', 'price', 'insuranceCoverage', 'insuaranceCode', 'symptom', 'roomName', 'visit_status' ,'special', 'createdAt'],
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
+                    // Add search condition to include
+                    where: search ? {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } }
+                        ]
+                    } : {},
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }]
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                    ],
+                },
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        const paraclinicals = await db.Paraclinical.findAll({
+            where: whereConditionParaclinical,
+            attributes: ['id', 'examinationId', 'doctorId', 'roomId', 'paraclinical', 'paracName', 'price', 'status', 'createdAt'],
+            include: [
+                {
+                    model: db.Examination,
+                    as: 'examinationResultParaclincalData',
+                    attributes: ['id', 'symptom','insuranceCoverage', 'insuaranceCode', 'special', 'visit_status'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'userExaminationData',
+                            attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
+                            include: [
+                                {
+                                    model: db.Insurance,
+                                    as: 'userInsuranceData',
+                                    attributes: ['insuranceCode'],
+                                },
+                            ],
+                            where: search ? {
+                                [Op.or]: [
+                                    { firstName: { [Op.like]: `%${search}%` } },
+                                    { lastName: { [Op.like]: `%${search}%` } }
+                                ]
+                            } : {},
+                            required: true,
+                        },
+                    ],
+                    required: true,
+                },
+                {
+                    model: db.Staff,
+                    as: 'doctorParaclinicalData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName'],
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'roomParaclinicalData',
+                    attributes: ['id', 'name'],
+                },
+            ],
+            order: [['createdAt', 'DESC']],
+        });
+
+        // Combine and sort the lists
+        const combinedList = [
+            ...examinations.map(exam => ({
+                type: 'examination',
+                data: exam,
+                createdAt: exam.createdAt,
+                userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
+                userPhone: exam.userExaminationData.phoneNumber
+            })),
+            ...paraclinicals.map(parac => ({
+                type: 'paraclinical',
+                data: parac,
+                createdAt: parac.createdAt,
+                userName: parac.examinationResultParaclincalData.userExaminationData.firstName + ' ' + parac.examinationResultParaclincalData.userExaminationData.lastName,
+                userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
+            }))
+        ];
+
+        const totalItems = combinedList.length;
+        
+        // Explicitly sort the combined list
+        combinedList.sort((itemA, itemB) => {
+            const dateA = new Date(itemA.createdAt);
+            const dateB = new Date(itemB.createdAt);
+            return dateA.getTime() - dateB.getTime(); // Oldest first
+        });
+
+        // Slice to pagination limit
+        const paginatedList = combinedList.slice(offset, offset + limitNum);
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách thành công',
+            DT: {
+                list: paginatedList,
+                pagination: {
+                    page: pageNum,
+                    limit: limitNum,
+                    totalItems: totalItems
+                }
+            }
+        };
+
+    } catch (error) {
+        console.error('Error fetching examinations and paraclinicals:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+}
 module.exports = {
     getExaminationById,
     getExaminationByUserId,
     createExamination,
     updateExamination,
     deleteExamination,
-    getExaminations
+    getExaminations,
+    getListToPay,
+    getScheduleApoinment,
 }

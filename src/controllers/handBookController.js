@@ -3,12 +3,13 @@ import { PAGINATE } from '../utils';
 
 const getAllHandBooks = async (req, res) => {
     try {
-        let page = req.query.page || 1;
-        let limit = req.query.limit || 10;
-        let search = req.query.search || "";
-        let staffId = req.query.staffId || null;
-        let filter = req.query.filter || "";
-        let response = await handBookService.getAllHandBooks(page, limit, search, staffId, filter);
+        let page = req.query?.page || 1;
+        let limit = req.query?.limit || 10;
+        let search = req.query?.search || "";
+        let staffId = req.user.staff;
+        let filter = req.query?.filter || "";
+        let status = req.query?.status || null;
+        let response = await handBookService.getAllHandBooks(page, limit, search, staffId, filter, status);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -58,8 +59,9 @@ const getHandBooksAdmin = async (req, res) => {
 const getHandBookById = async (req, res) => {
     try {
         let data = req.query;
+        let role = req.user.roleId;
         if (data && data.id) {
-            let response = await handBookService.getHandBookById(data.id);
+            let response = await handBookService.getHandBookById(data.id, role);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -85,6 +87,7 @@ const getHandBookById = async (req, res) => {
 const createHandBook = async (req, res) => {
     try {
         let data = req.body;
+        data.author = req.user.staff;
         if (data && data.title && data.author && data.image
             && data.htmlContent && data.markDownContent) {
             let response = await handBookService.createHandBook(data);
@@ -113,6 +116,7 @@ const createHandBook = async (req, res) => {
 const updateHandBook = async (req, res) => {
     try {
         let data = req.body;
+        data.author = req.user.staff;
         if (data && data.id && data.title && data.author && data.image
             && data.htmlContent && data.markDownContent) {
             let response = await handBookService.updateHandBook(data);
@@ -166,7 +170,7 @@ const updateHandbookStatus = async (req, res) => {
 }
 const getHandBookHome = async (req, res) => {
     try {
-        let response = await handBookService.getHandBookHome();
+        let response = await handBookService.getHandBookHome(req.query);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

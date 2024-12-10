@@ -46,7 +46,54 @@ const upsertPrescription = async (req, res) => {
     }
 }
 
+const getPrescriptions = async (req, res) => {
+    try {
+        let date = req.query.date || null;
+        let status = req.query.status || null;
+        let staffId = req.query.staffId || null;
+        
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 20;
+        let search = req.query.search || '';
+
+        let response = await prescriptionService.getPrescriptions(date, status, staffId, +page, +limit, search);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
+const updatePrescription = async (req, res) => {
+    try {
+        let data = req.body;
+        let response = await prescriptionService.updatePrescription(data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getPrescriptionByExaminationId,
-    upsertPrescription
+    upsertPrescription,
+    getPrescriptions,
+    updatePrescription
 }

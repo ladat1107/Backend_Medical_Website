@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'serviceId',
                 as: 'roomData',
             });
+            ServiceType.hasMany(models.Paraclinical, {
+                foreignKey: 'paraclinical',
+                as: 'paraclinicalData',
+            });
         }
     }
     ServiceType.init({
@@ -29,7 +33,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false,
         },
-
+        isLaboratory: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+        },
     }, {
         sequelize,
         modelName: 'ServiceType',

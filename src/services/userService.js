@@ -1,14 +1,14 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { literal, Op } from 'sequelize';
-import { sendEmailConform } from "../services/emailService";
+import { Op } from 'sequelize';
+import { sendEmailConform1 } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification } from "./emailService";
-import { ROLE, TIME } from "../utils/constraints";
-import { raw } from "body-parser";
+import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import dayjs from "dayjs";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -52,6 +52,7 @@ let loginUser = async (data) => {
                     id: user.id,
                     email: user.email,
                     roleId: user.roleId,
+                    staff: user?.staffUserData?.id
                 }
                 let token = createToken(data, TIME.tokenLife);
                 let refreshToken = createToken(data, TIME.refreshToken);
@@ -86,7 +87,6 @@ const checkEmail = async (email) => {
         let user = await db.User.findOne({
             where: { email: email }
         });
-
         if (user) {
             return false;
         }
@@ -121,6 +121,39 @@ const checkCid = async (cid) => {
     }
 }
 
+const checkDuplicateFields = async (email, phoneNumber, cid) => {
+    try {
+        const result = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    { email },
+                    { phoneNumber },
+                    { cid }
+                ]
+            },
+            attributes: ['email', 'phoneNumber', 'cid'] // Chỉ lấy các trường cần thiết
+        });
+
+        if (!result) {
+            return { isDuplicate: false, duplicateField: null };
+        }
+
+        // Kiểm tra trường nào bị trùng
+        let duplicateField = null;
+        if (result.email === email) {
+            duplicateField = 'Email đã tồn tại';
+        } else if (result.phoneNumber === phoneNumber) {
+            duplicateField = 'Số điện thoại đã tồn tại';
+        } else if (result.cid === cid) {
+            duplicateField = 'CMND/CCCD đã tồn tại';
+        }
+
+        return { isDuplicate: true, duplicateField };
+    } catch (error) {
+        console.error("Error checking duplicates:", error);
+        throw error;
+    }
+};
 const getAllUser = async (page, limit, search, position) => {
     try {
         let defaultPositions = [1, 3, 4, 5, 6, 7];
@@ -214,8 +247,6 @@ const getAllUser = async (page, limit, search, position) => {
         };
     }
 };
-
-
 const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
@@ -272,7 +303,6 @@ const getUserById = async (userId) => {
         }
     }
 }
-
 const getUserByCid = async (cid) => {
     try {
         let user = await db.User.findOne({
@@ -308,7 +338,6 @@ const getUserByCid = async (cid) => {
         }
     }
 }
-
 const createUser = async (data) => {
     try {
         data.password = "123456";
@@ -320,7 +349,7 @@ const createUser = async (data) => {
                 DT: "",
             }
         }
-        if(!await checkCid(data.cid)){
+        if (!await checkCid(data.cid)) {
             return {
                 EC: 200,
                 EM: "CMND/CCCD đã tồn tại",
@@ -342,13 +371,13 @@ const createUser = async (data) => {
         });
         console.log(user);
         let insurance = null;
-        if(data.insuranceCode && user){
+        if (data.insuranceCode && user) {
             insurance = await db.Insurance.create({
                 insuranceCode: data.insuranceCode,
                 benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
                 userId: user.id
             });
-            if(!insurance){
+            if (!insurance) {
                 await db.User.destroy({
                     where: { id: user.id }
                 });
@@ -359,7 +388,6 @@ const createUser = async (data) => {
                 }
             }
         }
-        console.log(data.staff);
         if (data.staff) {
             const staff = await staffService.createStaff(data, user.id);
             if (!staff) {
@@ -423,7 +451,7 @@ const createUser = async (data) => {
                     EM: "Thêm người dùng thành công",
                     DT: {
                         user,
-                        insurance 
+                        insurance
                     },
                 }
             }
@@ -441,16 +469,6 @@ const createUser = async (data) => {
 const updateUser = async (data) => {
     let transaction = await sequelize.transaction();
     try {
-        // let updateFeild = {};
-        // let content = null;
-        // // if (data.password) {
-        // //     updateFeild.password = await hashPasswordUser(data.password);
-        // //     console.log(updateFeild);
-        // //     content = `<p>Thông tin cập nhật của bạn:  </p>
-        // //     <p>Email: ${data.email}</p>
-        // //     <p>Mật khẩu mới: <strong>${data.password}</strong></p>
-        // //     `
-        // // }
         let user = await db.User.findOne({
             where: { id: data.id },
         }, { transaction });
@@ -492,30 +510,6 @@ const updateUser = async (data) => {
                     EM: "Cập nhật tài khoản thành công",
                     DT: "",
                 }
-                // if (content?.length > 0) {
-                //     console.log("Gửi mail");
-                //     let mail = await sendEmailNotification({
-                //         email: user.email,
-                //         lastName: user.lastName,
-                //         firstName: user.firstName,
-                //         subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
-                //         content: content
-                //     })
-                //     if (mail.EC === 0) {
-                //         console.log("Gửi mail thành công");
-                //         return {
-                //             EC: 0,
-                //             EM: "Cập nhật tài khoản thành công",
-                //             DT: "",
-                //         }
-                //     } else {
-                //         return {
-                //             EC: 200,
-                //             EM: "Gửi mail thông báo thất bại",
-                //             DT: "",
-                //         }
-                //     }
-                // }
             } else {
                 await transaction.commit();
                 return {
@@ -601,28 +595,29 @@ const deleteUser = async (userId) => {
         }
     }
 }
-
 const registerUser = async (data) => {
     try {
-        if (await checkEmail(data.email) == false) {
+        let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
+        if (checkExist?.isDuplicate) {
             return {
                 EC: 200,
-                EM: "Email đã tồn tại",
+                EM: checkExist.duplicateField,
                 DT: "",
             }
         }
         let passwordHash = await hashPasswordUser(data.password)
-        sendEmailConform({ ...data, password: passwordHash });
+        let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/login?confirm=`
+        sendEmailConform({ ...data, password: passwordHash }, urlRedirect);
         return {
             EC: 0,
-            EM: "Đăng ký thành công",
+            EM: "Vui lòng nhấn xác nhận trong email để hoàn tất đăng ký!",
             DT: "",
         }
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Lỗi hệ thống",
+            EM: "Đã xảy ra lỗi",
             DT: "",
         }
     }
@@ -630,13 +625,12 @@ const registerUser = async (data) => {
 const confirmUser = async (token) => {
     try {
         let data = await verifyToken(token);
-
         if (data) {
-            console.log("gửi mail thành công");
-            if (await checkEmail(data.email) == false) {
+            let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
+            if (checkExist?.isDuplicate) {
                 return {
-                    EC: 200,
-                    EM: "Bạn đã đăng ký tài khoản này",
+                    EC: 1,
+                    EM: "Tài khoản đã tồn tại. Bạn có thể đăng nhập",
                     DT: "",
                 }
             }
@@ -647,30 +641,26 @@ const confirmUser = async (token) => {
                 firstName: data.firstName,
                 phoneNumber: data.phoneNumber,
                 cid: data.cid,
-                currentResident: data.currentResident,
-                dob: data.dob,
-                folk: data.folk,
-                point: 0,
-                roleId: 1,
-                status: 1,
+                roleId: ROLE.PATIENT,
+                status: status.ACTIVE,
             })
             if (user) {
                 return {
                     EC: 0,
-                    EM: "Đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ",
+                    EM: "Chúc mừng bạn đã trở thành thành viên của chúng tôi",
                     DT: "",
                 }
             } else {
                 return {
                     EC: 200,
-                    EM: "Đăng ký thất bại",
+                    EM: "Vui lòng đăng ký lại",
                     DT: "",
                 }
             }
         }
         return {
             EC: 200,
-            EM: "Token không hợp lệ",
+            EM: "Quá hạn xác nhận",
             DT: "",
         }
     } catch (error) {
@@ -682,46 +672,154 @@ const confirmUser = async (token) => {
         }
     }
 }
-const getDoctorHome = async () => {
+const forgotPassword = async (email) => {
     try {
-        let examCount = await db.Examination.findAll({
-            attributes: [
-                'staffId',
-                [Sequelize.fn('COUNT', Sequelize.col('staffId')), 'examinationsCount']
-            ],
-            include: [
-                {
-                    model: db.Staff,
-                    as: 'examinationStaffData',
-                    attributes: ['id', 'position', "userId"],
-                    include: [
-                        {
-                            model: db.User,
-                            as: 'staffUserData',
-                            attributes: ['id', 'lastName', 'firstName', "avatar"], // Cho phép tìm kiếm ngay cả khi không có Department nào khớp
-                        }
-                    ],
+        let password = "123456";
+        let user = await db.User.findOne({ where: { email: email } });
+        if (!user) {
+            return {
+                EC: 200,
+                EM: "Email không tồn tại",
+                DT: "",
+            }
+        }
+        let hashPassword = await hashPasswordUser(password);
+        let [updatedRows] = await db.User.update(
+            { password: hashPassword },
+            { where: { email: email } }
+        );
+        if (updatedRows) {
+            let content = `<p>Thông tin cập nhật của bạn:  </p>
+            <p>Email: ${email}</p>
+            <p>Mật khẩu mới: <strong>${password}</strong></p>
+            `
+            let mail = await sendEmailNotification({
+                email: user.email,
+                lastName: user.lastName,
+                firstName: user.firstName,
+                subject: "THÔNG BÁO CẬP NHẬT TÀI KHOẢN",
+                content: content
+            })
+            if (mail.EC === 0) {
+                return {
+                    EC: 0,
+                    EM: "Mật khẩu mới đã được gửi vào email của bạn",
+                    DT: "",
                 }
-            ],
-            group: ['staffId'],
-            limit: 20,
-            order: [[literal('examinationsCount'), 'DESC']],
-        })
-        return {
-            EC: 0,
-            EM: "Lấy thông tin bác sĩ thành công",
-            DT: examCount
-        };
+            } else {
+                return {
+                    EC: 200,
+                    EM: "Có lỗi xảy ra",
+                    DT: "",
+                }
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Có lỗi xảy ra",
+                DT: "",
+            }
+        }
     } catch (error) {
         console.log(error);
         return {
             EC: 500,
-            EM: "Lỗi server!",
+            EM: "Lỗi hệ thống",
             DT: "",
         }
-
     }
 }
+
+const getDoctorHome = async (filter) => {
+    try {
+        // Khởi tạo điều kiện và tùy chọn include
+        const condition = {};
+        const includeOption = [];
+        const search = filter?.search || "";
+        if (filter?.date) {
+            includeOption.push({
+                model: db.Schedule,
+                as: 'staffScheduleData',
+                where: {
+                    date: { [Op.gte]: new Date() },
+                },
+                include: [
+                    {
+                        model: db.Room,
+                        as: 'scheduleRoomData',
+                        where: { departmentId: typeRoom.CLINIC, },
+                        attributes: ['name'],
+                    },
+                ],
+                required: true,
+                attributes: ['date', "roomId", "staffId"],
+                raw: true,
+            });
+        }
+        // Áp dụng các bộ lọc departmentId và specialtyId
+        if (filter?.departmentId) {
+            condition.departmentId = filter.departmentId;
+        }
+        if (filter?.specialtyId) {
+            condition.specialtyId = +filter.specialtyId;
+        }
+
+        // Truy vấn danh sách staff
+        const listStaff = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE,
+                ...condition,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        roleId: ROLE.DOCTOR,
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            Sequelize.literal(`CONCAT(lastName, ' ', firstName) LIKE '%${search}%'`),
+                        ],
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Specialty,
+                    as: 'staffSpecialtyData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Examination,
+                    as: 'examinationStaffData',
+                    attributes: ['id'],
+                },
+                ...includeOption, // Thêm lịch theo điều kiện date
+            ],
+            attributes: ['id', 'position', 'userId', 'price'],
+            nest: true,
+        });
+
+        // Trả về kết quả
+        return {
+            EC: 0,
+            EM: "Lấy thông tin bác sĩ thành công",
+            DT: listStaff,
+        };
+    } catch (error) {
+        console.error("Lỗi server:", error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+};
 const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
@@ -815,7 +913,6 @@ const updateProfilePassword = async (data) => {
         }
     }
 }
-
 const getUserInsuarance = async (userId) => {
     try {
         let insurance = await db.User.findOne({
@@ -829,7 +926,7 @@ const getUserInsuarance = async (userId) => {
                 },
             ],
         });
-        
+
         if (insurance) {
             return {
                 EC: 0,
@@ -842,6 +939,255 @@ const getUserInsuarance = async (userId) => {
             EC: 404,
             EM: "Không tìm thấy bảo hiểm cho người dùng này",
             DT: null,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: null,
+        };
+    }
+}
+const confirmBooking = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: { cid: data.profile.cid },
+        });
+        if (!user) {
+            data.profile.bookFor = true;
+        } else {
+            let examination = await db.Examination.findAll({
+                where: {
+                    userId: user.id,
+                    admissionDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                }
+            });
+            if (examination.length > 0) {
+                return {
+                    EC: 200,
+                    EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                    DT: "",
+                }
+            }
+        }
+        let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/appointmentList?confirm=`
+        let mail = await sendEmailConform1(data, urlRedirect);
+        if (mail.errCode === 200) {
+            return {
+                EC: 0,
+                EM: "Vui lòng kiểm tra email để xác nhận lich khám",
+                DT: "",
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Có lỗi xảy ra. Vui lòng thử lại sau",
+                DT: "",
+            }
+        }
+
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+}
+const confirmTokenBooking = async (token) => {
+    let transaction = await sequelize.transaction();
+    try {
+        let data = await verifyToken(token);
+
+        if (data) {
+            let user;
+            let examinationCount = await db.Examination.findAll({
+                where: {
+                    admissionDate: new Date(data.schedule.date),
+                    time: data.schedule.time.value,
+                    status: status.PENDING,
+                    is_appointment: 1,
+                },
+            });
+            if (examinationCount.length >= 6) {
+                return {
+                    EC: 200,
+                    EM: "Lịch khám đã đượt đặt hết",
+                    DT: "",
+                }
+            }
+            let staff = await db.Staff.findOne({
+                where: { id: data.doctor.id },
+                attributes: ["id", "price"],
+            });
+            if (!staff) {
+                return {
+                    EC: 200,
+                    EM: "Đặt lịch khám thất bại! Không tìm thấy bác sĩ",
+                    DT: "",
+                }
+            }
+            if (data.profile.bookFor) {
+                let password = "123456";
+                let hashPassword = await hashPasswordUser(password);
+                user = await db.User.create({
+                    password: hashPassword,
+                    lastName: data.profile.lastName,
+                    firstName: data.profile.firstName,
+                    gender: data.profile.gender,
+                    cid: data.profile.cid,
+                    folk: data.profile.folk,
+                    status: status.ACTIVE,
+                    roleId: ROLE.PATIENT,
+                    dob: dayjs(data.profile.dob) || null,
+                    currentResident: data.profile.address || null,
+                }, { transaction });
+            } else {
+                user = await db.User.findOne({
+                    where: { cid: data.profile.cid },
+                });
+                let examination = await db.Examination.findAll({
+                    where: {
+                        userId: user.id,
+                        admissionDate: new Date(data.schedule.date),
+                        status: status.PENDING,
+                    }
+                });
+                if (examination.length > 0) {
+                    return {
+                        EC: 200,
+                        EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                        DT: "",
+                    }
+                }
+            }
+            if (user && staff) {
+                let examination = await db.Examination.create({
+                    userId: user.id,
+                    staffId: staff.id,
+                    symptom: data.profile.symptom,
+                    admissionDate: new Date(data.schedule.date),
+                    dischargeDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                    paymentDoctorStatus: pamentStatus.UNPAID,
+
+                    price: staff.price,
+                    // special: data?.special,
+                    // insuranceCoverage: data?.insuranceCoverage,
+                    // comorbidities: data.comorbidities,
+
+                    // Số vào phòng bác sĩ (number) và tên phòng (roomName)
+                    // number: nextNumber,
+                    // roomName: data.roomName,
+
+                    // Thông tin cho người đặt trước
+                    time: +data.schedule.time.value,
+                    visit_status: 0,
+                    is_appointment: 0,
+                }, { transaction });
+                if (examination) {
+                    await transaction.commit();
+                    return {
+                        EC: 0,
+                        EM: "Đặt lịch khám thành công",
+                        DT: "",
+                    }
+                } else {
+                    await transaction.rollback();
+                    return {
+                        EC: 200,
+                        EM: "Đặt lịch khám thất bại",
+                        DT: "",
+                    }
+                }
+            } else {
+                await transaction.rollback();
+                return {
+                    EC: 200,
+                    EM: "Không tìm thấy người dùng",
+                    DT: "",
+                }
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Quá hạn xác nhận",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        await transaction.rollback();
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+}
+const getMedicalHistories = async (userId) => {
+    try {
+        let medicalHistories = await db.User.findAll({
+            where: { id: userId },
+            include: [
+                {
+                    model: db.Examination,
+                    as: "userExaminationData",
+                    include: [
+                        {
+                            model: db.VitalSign,
+                            as: 'examinationVitalSignData',
+                        },
+                        {
+                            model: db.Paraclinical,
+                            as: 'examinationResultParaclincalData',
+                            include: [
+                                {
+                                    model: db.Room,
+                                    as: 'roomParaclinicalData',
+                                    attributes: ['id', 'name'],
+                                },
+                                {
+                                    model: db.ServiceType,
+                                    as: 'paraclinicalData',
+                                    attributes: ['id', 'name', 'price'],
+                                }
+                            ],
+                            separate: true,
+                        },
+                        {
+                            model: db.Prescription,
+                            as: 'prescriptionExamData',
+                            attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                            include: [{
+                                model: db.Medicine,
+                                as: 'prescriptionDetails',
+                                attributes: ['id', 'name', 'price'],
+                                through: ['quantity', 'unit', 'dosage', 'price']
+                            }],
+                        }
+                    ],
+                    nest: true,
+                },
+                {
+                    model: db.Insurance,
+                    as: 'userInsuranceData',
+                },
+                {
+                    model: db.Folk,
+                    as: 'folkData'
+                }
+            ],
+            order: [["createdAt", "DESC"]],
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch sử khám bệnh thành công",
+            DT: medicalHistories,
         };
     } catch (error) {
         console.error(error);
@@ -866,5 +1212,10 @@ module.exports = {
     getDoctorHome,
     updateProfileInfor,
     updateProfilePassword,
-    getUserInsuarance
+    getUserInsuarance,
+    getMedicalHistories,
+    confirmUser,
+    forgotPassword,
+    confirmBooking,
+    confirmTokenBooking,
 }

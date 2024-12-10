@@ -1,6 +1,7 @@
 import { Op, where } from "sequelize";
 import db from "../models";
 import { status } from "../utils";
+import paraclinical from "../models/paraclinical";
 
 let getSpecialtySelect = async () => {
     try {
@@ -57,11 +58,18 @@ let getAllSpecialtyAdmin = async (page, limit, search) => {
 
     }
 }
-let getSpcialtyHome = async () => {
+let getSpcialtyHome = async (filter) => {
     try {
+        let search = filter?.search || "";
+        console.log(search);
         let specialtyData = await db.Specialty.findAll({
-            where: { status: status.ACTIVE },
-            attributes: ["id", "name", "image"]
+            where: {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` }, },
+                    { shortDescription: { [Op.like]: `%${search}%` } }
+                ],
+                status: status.ACTIVE,
+            }
         });
         return {
             EC: 0,
@@ -124,11 +132,7 @@ let updateSpecialty = async (data) => {
                 DT: ""
             }
         }
-        return {
-            EC: 0,
-            EM: "Cập nhật chuyên khoa thành công",
-            DT: specialty
-        }
+
     } catch (error) {
         console.log(error);
         return {
@@ -285,13 +289,13 @@ const getSpecialtiesByDepartment = async () => {
                                     where: {
                                         roleId: 3 // Bác sĩ
                                     },
-                                    required: true, 
+                                    required: true,
                                 }
                             ],
-                            required: true, 
+                            required: true,
                         },
                     ],
-                    required: true, 
+                    required: true,
                 },
             ],
             raw: true,
@@ -323,6 +327,107 @@ const getSpecialtiesByDepartment = async () => {
     }
 };
 
+const getSpecialtiesByLaboratory = async (labId) => {
+    try {
+        
+        let roomsWithSpecialties = await db.Room.findAll({
+            attributes: [
+                'id',
+                'name',
+                [db.Sequelize.fn('COUNT', db.Sequelize.col('roomParaclinicalData.id')), 'paraclinicalCount'],
+                // Remove other non-aggregated columns from attributes
+            ],
+            include: [
+                {
+                    model: db.Paraclinical,
+                    as: 'roomParaclinicalData',
+                    attributes: [],
+                },
+                {
+                    model: db.ServiceType,
+                    as: 'serviceData',
+                    attributes: ['id', 'name'],
+                    where: {
+                        isLaboratory: 0,
+                        id: labId,
+                    },
+                },
+                {
+                    model: db.Schedule,
+                    as: 'scheduleRoomData',
+                    attributes: ['staffId', 'date'],
+                    where: {
+                        date: {
+                            [db.Sequelize.Op.gte]: new Date().setHours(0, 0, 0, 0),
+                            [db.Sequelize.Op.lte]: new Date().setHours(23, 59, 59, 999),
+                        },
+                    },
+                    include: [
+                        {
+                            model: db.Staff,
+                            as: 'staffScheduleData',
+                            attributes: ['id'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'staffUserData',
+                                    attributes: ['lastName', 'firstName'],
+                                    where: {
+                                        roleId: 3,
+                                    },
+                                    required: true,
+                                }
+                            ],
+                            required: true,
+                        },
+                    ],
+                    required: true,
+                },
+            ],
+            group: ['Room.id', 
+                    'serviceData.id', 
+                    'serviceData.name', 
+                    'scheduleRoomData.staffId', 
+                    'scheduleRoomData.date',
+                    'scheduleRoomData->staffScheduleData.id',
+                    'scheduleRoomData->staffScheduleData->staffUserData.lastName',
+                    'scheduleRoomData->staffScheduleData->staffUserData.firstName'
+            ], 
+            raw: true,
+            nest: true,
+        });
+
+        const roomWithMinCount = roomsWithSpecialties.reduce((min, current) => 
+            (current.paraclinicalCount < min.paraclinicalCount) ? current : min
+        );
+
+        let updatedRooms = {
+            id: roomWithMinCount.id,
+            name: roomWithMinCount.name,
+            paraclinical: roomWithMinCount.roomParaclinicalData,
+            serviceId: roomWithMinCount.serviceData.id,
+            serviceName: roomWithMinCount.serviceData.name,
+            count: roomWithMinCount.paraclinicalCount,
+            staffId: roomWithMinCount.scheduleRoomData.staffScheduleData.id,
+            staffName: `${roomWithMinCount.scheduleRoomData.staffScheduleData.staffUserData.lastName} ${roomWithMinCount.scheduleRoomData.staffScheduleData.staffUserData.firstName}`,
+            scheduleDate: roomWithMinCount.scheduleRoomData.date,
+        };
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin thành công",
+            DT: updatedRooms,
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: "",
+        };
+    }
+};
+
 module.exports = {
     getSpecialtySelect,
     getSpcialtyHome,
@@ -332,5 +437,6 @@ module.exports = {
     deleteSpecialty,
     getAllSpecialtyAdmin,
     getSpecialtyById,
-    getSpecialtiesByDepartment
+    getSpecialtiesByDepartment,
+    getSpecialtiesByLaboratory
 }
