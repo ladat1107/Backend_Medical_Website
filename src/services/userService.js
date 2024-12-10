@@ -1,11 +1,10 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
 import { Op } from 'sequelize';
-import { sendEmailConform1 } from "../services/emailService";
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
-import { sendEmailNotification } from "./emailService";
+import { sendEmailNotification, sendEmailConformAppoinment } from "./emailService";
 import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import dayjs from "dayjs";
@@ -973,7 +972,7 @@ const confirmBooking = async (data) => {
             }
         }
         let urlRedirect = `${process.env.REACT_APP_BACKEND_URL}/appointmentList?confirm=`
-        let mail = await sendEmailConform1(data, urlRedirect);
+        let mail = await sendEmailConformAppoinment(data, urlRedirect);
         if (mail.errCode === 200) {
             return {
                 EC: 0,
@@ -1075,18 +1074,14 @@ const confirmTokenBooking = async (token) => {
                     paymentDoctorStatus: pamentStatus.UNPAID,
 
                     price: staff.price,
-                    // special: data?.special,
-                    // insuranceCoverage: data?.insuranceCoverage,
-                    // comorbidities: data.comorbidities,
-
-                    // Số vào phòng bác sĩ (number) và tên phòng (roomName)
-                    // number: nextNumber,
-                    // roomName: data.roomName,
+                    special: data?.profile?.special,
+                    roomName: data?.schedule?.room?.name || null,
 
                     // Thông tin cho người đặt trước
                     time: +data.schedule.time.value,
                     visit_status: 0,
                     is_appointment: 0,
+                    bookFor: data.profile.bookFor ? user.id : null,
                 }, { transaction });
                 if (examination) {
                     await transaction.commit();

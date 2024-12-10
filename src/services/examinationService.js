@@ -1,4 +1,6 @@
 import { raw } from "body-parser";
+// import { Op, Sequelize } from "sequelize";
+import dayjs from "dayjs";
 import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
 const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
@@ -90,10 +92,49 @@ const getExaminationById = async (id) => {
     }
 }
 
-const getExaminationByUserId = async (userId) => {
+const getExaminationByUserId = async (userId, filter) => {
     try {
+        let statusReq = filter?.status || status.ACTIVE;
+        if (statusReq === status.PENDING) {
+        }
         let examinations = await db.Examination.findAll({
-            where: { userId: userId },
+            where: {
+                [Op.or]: [
+                    { userId: userId },
+                    { bookFor: userId }
+                ],
+                status: statusReq
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                        {
+                            model: db.Specialty,
+                            as: 'staffSpecialtyData',
+                            attributes: ['name']
+                        }
+                    ],
+                },
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid', "phoneNumber", "currentResident", "dob"],
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }],
+                }
+            ],
+            order: [['createdAt', 'DESC']],
             raw: true,
             nest: true,
         });
@@ -237,7 +278,7 @@ const updateExamination = async (data) => {
 const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
-            where: { id: data.id }
+            where: { id: id }
         });
         if (!existExamination) {
             return {
@@ -246,15 +287,19 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-
-        let examination = await db.Examination.update({
-            status: status.INACTIVE
-        }, {
+        if (existExamination.status !== status.PENDING || dayjs(existExamination.admissionDate).isSame(dayjs(), "day")) {
+            return {
+                EC: 400,
+                EM: "Không thể hủy lịch hẹn",
+                DT: ""
+            }
+        }
+        let examination = await db.Examination.destroy({
             where: { id: id }
         });
         return {
             EC: 0,
-            EM: "Xóa khám bệnh thành công",
+            EM: "Đã hủy",
             DT: examination
         }
     } catch (error) {

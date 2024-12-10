@@ -1,5 +1,5 @@
 import handBookService from '../services/handBookService';
-import { PAGINATE } from '../utils';
+import { PAGINATE, ROLE } from '../utils';
 
 const getAllHandBooks = async (req, res) => {
     try {
@@ -59,7 +59,7 @@ const getHandBooksAdmin = async (req, res) => {
 const getHandBookById = async (req, res) => {
     try {
         let data = req.query;
-        let role = req.user.roleId;
+        let role = req?.user?.roleId || ROLE.PATIENT;
         if (data && data.id) {
             let response = await handBookService.getHandBookById(data.id, role);
             return res.status(200).json({

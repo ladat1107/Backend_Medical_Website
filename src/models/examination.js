@@ -54,7 +54,6 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
             onUpdate: 'CASCADE',
-            onDelete: 'CASCADE',
         },
         symptom: {
             type: DataTypes.STRING(45),
@@ -116,7 +115,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        time:{
+        time: {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
@@ -124,13 +123,23 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        is_appointment:{
+        is_appointment: {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
         insuaranceCode:{
             type: DataTypes.STRING(45),
             allowNull: true,
+        },
+        },
+        bookFor: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: null,
+            references: {
+                model: 'users', // Tên bảng tham chiếu
+                key: 'id',
+            },
         },
     }, {
         sequelize,

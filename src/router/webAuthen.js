@@ -1,5 +1,6 @@
 import express from 'express';
 import userController from '../controllers/userController';
+import examinationController from '../controllers/examinationController';
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 require('dotenv').config();
 
@@ -11,6 +12,10 @@ let initWebAuthenRounte = (app) => {
 
     router.post("/confirmBooking", userController.confirmBooking)
     router.post("/confirmTokenBooking", userController.confirmTokenBooking)
+
+    router.get("/getAppoinment", examinationController.getExaminationByUserId)
+    router.delete("/cancelAppoinment", examinationController.deleteExamination)
+
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;
