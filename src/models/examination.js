@@ -131,7 +131,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(45),
             allowNull: true,
         },
-        },
         bookFor: {
             type: DataTypes.INTEGER,
             allowNull: true,
