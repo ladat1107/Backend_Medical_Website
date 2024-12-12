@@ -202,7 +202,6 @@ const getUserByCid = async (req, res) => {
         })
     }
 }
-
 const createUser = async (req, res) => {
     try {
         let data = req.body;

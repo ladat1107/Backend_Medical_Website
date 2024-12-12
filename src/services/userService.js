@@ -340,7 +340,6 @@ const getUserByCid = async (cid) => {
 const createUser = async (data) => {
     try {
         data.password = "123456";
-
         if (data.email && !await checkEmail(data.email)) {
             return {
                 EC: 200,
