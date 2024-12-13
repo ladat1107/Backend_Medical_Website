@@ -132,7 +132,11 @@ let updateSpecialty = async (data) => {
                 DT: ""
             }
         }
-
+        return {
+            EC: 0,
+            EM: "Cập nhật chuyên khoa thành công",
+            DT: specialty
+        }
     } catch (error) {
         console.log(error);
         return {
@@ -329,7 +333,7 @@ const getSpecialtiesByDepartment = async () => {
 
 const getSpecialtiesByLaboratory = async (labId) => {
     try {
-        
+
         let roomsWithSpecialties = await db.Room.findAll({
             attributes: [
                 'id',
@@ -384,20 +388,20 @@ const getSpecialtiesByLaboratory = async (labId) => {
                     required: true,
                 },
             ],
-            group: ['Room.id', 
-                    'serviceData.id', 
-                    'serviceData.name', 
-                    'scheduleRoomData.staffId', 
-                    'scheduleRoomData.date',
-                    'scheduleRoomData->staffScheduleData.id',
-                    'scheduleRoomData->staffScheduleData->staffUserData.lastName',
-                    'scheduleRoomData->staffScheduleData->staffUserData.firstName'
-            ], 
+            group: ['Room.id',
+                'serviceData.id',
+                'serviceData.name',
+                'scheduleRoomData.staffId',
+                'scheduleRoomData.date',
+                'scheduleRoomData->staffScheduleData.id',
+                'scheduleRoomData->staffScheduleData->staffUserData.lastName',
+                'scheduleRoomData->staffScheduleData->staffUserData.firstName'
+            ],
             raw: true,
             nest: true,
         });
 
-        const roomWithMinCount = roomsWithSpecialties.reduce((min, current) => 
+        const roomWithMinCount = roomsWithSpecialties.reduce((min, current) =>
             (current.paraclinicalCount < min.paraclinicalCount) ? current : min
         );
 

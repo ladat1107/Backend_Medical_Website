@@ -495,7 +495,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         // Prepare base where conditions
         const whereConditionExamination = {};
         const whereConditionParaclinical = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Start of day
@@ -513,7 +513,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         if (statusPay <= 4) {
             whereConditionExamination.status = statusPay;
             whereConditionParaclinical.status = statusPay;
-        } else if(statusPay > 4) {
+        } else if (statusPay > 4) {
             whereConditionExamination.status = { [Op.gte]: statusPay };
             whereConditionParaclinical.status = { [Op.gte]: statusPay };
         }
@@ -526,7 +526,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         // Fetch data with associations
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
-            attributes: ['id', 'userId', 'staffId', 'price', 'insuranceCoverage', 'insuaranceCode', 'symptom', 'roomName', 'visit_status' ,'special', 'createdAt'],
+            attributes: ['id', 'userId', 'staffId', 'price', 'insuranceCoverage', 'insuaranceCode', 'symptom', 'roomName', 'visit_status', 'special', 'createdAt'],
             include: [
                 {
                     model: db.User,
@@ -568,7 +568,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                 {
                     model: db.Examination,
                     as: 'examinationResultParaclincalData',
-                    attributes: ['id', 'symptom','insuranceCoverage', 'insuaranceCode', 'special', 'visit_status'],
+                    attributes: ['id', 'symptom', 'insuranceCoverage', 'insuaranceCode', 'special', 'visit_status'],
                     include: [
                         {
                             model: db.User,
@@ -632,7 +632,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         ];
 
         const totalItems = combinedList.length;
-        
+
         // Explicitly sort the combined list
         combinedList.sort((itemA, itemB) => {
             const dateA = new Date(itemA.createdAt);
