@@ -112,7 +112,7 @@ const getHandBookHome = async (filter) => {
     try {
         let condition = {};
         let limit = filter?.limtit || 100;
-        console.log("filter", filter);
+        // console.log("filter", filter);
         let filterArray = filter.tags ? filter.tags?.split(",") : [];
         if (filter.departmentId) {
             condition.departmentId = filter.departmentId;

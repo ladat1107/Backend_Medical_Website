@@ -329,7 +329,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         const totalPatient = await db.Examination.count({
             where: {
                 ...whereCondition,
-                status: 4,
+                status: { [Op.gte]: 4 },
             }
         });
 

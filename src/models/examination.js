@@ -56,15 +56,15 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
         },
         symptom: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(256),
             allowNull: true,
         },
         diseaseName: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(256),
             allowNull: true,
         },
         treatmentResult: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(256),
             allowNull: true,
         },
         admissionDate: {
@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         reason: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(256),
             allowNull: true,
         },
         medicalTreatmentTier: {
@@ -104,7 +104,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         comorbidities: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(256),
             allowNull: true,
         },
         roomName: {
