@@ -103,7 +103,8 @@ const getExaminationByUserId = async (userId, filter) => {
                     { userId: userId },
                     { bookFor: userId }
                 ],
-                status: statusReq
+                is_appointment: 1,
+                //status: statusReq
             },
             include: [
                 {
@@ -287,7 +288,7 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        if (existExamination.status !== status.PENDING || dayjs(existExamination.admissionDate).isSame(dayjs(), "day")) {
+        if (existExamination.status !== status.PENDING || dayjs(existExamination.admissionDate).isBefore(dayjs().add(1, 'day').startOf('day'))) {
             return {
                 EC: 400,
                 EM: "Không thể hủy lịch hẹn",
@@ -336,7 +337,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         const totalAppointment = await db.Examination.count({
             where: {
                 ...whereCondition,
-                is_appointment: 1,
+                //is_appointment: 1,
                 status: 2,
             }
         });
@@ -488,7 +489,6 @@ const getScheduleApoinment = async (filter) => {
         }
     }
 }
-
 
 const getListToPay = async (date, statusPay, page, limit, search) => {
     try {

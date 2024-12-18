@@ -1079,7 +1079,7 @@ const confirmTokenBooking = async (token) => {
                     // Thông tin cho người đặt trước
                     time: +data.schedule.time.value,
                     visit_status: 0,
-                    is_appointment: 0,
+                    is_appointment: 1,
                     bookFor: data.profile.bookFor ? user.id : null,
                 }, { transaction });
                 if (examination) {

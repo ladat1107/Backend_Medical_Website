@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { COOKIE, TIME } from "../utils";
 require('dotenv').config();
-const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm'];
+const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callback"];
 const createToken = (payload, time) => {
     let key = process.env.SECURITY_KEY;
     let token = null;
