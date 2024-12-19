@@ -225,6 +225,33 @@ const getParaclinicals = async (req, res) => {
     }
 }
 
+const updateListPayParaclinicals = async (req, res) => {
+    try{
+        let data = req.body;
+        if(data && data.ids){
+            let response = await paraclinicalService.updateListPayParaclinicals(data.ids);
+            return res.status(200).json({
+                EC: response.EC,
+                EM: response.EM,
+                DT: response.DT
+            })
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
 module.exports = {
     getParaclinicalByExamId,
     createParaclinical,
@@ -232,5 +259,6 @@ module.exports = {
     deleteParaclinical,
     createOrUpdateParaclinical,
     createRequestParaclinical,
-    getParaclinicals
+    getParaclinicals,
+    updateListPayParaclinicals
 }
