@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'examinationAppointmentData',
             });
+            Examination.belongsTo(models.Payment, {
+                foreignKey: 'paymentId',
+                as: 'paymentData',
+            });
         }
     }
     Examination.init({
@@ -127,7 +131,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        insuaranceCode:{
+        insuaranceCode: {
             type: DataTypes.STRING(45),
             allowNull: true,
         },
@@ -137,6 +141,14 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: null,
             references: {
                 model: 'users', // Tên bảng tham chiếu
+                key: 'id',
+            },
+        },
+        paymentId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'payments', // Tên bảng tham chiếu
                 key: 'id',
             },
         },
