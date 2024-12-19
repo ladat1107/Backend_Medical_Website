@@ -346,7 +346,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            whereCondition.createdAt = {
+            whereCondition.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
             };
         }
@@ -375,7 +375,6 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         if (status) {
             whereCondition.status = status;
         }
-
         // Appointment filter
         // if (is_appointment) {
         //     whereCondition.is_appointment = is_appointment;
@@ -525,7 +524,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Start of day
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // End of day
 
-            whereConditionExamination.createdAt = {
+            whereConditionExamination.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
             };
             whereConditionParaclinical.createdAt = {
@@ -641,10 +640,10 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         const combinedList = [
             ...examinations.map(exam => ({
                 type: 'examination',
-                data: exam,
+                data: { ...exam.toJSON(), status: statusPay },
                 createdAt: exam.createdAt,
                 userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
-                userPhone: exam.userExaminationData.phoneNumber
+                userPhone: exam.userExaminationData.phoneNumber,
             })),
             // Nhóm paraclinicals theo examinationId
             ...Object.values(
@@ -656,16 +655,17 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                             data: {
                                 ...parac.examinationResultParaclincalData.toJSON(),
                                 paraclinicalItems: [],
+                                status: statusPay,
                                 totalParaclinicalPrice: 0
                             },
                             createdAt: parac.createdAt,
-                            userName: parac.examinationResultParaclincalData.userExaminationData.lastName + 
-                                      ' ' + 
-                                      parac.examinationResultParaclincalData.userExaminationData.firstName,
+                            userName: parac.examinationResultParaclincalData.userExaminationData.lastName +
+                                ' ' +
+                                parac.examinationResultParaclincalData.userExaminationData.firstName,
                             userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
                         };
                     }
-                    
+
                     // Thêm thông tin chi tiết của từng paraclinical vào mảng paraclinicalItems
                     const paracItem = {
                         id: parac.id,
@@ -676,21 +676,21 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                         doctorInfo: {
                             id: parac.doctorParaclinicalData.id,
                             position: parac.doctorParaclinicalData.position,
-                            doctorName: parac.doctorParaclinicalData.staffUserData.lastName + 
-                                        ' ' + 
-                                        parac.doctorParaclinicalData.staffUserData.firstName
+                            doctorName: parac.doctorParaclinicalData.staffUserData.lastName +
+                                ' ' +
+                                parac.doctorParaclinicalData.staffUserData.firstName
                         },
                         roomInfo: {
                             id: parac.roomParaclinicalData.id,
                             name: parac.roomParaclinicalData.name
                         }
                     };
-                    
+
                     acc[examinationId].data.paraclinicalItems.push(paracItem);
-                    
+
                     // Cộng dồn tổng giá
                     acc[examinationId].data.totalParaclinicalPrice += parac.price;
-                    
+
                     return acc;
                 }, {})
             )

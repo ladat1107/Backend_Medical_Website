@@ -63,6 +63,12 @@ const PAYMENT_METHOD = {
     VN_PAY: 2,
     CASH: 3
 }
+const TYPE_PAYMENT = {
+    EXAMINATION: 1,
+    PARA_CLINICAL: 2,
+    MEDICINE: 3,
+    APPOINMENT: 4
+}
 module.exports = {
     status,
     typeRoom,
@@ -72,5 +78,6 @@ module.exports = {
     ROLE,
     COOKIE,
     TIME,
-    PAYMENT_METHOD
+    PAYMENT_METHOD,
+    TYPE_PAYMENT
 }

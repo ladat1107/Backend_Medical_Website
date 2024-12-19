@@ -8,7 +8,6 @@ import { sendEmailNotification, sendEmailConformAppoinment } from "./emailServic
 import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import dayjs from "dayjs";
-import { raw } from "body-parser";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -1055,7 +1054,7 @@ const confirmTokenBooking = async (token) => {
             if (examinationCount.length >= 6) {
                 return {
                     EC: 200,
-                    EM: "Lịch khám đã đượt đặt hết",
+                    EM: "Lịch khám đã được đặt hết",
                     DT: "",
                 }
             }
@@ -1071,6 +1070,7 @@ const confirmTokenBooking = async (token) => {
                 }
             }
             if (data.profile.bookFor) {
+                console.log("Book for another person");
                 let password = "123456";
                 let hashPassword = await hashPasswordUser(password);
                 user = await db.User.create({
@@ -1082,9 +1082,9 @@ const confirmTokenBooking = async (token) => {
                     folk: data.profile.folk,
                     status: status.ACTIVE,
                     roleId: ROLE.PATIENT,
-                    dob: dayjs(data.profile.dob) || null,
+                    dob: new Date(data.profile.dob),
                     currentResident: data.profile.address || null,
-                }, { transaction });
+                });
             } else {
                 user = await db.User.findOne({
                     where: { cid: data.profile.cid },
@@ -1122,7 +1122,7 @@ const confirmTokenBooking = async (token) => {
                     time: +data.schedule.time.value,
                     visit_status: 0,
                     is_appointment: 1,
-                    bookFor: data.profile.bookFor ? user.id : null,
+                    bookFor: data.profile.bookFor ? data.profile.id : null,
                 }, { transaction });
                 if (examination) {
                     await transaction.commit();
