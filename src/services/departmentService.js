@@ -6,7 +6,6 @@ import { raw } from "body-parser";
 
 const getAllDepartment = async (page, limit, search) => {
     try {
-        let countDepartment = await db.Department.count()
         let department = await db.Department.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -46,10 +45,9 @@ const getAllDepartment = async (page, limit, search) => {
             // Phân trang
             offset: (+page - 1) * +limit,
             limit: +limit,
-            raw: false,
+            distinct: true,
             nest: true,
         });
-        department.count = countDepartment;
         return {
             EC: 0,
             EM: "Lấy thông tin phòng ban thành công",
@@ -416,7 +414,7 @@ const deleteDepartment = async (departmentId) => {
     }
 }
 
-const getOutpatientDepartments = async () => {}
+const getOutpatientDepartments = async () => { }
 
 module.exports = {
     getAllDepartment,

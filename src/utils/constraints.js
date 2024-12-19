@@ -58,6 +58,11 @@ const TIME = {
     cookieLife: 7 * 24 * 60 * 60 * 1000,// tính theo milisecond
     tokenEmail: 3 * 60, // tính theo giây
 }
+const PAYMENT_METHOD = {
+    MOMO: 1,
+    VN_PAY: 2,
+    CASH: 3
+}
 module.exports = {
     status,
     typeRoom,
@@ -66,5 +71,6 @@ module.exports = {
     PAGINATE,
     ROLE,
     COOKIE,
-    TIME
+    TIME,
+    PAYMENT_METHOD
 }

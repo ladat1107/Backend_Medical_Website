@@ -29,6 +29,7 @@ import diseaseController from '../controllers/diseaseController';
 import specialtyController from '../controllers/specialtyController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import { getStatisticalAppoinment } from '../services/statisticalService';
 require('dotenv').config();
 
 let router = express.Router();
@@ -94,6 +95,10 @@ let initAdminRoute = (app) => {
     router.put("/updateScheduleStaff", scheduleController.updateScheduleStaff)
     router.delete("/deleteSchedule", scheduleController.deleteSchedule)
 
+    // ----> Admin statistical 
+    router.get("/getStatisticalAppoinment", getStatisticalAppoinment)
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
     // ----> Admin
     router.post("/createMedicine", medicineController.createMedicine)
     router.put("/updateMedicine", medicineController.updateMedicine)
