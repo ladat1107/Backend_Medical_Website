@@ -1,17 +1,17 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import db from '../models/index';
-import { status } from '../utils';
-import { stringify } from 'querystring';
-
+import { PAYMENT_METHOD, status } from '../utils';
+let accessKey = 'F8BBA842ECF85';
+let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
 export const paymentMomo = async (data) => {
     try {
-        let accessKey = 'F8BBA842ECF85';
-        let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+        //  let accessKey = 'F8BBA842ECF85';
+        //   let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
         let orderInfo = 'pay with MoMo';
         let partnerCode = "MOMO";
         let redirectUrl = data.redirectUrl;
-        let ipnUrl = 'https://cf94-118-68-51-185.ngrok-free.app/api/callback';
+        let ipnUrl = 'https://6f84-14-161-44-125.ngrok-free.app/api/callback';
         let requestType = "payWithMethod";
         let amount = data.price;
         let orderId = partnerCode + new Date().getTime();
@@ -44,7 +44,8 @@ export const paymentMomo = async (data) => {
             autoCapture: autoCapture,
             extraData: extraData,
             orderGroupId: orderGroupId,
-            signature: signature
+            signature: signature,
+            orderExpireTime: 5,
         });
         //Create the HTTPS objects
         let response = await axios.post(
@@ -81,26 +82,45 @@ export const paymentMomo = async (data) => {
 }
 
 export const paymentMomoCallback = async (req, res) => {
+    let transaction = await db.sequelize.transaction();
     try {
-        const { resultCode, extraData } = req.body;
-        if (resultCode === 0) {
-            let examination = JSON.parse(extraData); // Tách ID từ orderId
-            await db.Examination.update(
-                { paymentDoctorStatus: status.ACTIVE },
-                { where: { id: examination.id } });
-            return res.status(200).json({
-                EC: 0,
-                EM: "Thanh toán thành công, trạng thái đã được cập nhật",
-                DT: req.body
-            });
+        let data = req.body;
+        if (data.resultCode === 0) {
+            let detail = JSON.stringify(data);
+            let payment = await db.Payment.create({
+                orderId: data.orderId,
+                amount: data.amount,
+                paymentMethod: PAYMENT_METHOD.MOMO,
+                status: status.ACTIVE,
+                detail: detail,
+                transId: data.transId,
+            }, { transaction });
+            if (payment) {
+                let examination = JSON.parse(data.extraData);
+                await db.Examination.update(
+                    {
+                        paymentDoctorStatus: status.ACTIVE,
+                        paymentId: payment.id
+                    },
+                    {
+                        where: { id: examination.id },
+                        transaction
+                    });
+                await transaction.commit();
+                return res.status(200).json({
+                    EC: 0,
+                    EM: "Thanh toán thành công, trạng thái đã được cập nhật",
+                    DT: req.body
+                });
+            } else {
+                await transaction.rollback();
+                throw new Error("Failed to create Payment");
+            }
         } else {
-            return res.status(400).json({
-                EC: 400,
-                EM: "Thanh toán thất bại",
-                DT: req.body
-            });
+            throw new Error("Failed to create Payment");
         }
     } catch (error) {
+        await transaction.rollback();
         console.log(error);
         return res.status(500).json({
             EC: 500,
@@ -110,6 +130,69 @@ export const paymentMomoCallback = async (req, res) => {
 
     }
 }
+
+export const refundMomo = async (data) => {
+    try {
+        let partnerCode = "MOMO";
+        let orderId = partnerCode + new Date().getTime();
+        let requestId = orderId; // Mã yêu cầu hoàn tiền duy nhất
+        let amount = data.amount; // Số tiền cần hoàn
+        let transId = data.transId; // Mã giao dịch trên hệ thống MoMo
+        let description = 'Refund due to appointment cancellation';
+        let lang = 'vi';
+
+        // Tạo chữ ký
+        let rawSignature = `accessKey=${accessKey}&amount=${amount}&description=${description}&orderId=${orderId}&partnerCode=${partnerCode}&requestId=${requestId}&transId=${transId}`;
+        let signature = crypto.createHmac('sha256', secretKey).update(rawSignature).digest('hex');
+
+        // Tạo request body
+        const requestBody = JSON.stringify({
+            partnerCode: partnerCode,
+            accessKey: accessKey,
+            requestId: requestId,
+            orderId: orderId,
+            amount: amount,
+            transId: +transId,
+            description: description,
+            signature: signature,
+            lang: lang,
+        });
+
+        // Gửi yêu cầu hoàn tiền
+        let response = await axios.post(
+            'https://test-payment.momo.vn/v2/gateway/api/refund',
+            requestBody,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(requestBody),
+                },
+            }
+        );
+
+        // Kiểm tra kết quả trả về
+        if (response.data.resultCode === 0) {
+            return {
+                EC: 0,
+                EM: "Hoàn tiền thành công",
+                DT: response.data,
+            };
+        } else {
+            return {
+                EC: response.data.resultCode,
+                EM: response.data.message,
+                DT: "",
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "System error",
+            DT: "",
+        };
+    }
+};
 
 // EXPLANATION PAYMENT MOMO
 export const examinationPayment = async (req, res) => {

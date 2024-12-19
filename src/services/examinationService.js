@@ -3,7 +3,8 @@ import { raw } from "body-parser";
 import dayjs from "dayjs";
 import db from "../models/index";
 import { status, pamentStatus } from "../utils/index";
-const { Op, ConnectionTimedOutError, Sequelize, where } = require('sequelize');
+import { refundMomo } from "./paymentService";
+const { Op, ConnectionTimedOutError, Sequelize, where, or } = require('sequelize');
 
 
 const getExaminationById = async (id) => {
@@ -227,8 +228,6 @@ const createExamination = async (data) => {
         };
     }
 };
-
-
 const updateExamination = async (data) => {
     try {
         let existExamination = await db.Examination.findOne({
@@ -275,11 +274,18 @@ const updateExamination = async (data) => {
         }
     }
 }
-
 const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
-            where: { id: id }
+            where: { id: id },
+            include: [
+                {
+                    model: db.Payment,
+                    as: "paymentData",
+                }
+            ],
+            raw: true,
+            nest: true,
         });
         if (!existExamination) {
             return {
@@ -295,13 +301,32 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        let examination = await db.Examination.destroy({
+        if (existExamination.paymentDoctorStatus === status.ACTIVE && existExamination.paymentId) {
+            let refund = await refundMomo({ transId: existExamination.paymentData.transId, amount: existExamination.paymentData.amount * 0.8 });
+            if (refund.EC !== 0) {
+                return {
+                    EC: 400,
+                    EM: "Không thể hủy lịch hẹn",
+                    DT: ""
+                }
+            } else {
+                await db.Payment.update({
+                    status: status.INACTIVE,
+                    paymentDoctorStatus: status.INACTIVE
+                }, {
+                    where: { id: existExamination.paymentData.id }
+                })
+            }
+        }
+        await db.Examination.update({
+            status: status.INACTIVE,
+        }, {
             where: { id: id }
-        });
+        })
         return {
             EC: 0,
-            EM: "Đã hủy",
-            DT: examination
+            EM: "Hủy lịch hẹn thành công",
+            DT: ""
         }
     } catch (error) {
         console.log(error);
@@ -312,7 +337,6 @@ const deleteExamination = async (id) => {
         }
     }
 }
-
 const getExaminations = async (date, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
