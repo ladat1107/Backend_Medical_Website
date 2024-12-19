@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import db from "../models/index";
 import room from "../models/room";
 import { status, pamentStatus } from "../utils/index";
@@ -420,6 +420,35 @@ const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     }
 };
 
+const updateListPayParaclinicals = async (ids) => {
+    try {
+        const updateResults = await db.Paraclinical.update(
+            {
+                status: status.PAID
+            },{
+                where: {
+                    id: {
+                        [Op.in]: ids
+                    }
+                }
+            }
+        );
+
+        return {
+            EC: 0,
+            EM: 'Cập nhật danh sách xét nghiệm thành công!',
+            DT: updateResults,
+        };
+    } catch (error) {
+        console.error('Error updating list paraclinicals:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+};
+
 module.exports = {
     getParaclinicalByExamId,
     createParaclinical,
@@ -427,5 +456,6 @@ module.exports = {
     deleteParaclinical,
     createOrUpdateParaclinical,
     createRequestParaclinical,
-    getParaclinicals
+    getParaclinicals,
+    updateListPayParaclinicals
 }

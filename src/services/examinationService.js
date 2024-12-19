@@ -543,9 +543,9 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         }
 
         // Pagination
-        const pageNum = page || 1;
-        const limitNum = limit || 10;
-        const offset = (pageNum - 1) * limitNum;
+        // const pageNum = page || 1;
+        // const limitNum = limit || 10;
+        // const offset = (pageNum - 1) * limitNum;
 
         // Fetch data with associations
         const examinations = await db.Examination.findAll({
@@ -646,26 +646,69 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
                 userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
                 userPhone: exam.userExaminationData.phoneNumber
             })),
-            ...paraclinicals.map(parac => ({
-                type: 'paraclinical',
-                data: parac,
-                createdAt: parac.createdAt,
-                userName: parac.examinationResultParaclincalData.userExaminationData.firstName + ' ' + parac.examinationResultParaclincalData.userExaminationData.lastName,
-                userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
-            }))
+            // Nhóm paraclinicals theo examinationId
+            ...Object.values(
+                paraclinicals.reduce((acc, parac) => {
+                    const examinationId = parac.examinationId;
+                    if (!acc[examinationId]) {
+                        acc[examinationId] = {
+                            type: 'paraclinical',
+                            data: {
+                                ...parac.examinationResultParaclincalData.toJSON(),
+                                paraclinicalItems: [],
+                                totalParaclinicalPrice: 0
+                            },
+                            createdAt: parac.createdAt,
+                            userName: parac.examinationResultParaclincalData.userExaminationData.lastName + 
+                                      ' ' + 
+                                      parac.examinationResultParaclincalData.userExaminationData.firstName,
+                            userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
+                        };
+                    }
+                    
+                    // Thêm thông tin chi tiết của từng paraclinical vào mảng paraclinicalItems
+                    const paracItem = {
+                        id: parac.id,
+                        paraclinical: parac.paraclinical,
+                        paracName: parac.paracName,
+                        price: parac.price,
+                        status: parac.status,
+                        doctorInfo: {
+                            id: parac.doctorParaclinicalData.id,
+                            position: parac.doctorParaclinicalData.position,
+                            doctorName: parac.doctorParaclinicalData.staffUserData.lastName + 
+                                        ' ' + 
+                                        parac.doctorParaclinicalData.staffUserData.firstName
+                        },
+                        roomInfo: {
+                            id: parac.roomParaclinicalData.id,
+                            name: parac.roomParaclinicalData.name
+                        }
+                    };
+                    
+                    acc[examinationId].data.paraclinicalItems.push(paracItem);
+                    
+                    // Cộng dồn tổng giá
+                    acc[examinationId].data.totalParaclinicalPrice += parac.price;
+                    
+                    return acc;
+                }, {})
+            )
         ];
 
-        const totalItems = combinedList.length;
-
-        // Explicitly sort the combined list
-        combinedList.sort((itemA, itemB) => {
+        // Sắp xếp lại danh sách
+        const sortedList = combinedList.sort((itemA, itemB) => {
             const dateA = new Date(itemA.createdAt);
             const dateB = new Date(itemB.createdAt);
-            return dateA.getTime() - dateB.getTime(); // Oldest first
+            return dateB.getTime() - dateA.getTime(); // Mới nhất lên đầu
         });
 
-        // Slice to pagination limit
-        const paginatedList = combinedList.slice(offset, offset + limitNum);
+        // Áp dụng phân trang
+        const totalItems = sortedList.length;
+        const pageNum = page || 1;
+        const limitNum = limit || 10;
+        const offset = (pageNum - 1) * limitNum;
+        const paginatedList = sortedList.slice(offset, offset + limitNum);
 
         return {
             EC: 0,
@@ -688,7 +731,8 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
             DT: '',
         };
     }
-}
+};
+
 module.exports = {
     getExaminationById,
     getExaminationByUserId,
