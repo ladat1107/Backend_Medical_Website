@@ -36,7 +36,7 @@ const getParaclinicalByExamId = async (examinationId) => {
 const createRequestParaclinical = async (data) => {
     try {
 
-        if(data.listParaclinicals.length === 0){
+        if (data.listParaclinicals.length === 0) {
             return {
                 EC: 400,
                 EM: "Danh sách xét nghiệm không được trống",
@@ -61,10 +61,10 @@ const createRequestParaclinical = async (data) => {
         // Mảng lưu trạng thái các lần tạo
         let createResults = [];
         for (const item of data.listParaclinicals) {
-        
+
             const roomDataResponse = await specialtyService.getSpecialtiesByLaboratory(+item.id);
-      
-            if(roomDataResponse.EC === 0 && roomDataResponse.DT){
+
+            if (roomDataResponse.EC === 0 && roomDataResponse.DT) {
                 const roomData = roomDataResponse.DT;
 
                 let dataParaclinical = {
@@ -77,7 +77,7 @@ const createRequestParaclinical = async (data) => {
                     doctorId: roomData.staffId,
                     roomId: roomData.id
                 };
-    
+
                 const result = await createParaclinical(dataParaclinical);
                 createResults.push(result);
             } else {
@@ -103,7 +103,7 @@ const createRequestParaclinical = async (data) => {
                 DT: createResults
             };
         }
-        
+
     } catch (error) {
         console.log(error);
         return {
@@ -289,7 +289,7 @@ const createOrUpdateParaclinical = async (data) => {
         return {
             EC: 500,
             EM: "Lỗi server!",
-            DT: ""  
+            DT: ""
         }
     }
 }
@@ -298,12 +298,12 @@ const createOrUpdateParaclinical = async (data) => {
 const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     try {
         const whereCondition = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
-        
+
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
             };
@@ -425,13 +425,13 @@ const updateListPayParaclinicals = async (ids) => {
         const updateResults = await db.Paraclinical.update(
             {
                 status: status.PAID
-            },{
-                where: {
-                    id: {
-                        [Op.in]: ids
-                    }
+            }, {
+            where: {
+                id: {
+                    [Op.in]: ids
                 }
             }
+        }
         );
 
         return {
