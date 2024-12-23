@@ -2,7 +2,7 @@ import { raw } from "body-parser";
 // import { Op, Sequelize } from "sequelize";
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, pamentStatus } from "../utils/index";
+import { status, paymentStatus } from "../utils/index";
 import { refundMomo } from "./paymentService";
 const { Op, ConnectionTimedOutError, Sequelize, where, or } = require('sequelize');
 
@@ -196,7 +196,7 @@ const createExamination = async (data) => {
             admissionDate: new Date(),
             dischargeDate: new Date(),
             status: data.status,
-            paymentDoctorStatus: pamentStatus.UNPAID,
+            paymentDoctorStatus: paymentStatus.UNPAID,
 
             price: staff.price,
             special: data.special,
@@ -301,7 +301,7 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        if (existExamination.paymentDoctorStatus === status.ACTIVE && existExamination.paymentId) {
+        if (existExamination.paymentDoctorStatus === status.PAID && existExamination.paymentId) {
             let refund = await refundMomo({ transId: existExamination.paymentData.transId, amount: existExamination.paymentData.amount * 0.8 });
             if (refund.EC !== 0) {
                 return {
@@ -312,7 +312,7 @@ const deleteExamination = async (id) => {
             } else {
                 await db.Payment.update({
                     status: status.INACTIVE,
-                    paymentDoctorStatus: status.INACTIVE
+                    paymentDoctorStatus: paymentStatus.UNPAID,
                 }, {
                     where: { id: existExamination.paymentData.id }
                 })

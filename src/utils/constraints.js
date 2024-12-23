@@ -8,17 +8,18 @@ const status = {
     ACTIVE: 1,
     INACTIVE: 0
 }
+const paymentStatus = {
+    UNPAID: 0,
+    PENDING: 1,
+    PAID: 2
+}
+
 const typeRoom = {
     CLINIC: 2,
     DUTY: 1,
 }
 const department = {
     CLINIC: 2,
-}
-const pamentStatus = {
-    UNPAID: 0,
-    PENDING: 1,
-    PAID: 2
 }
 
 const PAGINATE = [
@@ -66,14 +67,14 @@ const PAYMENT_METHOD = {
 const TYPE_PAYMENT = {
     EXAMINATION: 1,
     PARA_CLINICAL: 2,
-    MEDICINE: 3,
+    PRESCRIPTION: 3,
     APPOINMENT: 4
 }
 module.exports = {
     status,
     typeRoom,
     department,
-    pamentStatus,
+    paymentStatus,
     PAGINATE,
     ROLE,
     COOKIE,

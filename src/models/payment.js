@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'paymentId',
                 as: 'paraclinicalData',
             });
+            Payment.hasOne(models.Prescription, {
+                foreignKey: 'paymentId',
+                as: 'prescriptionData',
+            });
         }
     }
     Payment.init({

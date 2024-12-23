@@ -1,7 +1,7 @@
 import { Op, where } from "sequelize";
 import db from "../models/index";
 import room from "../models/room";
-import { status, pamentStatus } from "../utils/index";
+import { status, paymentStatus } from "../utils/index";
 import specialtyService from "./specialtyService";
 
 const getParaclinicalByExamId = async (examinationId) => {
@@ -73,7 +73,7 @@ const createRequestParaclinical = async (data) => {
                     paracName: item.label,
                     price: item.price,
                     status: status.WAITING,
-                    paymentStatus: pamentStatus.UNPAID,
+                    paymentStatus: paymentStatus.UNPAID,
                     doctorId: roomData.staffId,
                     roomId: roomData.id
                 };
@@ -274,7 +274,7 @@ const createOrUpdateParaclinical = async (data) => {
                 result: data.result,
                 image: data.image,
                 status: status.ACTIVE,
-                paymentStatus: pamentStatus.UNPAID,
+                paymentStatus: paymentStatus.UNPAID,
                 price: data.price,
                 doctorId: data.doctorId
             });

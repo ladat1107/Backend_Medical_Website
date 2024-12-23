@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'prescriptionId',
                 as: 'prescriptionDetails',
             });
+            Prescription.belongsTo(models.Payment, {
+                foreignKey: 'paymentId',
+                as: 'paymentData',
+            });
         }
     }
     Prescription.init({
@@ -33,13 +37,17 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
-        paymentStatus: { //bỏ
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
         status: {
             type: DataTypes.INTEGER, // 0 - delete, 1 - unpay, 2 - paid
             allowNull: false,
+        },
+        paymentId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'payments', // Tên bảng tham chiếu
+                key: 'id',
+            },
         },
     }, {
         sequelize,
