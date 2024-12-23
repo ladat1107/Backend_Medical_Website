@@ -5,9 +5,10 @@ import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment } from "./emailService";
-import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
+import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import dayjs from "dayjs";
+import e from "express";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -1112,7 +1113,7 @@ const confirmTokenBooking = async (token) => {
                     admissionDate: new Date(data.schedule.date),
                     dischargeDate: new Date(data.schedule.date),
                     status: status.PENDING,
-                    paymentDoctorStatus: pamentStatus.UNPAID,
+                    paymentDoctorStatus: paymentStatus.UNPAID,
 
                     price: staff.price,
                     special: data?.profile?.special,
@@ -1197,10 +1198,13 @@ const getMedicalHistories = async (userId) => {
                         {
                             model: db.Prescription,
                             as: 'prescriptionExamData',
-                            attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                            attributes: ['id', 'note', 'totalMoney'],
                             include: [{
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
+                                where: {
+                                    status: status.DONE
+                                },
                                 attributes: ['id', 'name', 'price'],
                                 through: ['quantity', 'unit', 'dosage', 'price']
                             }],

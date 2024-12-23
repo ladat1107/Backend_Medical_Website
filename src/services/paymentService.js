@@ -1,7 +1,8 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import db from '../models/index';
-import { PAYMENT_METHOD, status, TYPE_PAYMENT } from '../utils';
+import { PAYMENT_METHOD, paymentStatus, status, TYPE_PAYMENT } from '../utils';
+import prescriptionService from './prescriptionService';
 import { Op } from 'sequelize';
 let accessKey = 'F8BBA842ECF85';
 let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
@@ -10,7 +11,7 @@ export const paymentMomo = async (data) => {
         let orderInfo = 'pay with MoMo';
         let partnerCode = "MOMO";
         let redirectUrl = data.redirectUrl;
-        let ipnUrl = 'https://6f84-14-161-44-125.ngrok-free.app/api/callback';
+        let ipnUrl = 'https://0f31-118-68-51-185.ngrok-free.app/api/callback';
         let requestType = "payWithMethod";
         let amount = data.price;
         let orderId = partnerCode + new Date().getTime();
@@ -83,6 +84,7 @@ export const paymentMomo = async (data) => {
 export const paymentMomoCallback = async (req, res) => {
     try {
         let data = req.body;
+        console.log("check ress ----------------", data);
         if (data.resultCode === 0) {
             let detail = JSON.stringify(data);
             let payment = await db.Payment.create({
@@ -102,8 +104,9 @@ export const paymentMomoCallback = async (req, res) => {
                     result = await paymentParaclinical(dataExtra, payment);
                 } else if (dataExtra.type === TYPE_PAYMENT.EXAMINATION) {
                     result = await paymentExamination(dataExtra, payment);
+                } else if (dataExtra.type === TYPE_PAYMENT.PRESCRIPTION) {
+                    result = await prescriptionService.updatePrescription(dataExtra, payment);
                 }
-
                 if (result === false) {
                     await db.Payment.destroy({
                         where: {
@@ -320,6 +323,44 @@ export const paraclinicalPayment = async (req, res) => {
         })
     }
 }
+export const prescriptionPayment = async (req, res) => {
+    try {
+        let dataReq = req.body;
+        let prescription = await db.Prescription.findOne({
+            where: {
+                id: dataReq.id
+            },
+        });
+        if (!prescription) {
+            return res.status(200).json({
+                EC: 404,
+                EM: "Không tìm thấy đơn thuốc",
+                DT: ""
+            })
+        }
+        let body = {
+            id: prescription.id,
+            type: TYPE_PAYMENT.PRESCRIPTION,
+            price: prescription.totalMoney,
+            redirectUrl: 'http://localhost:3000/prescribe',
+            update: dataReq
+        }
+        let response = await paymentMomo(body);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
 
 
 ///Viết vô examinationService.js
@@ -328,7 +369,7 @@ const paymentAppoinment = async (data, payment) => {
         let examination = data;
         await db.Examination.update(
             {
-                paymentDoctorStatus: status.ACTIVE,
+                paymentDoctorStatus: paymentStatus.PAID,
                 paymentId: payment.id
             },
             {
@@ -348,7 +389,7 @@ const paymentExamination = async (data, payment) => {
             insuaranceCode: dataUpdate?.insuaranceCode,
             status: dataUpdate?.status,
             paymentId: payment.id,
-            paymentDoctorStatus: status.ACTIVE,
+            paymentDoctorStatus: paymentStatus.PAID,
         }, {
             where: { id: data.id }
         });
