@@ -223,13 +223,6 @@ export const getHandBookById = async (handBookId, role) => {
             raw: true,
             nest: true,
         });
-        if (role === ROLE.PATIENT && handBook) {
-            await db.Handbook.update({
-                view: +handBook?.view + 1
-            }, {
-                where: { id: handBookId }
-            });
-        }
         if (handBook) {
             return {
                 EC: 0,
