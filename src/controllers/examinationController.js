@@ -85,7 +85,7 @@ const updateExamination = async (req, res) => {
             // && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price !== undefined
             // && data.special !== undefined && data.insuranceCoverage
         ) {
-            let response = await examinationService.updateExamination(data);
+            let response = await examinationService.updateExamination(data, req.user.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,
@@ -176,7 +176,7 @@ const getListToPay = async (req, res) => {
             EM: response.EM,
             DT: response.DT
         })
-        
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({
