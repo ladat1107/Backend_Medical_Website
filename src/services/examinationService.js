@@ -2,7 +2,7 @@ import { raw } from "body-parser";
 // import { Op, Sequelize } from "sequelize";
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, paymentStatus } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
 import { refundMomo } from "./paymentService";
 const { Op, ConnectionTimedOutError, Sequelize, where, or } = require('sequelize');
 
@@ -196,7 +196,6 @@ const createExamination = async (data) => {
             admissionDate: new Date(),
             dischargeDate: new Date(),
             status: data.status,
-            paymentDoctorStatus: paymentStatus.UNPAID,
 
             price: staff.price,
             special: data.special,
@@ -228,8 +227,9 @@ const createExamination = async (data) => {
         };
     }
 };
-const updateExamination = async (data) => {
+const updateExamination = async (data, userId) => {
     try {
+        let paymentObject = {};
         let existExamination = await db.Examination.findOne({
             where: { id: data.id }
         });
@@ -240,7 +240,18 @@ const updateExamination = async (data) => {
                 DT: ""
             }
         }
-
+        if (data.payment) {
+            let payment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: existExamination.id,
+                amount: existExamination.price,
+                paymentMethod: data.payment,
+                status: paymentStatus.PAID,
+            })
+            paymentObject = {
+                paymentId: payment.id,
+            }
+        }
         let examination = await db.Examination.update({
             symptom: data.symptom,
             diseaseName: data.diseaseName,
@@ -249,7 +260,6 @@ const updateExamination = async (data) => {
             dischargeDate: data.dischargeDate,
             reason: data.reason,
             medicalTreatmentTier: data.medicalTreatmentTier,
-            paymentDoctorStatus: data.paymentDoctorStatus,
             price: data.price,
             special: data.special,
             insuranceCoverage: data.insuranceCoverage,
@@ -257,6 +267,7 @@ const updateExamination = async (data) => {
             visit_status: data.visit_status ? data.visit_status : 0,
             insuaranceCode: data.insuaranceCode,
             status: data.status,
+            ...paymentObject
         }, {
             where: { id: data.id }
         });
@@ -301,7 +312,7 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        if (existExamination.paymentDoctorStatus === status.PAID && existExamination.paymentId) {
+        if (existExamination.paymentId) {
             let refund = await refundMomo({ transId: existExamination.paymentData.transId, amount: existExamination.paymentData.amount * 0.8 });
             if (refund.EC !== 0) {
                 return {
@@ -311,8 +322,7 @@ const deleteExamination = async (id) => {
                 }
             } else {
                 await db.Payment.update({
-                    status: status.INACTIVE,
-                    paymentDoctorStatus: paymentStatus.UNPAID,
+                    status: paymentStatus.UNPAID,
                 }, {
                     where: { id: existExamination.paymentData.id }
                 })
