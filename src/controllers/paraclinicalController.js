@@ -28,9 +28,9 @@ const getParaclinicalByExamId = async (req, res) => {
 }
 
 const createRequestParaclinical = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.examinationId && data.listParaclinicals){
+        if (data && data.examinationId && data.listParaclinicals) {
             let response = await paraclinicalService.createRequestParaclinical(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -87,7 +87,7 @@ const createParaclinical = async (req, res) => {
 const updateParaclinical = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id 
+        if (data && data.id
             // && data.paraclinical 
             // && data.description
             // && data.result && data.image && data.price
@@ -178,7 +178,7 @@ const getExaminations = async (req, res) => {
         let staffId = req.query.staffId || null;
         let is_appointment = req.query.is_appointment || null;
         let time = req.query.time || null;
-        
+
         let page = req.query.page || 1;
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
@@ -204,7 +204,7 @@ const getParaclinicals = async (req, res) => {
         let date = req.query.date || null;
         let status = req.query.status || null;
         let staffId = req.query.staffId || null;
-        
+
         let page = req.query.page || 1;
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
@@ -226,10 +226,10 @@ const getParaclinicals = async (req, res) => {
 }
 
 const updateListPayParaclinicals = async (req, res) => {
-    try{
+    try {
         let data = req.body;
-        if(data && data.ids){
-            let response = await paraclinicalService.updateListPayParaclinicals(data.ids);
+        if (data && data.ids) {
+            let response = await paraclinicalService.updateListPayParaclinicals(data.ids, req.user.id);
             return res.status(200).json({
                 EC: response.EC,
                 EM: response.EM,

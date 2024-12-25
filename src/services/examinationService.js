@@ -66,7 +66,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.Prescription,
                     as: 'prescriptionExamData',
-                    attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                    attributes: ['id', 'note', 'totalMoney'],
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',

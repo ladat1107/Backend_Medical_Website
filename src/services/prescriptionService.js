@@ -1,7 +1,7 @@
 import db from '../models/index';
 import prescriptionDetailService from './prescriptionDetailService';
-import { status, paymentStatus } from "../utils/index";
-import { Op, Sequelize, where } from 'sequelize';
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
+import { Op, or, Sequelize, where } from 'sequelize';
 
 const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
@@ -247,7 +247,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     }
 };
 
-const updatePrescription = async (data, payment = null) => {
+const updatePrescription = async (data, payment, userId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { id: data.id },
@@ -269,14 +269,15 @@ const updatePrescription = async (data, payment = null) => {
                 where: { id: data.exam.examId }
             })
         }
-
-        // const { id, exam, ...updateData } = data;
-
-        // let response = await prescription.update(
-        //     ...updateData, {
-        //     where: { id: data.id }
-        // }
-        // );
+        if (data?.payment) {
+            payment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: prescription.id,
+                amount: prescription.totalMoney,
+                status: paymentStatus.PAID,
+                paymentMethod: data.payment,
+            })
+        }
 
         await db.Prescription.update({
             status: paymentStatus.PAID,

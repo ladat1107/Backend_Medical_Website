@@ -107,7 +107,7 @@ export const paymentMomoCallback = async (req, res) => {
                 } else if (dataExtra.type === TYPE_PAYMENT.EXAMINATION) {
                     result = await paymentExamination(dataExtra, payment);
                 } else if (dataExtra.type === TYPE_PAYMENT.PRESCRIPTION) {
-                    result = await prescriptionService.updatePrescription(dataExtra, payment);
+                    result = await prescriptionService.updatePrescription(dataExtra, payment, null);
                 }
                 if (result === false) {
                     await db.Payment.destroy({
