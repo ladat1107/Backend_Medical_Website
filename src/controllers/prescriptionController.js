@@ -51,7 +51,7 @@ const getPrescriptions = async (req, res) => {
         let date = req.query.date || null;
         let status = req.query.status || null;
         let staffId = req.query.staffId || null;
-        
+
         let page = req.query.page || 1;
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
@@ -75,7 +75,7 @@ const getPrescriptions = async (req, res) => {
 const updatePrescription = async (req, res) => {
     try {
         let data = req.body;
-        let response = await prescriptionService.updatePrescription(data);
+        let response = await prescriptionService.updatePrescription(data, null, req.user.id);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,

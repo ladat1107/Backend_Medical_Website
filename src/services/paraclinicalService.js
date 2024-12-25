@@ -1,7 +1,7 @@
-import { Op, where } from "sequelize";
+import { Op, or, where } from "sequelize";
 import db from "../models/index";
 import room from "../models/room";
-import { status, paymentStatus } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
 import specialtyService from "./specialtyService";
 
 const getParaclinicalByExamId = async (examinationId) => {
@@ -420,11 +420,31 @@ const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     }
 };
 
-const updateListPayParaclinicals = async (ids) => {
+const updateListPayParaclinicals = async (ids, userId) => {
     try {
+        let paraclinicals = await db.Paraclinical.findAll({
+            where: {
+                id: {
+                    [Op.in]: ids
+                }
+            }
+        });
+        let price = 0;
+        for (let paraclinical of paraclinicals) {
+            price += +paraclinical.price;
+        }
+        let payment = await db.Payment.create({
+            orderId: new Date().toISOString() + "_UserId__" + userId,
+            transId: Math.floor(100000 + Math.random() * 900000),
+            amount: price,
+            paymentMethod: PAYMENT_METHOD.CASH,
+            status: paymentStatus.PAID
+        });
+
         const updateResults = await db.Paraclinical.update(
             {
-                status: status.PAID
+                status: status.PAID,
+                paymentId: payment.id
             }, {
             where: {
                 id: {
@@ -439,6 +459,7 @@ const updateListPayParaclinicals = async (ids) => {
             EM: 'Cập nhật danh sách xét nghiệm thành công!',
             DT: updateResults,
         };
+
     } catch (error) {
         console.error('Error updating list paraclinicals:', error);
         return {
