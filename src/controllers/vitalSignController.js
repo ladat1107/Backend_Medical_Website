@@ -30,9 +30,9 @@ const getVitalSignByExamId = async (req, res) => {
 const createVitalSign = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+        if (data && data.examinationId && data.height && data.weight 
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
-            && data.breathingRate && data.glycemicIndex) {
+            && data.breathingRate) {
             let response = await vitalSignService.createVitalSign(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -115,9 +115,9 @@ const deleteVitalSign = async (req, res) => {
 const createOrUpdateVitalSign = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
+        if (data && data.examinationId && data.height && data.weight 
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
-            && data.breathingRate && data.glycemicIndex) {
+            && data.breathingRate) {
             let response = await vitalSignService.createOrUpdateVitalSign(data);
             return res.status(200).json({
                 EC: response.EC,

@@ -28,13 +28,13 @@ const createVitalSign = async (data) => {
             examinationId: data.examinationId,
             height: data.height,
             weight: data.weight,
-            fetalWeight: data.fetalWeight,
+            fetalWeight: data.fetalWeight || null,
             pulse: data.pulse,
             temperature: data.temperature,
             hightBloodPressure: data.hightBloodPressure,
             lowBloodPressure: data.lowBloodPressure,
             breathingRate: data.breathingRate,
-            glycemicIndex: data.glycemicIndex,
+            glycemicIndex: data.glycemicIndex || null,
         });
         return {
             EC: 0,
