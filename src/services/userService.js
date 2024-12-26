@@ -7,8 +7,6 @@ import staffService from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment } from "./emailService";
 import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
-import dayjs from "dayjs";
-import e from "express";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
@@ -744,6 +742,7 @@ const getDoctorHome = async (filter) => {
                         model: db.User,
                         as: 'staffUserData',
                         where: {
+                            status: status.ACTIVE,
                             roleId: ROLE.DOCTOR,
                             [Op.or]: [
                                 { firstName: { [Op.like]: `%${search}%` } },
@@ -1173,6 +1172,9 @@ const getMedicalHistories = async (userId) => {
                 {
                     model: db.Examination,
                     as: "userExaminationData",
+                    where: {
+                        status: status.DONE
+                    },
                     include: [
                         {
                             model: db.VitalSign,
@@ -1203,7 +1205,7 @@ const getMedicalHistories = async (userId) => {
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
                                 where: {
-                                    status: status.DONE
+                                    status: 1
                                 },
                                 attributes: ['id', 'name', 'price'],
                                 through: ['quantity', 'unit', 'dosage', 'price']

@@ -285,6 +285,9 @@ const deleteRoom = async (id) => {
             await db.RoomServiceType.destroy({
                 where: { roomId: room.id }  // Replace `someRoomId` with the room ID you're deleting
             });
+            await db.Bed.destroy({
+                where: { roomId: room.id }  // Replace `someRoomId` with the room ID you're deleting
+            });
             await db.Room.destroy({
                 where: {
                     id: room.id,  // Replace with your condition
