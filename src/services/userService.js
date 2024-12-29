@@ -4,7 +4,7 @@ import { Op, where } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
-import { sendEmailNotification, sendEmailConformAppoinment } from "./emailService";
+import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 require('dotenv').config();
