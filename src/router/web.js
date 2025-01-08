@@ -186,7 +186,7 @@ let initWebRounte = (app) => {
     router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
     router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
 
-    router.get("/getMedicalHistories", userController.getMedicalHistories)
+   
 
     return app.use("/api/", router);
 }

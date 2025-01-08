@@ -30,6 +30,7 @@ const checkTokenWithCookie = (req, res, next) => {
         let reqToken = req.headers.authorization.split(' ')[1];
         let reqDecoded = verifyToken(reqToken);
         if (reqDecoded !== null) {
+            console.log("reqDecoded", reqDecoded);
             req.user = reqDecoded;
             req.token = reqToken;
             return next();
