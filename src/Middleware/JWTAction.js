@@ -114,6 +114,7 @@ const refreshToken = async (req, res) => {
                     email: reqDecoded.email,
                     roleId: reqDecoded.roleId,
                     staff: reqDecoded?.staff,
+                    version: reqDecoded.version,
                 }
                 let newToken = createToken(data, TIME.tokenLife);
                 return res.status(200).json({

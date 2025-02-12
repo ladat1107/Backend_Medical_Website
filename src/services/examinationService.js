@@ -46,7 +46,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
+                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid', "currentResident"],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -56,7 +56,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.Staff,
                     as: 'examinationStaffData',
-                    attributes: ['id', 'departmentId'],
+                    attributes: ['id', 'departmentId', 'position'],
                     include: [{
                         model: db.User,
                         as: 'staffUserData',
