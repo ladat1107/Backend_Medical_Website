@@ -7,10 +7,11 @@ import staffService from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import { use } from "passport";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
-let hashPasswordUser = async (password) => {
+const hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
         return hashPassword;
@@ -22,7 +23,7 @@ let hashPasswordUser = async (password) => {
         }
     }
 }
-let loginUser = async (data) => {
+const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
@@ -50,7 +51,8 @@ let loginUser = async (data) => {
                     id: user.id,
                     email: user.email,
                     roleId: user.roleId,
-                    staff: user?.staffUserData?.id
+                    staff: user?.staffUserData?.id,
+                    version: user.tokenVersion,
                 }
                 let token = createToken(data, TIME.tokenLife);
                 let refreshToken = createToken(data, TIME.refreshToken);
@@ -72,6 +74,59 @@ let loginUser = async (data) => {
         }
     }
     catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: "",
+        }
+    }
+}
+const loginGoogle = async (data,googleId) => {
+    try {
+        let user = await db.User.findOne({
+            where: { email: data.email },
+            include: [{
+                model: db.Role,
+                as: "userRoleData",
+                attributes: ["name"],
+            }, {
+                model: db.Staff,
+                as: "staffUserData",
+                attributes: ["id"],
+            }],
+        });
+        if (!user) {
+            user = await db.User.create({
+                email: data.email,
+                lastName: data.family_name,
+                firstName: data.given_name,
+                avatar: data.picture,
+                googleId: googleId,
+                roleId: ROLE.PATIENT,
+                tokenVersion: new Date().getTime(),
+                status: status.ACTIVE,
+            });
+        }
+        let dataToken = {
+            id: user.id,
+            email: user.email,
+            roleId: user.roleId,
+            staff: user?.staffUserData?.id,
+            version: user.tokenVersion,
+        }
+        let token = createToken(dataToken, TIME.tokenLife);
+        let refreshToken = createToken(dataToken, TIME.refreshToken);
+        return {
+            EC: 0,
+            EM: "Đăng nhập thành công",
+            DT: {
+                user: { id: user.id, staff: user?.staffUserData?.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                accessToken: token,
+                refreshToken: refreshToken
+            }
+        }
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
@@ -363,10 +418,10 @@ const createUser = async (data) => {
             cid: data.cid,
             status: status.ACTIVE,
             roleId: data.roleId,
+            tokenVersion: new Date().getTime(),
             dob: data.dob || null,
             address: data.address || null,
         });
-        console.log(user);
         let insurance = null;
         if (data.insuranceCode && user) {
             insurance = await db.Insurance.create({
@@ -682,7 +737,7 @@ const forgotPassword = async (email) => {
         }
         let hashPassword = await hashPasswordUser(password);
         let [updatedRows] = await db.User.update(
-            { password: hashPassword },
+            { password: hashPassword, tokenVersion: new Date().getTime() },
             { where: { email: email } }
         );
         if (updatedRows) {
@@ -904,14 +959,26 @@ const updateProfilePassword = async (data) => {
     try {
         let user = await db.User.findOne({
             where: { id: data.id },
-            attributes: ["password"],
+            include: [{
+                model: db.Role,
+                as: "userRoleData",
+                attributes: ["name"],
+            }, {
+                model: db.Staff,
+                as: "staffUserData",
+                attributes: ["id"],
+            }],
+            raw: true,
+            nest: true,
         });
         if (user) {
             let comparePassword = await bcrypt.compareSync(data.oldPassword, user.password);
             if (comparePassword) {
+                let timestamp = new Date().getTime();
                 let hashPassword = await hashPasswordUser(data.newPassword);
                 let [numberOfAffectedRows] = await db.User.update({
                     password: hashPassword,
+                    tokenVersion: timestamp,
                 }, {
                     where: { id: data.id },
                 });
@@ -922,10 +989,18 @@ const updateProfilePassword = async (data) => {
                         DT: "",
                     }
                 } else {
+                    let data = {
+                        id: user.id,
+                        email: user.email,
+                        roleId: user.roleId,
+                        staff: user?.staffUserData?.id,
+                        version: user.tokenVersion,
+                    }
+                    let refreshToken = createToken(data, TIME.refreshToken);
                     return {
                         EC: 0,
                         EM: "Cập nhật mật khẩu thành công",
-                        DT: "",
+                        DT: refreshToken,
                     }
                 }
             } else {
@@ -1251,6 +1326,7 @@ module.exports = {
     deleteUser,
     registerUser,
     loginUser,
+    loginGoogle,
     getDoctorHome,
     updateProfileInfor,
     updateProfilePassword,

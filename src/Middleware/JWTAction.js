@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
+import db from "../models/index";
 import { COOKIE, TIME } from "../utils";
+import { where } from "sequelize";
 require('dotenv').config();
 const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callback"];
 const createToken = (payload, time) => {
@@ -22,7 +24,7 @@ const verifyToken = (token) => {
     }
     return decoded;
 }
-const checkTokenWithCookie = (req, res, next) => {
+const checkTokenWithCookie = async (req, res, next) => {
     if (defaultUrl.includes(req.path)) {
         return next();
     }
@@ -30,10 +32,20 @@ const checkTokenWithCookie = (req, res, next) => {
         let reqToken = req.headers.authorization.split(' ')[1];
         let reqDecoded = verifyToken(reqToken);
         if (reqDecoded !== null) {
-            console.log("reqDecoded", reqDecoded);
-            req.user = reqDecoded;
-            req.token = reqToken;
-            return next();
+            let user = await db.User.findOne({
+                where: { id: reqDecoded.id },
+            });
+            if (user && user.tokenVersion === reqDecoded.version) {
+                req.user = reqDecoded;
+                req.token = reqToken;
+                return next();
+            } else {
+                return res.status(401).json({
+                    EC: 401,
+                    EM: "Phiên đăng nhập đã hết hạn",
+                    DT: ""
+                });
+            }
         } else {
             return res.status(403).json({
                 EC: 403,
@@ -83,9 +95,8 @@ const checkAuthentication = (req, res, next) => {
     }
 
 }
-const refreshToken = (req, res) => {
+const refreshToken = async (req, res) => {
     try {
-        console.log("refreshToken");
         let reqToken = req.cookies[COOKIE.refreshToken];
         if (!reqToken) {
             return res.status(200).json({
@@ -96,18 +107,27 @@ const refreshToken = (req, res) => {
         }
         let reqDecoded = verifyToken(reqToken);
         if (reqDecoded) {
-            let data = {
-                id: reqDecoded.id,
-                email: reqDecoded.email,
-                roleId: reqDecoded.roleId,
-                staff: reqDecoded?.staff,
+            let user = await db.User.findOne({ where: { id: reqDecoded.id } });
+            if (user && user.tokenVersion === reqDecoded.version) {
+                let data = {
+                    id: reqDecoded.id,
+                    email: reqDecoded.email,
+                    roleId: reqDecoded.roleId,
+                    staff: reqDecoded?.staff,
+                }
+                let newToken = createToken(data, TIME.tokenLife);
+                return res.status(200).json({
+                    EC: 0,
+                    EM: "Refresh token success",
+                    DT: newToken
+                });
+            } else {
+                return res.status(200).json({
+                    EC: 401,
+                    EM: "Lỗi xác thực",
+                    DT: ""
+                });
             }
-            let newToken = createToken(data, TIME.tokenLife);
-            return res.status(200).json({
-                EC: 0,
-                EM: "Refresh token success",
-                DT: newToken
-            });
         } else {
             return res.status(200).json({
                 EC: 401,

@@ -71,7 +71,7 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     password: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     lastName: {
       type: DataTypes.STRING(45),
@@ -145,6 +145,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    tokenVersion: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    googleId: DataTypes.STRING(255),
     point: {
       type: DataTypes.DOUBLE,
       allowNull: true,

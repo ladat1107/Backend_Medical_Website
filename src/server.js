@@ -1,11 +1,15 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import session from 'express-session';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+
 import configViewEngine from './config/configViewEngine';
 import initAdminRoute from "./router/admin"
 import initDoctorRoute from "./router/doctor"
 import connectDB from './config/connectDB';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
@@ -26,6 +30,37 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+// Cấu hình express-session
+app.use(
+    session({
+        secret: process.env.SECRET_SESSION, // Một chuỗi bí mật dùng để mã hóa session
+        resave: false, // Không lưu lại session nếu không thay đổi
+        saveUninitialized: true, // Lưu session ngay cả khi chưa khởi tạo
+    })
+);
+
+app.use(passport.initialize());
+app.use(passport.session()); // Sử dụng session để lưu trữ phiên
+
+// Passport setup (cấu hình Google OAuth)
+passport.use(
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: '/auth/google/callback',
+        },
+        (accessToken, refreshToken, profile, done) => {
+            // Thông tin người dùng nhận từ Google ==> console.log('Google Profile:', profile);
+            done(null, profile);
+        }
+    )
+);
+
+// Serialize & Deserialize user
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
 // Initialize cookie parser
 app.use(cookieParser());
 
@@ -33,7 +68,7 @@ app.use(cookieParser());
 configViewEngine(app);
 
 // Initialize web routes
-authenRoute(app);
+authenRoute(app,passport);
 
 initWebRounte(app);
 initWebRounte(app);
