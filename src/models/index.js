@@ -9,13 +9,25 @@ const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
+// let sequelize;
+// if (config.use_env_variable) {
+//   sequelize = new Sequelize(process.env[config.use_env_variable], config);
+// } else {
+//   sequelize = new Sequelize(config.database, config.username, config.password, config);
+// }
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
+const customconfig = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  dialect: process.env.DB_DIALECT,
+  logging: false,
+  timezone: "+07:00",
+  raw: true,
+};
+sequelize = new Sequelize(
+  process.env.DB_DATABASE,
+  process.env.DB_USER_NAME,
+  process.env.DB_PASSWORD, customconfig)
 fs
   .readdirSync(__dirname)
   .filter(file => {

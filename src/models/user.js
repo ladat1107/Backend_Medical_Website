@@ -10,34 +10,150 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //   User.belongsTo(models.Group, {
-      //     foreignKey: 'groupId',
-      //     targetKey: 'id',
-      //     as: 'userGroup'
-      //   });
-      //   User.hasMany(models.Project, {
-      //     foreignKey: 'customerId',
-      //     targetKey: 'id',
-      //     as: 'customerData',
-      //   });
-
-      //   User.belongsToMany(models.Project, {
-      //     through: models.ProjectUser,
-      //     uniqueKey: 'userId',
-      //     as: "userData",
-      //   });
-
+      User.hasOne(models.Insurance, {
+        foreignKey: 'userId',
+        as: 'userInsuranceData', // Phải đồng nhất với alias khi truy vấn
+      });
+      User.hasOne(models.ConditionAtBirth, {
+        foreignKey: 'userId',
+        as: 'conditionAtBirthUserData',
+      });
+      User.hasMany(models.Staff, {
+        foreignKey: 'userId',
+        as: 'staffUserData',
+      });
+      User.hasMany(models.Patient, {
+        foreignKey: 'userId',
+        as: 'patientUserData',
+      });
+      User.hasMany(models.Relative, {
+        foreignKey: 'userId',
+        as: 'userRelativeData',
+      });
+      User.hasMany(models.FamilyHistory, {
+        foreignKey: 'userId',
+        as: 'userFamilyHistoryData',
+      });
+      User.belongsToMany(models.SurgicalHistory, {
+        through: 'SurgicalhistoryUsers',
+        foreignKey: 'userId',
+        as: 'surgicalhistoryData',
+      });
+      User.belongsToMany(models.Disability, {
+        through: 'DisabilityUsers',
+        foreignKey: 'userId',
+        as: 'disablityData',
+      });
+      User.belongsToMany(models.Allergy, {
+        through: 'AllergyUsers',
+        foreignKey: 'userId',
+        as: 'allergyData',
+      });
+      User.belongsToMany(models.Disease, {
+        through: 'DiseaseUsers',
+        foreignKey: 'userId',
+        as: 'diseaseData',
+      });
+      User.hasMany(models.Examination, {
+        foreignKey: 'userId',
+        as: 'userExaminationData',
+      });
+      User.belongsTo(models.Role, {
+        foreignKey: 'roleId',
+        as: 'userRoleData',
+      });
+      User.belongsTo(models.Folk, {
+        foreignKey: 'folk',
+        as: 'folkData',
+      });
     }
   }
   User.init({
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    userName: DataTypes.STRING,
-    address: DataTypes.STRING,
-    phoneNumber: DataTypes.STRING,
-    gender: DataTypes.BOOLEAN,
-    image: DataTypes.TEXT('long'),
-    groupId: DataTypes.INTEGER,
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    lastName: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
+    firstName: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(45),
+      allowNull: true,
+      unique: true,
+    },
+    cid: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    currentResident: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    dob: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
+    },
+    avatar: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+      defaultValue: "https://md.surehis.com/File/Lawyer_LawOffice/avatar%20bs%20covid_02.png"
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    folk: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'folks', // Tên bảng tham chiếu
+        key: 'id',
+      },
+    },
+    ABOBloodGroup: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    RHBloodGroup: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    maritalStatus: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    tokenVersion: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    googleId: DataTypes.STRING(255),
+    point: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    }
   }, {
     sequelize,
     modelName: 'User',
