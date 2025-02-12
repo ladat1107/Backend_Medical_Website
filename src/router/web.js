@@ -31,6 +31,7 @@ import { getServiceHome } from "../utils/data/dataService"
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 import { getDataByDepartment } from '../services/staffService';
 import { getDistrict, getFolk, getProvince } from '../services/addressService';
+import { generalNumber, generalNumberCurrent, getTickets } from '../services/ticketService';
 require('dotenv').config();
 
 let router = express.Router();
@@ -186,7 +187,10 @@ let initWebRounte = (app) => {
     router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
     router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
 
-    router.get("/getMedicalHistories", userController.getMedicalHistories)
+    router.get("/getCurrentNumber", getTickets)
+    router.put("/generateNumber", generalNumber)
+    router.put("/generateNumberCurrent", generalNumberCurrent)
+
 
     return app.use("/api/", router);
 }

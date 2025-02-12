@@ -1,5 +1,6 @@
 import userService from '../services/userService'
-import { COOKIE, PAGINATE, TIME } from '../utils';
+import { COOKIE, PAGINATE, ROLE, TIME } from '../utils';
+require('dotenv').config();
 const handleRegisterUser = async (req, res) => {
     try {
         let data = req.body
@@ -100,6 +101,25 @@ const handleLogin = async (req, res) => {
             EM: response.EM,
             DT: response.DT
         })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: ""
+        })
+    }
+}
+const handleLoginGoogle = async (req, res) => {
+    try {
+        let response = await userService.loginGoogle(req?.user?._json, req?.user?.id);
+        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+            httpOnly: true,
+            maxAge: TIME.cookieLife
+        })
+        delete response.DT.refreshToken;
+        let dataCustom = JSON.stringify(response.DT);
+        return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?google=${dataCustom}`);
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -487,10 +507,14 @@ const profilePassword = async (req, res) => {
             })
         }
         let response = await userService.updateProfilePassword(data);
+        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+            httpOnly: true,
+            maxAge: TIME.cookieLife
+        })
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
-            DT: response.DT
+            DT: ""
         })
     } catch (error) {
         console.log(error);
@@ -582,22 +606,15 @@ const confirmTokenBooking = async (req, res) => {
 }
 
 const getMedicalHistories = async (req, res) => {
-    try{
-        let data = req.query;
-        if(data && data.userId){
-            let response = await userService.getMedicalHistories(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }else{
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
+    try {
+        let userId = req.user.roleId === ROLE.PATIENT ? req?.user?.id : req?.query?.userId;
+        let response = await userService.getMedicalHistories(userId);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+
     } catch (error) {
         console.log(error);
         return res.status(200).json({
@@ -620,6 +637,7 @@ module.exports = {
     handleForgotPassword,
     handleRegisterUser,
     handleLogin,
+    handleLoginGoogle,
     updateFunction,
     deleteFunction,
     getFunctionById,

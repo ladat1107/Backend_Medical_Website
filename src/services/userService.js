@@ -4,15 +4,14 @@ import { Op, where } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
-import { sendEmailNotification, sendEmailConformAppoinment } from "./emailService";
-import { pamentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
+import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
+import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
-import dayjs from "dayjs";
-import { raw } from "body-parser";
+import { use } from "passport";
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
 
-let hashPasswordUser = async (password) => {
+const hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
         return hashPassword;
@@ -24,7 +23,7 @@ let hashPasswordUser = async (password) => {
         }
     }
 }
-let loginUser = async (data) => {
+const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
@@ -52,7 +51,8 @@ let loginUser = async (data) => {
                     id: user.id,
                     email: user.email,
                     roleId: user.roleId,
-                    staff: user?.staffUserData?.id
+                    staff: user?.staffUserData?.id,
+                    version: user.tokenVersion,
                 }
                 let token = createToken(data, TIME.tokenLife);
                 let refreshToken = createToken(data, TIME.refreshToken);
@@ -74,6 +74,59 @@ let loginUser = async (data) => {
         }
     }
     catch (error) {
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi hệ thống",
+            DT: "",
+        }
+    }
+}
+const loginGoogle = async (data,googleId) => {
+    try {
+        let user = await db.User.findOne({
+            where: { email: data.email },
+            include: [{
+                model: db.Role,
+                as: "userRoleData",
+                attributes: ["name"],
+            }, {
+                model: db.Staff,
+                as: "staffUserData",
+                attributes: ["id"],
+            }],
+        });
+        if (!user) {
+            user = await db.User.create({
+                email: data.email,
+                lastName: data.family_name,
+                firstName: data.given_name,
+                avatar: data.picture,
+                googleId: googleId,
+                roleId: ROLE.PATIENT,
+                tokenVersion: new Date().getTime(),
+                status: status.ACTIVE,
+            });
+        }
+        let dataToken = {
+            id: user.id,
+            email: user.email,
+            roleId: user.roleId,
+            staff: user?.staffUserData?.id,
+            version: user.tokenVersion,
+        }
+        let token = createToken(dataToken, TIME.tokenLife);
+        let refreshToken = createToken(dataToken, TIME.refreshToken);
+        return {
+            EC: 0,
+            EM: "Đăng nhập thành công",
+            DT: {
+                user: { id: user.id, staff: user?.staffUserData?.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                accessToken: token,
+                refreshToken: refreshToken
+            }
+        }
+    } catch (error) {
         console.log(error);
         return {
             EC: 500,
@@ -365,10 +418,10 @@ const createUser = async (data) => {
             cid: data.cid,
             status: status.ACTIVE,
             roleId: data.roleId,
+            tokenVersion: new Date().getTime(),
             dob: data.dob || null,
             address: data.address || null,
         });
-        console.log(user);
         let insurance = null;
         if (data.insuranceCode && user) {
             insurance = await db.Insurance.create({
@@ -684,7 +737,7 @@ const forgotPassword = async (email) => {
         }
         let hashPassword = await hashPasswordUser(password);
         let [updatedRows] = await db.User.update(
-            { password: hashPassword },
+            { password: hashPassword, tokenVersion: new Date().getTime() },
             { where: { email: email } }
         );
         if (updatedRows) {
@@ -744,6 +797,7 @@ const getDoctorHome = async (filter) => {
                         model: db.User,
                         as: 'staffUserData',
                         where: {
+                            status: status.ACTIVE,
                             roleId: ROLE.DOCTOR,
                             [Op.or]: [
                                 { firstName: { [Op.like]: `%${search}%` } },
@@ -905,14 +959,26 @@ const updateProfilePassword = async (data) => {
     try {
         let user = await db.User.findOne({
             where: { id: data.id },
-            attributes: ["password"],
+            include: [{
+                model: db.Role,
+                as: "userRoleData",
+                attributes: ["name"],
+            }, {
+                model: db.Staff,
+                as: "staffUserData",
+                attributes: ["id"],
+            }],
+            raw: true,
+            nest: true,
         });
         if (user) {
             let comparePassword = await bcrypt.compareSync(data.oldPassword, user.password);
             if (comparePassword) {
+                let timestamp = new Date().getTime();
                 let hashPassword = await hashPasswordUser(data.newPassword);
                 let [numberOfAffectedRows] = await db.User.update({
                     password: hashPassword,
+                    tokenVersion: timestamp,
                 }, {
                     where: { id: data.id },
                 });
@@ -923,10 +989,18 @@ const updateProfilePassword = async (data) => {
                         DT: "",
                     }
                 } else {
+                    let data = {
+                        id: user.id,
+                        email: user.email,
+                        roleId: user.roleId,
+                        staff: user?.staffUserData?.id,
+                        version: user.tokenVersion,
+                    }
+                    let refreshToken = createToken(data, TIME.refreshToken);
                     return {
                         EC: 0,
                         EM: "Cập nhật mật khẩu thành công",
-                        DT: "",
+                        DT: refreshToken,
                     }
                 }
             } else {
@@ -1055,7 +1129,7 @@ const confirmTokenBooking = async (token) => {
             if (examinationCount.length >= 6) {
                 return {
                     EC: 200,
-                    EM: "Lịch khám đã đượt đặt hết",
+                    EM: "Lịch khám đã được đặt hết",
                     DT: "",
                 }
             }
@@ -1071,6 +1145,7 @@ const confirmTokenBooking = async (token) => {
                 }
             }
             if (data.profile.bookFor) {
+                console.log("Book for another person");
                 let password = "123456";
                 let hashPassword = await hashPasswordUser(password);
                 user = await db.User.create({
@@ -1082,9 +1157,9 @@ const confirmTokenBooking = async (token) => {
                     folk: data.profile.folk,
                     status: status.ACTIVE,
                     roleId: ROLE.PATIENT,
-                    dob: dayjs(data.profile.dob) || null,
+                    dob: new Date(data.profile.dob),
                     currentResident: data.profile.address || null,
-                }, { transaction });
+                });
             } else {
                 user = await db.User.findOne({
                     where: { cid: data.profile.cid },
@@ -1112,7 +1187,7 @@ const confirmTokenBooking = async (token) => {
                     admissionDate: new Date(data.schedule.date),
                     dischargeDate: new Date(data.schedule.date),
                     status: status.PENDING,
-                    paymentDoctorStatus: pamentStatus.UNPAID,
+                    paymentDoctorStatus: paymentStatus.UNPAID,
 
                     price: staff.price,
                     special: data?.profile?.special,
@@ -1122,7 +1197,7 @@ const confirmTokenBooking = async (token) => {
                     time: +data.schedule.time.value,
                     visit_status: 0,
                     is_appointment: 1,
-                    bookFor: data.profile.bookFor ? user.id : null,
+                    bookFor: data.profile.bookFor ? data.profile.id : null,
                 }, { transaction });
                 if (examination) {
                     await transaction.commit();
@@ -1172,6 +1247,9 @@ const getMedicalHistories = async (userId) => {
                 {
                     model: db.Examination,
                     as: "userExaminationData",
+                    where: {
+                        status: status.DONE
+                    },
                     include: [
                         {
                             model: db.VitalSign,
@@ -1197,10 +1275,13 @@ const getMedicalHistories = async (userId) => {
                         {
                             model: db.Prescription,
                             as: 'prescriptionExamData',
-                            attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                            attributes: ['id', 'note', 'totalMoney'],
                             include: [{
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
+                                where: {
+                                    status: 1
+                                },
                                 attributes: ['id', 'name', 'price'],
                                 through: ['quantity', 'unit', 'dosage', 'price']
                             }],
@@ -1245,6 +1326,7 @@ module.exports = {
     deleteUser,
     registerUser,
     loginUser,
+    loginGoogle,
     getDoctorHome,
     updateProfileInfor,
     updateProfilePassword,

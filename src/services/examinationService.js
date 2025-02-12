@@ -2,7 +2,7 @@ import { raw } from "body-parser";
 // import { Op, Sequelize } from "sequelize";
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, pamentStatus } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
 import { refundMomo } from "./paymentService";
 const { Op, ConnectionTimedOutError, Sequelize, where, or } = require('sequelize');
 
@@ -66,7 +66,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.Prescription,
                     as: 'prescriptionExamData',
-                    attributes: ['id', 'note', 'totalMoney', 'paymentStatus'],
+                    attributes: ['id', 'note', 'totalMoney'],
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
@@ -196,7 +196,6 @@ const createExamination = async (data) => {
             admissionDate: new Date(),
             dischargeDate: new Date(),
             status: data.status,
-            paymentDoctorStatus: pamentStatus.UNPAID,
 
             price: staff.price,
             special: data.special,
@@ -228,8 +227,9 @@ const createExamination = async (data) => {
         };
     }
 };
-const updateExamination = async (data) => {
+const updateExamination = async (data, userId) => {
     try {
+        let paymentObject = {};
         let existExamination = await db.Examination.findOne({
             where: { id: data.id }
         });
@@ -240,7 +240,18 @@ const updateExamination = async (data) => {
                 DT: ""
             }
         }
-
+        if (data.payment) {
+            let payment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: existExamination.id,
+                amount: existExamination.price,
+                paymentMethod: data.payment,
+                status: paymentStatus.PAID,
+            })
+            paymentObject = {
+                paymentId: payment.id,
+            }
+        }
         let examination = await db.Examination.update({
             symptom: data.symptom,
             diseaseName: data.diseaseName,
@@ -249,7 +260,6 @@ const updateExamination = async (data) => {
             dischargeDate: data.dischargeDate,
             reason: data.reason,
             medicalTreatmentTier: data.medicalTreatmentTier,
-            paymentDoctorStatus: data.paymentDoctorStatus,
             price: data.price,
             special: data.special,
             insuranceCoverage: data.insuranceCoverage,
@@ -257,6 +267,7 @@ const updateExamination = async (data) => {
             visit_status: data.visit_status ? data.visit_status : 0,
             insuaranceCode: data.insuaranceCode,
             status: data.status,
+            ...paymentObject
         }, {
             where: { id: data.id }
         });
@@ -301,7 +312,7 @@ const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        if (existExamination.paymentDoctorStatus === status.ACTIVE && existExamination.paymentId) {
+        if (existExamination.paymentId) {
             let refund = await refundMomo({ transId: existExamination.paymentData.transId, amount: existExamination.paymentData.amount * 0.8 });
             if (refund.EC !== 0) {
                 return {
@@ -311,8 +322,7 @@ const deleteExamination = async (id) => {
                 }
             } else {
                 await db.Payment.update({
-                    status: status.INACTIVE,
-                    paymentDoctorStatus: status.INACTIVE
+                    status: paymentStatus.UNPAID,
                 }, {
                     where: { id: existExamination.paymentData.id }
                 })
@@ -346,7 +356,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            whereCondition.createdAt = {
+            whereCondition.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
             };
         }
@@ -375,7 +385,6 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         if (status) {
             whereCondition.status = status;
         }
-
         // Appointment filter
         // if (is_appointment) {
         //     whereCondition.is_appointment = is_appointment;
@@ -525,7 +534,7 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Start of day
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // End of day
 
-            whereConditionExamination.createdAt = {
+            whereConditionExamination.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
             };
             whereConditionParaclinical.createdAt = {
@@ -543,9 +552,9 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         }
 
         // Pagination
-        const pageNum = page || 1;
-        const limitNum = limit || 10;
-        const offset = (pageNum - 1) * limitNum;
+        // const pageNum = page || 1;
+        // const limitNum = limit || 10;
+        // const offset = (pageNum - 1) * limitNum;
 
         // Fetch data with associations
         const examinations = await db.Examination.findAll({
@@ -641,31 +650,75 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         const combinedList = [
             ...examinations.map(exam => ({
                 type: 'examination',
-                data: exam,
+                data: { ...exam.toJSON(), status: statusPay },
                 createdAt: exam.createdAt,
                 userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
-                userPhone: exam.userExaminationData.phoneNumber
+                userPhone: exam.userExaminationData.phoneNumber,
             })),
-            ...paraclinicals.map(parac => ({
-                type: 'paraclinical',
-                data: parac,
-                createdAt: parac.createdAt,
-                userName: parac.examinationResultParaclincalData.userExaminationData.firstName + ' ' + parac.examinationResultParaclincalData.userExaminationData.lastName,
-                userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
-            }))
+            // Nhóm paraclinicals theo examinationId
+            ...Object.values(
+                paraclinicals.reduce((acc, parac) => {
+                    const examinationId = parac.examinationId;
+                    if (!acc[examinationId]) {
+                        acc[examinationId] = {
+                            type: 'paraclinical',
+                            data: {
+                                ...parac.examinationResultParaclincalData.toJSON(),
+                                paraclinicalItems: [],
+                                status: statusPay,
+                                totalParaclinicalPrice: 0
+                            },
+                            createdAt: parac.createdAt,
+                            userName: parac.examinationResultParaclincalData.userExaminationData.lastName +
+                                ' ' +
+                                parac.examinationResultParaclincalData.userExaminationData.firstName,
+                            userPhone: parac.examinationResultParaclincalData.userExaminationData.phoneNumber
+                        };
+                    }
+
+                    // Thêm thông tin chi tiết của từng paraclinical vào mảng paraclinicalItems
+                    const paracItem = {
+                        id: parac.id,
+                        paraclinical: parac.paraclinical,
+                        paracName: parac.paracName,
+                        price: parac.price,
+                        status: parac.status,
+                        doctorInfo: {
+                            id: parac.doctorParaclinicalData.id,
+                            position: parac.doctorParaclinicalData.position,
+                            doctorName: parac.doctorParaclinicalData.staffUserData.lastName +
+                                ' ' +
+                                parac.doctorParaclinicalData.staffUserData.firstName
+                        },
+                        roomInfo: {
+                            id: parac.roomParaclinicalData.id,
+                            name: parac.roomParaclinicalData.name
+                        }
+                    };
+
+                    acc[examinationId].data.paraclinicalItems.push(paracItem);
+
+                    // Cộng dồn tổng giá
+                    acc[examinationId].data.totalParaclinicalPrice += parac.price;
+
+                    return acc;
+                }, {})
+            )
         ];
 
-        const totalItems = combinedList.length;
-
-        // Explicitly sort the combined list
-        combinedList.sort((itemA, itemB) => {
+        // Sắp xếp lại danh sách
+        const sortedList = combinedList.sort((itemA, itemB) => {
             const dateA = new Date(itemA.createdAt);
             const dateB = new Date(itemB.createdAt);
-            return dateA.getTime() - dateB.getTime(); // Oldest first
+            return dateB.getTime() - dateA.getTime(); // Mới nhất lên đầu
         });
 
-        // Slice to pagination limit
-        const paginatedList = combinedList.slice(offset, offset + limitNum);
+        // Áp dụng phân trang
+        const totalItems = sortedList.length;
+        const pageNum = page || 1;
+        const limitNum = limit || 10;
+        const offset = (pageNum - 1) * limitNum;
+        const paginatedList = sortedList.slice(offset, offset + limitNum);
 
         return {
             EC: 0,
@@ -688,7 +741,8 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
             DT: '',
         };
     }
-}
+};
+
 module.exports = {
     getExaminationById,
     getExaminationByUserId,

@@ -1,7 +1,7 @@
 import db from '../models/index';
 import prescriptionDetailService from './prescriptionDetailService';
-import { status, pamentStatus } from "../utils/index";
-import { Op, Sequelize, where } from 'sequelize';
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
+import { Op, or, Sequelize, where } from 'sequelize';
 
 const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
@@ -11,7 +11,7 @@ const getPrescriptionByExaminationId = async (examinationId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { examinationId: examinationId },
-            attributes: ['id', 'examinationId', 'note', 'totalMoney', 'paymentStatus'],
+            attributes: ['id', 'examinationId', 'note', 'totalMoney'],
             include: [{
                 model: db.Medicine,
                 as: 'prescriptionDetails',
@@ -46,7 +46,7 @@ const upsertPrescription = async (data) => {
     try {
         let response = await db.Examination.update(
             {
-                status: 7,
+                status: status.DONE,
             },
             {
                 where: {
@@ -55,21 +55,20 @@ const upsertPrescription = async (data) => {
             }
         );
 
-        if(!response) {
+        if (!response) {
             return {
                 EC: 1,
                 EM: "Không tìm thấy bệnh nhân",
                 DT: "",
             }
         }
-        
+
         let [prescription, created] = await db.Prescription.findOrCreate({
             where: { examinationId: data.examinationId },
             defaults: {
                 note: data.note,
                 totalMoney: data.totalMoney,
-                paymentStatus: pamentStatus.UNPAID,
-                status: status.ACTIVE,
+                status: paymentStatus.PENDING,
             }
         });
 
@@ -77,13 +76,12 @@ const upsertPrescription = async (data) => {
             await prescription.update({
                 note: data.note,
                 totalMoney: data.totalMoney,
-                paymentStatus: pamentStatus.UNPAID,
             });
         }
 
         let prescriptionDetail = await prescriptionDetailService.upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
 
-        if(prescriptionDetail.EC !== 0) {
+        if (prescriptionDetail.EC !== 0) {
             return prescriptionDetail;
         }
 
@@ -114,12 +112,12 @@ const upsertPrescription = async (data) => {
 const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     try {
         const whereCondition = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
-        
+
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
             };
@@ -191,7 +189,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
                 {
                     model: db.Prescription,
                     as: 'prescriptionExamData',
-                    attributes: ['id', 'note', 'totalMoney', 'status', 'paymentStatus'],
+                    attributes: ['id', 'note', 'totalMoney', 'status'],
                     where: {
                         status: status
                     },
@@ -200,7 +198,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
                         through: {
-                            model: db.PrescriptionMedicine, 
+                            model: db.PrescriptionMedicine,
                             where: {
                                 ...whereCondition,
                             },
@@ -246,10 +244,10 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
             EM: 'Lỗi server!',
             DT: '',
         };
-    }      
+    }
 };
 
-const updatePrescription = async (data) => {
+const updatePrescription = async (data, payment, userId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { id: data.id },
@@ -263,7 +261,7 @@ const updatePrescription = async (data) => {
             };
         }
 
-        if(data.exam) {
+        if (data.exam) {
             await db.Examination.update({
                 insuaranceCode: data.exam.insuaranceCode,
                 insuranceCoverage: data.exam.insuranceCoverage,
@@ -271,14 +269,22 @@ const updatePrescription = async (data) => {
                 where: { id: data.exam.examId }
             })
         }
+        if (data?.payment) {
+            payment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: prescription.id,
+                amount: prescription.totalMoney,
+                status: paymentStatus.PAID,
+                paymentMethod: data.payment,
+            })
+        }
 
-        const { id, exam, ...updateData } = data;
-
-        let response = await prescription.update(
-            updateData, {
-            where: { id: data.id}
-            }
-        );
+        await db.Prescription.update({
+            status: paymentStatus.PAID,
+            paymentId: payment.id,
+        }, {
+            where: { id: data.id }
+        })
 
         return {
             EC: 0,
@@ -286,7 +292,7 @@ const updatePrescription = async (data) => {
             DT: [1]
         };
 
-        
+
     } catch (error) {
         console.log(error);
         return {

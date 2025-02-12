@@ -1,7 +1,7 @@
-import { Op } from "sequelize";
+import { Op, or, where } from "sequelize";
 import db from "../models/index";
 import room from "../models/room";
-import { status, pamentStatus } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
 import specialtyService from "./specialtyService";
 
 const getParaclinicalByExamId = async (examinationId) => {
@@ -36,7 +36,7 @@ const getParaclinicalByExamId = async (examinationId) => {
 const createRequestParaclinical = async (data) => {
     try {
 
-        if(data.listParaclinicals.length === 0){
+        if (data.listParaclinicals.length === 0) {
             return {
                 EC: 400,
                 EM: "Danh sách xét nghiệm không được trống",
@@ -61,10 +61,10 @@ const createRequestParaclinical = async (data) => {
         // Mảng lưu trạng thái các lần tạo
         let createResults = [];
         for (const item of data.listParaclinicals) {
-        
+
             const roomDataResponse = await specialtyService.getSpecialtiesByLaboratory(+item.id);
-      
-            if(roomDataResponse.EC === 0 && roomDataResponse.DT){
+
+            if (roomDataResponse.EC === 0 && roomDataResponse.DT) {
                 const roomData = roomDataResponse.DT;
 
                 let dataParaclinical = {
@@ -73,11 +73,11 @@ const createRequestParaclinical = async (data) => {
                     paracName: item.label,
                     price: item.price,
                     status: status.WAITING,
-                    paymentStatus: pamentStatus.UNPAID,
+                    paymentStatus: paymentStatus.UNPAID,
                     doctorId: roomData.staffId,
                     roomId: roomData.id
                 };
-    
+
                 const result = await createParaclinical(dataParaclinical);
                 createResults.push(result);
             } else {
@@ -103,7 +103,7 @@ const createRequestParaclinical = async (data) => {
                 DT: createResults
             };
         }
-        
+
     } catch (error) {
         console.log(error);
         return {
@@ -274,7 +274,7 @@ const createOrUpdateParaclinical = async (data) => {
                 result: data.result,
                 image: data.image,
                 status: status.ACTIVE,
-                paymentStatus: pamentStatus.UNPAID,
+                paymentStatus: paymentStatus.UNPAID,
                 price: data.price,
                 doctorId: data.doctorId
             });
@@ -289,7 +289,7 @@ const createOrUpdateParaclinical = async (data) => {
         return {
             EC: 500,
             EM: "Lỗi server!",
-            DT: ""  
+            DT: ""
         }
     }
 }
@@ -298,12 +298,12 @@ const createOrUpdateParaclinical = async (data) => {
 const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     try {
         const whereCondition = {};
-        
+
         // Date filter
         if (date) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
-        
+
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
             };
@@ -420,6 +420,56 @@ const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     }
 };
 
+const updateListPayParaclinicals = async (ids, userId) => {
+    try {
+        let paraclinicals = await db.Paraclinical.findAll({
+            where: {
+                id: {
+                    [Op.in]: ids
+                }
+            }
+        });
+        let price = 0;
+        for (let paraclinical of paraclinicals) {
+            price += +paraclinical.price;
+        }
+        let payment = await db.Payment.create({
+            orderId: new Date().toISOString() + "_UserId__" + userId,
+            transId: Math.floor(100000 + Math.random() * 900000),
+            amount: price,
+            paymentMethod: PAYMENT_METHOD.CASH,
+            status: paymentStatus.PAID
+        });
+
+        const updateResults = await db.Paraclinical.update(
+            {
+                status: status.PAID,
+                paymentId: payment.id
+            }, {
+            where: {
+                id: {
+                    [Op.in]: ids
+                }
+            }
+        }
+        );
+
+        return {
+            EC: 0,
+            EM: 'Cập nhật danh sách xét nghiệm thành công!',
+            DT: updateResults,
+        };
+
+    } catch (error) {
+        console.error('Error updating list paraclinicals:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+};
+
 module.exports = {
     getParaclinicalByExamId,
     createParaclinical,
@@ -427,5 +477,6 @@ module.exports = {
     deleteParaclinical,
     createOrUpdateParaclinical,
     createRequestParaclinical,
-    getParaclinicals
+    getParaclinicals,
+    updateListPayParaclinicals
 }

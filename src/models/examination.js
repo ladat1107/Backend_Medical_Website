@@ -29,10 +29,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'examinationComorbiditiesData',
             });
-            Examination.hasOne(models.Appointment, {
-                foreignKey: 'examinationId',
-                as: 'examinationAppointmentData',
-            });
             Examination.belongsTo(models.Payment, {
                 foreignKey: 'paymentId',
                 as: 'paymentData',
@@ -90,10 +86,6 @@ module.exports = (sequelize, DataTypes) => {
         medicalTreatmentTier: {
             type: DataTypes.INTEGER,
             allowNull: true,
-        },
-        paymentDoctorStatus: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
         },
         price: {
             type: DataTypes.DOUBLE,

@@ -12,6 +12,7 @@ import appointmentController from '../controllers/appointmentController';
 import staffController from '../controllers/staffController';
 
 import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import { examinationPayment, paraclinicalPayment, prescriptionPayment } from '../services/paymentService';
 require('dotenv').config();
 
 let router = express.Router();
@@ -88,7 +89,12 @@ let initDoctorRoute = (app) => {
     router.get("/getParaclinicals", paraclinicalController.getParaclinicals)
     router.get("/getPrescriptions", prescriptionController.getPrescriptions)
     router.put("/updatePrescription", prescriptionController.updatePrescription)
+    router.put("/updateListPayParaclinicals", paraclinicalController.updateListPayParaclinicals)
 
+    //Payment
+    router.post("/paymentParaclinicalMomo", paraclinicalPayment)
+    router.post("/paymentExaminationMomo", examinationPayment)
+    router.post("/paymentPrescriptionMomo", prescriptionPayment)
     return app.use("/api/", router);
 }
 export default initDoctorRoute;
