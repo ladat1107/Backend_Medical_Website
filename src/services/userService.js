@@ -82,7 +82,7 @@ const loginUser = async (data) => {
         }
     }
 }
-const loginGoogle = async (data,googleId) => {
+const loginGoogle = async (data, googleId) => {
     try {
         let user = await db.User.findOne({
             where: { email: data.email },

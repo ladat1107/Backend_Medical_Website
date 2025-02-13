@@ -70,6 +70,9 @@ const TYPE_PAYMENT = {
     PRESCRIPTION: 3,
     APPOINMENT: 4
 }
+const SOCKET = {
+    EMIT_UPDATE_TICKET_NEW_DAY: "updateTicketNewDay"
+}
 module.exports = {
     status,
     typeRoom,
@@ -80,5 +83,6 @@ module.exports = {
     COOKIE,
     TIME,
     PAYMENT_METHOD,
-    TYPE_PAYMENT
+    TYPE_PAYMENT,
+    SOCKET
 }
