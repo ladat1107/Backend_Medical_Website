@@ -56,6 +56,7 @@ let initDoctorRoute = (app) => {
     router.post("/createExamination", createExaminationController)
     router.put("/updateExamination", updateExaminationController)
     router.put("/deleteExamination", deleteExaminationController)
+    router.get("/getPatienSteps", examinationController.getPatienSteps)
 
     //-- VitalSign
     router.get("/getVitalSignByExamId", getVitalSignByExamIdController)

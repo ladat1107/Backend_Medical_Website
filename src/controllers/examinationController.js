@@ -98,6 +98,7 @@ export const deleteExaminationController = async (req, res) => {
 export const getExaminationsController = async (req, res) => {
     try {
         let date = req.query.date || null;
+        let toDate = req.query.toDate || null;
         let status = req.query.status || null;
         let staffId = req.query.staffId || null;
         let time = req.query.time || null;
@@ -144,4 +145,27 @@ export const getScheduleApoinmentController = async (req, res) => {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
     }
+}
+
+const getPatienSteps = async (req, res) => {
+    try {
+        let data = req.query.examId;
+        let response = await examinationService.getPatienSteps(data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
+    }
+}
+
+module.exports = {
+    getPatienSteps
 }

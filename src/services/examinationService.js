@@ -70,7 +70,7 @@ export const getExaminationById = async (id) => {
                         model: db.Medicine,
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
-                        through: ['quantity', 'unit', 'dosage', 'price']
+                        through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose']
                     }],
                 }
             ],
@@ -328,9 +328,9 @@ export const getExaminations = async (date, status, staffId, page, limit, search
         const whereCondition = {};
 
         // Date filter
-        if (date) {
+        if (date && toDate) {
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
-            const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
+            const endOfDay = new Date(toDate).setHours(23, 59, 59, 999); // Kết thúc ngày
 
             whereCondition.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
@@ -359,8 +359,9 @@ export const getExaminations = async (date, status, staffId, page, limit, search
 
         // Status filter
         if (status) {
-            whereCondition.status = status;
+            whereCondition.status = status === 4 ? { [Op.in]: [4, 5, 6] } : status;
         }
+        
         // Appointment filter
         // if (is_appointment) {
         //     whereCondition.is_appointment = is_appointment;
@@ -714,3 +715,100 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         };
     }
 };
+const getPatienSteps = async (examId) => {
+    try {
+        const examination = await db.Examination.findOne({
+            where: { id: examId },
+            attributes: ['id', 'status', 'roomName'],
+            include: [
+                {
+                    model: db.Paraclinical,
+                    as: 'examinationResultParaclincalData',
+                    attributes: ['id', 'paraclinical', 'paracName', 'status'],
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'roomParaclinicalData',
+                            attributes: ['id', 'name'],
+                        },
+                        {
+                            model: db.ServiceType,
+                            as: 'paraclinicalData',
+                            attributes: ['id', 'name', 'price'],
+                        }
+                    ],
+                    separate: true,
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionExamData',
+                    attributes: ['id', 'note', 'totalMoney'],
+                    include: [{
+                        model: db.Medicine,
+                        as: 'prescriptionDetails',
+                        attributes: ['id', 'name', 'price'],
+                        through: ['quantity', 'unit', 'dosage', 'price']
+                    }],
+                }
+            ],
+            nest: true,
+        });
+
+        // Format steps data
+        const formatSteps = (data, isParaclinical = false) => {
+            const stepLabels = isParaclinical ? {
+                4: 'Chờ thanh toán',
+                5: 'Chờ thực hiện cận lâm sàng',
+                6: 'Thực hiện cận lâm sàng'
+            } : {
+                4: 'Chờ thanh toán',
+                5: 'Chờ khám bệnh',
+                6: 'Khám bệnh'
+            };
+
+            return {
+                currentStatus: data.status,
+                currentStep: stepLabels[data.status] || 'Chưa xác định',
+                roomInfo: data.roomName || null,
+                completedSteps: Object.keys(stepLabels)
+                    .map(step => ({
+                        status: Number(step),
+                        label: stepLabels[step],
+                        isCompleted: Number(step) < data.status,
+                        isActive: Number(step) === data.status
+                    }))
+            };
+        };
+
+        // Transform response data
+        const transformedData = {
+            mainExamination: formatSteps(examination),
+            paraclinicalTests: examination.examinationResultParaclincalData.map(test => ({
+                id: test.id,
+                name: test.paracName,
+                room: test.roomParaclinicalData.name,
+                price: test.paraclinicalData.price,
+                steps: formatSteps(test, true)
+            }))
+        };
+
+        return {
+            EC: 0,
+            EM: 'Lấy thông tin bệnh nhân thành công',
+            DT: transformedData
+        };
+
+    } catch (error) {
+        console.error('Error fetching patient steps:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+};
+
+
+module.exports = {
+    getPatienSteps
+}

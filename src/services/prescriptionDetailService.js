@@ -1,3 +1,4 @@
+import { session } from 'passport';
 import db from '../models/index';
 import { ERROR_SERVER } from '../utils';
 import medicineService from './medicineService';
@@ -81,8 +82,10 @@ export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                 await existingDetail.update({
                     quantity: newDetail.quantity,
                     unit: newDetail.unit,
-                    dosage: newDetail.dosage,
-                    price: newDetail.price
+                    price: newDetail.price,
+                    session: newDetail.session,
+                    dose: +newDetail.dose,
+                    dosage: newDetail.dosage
                 });
                 updatedDetails.push(existingDetail);
                 existingDetailsMap.delete(newDetail.medicineId);
@@ -129,8 +132,10 @@ export const createPrescriptionDetail = async (prescriptionId, data) => {
             medicineId: data.medicineId,
             quantity: data.quantity,
             unit: data.unit,
-            dosage: data.dosage,
-            price: data.price
+            price: data.price,
+            session: data.session,
+            dose: +data.dose,
+            dosage: data.dosage
         });
         if (prescriptionDetail) {
             return true;
@@ -155,8 +160,10 @@ export const updatePrescriptionDetail = async (prescriptionId, data) => {
             prescriptionDetail.update({
                 quantity: data.quantity,
                 unit: data.unit,
-                dosage: data.dosage,
-                price: data.price
+                price: data.price,
+                session: data.session,
+                dose: +data.dose,
+                dosage: data.dosage
             })
             console.log("Update PrescriptionDetail successfully");
             return true;
