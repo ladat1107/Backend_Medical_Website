@@ -1,8 +1,8 @@
 import express from 'express';
-import userController from '../controllers/userController';
-import examinationController from '../controllers/examinationController';
-import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
+import userController, { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
+import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
+import { checkTokenWithCookie } from '../Middleware/JWTAction';
 require('dotenv').config();
 
 let router = express.Router();
@@ -10,17 +10,15 @@ let initWebAuthenRounte = (app) => {
     // Cần check đăng nhập
     router.all("*", checkTokenWithCookie) 
     
-    router.get("/getProfile", userController.getUserById)
-    router.put("/profileUpdateInfo", userController.profileInfor)
-    router.get("/getMedicalHistories", userController.getMedicalHistories)
+    router.get("/getProfile", getUserByIdController)
+    router.put("/profileUpdateInfo", profileInforController)
+    router.get("/getMedicalHistories", getMedicalHistoriesController)
 
-    router.post("/confirmBooking", userController.confirmBooking)
-    router.post("/confirmTokenBooking", userController.confirmTokenBooking)
+    router.post("/confirmBooking", confirmBookingController)
+    router.post("/confirmTokenBooking", confirmTokenBookingController)
 
-    router.get("/getAppoinment", examinationController.getExaminationByUserId)
-    router.delete("/cancelAppoinment", examinationController.deleteExamination)
-
-
+    router.get("/getAppoinment", getExaminationByUserIdController)
+    router.delete("/cancelAppoinment", deleteExaminationController)
 
     router.get("/paymentAppoinmentMomo", appoinmentPayment)
     router.post("/callback", paymentMomoCallback)

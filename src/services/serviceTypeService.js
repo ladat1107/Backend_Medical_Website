@@ -1,8 +1,8 @@
 import { Op } from "sequelize";
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllServiceTypes = async () => {
+export const getAllServiceTypes = async () => {
     try {
         let serviceType = await db.ServiceType.findAll({
             where: { status: status.ACTIVE },
@@ -17,14 +17,10 @@ const getAllServiceTypes = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getServiceSearch = async () => {
+export const getServiceSearch = async () => {
     try {
         let serviceType = await db.ServiceType.findAll({
             where: {
@@ -50,14 +46,10 @@ const getServiceSearch = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getAllServiceTypesAdmin = async (page, limit, search) => {
+export const getAllServiceTypesAdmin = async (page, limit, search) => {
     try {
         let serviceType = await db.ServiceType.findAndCountAll({
             where: {
@@ -84,14 +76,10 @@ const getAllServiceTypesAdmin = async (page, limit, search) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getServiceTypeById = async (ServiceTypeId) => {
+export const getServiceTypeById = async (ServiceTypeId) => {
     try {
         let serviceType = await db.ServiceType.findOne({
             where: { id: ServiceTypeId },
@@ -113,15 +101,11 @@ const getServiceTypeById = async (ServiceTypeId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createServiceType = async (data) => {
+export const createServiceType = async (data) => {
     try {
         let serviceType = await db.ServiceType.create({
             name: data.name,
@@ -137,15 +121,11 @@ const createServiceType = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateServiceType = async (data) => {
+export const updateServiceType = async (data) => {
     try {
         let serviceType = await db.ServiceType.update({
             name: data.name,
@@ -171,15 +151,11 @@ const updateServiceType = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const blockStatusServiceType = async (id) => {
+export const blockStatusServiceType = async (id) => {
     try {
         let serviceType = await db.ServiceType.update({
             status: status.INACTIVE,
@@ -201,14 +177,10 @@ const blockStatusServiceType = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteStatusServiceType = async (id) => {
+export const deleteStatusServiceType = async (id) => {
     try {
         let serviceType = await db.ServiceType.findOne({
             where: { id: id }
@@ -229,15 +201,11 @@ const deleteStatusServiceType = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getServiceLaboratory = async () => {
+export const getServiceLaboratory = async () => {
     try {
         let serviceType = await db.ServiceType.findAll({
             where: { status: status.ACTIVE, isLaboratory: 0 },
@@ -252,22 +220,6 @@ const getServiceLaboratory = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllServiceTypes,
-    getAllServiceTypesAdmin,
-    getServiceTypeById,
-    getServiceSearch,
-    createServiceType,
-    updateServiceType,
-    blockStatusServiceType,
-    deleteStatusServiceType,
-    getServiceLaboratory
 }

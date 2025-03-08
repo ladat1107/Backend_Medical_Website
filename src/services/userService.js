@@ -1,17 +1,16 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op, where } from 'sequelize';
+import { Op } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import staffService from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
-import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
+import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
-import { use } from "passport";
 require('dotenv').config();
-const salt = bcrypt.genSaltSync(10);
+export const salt = bcrypt.genSaltSync(10);
 
-const hashPasswordUser = async (password) => {
+export const hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
         return hashPassword;
@@ -23,7 +22,7 @@ const hashPasswordUser = async (password) => {
         }
     }
 }
-const loginUser = async (data) => {
+export const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
@@ -75,14 +74,10 @@ const loginUser = async (data) => {
     }
     catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const loginGoogle = async (data, googleId) => {
+export const loginGoogle = async (data, googleId) => {
     try {
         let user = await db.User.findOne({
             where: { email: data.email },
@@ -128,14 +123,10 @@ const loginGoogle = async (data, googleId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const checkEmail = async (email) => {
+export const checkEmail = async (email) => {
     try {
         let user = await db.User.findOne({
             where: { email: email }
@@ -149,7 +140,7 @@ const checkEmail = async (email) => {
         return false;
     }
 }
-const checkPhoneNumber = async (phoneNumber) => {
+export const checkPhoneNumber = async (phoneNumber) => {
     try {
         let user = await db.User.findOne({ where: { phoneNumber: phoneNumber } });
         if (user) {
@@ -161,7 +152,7 @@ const checkPhoneNumber = async (phoneNumber) => {
         return false;
     }
 }
-const checkCid = async (cid) => {
+export const checkCid = async (cid) => {
     try {
         let user = await db.User.findOne({ where: { cid: cid } });
         if (user) {
@@ -174,9 +165,9 @@ const checkCid = async (cid) => {
     }
 }
 
-const checkDuplicateFields = async (email, phoneNumber, cid) => {
+export const checkDuplicateFields = async (email, phoneNumber, cid) => {
     try {
-        const result = await db.User.findOne({
+         const result = await db.User.findOne({
             where: {
                 [Op.or]: [
                     { email },
@@ -207,7 +198,7 @@ const checkDuplicateFields = async (email, phoneNumber, cid) => {
         throw error;
     }
 };
-const getAllUser = async (page, limit, search, position) => {
+export const getAllUser = async (page, limit, search, position) => {
     try {
         let defaultPositions = [1, 3, 4, 5, 6, 7];
 
@@ -293,14 +284,10 @@ const getAllUser = async (page, limit, search, position) => {
 
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const getUserById = async (userId) => {
+export const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId },
@@ -349,14 +336,10 @@ const getUserById = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getUserByCid = async (cid) => {
+export const getUserByCid = async (cid) => {
     try {
         let user = await db.User.findOne({
             where: { cid: cid },
@@ -384,14 +367,10 @@ const getUserByCid = async (cid) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const createUser = async (data) => {
+export const createUser = async (data) => {
     try {
         data.password = "123456";
         if (data.email && !await checkEmail(data.email)) {
@@ -441,7 +420,7 @@ const createUser = async (data) => {
             }
         }
         if (data.staff) {
-            const staff = await staffService.createStaff(data, user.id);
+         const staff = await staffService.createStaff(data, user.id);
             if (!staff) {
                 await db.User.destroy({
                     where: { id: user.id }
@@ -511,14 +490,10 @@ const createUser = async (data) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const updateUser = async (data) => {
+export const updateUser = async (data) => {
     let transaction = await sequelize.transaction();
     try {
         let user = await db.User.findOne({
@@ -580,14 +555,10 @@ const updateUser = async (data) => {
     } catch (error) {
         console.log(error);
         await transaction.rollback();
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const blockUser = async (data) => {
+export const blockUser = async (data) => {
     try {
         let user = await db.User.update({
             status: status.INACTIVE,
@@ -612,14 +583,10 @@ const blockUser = async (data) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
-const deleteUser = async (userId) => {
+export const deleteUser = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId },
@@ -640,14 +607,10 @@ const deleteUser = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
-const registerUser = async (data) => {
+export const registerUser = async (data) => {
     try {
         let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
         if (checkExist?.isDuplicate) {
@@ -674,7 +637,7 @@ const registerUser = async (data) => {
         }
     }
 }
-const confirmUser = async (token) => {
+export const confirmUser = async (token) => {
     try {
         let data = await verifyToken(token);
         if (data) {
@@ -717,14 +680,10 @@ const confirmUser = async (token) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const forgotPassword = async (email) => {
+export const forgotPassword = async (email) => {
     try {
         let password = "123456";
         let user = await db.User.findOne({ where: { email: email } });
@@ -774,15 +733,11 @@ const forgotPassword = async (email) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getDoctorHome = async (filter) => {
+export const getDoctorHome = async (filter) => {
     try {
         let condition = {};
         let includeOption = [];
@@ -906,14 +861,10 @@ const getDoctorHome = async (filter) => {
         };
     } catch (error) {
         console.error("Lỗi server:", error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const updateProfileInfor = async (data) => {
+export const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
             phoneNumber: data?.phoneNumber,
@@ -948,14 +899,10 @@ const updateProfileInfor = async (data) => {
     }
     catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const updateProfilePassword = async (data) => {
+export const updateProfilePassword = async (data) => {
     try {
         let user = await db.User.findOne({
             where: { id: data.id },
@@ -1019,14 +966,10 @@ const updateProfilePassword = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getUserInsuarance = async (userId) => {
+export const getUserInsuarance = async (userId) => {
     try {
         let insurance = await db.User.findOne({
             where: { id: userId },
@@ -1062,7 +1005,7 @@ const getUserInsuarance = async (userId) => {
         };
     }
 }
-const confirmBooking = async (data) => {
+export const confirmBooking = async (data) => {
     try {
         let user = await db.User.findOne({
             where: { cid: data.profile.cid },
@@ -1104,14 +1047,10 @@ const confirmBooking = async (data) => {
 
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 }
-const confirmTokenBooking = async (token) => {
+export const confirmTokenBooking = async (token) => {
     let transaction = await sequelize.transaction();
     try {
         let data = await verifyToken(token);
@@ -1232,14 +1171,10 @@ const confirmTokenBooking = async (token) => {
     } catch (error) {
         await transaction.rollback();
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 }
-const getMedicalHistories = async (userId) => {
+export const getMedicalHistories = async (userId) => {
     try {
         let medicalHistories = await db.User.findAll({
             where: { id: userId },
@@ -1314,26 +1249,4 @@ const getMedicalHistories = async (userId) => {
             DT: null,
         };
     }
-}
-
-module.exports = {
-    getAllUser,
-    getUserById,
-    getUserByCid,
-    createUser,
-    updateUser,
-    blockUser,
-    deleteUser,
-    registerUser,
-    loginUser,
-    loginGoogle,
-    getDoctorHome,
-    updateProfileInfor,
-    updateProfilePassword,
-    getUserInsuarance,
-    getMedicalHistories,
-    confirmUser,
-    forgotPassword,
-    confirmBooking,
-    confirmTokenBooking,
 }

@@ -1,33 +1,22 @@
-import surgicalHistoryService from '../services/surgicalHistoryService';
+import { createSurgicalHistory, deleteSurgicalHistory, getAllSurgicalHistories, getSurgicalHistoryById, updateSurgicalHistory } from '../services/surgicalHistoryService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllSurgicalHistories = async (req, res) => {
+export const getAllSurgicalHistoriesController = async (req, res) => {
     try {
-        let response = await surgicalHistoryService.getAllSurgicalHistories();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllSurgicalHistories();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getSurgicalHistoryById = async (req, res) => {
+export const getSurgicalHistoryByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await surgicalHistoryService.getSurgicalHistoryById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getSurgicalHistoryById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getSurgicalHistoryById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createSurgicalHistory = async (req, res) => {
+export const createSurgicalHistoryController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.diseaseName && data.bodyPart) {
-            let response = await surgicalHistoryService.createSurgicalHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createSurgicalHistory(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +45,16 @@ const createSurgicalHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateSurgicalHistory = async (req, res) => {
+export const updateSurgicalHistoryController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.diseaseName && data.bodyPart) {
-            let response = await surgicalHistoryService.updateSurgicalHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateSurgicalHistory(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +64,16 @@ const updateSurgicalHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteSurgicalHistory = async (req, res) => {
+export const deleteSurgicalHistoryController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await surgicalHistoryService.deleteSurgicalHistory(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteSurgicalHistory(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,18 +83,7 @@ const deleteSurgicalHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).send({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-module.exports = {
-    getAllSurgicalHistories,
-    getSurgicalHistoryById,
-    createSurgicalHistory,
-    updateSurgicalHistory,
-    deleteSurgicalHistory,
-}

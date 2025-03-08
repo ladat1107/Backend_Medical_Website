@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllRelatives = async () => {
+export const getAllRelatives = async () => {
     try {
         let relative = await db.Relative.findAll({
             where: {
@@ -17,15 +17,11 @@ const getAllRelatives = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getRelativesByUserId = async (userId) => {
+export const getRelativesByUserId = async (userId) => {
     try {
         let relative = await db.Relative.findAll({
             where: {
@@ -42,15 +38,11 @@ const getRelativesByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getRelativeById = async (id) => {
+export const getRelativeById = async (id) => {
     try {
         let relative = await db.Relative.findOne({
             where: {
@@ -66,15 +58,11 @@ const getRelativeById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createRelative = async (data) => {
+export const createRelative = async (data) => {
     try {
         let relative = await db.Relative.create({
             fullName: data.fullName,
@@ -93,15 +81,11 @@ const createRelative = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateRelative = async (data) => {
+export const updateRelative = async (data) => {
     try {
         let relative = await db.Relative.update({
             fullName: data.fullName,
@@ -122,15 +106,11 @@ const updateRelative = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteRelative = async (id) => {
+export const deleteRelative = async (id) => {
     try {
         let relative = await db.Relative.update({
             status: status.INACTIVE,
@@ -146,19 +126,6 @@ const deleteRelative = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllRelatives,
-    getRelativesByUserId,
-    getRelativeById,
-    createRelative,
-    updateRelative,
-    deleteRelative,
 }

@@ -1,16 +1,15 @@
 import db from "../models/index";
 import descriptionService from "./descriptionService";
-import { ROLE, status } from "../utils/index";
-const { Op, } = require('sequelize');
+import { ERROR_SERVER, ROLE, status } from "../utils/index";
+export const { Op, } = require('sequelize');
 
-const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind) => {
+export const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind) => {
     try {
         // Nếu có filter, chuyển thành mảng
 
         let filterArray = filter ? filter?.split(",") : [];
         let whereCondition = {};
         if (statusFind) {
-            console.log("staffId", statusFind);
             whereCondition.status = statusFind;
         }
         // Đếm tổng số lượng bản ghi phù hợp với điều kiện tìm kiếm
@@ -100,15 +99,11 @@ const getAllHandBooks = async (page, limit, search, staffId, filter, statusFind)
         };
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 }
 
-const getHandBookHome = async (filter) => {
+export const getHandBookHome = async (filter) => {
     try {
         let condition = {};
         let limit = filter?.limtit || 100;
@@ -150,22 +145,19 @@ const getHandBookHome = async (filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getHandbookAdmin = async (page, limit, search, status, filter) => {
+export const getHandbookAdmin = async (page, limit, search, status, filter) => {
     try {
         let whereCondition = {};
         let filterArray = filter ? filter.split(",") : [];
         // Kiểm tra điều kiện departmentId
         if (status) {
-            whereCondition.status = status;
+            whereCondition.status = +status;
         }
+        console.log("whereCondition", whereCondition);
         let handbooks = await db.Handbook.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -192,8 +184,8 @@ const getHandbookAdmin = async (page, limit, search, status, filter) => {
                 }]
             }],
             order: [['updatedAt', 'DESC']],
-            offset: (page - 1) * limit,
-            limit: limit,
+            offset: (+page - 1) * +limit,
+            limit: +limit,
             raw: false,
             nest: true,
         });
@@ -204,15 +196,11 @@ const getHandbookAdmin = async (page, limit, search, status, filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getHandBookById = async (handBookId, role) => {
+export const getHandBookById = async (handBookId, role) => {
     try {
         let handBook = await db.Handbook.findOne({
             where: { id: handBookId },
@@ -262,15 +250,11 @@ const getHandBookById = async (handBookId, role) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createHandBook = async (data) => {
+export const createHandBook = async (data) => {
     try {
         let descriptionId = await descriptionService.createDescription(data);
         if (descriptionId) {
@@ -298,15 +282,11 @@ const createHandBook = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateHandBook = async (data) => {
+export const updateHandBook = async (data) => {
     try {
         let handBook = await db.Handbook.findOne({
             where: { id: data.id },
@@ -349,15 +329,11 @@ const updateHandBook = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateHandbookStatus = async (data) => {
+export const updateHandbookStatus = async (data) => {
     try {
         let handBook = await db.Handbook.findOne({
             where: { id: data.id },
@@ -380,19 +356,6 @@ const updateHandbookStatus = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-module.exports = {
-    getAllHandBooks,
-    getHandBookById,
-    createHandBook,
-    updateHandBook,
-    updateHandbookStatus,
-    getHandBookHome,
-    getHandbookAdmin,
 }

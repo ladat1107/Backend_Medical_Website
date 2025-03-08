@@ -1,10 +1,9 @@
-import { Op, or, where } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models/index";
-import room from "../models/room";
-import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD, ERROR_SERVER } from "../utils/index";
 import specialtyService from "./specialtyService";
 
-const getParaclinicalByExamId = async (examinationId) => {
+export const getParaclinicalByExamId = async (examinationId) => {
     try {
         let paraclinical = await db.Paraclinical.findAll({
             where: {
@@ -25,15 +24,11 @@ const getParaclinicalByExamId = async (examinationId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const createRequestParaclinical = async (data) => {
+export const createRequestParaclinical = async (data) => {
     try {
 
         if (data.listParaclinicals.length === 0) {
@@ -106,15 +101,11 @@ const createRequestParaclinical = async (data) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const createParaclinical = async (data) => {
+export const createParaclinical = async (data) => {
     try {
         let examination = await db.Examination.findOne({
             where: {
@@ -156,15 +147,11 @@ const createParaclinical = async (data) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateParaclinical = async (data) => {
+export const updateParaclinical = async (data) => {
     try {
         const { id, ...updateData } = data; // Tách id ra khỏi data
 
@@ -183,15 +170,11 @@ const updateParaclinical = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteParaclinical = async (data) => {
+export const deleteParaclinical = async (data) => {
     try {
         let paraclinical = await db.Paraclinical.destroy({
             where: {
@@ -206,15 +189,11 @@ const deleteParaclinical = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const createOrUpdateParaclinical = async (data) => {
+export const createOrUpdateParaclinical = async (data) => {
     try {
         let examination = await db.Examination.findOne({
             where: {
@@ -286,16 +265,11 @@ const createOrUpdateParaclinical = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-
-const getParaclinicals = async (date, status, staffId, page, limit, search) => {
+export const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     try {
         const whereCondition = {};
 
@@ -420,7 +394,7 @@ const getParaclinicals = async (date, status, staffId, page, limit, search) => {
     }
 };
 
-const updateListPayParaclinicals = async (ids, userId) => {
+export const updateListPayParaclinicals = async (ids, userId) => {
     try {
         let paraclinicals = await db.Paraclinical.findAll({
             where: {
@@ -469,14 +443,3 @@ const updateListPayParaclinicals = async (ids, userId) => {
         };
     }
 };
-
-module.exports = {
-    getParaclinicalByExamId,
-    createParaclinical,
-    updateParaclinical,
-    deleteParaclinical,
-    createOrUpdateParaclinical,
-    createRequestParaclinical,
-    getParaclinicals,
-    updateListPayParaclinicals
-}

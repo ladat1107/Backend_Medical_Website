@@ -1,8 +1,9 @@
-import medicineService from "../services/medicineService";
+import { createMedicine, deleteMedicine, getAllMedicines, getAllMedicinesForExam, getMedicineById, updateMedicine } from "../services/medicineService";
+import { ERROR_SERVER } from "../utils";
 
-const getAllMedicines = async (req, res) => {
+export const getAllMedicinesController = async (req, res) => {
     try {
-        let response = await medicineService.getAllMedicines();
+        let response = await getAllMedicines();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,17 +11,13 @@ const getAllMedicines = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
-const getAllMedicinesForExam = async (req, res) => {
+export const getAllMedicinesForExamController = async (req, res) => {
     try {
-        let response = await medicineService.getAllMedicinesForExam();
+        let response = await getAllMedicinesForExam();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -28,24 +25,16 @@ const getAllMedicinesForExam = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
-const getMedicineById = async (req, res) => {
+export const getMedicineByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await medicineService.getMedicineById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getMedicineById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -55,27 +44,19 @@ const getMedicineById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
-const createMedicine = async (req, res) => {
+export const createMedicineController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.name && data.price && data.registrationNumber && data.unit && data.inventory
             && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
             && data.description && data.activeIngredient && data.group && data.concentration
         ) {
-            let response = await medicineService.createMedicine(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createMedicine(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -85,27 +66,19 @@ const createMedicine = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
-const updateMedicine = async (req, res) => {
+export const updateMedicineController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.name && data.price && data.registrationNumber && data.unit && data.inventory
             && data.exp && data.approvalNumber && data.approvalDate && data.dosageForm && data.manufacturerCountry
             && data.description && data.activeIngredient && data.group && data.concentration
         ) {
-            let response = await medicineService.updateMedicine(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateMedicine(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -115,24 +88,16 @@ const updateMedicine = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
-const deleteMedicine = async (req, res) => {
+export const deleteMedicineController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await medicineService.deleteMedicine(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteMedicine(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -142,19 +107,6 @@ const deleteMedicine = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
-}
-
-module.exports = {
-    getAllMedicines,
-    getAllMedicinesForExam,
-    getMedicineById,
-    createMedicine,
-    updateMedicine,
-    deleteMedicine
 }

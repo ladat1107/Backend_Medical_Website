@@ -1,33 +1,22 @@
-import patientService from '../services/patientService';
+import { createPatient, getAllPatients, getPatientById, getPatientByUserId, updatePatient } from '../services/patientService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllPatients = async (req, res) => {
+export const getAllPatientsController = async (req, res) => {
     try {
-        let response = await patientService.getAllPatients();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllPatients();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getPatientById = async (req, res) => {
+export const getPatientByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await patientService.getPatientById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getPatientById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getPatientById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getPatientByUserId = async (req, res) => {
+export const getPatientByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await patientService.getPatientByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getPatientByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +45,16 @@ const getPatientByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createPatient = async (req, res) => {
+export const createPatientController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.dateOfAdmission && data.bedId && data.userId) {
-            let response = await patientService.createPatient(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createPatient(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +64,16 @@ const createPatient = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updatePatient = async (req, res) => {
+export const updatePatientController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.dateOfAdmission && data.dateOfDischarge && data.bedId) {
-            let response = await patientService.updatePatient(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updatePatient(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,18 +83,6 @@ const updatePatient = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllPatients,
-    getPatientById,
-    getPatientByUserId,
-    createPatient,
-    updatePatient
 }

@@ -1,13 +1,13 @@
 import db from '../models/index';
 import prescriptionDetailService from './prescriptionDetailService';
-import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
-import { Op, or, Sequelize, where } from 'sequelize';
+import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
+import { Op, Sequelize } from 'sequelize';
 
-const calculateTotalMoney = (details) => {
+export const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
 };
 
-const getPrescriptionByExaminationId = async (examinationId) => {
+export const getPrescriptionByExaminationId = async (examinationId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { examinationId: examinationId },
@@ -34,15 +34,11 @@ const getPrescriptionByExaminationId = async (examinationId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const upsertPrescription = async (data) => {
+export const upsertPrescription = async (data) => {
     try {
         let response = await db.Examination.update(
             {
@@ -109,14 +105,14 @@ const upsertPrescription = async (data) => {
     }
 };
 
-const getPrescriptions = async (date, status, staffId, page, limit, search) => {
+export const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     try {
-        const whereCondition = {};
+         const whereCondition = {};
 
         // Date filter
         if (date) {
-            const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
-            const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
+             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
+             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
 
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
@@ -134,7 +130,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
         // }
 
         // Search filter (across user's first and last name)
-        const searchCondition = search ? {
+         const searchCondition = search ? {
             [Op.or]: [
                 { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
                 { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
@@ -151,7 +147,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
             limit_query = limit;
         }
 
-        const { count, rows: examinations } = await db.Examination.findAndCountAll({
+         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...searchCondition,
                 status: 7
@@ -247,7 +243,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     }
 };
 
-const updatePrescription = async (data, payment, userId) => {
+export const updatePrescription = async (data, payment, userId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { id: data.id },
@@ -302,10 +298,3 @@ const updatePrescription = async (data, payment, userId) => {
         };
     }
 };
-
-module.exports = {
-    getPrescriptionByExaminationId,
-    upsertPrescription,
-    getPrescriptions,
-    updatePrescription
-}

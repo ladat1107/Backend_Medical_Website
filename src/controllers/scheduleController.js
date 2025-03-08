@@ -1,33 +1,22 @@
-import scheduleService from '../services/scheduleService';
+import  { arrangeSchedule, createSchedule, deleteSchedule, getAllSchedules, getAllSchedulesAdmin, getScheduleByStaffId, getScheduleInWeek, updateScheduleStaff } from '../services/scheduleService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllSchedules = async (req, res) => {
+export const getAllSchedulesController = async (req, res) => {
     try {
-        let response = await scheduleService.getAllSchedules();
-        res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        });
+        let response = await getAllSchedules();
+        res.status(200).json(response);
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getScheduleByStaffId = async (req, res) => {
+export const getScheduleByStaffIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.staffId) {
-            let response = await scheduleService.getScheduleByStaffId(data.staffId);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getScheduleByStaffId(data.staffId);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getScheduleByStaffId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getScheduleInWeek = async (req, res) => {
+export const getScheduleInWeekController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.from && data.to) {
-            let response = await scheduleService.getScheduleInWeek(data);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getScheduleInWeek(data);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,18 +45,14 @@ const getScheduleInWeek = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createSchedule = async (req, res) => {
+export const createScheduleController = async (req, res) => {
     try {
         let data = req.body;
-        let response = await scheduleService.createSchedule(data);
+        let response = await createSchedule(data);
         res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -83,23 +60,15 @@ const createSchedule = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const updateScheduleStaff = async (req, res) => {
+export const updateScheduleStaffController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.newStaffId && data.oldStaffId && data.roomId && data.date) {
-            let response = await scheduleService.updateScheduleStaff(data);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await updateScheduleStaff(data);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -109,23 +78,15 @@ const updateScheduleStaff = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const deleteSchedule = async (req, res) => {
+export const deleteScheduleController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.staffId && data.roomId && data.date) {
-            let response = await scheduleService.deleteSchedule(data);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await deleteSchedule(data);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -135,17 +96,13 @@ const deleteSchedule = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const arrangSchedule = async (req, res) => {
+export const arrangScheduleController = async (req, res) => {
     try {
         let data = req.body;
-        let response = await scheduleService.arrangeSchedule(data);
+        let response = await arrangeSchedule(data);
         res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -153,16 +110,12 @@ const arrangSchedule = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getAllSchedulesAdmin = async (req, res) => {
+export const getAllSchedulesAdminController = async (req, res) => {
     try {
-        let response = await scheduleService.getAllSchedulesAdmin(req.query);
+        let response = await getAllSchedulesAdmin(req.query);
         res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -170,20 +123,6 @@ const getAllSchedulesAdmin = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-module.exports = {
-    getAllSchedulesAdmin,
-    getAllSchedules,
-    getScheduleByStaffId,
-    getScheduleInWeek,
-    createSchedule,
-    updateScheduleStaff,
-    deleteSchedule,
-    arrangSchedule,
 }

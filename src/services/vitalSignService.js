@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getVitalSignByExamId = async (examinationId) => {
+export const getVitalSignByExamId = async (examinationId) => {
     try {
         let vitalSigns = await db.VitalSign.findOne({
             where: {
@@ -14,15 +15,11 @@ const getVitalSignByExamId = async (examinationId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createVitalSign = async (data) => {
+export const createVitalSign = async (data) => {
     try {
         let vitalSign = await db.VitalSign.create({
             examinationId: data.examinationId,
@@ -43,15 +40,11 @@ const createVitalSign = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateVitalSign = async (data) => {
+export const updateVitalSign = async (data) => {
     try {
         let vitalSign = await db.VitalSign.update({
             height: data.height,
@@ -73,15 +66,11 @@ const updateVitalSign = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteVitalSign = async (examinationId) => {
+export const deleteVitalSign = async (examinationId) => {
     try {
         let vitalSign = await db.VitalSign.destroy({
             where: { examinationId: examinationId }
@@ -93,15 +82,11 @@ const deleteVitalSign = async (examinationId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createOrUpdateVitalSign = async (data) => {
+export const createOrUpdateVitalSign = async (data) => {
     try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingVitalSign = await db.VitalSign.findOne({
@@ -156,13 +141,4 @@ const createOrUpdateVitalSign = async (data) => {
             DT: "",
         };
     }
-}
-
-
-module.exports = {
-    getVitalSignByExamId,
-    createVitalSign,
-    updateVitalSign,
-    deleteVitalSign,
-    createOrUpdateVitalSign
 }

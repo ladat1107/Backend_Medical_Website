@@ -1,8 +1,8 @@
 import db from "../models/index";
-import { department, ROLE, status, typeRoom } from "../utils";
+import { department, ERROR_SERVER, ROLE, status, typeRoom } from "../utils";
 const { Op } = require('sequelize');
 
-const getAllSchedules = async () => {
+export const getAllSchedules = async () => {
     try {
         let schedule = await db.Schedule.findAll({
             include: [{
@@ -25,14 +25,10 @@ const getAllSchedules = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getScheduleByStaffId = async (staffId) => {
+export const getScheduleByStaffId = async (staffId) => {
     try {
         let schedule = await db.Schedule.findAll({
             where: { staffId: staffId },
@@ -52,14 +48,10 @@ const getScheduleByStaffId = async (staffId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getScheduleInWeek = async (data) => {
+export const getScheduleInWeek = async (data) => {
     try {
         let schedule = await db.Schedule.findAll({
             where: {
@@ -88,14 +80,10 @@ const getScheduleInWeek = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const createSchedule = async (data) => {
+export const createSchedule = async (data) => {
     let transaction = await db.sequelize.transaction();
     try {
         await db.Schedule.destroy({
@@ -153,14 +141,10 @@ const createSchedule = async (data) => {
     } catch (error) {
         await transaction.rollback();
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const updateScheduleStaff = async (data) => {
+export const updateScheduleStaff = async (data) => {
     try {
         let schedule = await db.Schedule.update({
             staffId: data.newStaffId
@@ -174,14 +158,10 @@ const updateScheduleStaff = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteSchedule = async (data) => {
+export const deleteSchedule = async (data) => {
     try {
         let schedule = await db.Schedule.destroy({
             where: { staffId: data.staffId, roomId: data.roomId, date: data.date },
@@ -193,14 +173,10 @@ const deleteSchedule = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const arrangeSchedule = async (data) => {
+export const arrangeSchedule = async (data) => {
     const transaction = await db.sequelize.transaction();
     try {
         let doctorNedeed = data?.doctorNedeed || 1;
@@ -360,7 +336,7 @@ const arrangeSchedule = async (data) => {
         return { EC: 500, EM: 'Lỗi server!', DT: '' };
     }
 };
-const getAllSchedulesAdmin = async (filter) => {
+export const getAllSchedulesAdmin = async (filter) => {
     try {
         let condition = {};
         let listStaff;
@@ -479,20 +455,6 @@ const getAllSchedulesAdmin = async (filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-module.exports = {
-    getAllSchedulesAdmin,
-    getAllSchedules,
-    getScheduleByStaffId,
-    getScheduleInWeek,
-    createSchedule,
-    updateScheduleStaff,
-    deleteSchedule,
-    arrangeSchedule,
 }

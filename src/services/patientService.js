@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getAllPatients = async () => {
+export const getAllPatients = async () => {
     try {
         let patient = await db.Patient.findAll({
             include: [
@@ -34,15 +35,11 @@ const getAllPatients = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getPatientById = async (patientId) => {
+export const getPatientById = async (patientId) => {
     try {
         let patient = await db.Patient.findOne({
             where: { id: patientId },
@@ -77,15 +74,11 @@ const getPatientById = async (patientId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getPatientByUserId = async (userId) => {
+export const getPatientByUserId = async (userId) => {
     try {
         let patient = await db.Patient.findOne({
             where: { userId: userId },
@@ -120,15 +113,11 @@ const getPatientByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createPatient = async (data) => {
+export const createPatient = async (data) => {
     try {
         let patient = await db.Patient.create({
             dateOfAdmission: data.dateOfAdmission,
@@ -142,15 +131,11 @@ const createPatient = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updatePatient = async (data) => {
+export const updatePatient = async (data) => {
     try {
         let patient = await db.Patient.update({
             dateOfAdmission: data.dateOfAdmission,
@@ -166,18 +151,6 @@ const updatePatient = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllPatients,
-    getPatientById,
-    getPatientByUserId,
-    createPatient,
-    updatePatient,
 }

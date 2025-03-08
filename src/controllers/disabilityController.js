@@ -1,8 +1,9 @@
-import disabilityService from '../services/disabilityService';
+import  { createDisability, deleteDisability, getAllDisability, getDisabilityById, updateDisability } from '../services/disabilityService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllDisabilities = async (req, res) => {
+export const getAllDisabilitiesController = async (req, res) => {
     try {
-        let response = await disabilityService.getAllDisability();
+        let response = await getAllDisability();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,24 +11,16 @@ const getAllDisabilities = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getDisabilityById = async (req, res) => {
+export const getDisabilityByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await disabilityService.getDisabilityById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getDisabilityById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +30,16 @@ const getDisabilityById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createDisability = async (req, res) => {
+export const createDisabilityController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.bodyPart) {
-            let response = await disabilityService.createDisability(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createDisability(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +49,16 @@ const createDisability = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateDisability = async (req, res) => {
+export const updateDisabilityController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.bodyPart) {
-            let response = await disabilityService.updateDisability(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateDisability(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +68,16 @@ const updateDisability = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteDisability = async (req, res) => {
+export const deleteDisabilityController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await disabilityService.deleteDisability(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteDisability(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,18 +87,6 @@ const deleteDisability = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllDisabilities,
-    getDisabilityById,
-    createDisability,
-    updateDisability,
-    deleteDisability
 }

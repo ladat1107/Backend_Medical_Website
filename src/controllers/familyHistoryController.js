@@ -1,33 +1,22 @@
-import familyHistoryService from '../services/familyHistoryService';
+import  { createFamilyHistory, deleteFamilyHistory, getAllFamilyHistories, getFamilyHistoriesByUserId, getFamilyHistoryById, updateFamilyHistory } from '../services/familyHistoryService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllFamilyHistories = async (req, res) => {
+export const getAllFamilyHistoriesController = async (req, res) => {
     try {
-        let response = await familyHistoryService.getAllFamilyHistories();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllFamilyHistories();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getFamilyHistoryById = async (req, res) => {
+export const getFamilyHistoryByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await familyHistoryService.getFamilyHistoryById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getFamilyHistoryById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getFamilyHistoryById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getFamilyHistoriesByUserId = async (req, res) => {
+export const getFamilyHistoriesByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await familyHistoryService.getFamilyHistoriesByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getFamilyHistoriesByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,25 +45,17 @@ const getFamilyHistoriesByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createFamilyHistory = async (req, res) => {
+export const createFamilyHistoryController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.relationship && data.diseaseGroup && data.diseaseName && data.medicalFacilityRecords
             && data.description && data.discoveryDate && data.illnessDuration && data.userId) {
-            let response = await familyHistoryService.createFamilyHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createFamilyHistory(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -92,25 +65,17 @@ const createFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateFamilyHistory = async (req, res) => {
+export const updateFamilyHistoryController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.relationship && data.diseaseGroup && data.diseaseName && data.medicalFacilityRecords
             && data.description && data.discoveryDate && data.illnessDuration) {
-            let response = await familyHistoryService.updateFamilyHistory(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateFamilyHistory(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -120,24 +85,16 @@ const updateFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteFamilyHistory = async (req, res) => {
+export const deleteFamilyHistoryController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await familyHistoryService.deleteFamilyHistory(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteFamilyHistory(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -147,19 +104,6 @@ const deleteFamilyHistory = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
 }

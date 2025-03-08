@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getInsuranceById = async (id) => {
+export const getInsuranceById = async (id) => {
     try {
         let insuarance = await db.Insurance.findOne({
             where: { id: id },
@@ -14,15 +15,11 @@ const getInsuranceById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getInsuranceByUserId = async (userId) => {
+export const getInsuranceByUserId = async (userId) => {
     try {
         let insuarance = await db.Insurance.findOne({
             where: { userId: userId },
@@ -41,15 +38,11 @@ const getInsuranceByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createInsurance = async (data) => {
+export const createInsurance = async (data) => {
     try {
         let insuarance = await db.Insurance.create({
             insuranceCode: data.insuranceCode,
@@ -68,15 +61,11 @@ const createInsurance = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateInsurance = async (data) => {
+export const updateInsurance = async (data) => {
     try {
         let insuarance = await db.Insurance.update({
             insuranceCode: data.insuranceCode,
@@ -98,15 +87,11 @@ const updateInsurance = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteInsurance = async (id) => {
+export const deleteInsurance = async (id) => {
     try {
         let insuarance = await db.Insurance.destroy({
             where: {
@@ -120,18 +105,6 @@ const deleteInsurance = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-export default {
-    getInsuranceById,
-    getInsuranceByUserId,
-    createInsurance,
-    updateInsurance,
-    deleteInsurance
 }

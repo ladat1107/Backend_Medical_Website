@@ -1,15 +1,12 @@
-import vitalSignService from '../services/vitalSignService';
+import { createOrUpdateVitalSign, createVitalSign, deleteVitalSign, getVitalSignByExamId, updateVitalSign } from '../services/vitalSignService';
+import { ERROR_SERVER } from '../utils';
 
-const getVitalSignByExamId = async (req, res) => {
+export const getVitalSignByExamIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.examinationId) {
-            let response = await vitalSignService.getVitalSignByExamId(data.examinationId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getVitalSignByExamId(data.examinationId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -19,26 +16,18 @@ const getVitalSignByExamId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createVitalSign = async (req, res) => {
+export const createVitalSignController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.height && data.weight 
+        if (data && data.examinationId && data.height && data.weight
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate) {
-            let response = await vitalSignService.createVitalSign(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createVitalSign(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -48,26 +37,18 @@ const createVitalSign = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateVitalSign = async (req, res) => {
+export const updateVitalSignController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate && data.glycemicIndex) {
-            let response = await vitalSignService.updateVitalSign(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateVitalSign(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -77,24 +58,16 @@ const updateVitalSign = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteVitalSign = async (req, res) => {
+export const deleteVitalSignController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.examinationId) {
-            let response = await vitalSignService.deleteVitalSign(data.examinationId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteVitalSign(data.examinationId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -104,26 +77,18 @@ const deleteVitalSign = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createOrUpdateVitalSign = async (req, res) => {
+export const createOrUpdateVitalSignController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.height && data.weight 
+        if (data && data.examinationId && data.height && data.weight
             && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
             && data.breathingRate) {
-            let response = await vitalSignService.createOrUpdateVitalSign(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createOrUpdateVitalSign(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -133,18 +98,6 @@ const createOrUpdateVitalSign = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getVitalSignByExamId,
-    createVitalSign,
-    updateVitalSign,
-    deleteVitalSign,
-    createOrUpdateVitalSign
 }

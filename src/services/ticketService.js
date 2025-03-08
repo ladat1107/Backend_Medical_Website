@@ -1,4 +1,5 @@
 import db from '../models/index';
+import { ERROR_SERVER } from '../utils';
 const numberType = {
     priorityNumber: "priorityNumber",
     normalNumber: "normalNumber"
@@ -13,11 +14,7 @@ export const getTickets = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 
 }
@@ -62,11 +59,7 @@ export const generalNumber = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
 
     }
 }
@@ -126,11 +119,7 @@ export const generalNumberCurrent = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
 
     }
 }

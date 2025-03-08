@@ -1,33 +1,22 @@
-import relativeService from '../services/relativeService';
+import { createRelative, deleteRelative, getAllRelatives, getRelativeById, getRelativesByUserId, updateRelative } from '../services/relativeService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllRelatives = async (req, res) => {
+export const getAllRelativesController = async (req, res) => {
     try {
-        let response = await relativeService.getAllRelatives();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllRelatives();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getRelativesByUserId = async (req, res) => {
+export const getRelativesByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await relativeService.getRelativesByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getRelativesByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getRelativesByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getRelativeById = async (req, res) => {
+export const getRelativeByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await relativeService.getRelativeById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getRelativeById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +45,16 @@ const getRelativeById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createRelative = async (req, res) => {
+export const createRelativeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.fullName && data.cid && data.phoneNumber && data.relationship && data.address && data.userId && data.email !== undefined) {
-            let response = await relativeService.createRelative(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createRelative(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +64,16 @@ const createRelative = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateRelative = async (req, res) => {
+export const updateRelativeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.fullName && data.cid && data.phoneNumber && data.relationship && data.address && data.email !== undefined) {
-            let response = await relativeService.updateRelative(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateRelative(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,24 +83,16 @@ const updateRelative = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteRelative = async (req, res) => {
+export const deleteRelativeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await relativeService.deleteRelative(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteRelative(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -145,19 +102,6 @@ const deleteRelative = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllRelatives,
-    getRelativesByUserId,
-    getRelativeById,
-    createRelative,
-    updateRelative,
-    deleteRelative
 }

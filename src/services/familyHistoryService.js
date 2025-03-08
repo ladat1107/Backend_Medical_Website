@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getAllFamilyHistories = async () => {
+export const getAllFamilyHistories = async () => {
     try {
         let familyHistory = await db.FamilyHistory.findAll({
             raw: true,
@@ -13,15 +14,11 @@ const getAllFamilyHistories = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getFamilyHistoryById = async (id) => {
+export const getFamilyHistoryById = async (id) => {
     try {
         let familyHistory = await db.FamilyHistory.findOne({
             where: {
@@ -37,15 +34,11 @@ const getFamilyHistoryById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getFamilyHistoriesByUserId = async (userId) => {
+export const getFamilyHistoriesByUserId = async (userId) => {
     try {
         let familyHistory = await db.FamilyHistory.findAll({
             where: {
@@ -61,15 +54,11 @@ const getFamilyHistoriesByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createFamilyHistory = async (data) => {
+export const createFamilyHistory = async (data) => {
     try {
         let newFamilyHistory = await db.FamilyHistory.create({
             relationship: data.relationship,
@@ -88,15 +77,11 @@ const createFamilyHistory = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateFamilyHistory = async (data) => {
+export const updateFamilyHistory = async (data) => {
     try {
         let familyHistory = await db.FamilyHistory.update({
             relationship: data.relationship,
@@ -118,15 +103,11 @@ const updateFamilyHistory = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteFamilyHistory = async (id) => {
+export const deleteFamilyHistory = async (id) => {
     try {
         let familyHistory = await db.FamilyHistory.destroy({
             where: {
@@ -140,19 +121,6 @@ const deleteFamilyHistory = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllFamilyHistories,
-    getFamilyHistoryById,
-    getFamilyHistoriesByUserId,
-    createFamilyHistory,
-    updateFamilyHistory,
-    deleteFamilyHistory
 }

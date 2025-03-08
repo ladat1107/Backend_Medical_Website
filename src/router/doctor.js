@@ -1,18 +1,17 @@
 import express from 'express';
 
-import handBookController from '../controllers/handBookController';
-import scheduleController from '../controllers/scheduleController';
-import prescriptionController from '../controllers/prescriptionController';
-import diseaseController from '../controllers/diseaseController';
-import medicineController from '../controllers/medicineController';
-import examinationController from '../controllers/examinationController';
-import vitalSignController from '../controllers/vitalSignController';
-import paraclinicalController from '../controllers/paraclinicalController';
-import appointmentController from '../controllers/appointmentController';
-import staffController from '../controllers/staffController';
 
-import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
 import { examinationPayment, paraclinicalPayment, prescriptionPayment } from '../services/paymentService';
+import { checkTokenWithCookie } from '../Middleware/JWTAction';
+import { getStaffNameByIdController } from '../controllers/staffController';
+import { createHandBookController, getAllHandBooksController, updateHandBookController } from '../controllers/handBookController';
+import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleInWeekController } from '../controllers/scheduleController';
+import { getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
+import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
+import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
+import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, updateExaminationController } from '../controllers/examinationController';
+import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
+import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -26,70 +25,70 @@ let initDoctorRoute = (app) => {
     // router.put("/blockSpecialty", specialtyController.blockSpecialty)
     // router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
 
-    router.get("/getStaffNameById", staffController.getStaffNameById)
+    router.get("/getStaffNameById", getStaffNameByIdController)
 
     //--  HandBook
-    router.get("/getAllHandBooks", handBookController.getAllHandBooks)
-    router.post("/createHandBook", handBookController.createHandBook)
-    router.put("/updateHandBook", handBookController.updateHandBook)
+    router.get("/getAllHandBooks", getAllHandBooksController)
+    router.post("/createHandBook", createHandBookController)
+    router.put("/updateHandBook", updateHandBookController)
 
     //-- Schedule
-    router.get("/getAllSchedules", scheduleController.getAllSchedules)
-    router.get("/getScheduleByStaffId", scheduleController.getScheduleByStaffId)
-    router.get("/getScheduleInWeek", scheduleController.getScheduleInWeek)
+    router.get("/getAllSchedules", getAllSchedulesController)
+    router.get("/getScheduleByStaffId", getScheduleByStaffIdController)
+    router.get("/getScheduleInWeek", getScheduleInWeekController)
 
     //-- Prescription
-    router.get("/getPrescriptionByExaminationId", prescriptionController.getPrescriptionByExaminationId)
-    router.post("/upsertPrescription", prescriptionController.upsertPrescription)
+    router.get("/getPrescriptionByExaminationId", getPrescriptionByExaminationIdController)
+    router.post("/upsertPrescription", upsertPrescriptionController)
 
     //-- Disease
-    router.get("/getDiseaseByName", diseaseController.getDiseaseByName)
-    router.get("/getAllDisease", diseaseController.getAllDisease)
+    router.get("/getDiseaseByName", getDiseaseByNameController)
+    router.get("/getAllDisease", getAllDiseaseController)
 
     //-- Medicine
-    router.get("/getAllMedicines", medicineController.getAllMedicines)
-    router.get("/getAllMedicinesForExam", medicineController.getAllMedicinesForExam)
-    router.get("/getMedicineById", medicineController.getMedicineById)
+    router.get("/getAllMedicines", getAllMedicinesController)
+    router.get("/getAllMedicinesForExam", getAllMedicinesForExamController)
+    router.get("/getMedicineById", getMedicineByIdController)
 
     //-- Examination
-    router.get("/getExaminationById", examinationController.getExaminationById)
-    router.get("/getExaminationByUserId", examinationController.getExaminationByUserId)
-    router.post("/createExamination", examinationController.createExamination)
-    router.put("/updateExamination", examinationController.updateExamination)
-    router.put("/deleteExamination", examinationController.deleteExamination)
+    router.get("/getExaminationById", getExaminationByIdController)
+    router.get("/getExaminationByUserId", getExaminationByUserIdController)
+    router.post("/createExamination", createExaminationController)
+    router.put("/updateExamination", updateExaminationController)
+    router.put("/deleteExamination", deleteExaminationController)
 
     //-- VitalSign
-    router.get("/getVitalSignByExamId", vitalSignController.getVitalSignByExamId)
-    router.post("/createVitalSign", vitalSignController.createVitalSign)
-    router.put("/updateVitalSign", vitalSignController.updateVitalSign)
-    router.delete("/deleteVitalSign", vitalSignController.deleteVitalSign)
-    router.post("/createOrUpdateVitalSign", vitalSignController.createOrUpdateVitalSign)
+    router.get("/getVitalSignByExamId", getVitalSignByExamIdController)
+    router.post("/createVitalSign", createVitalSignController)
+    router.put("/updateVitalSign", updateVitalSignController)
+    router.delete("/deleteVitalSign", deleteVitalSignController)
+    router.post("/createOrUpdateVitalSign", createOrUpdateVitalSignController)
 
     //-- Paraclinical
-    router.get("/getParaclinicalByExamId", paraclinicalController.getParaclinicalByExamId)
-    router.post("/createParaclinical", paraclinicalController.createParaclinical)
-    router.put("/updateParaclinical", paraclinicalController.updateParaclinical)
-    router.delete("/deleteParaclinical", paraclinicalController.deleteParaclinical)
-    router.post("/createOrUpdateParaclinical", paraclinicalController.createOrUpdateParaclinical)
-    router.post("/createRequestParaclinical", paraclinicalController.createRequestParaclinical)
+    router.get("/getParaclinicalByExamId", getParaclinicalByExamIdController)
+    router.post("/createParaclinical", createParaclinicalController)
+    router.put("/updateParaclinical", updateParaclinicalController)
+    router.delete("/deleteParaclinical", deleteParaclinicalController)
+    router.post("/createOrUpdateParaclinical", createOrUpdateParaclinicalController)
+    router.post("/createRequestParaclinical", createRequestParaclinicalController)
 
     //-- Appointment
-    router.get("/getAllAppointments", appointmentController.getAllAppointments)
-    router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)
-    router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
-    router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
-    router.get("/searchAppointment", appointmentController.searchAppointment)
-    router.get("/searchAppointmentWithStaffId", appointmentController.seachAppointmentWithStaffId)
-    router.post("/createAppointment", appointmentController.createAppointment)
-    router.delete("/deleteAppointment", appointmentController.deleteAppointment)
+    // router.get("/getAllAppointments", appointmentController.getAllAppointments)
+    // router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)
+    // router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
+    // router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
+    // router.get("/searchAppointment", appointmentController.searchAppointment)
+    // router.get("/searchAppointmentWithStaffId", appointmentController.seachAppointmentWithStaffId)
+    // router.post("/createAppointment", appointmentController.createAppointment)
+    // router.delete("/deleteAppointment", appointmentController.deleteAppointment)
 
     //examination
-    router.get("/getExaminations", examinationController.getExaminations)
-    router.get("/getListToPay", examinationController.getListToPay)
-    router.get("/getParaclinicals", paraclinicalController.getParaclinicals)
-    router.get("/getPrescriptions", prescriptionController.getPrescriptions)
-    router.put("/updatePrescription", prescriptionController.updatePrescription)
-    router.put("/updateListPayParaclinicals", paraclinicalController.updateListPayParaclinicals)
+    router.get("/getExaminations", getExaminationsController)
+    router.get("/getListToPay", getListToPayController)
+    router.get("/getParaclinicals", getParaclinicalsController)
+    router.get("/getPrescriptions", getPrescriptionsController)
+    router.put("/updatePrescription", updatePrescriptionController)
+    router.put("/updateListPayParaclinicals", updateListPayParaclinicalsController)
 
     //Payment
     router.post("/paymentParaclinicalMomo", paraclinicalPayment)

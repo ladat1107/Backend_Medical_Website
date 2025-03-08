@@ -1,40 +1,23 @@
-import specialtyService from '../services/specialtyService';
-import { PAGINATE } from '../utils';
-let getSpecialtySelect = async (req, res) => {
+import { blockSpecialty, createSpecialty, deleteSpecialty, getAllSpecialtyAdmin, getSpcialtyHome, getSpecialtiesByDepartment, getSpecialtiesByLaboratory, getSpecialtyById, getSpecialtySelect, updateSpecialty } from '../services/specialtyService';
+export const getSpecialtySelectController = async (req, res) => {
     try {
-        let response = await specialtyService.getSpecialtySelect();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getSpecialtySelect();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getSpcialtyHome = async (req, res) => {
+export const getSpcialtyHomeController = async (req, res) => {
     try {
-        let response = await specialtyService.getSpcialtyHome(req.query);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getSpcialtyHome(req.query);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let createSpecialty = async (req, res) => {
+export const createSpecialtyController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.name || !data.image) {
@@ -44,22 +27,14 @@ let createSpecialty = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await specialtyService.createSpecialty(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await createSpecialty(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let updateSpecialty = async (req, res) => {
+export const updateSpecialtyController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
@@ -69,22 +44,14 @@ let updateSpecialty = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await specialtyService.updateSpecialty(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await updateSpecialty(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let blockSpecialty = async (req, res) => {
+export const blockSpecialtyController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
@@ -94,22 +61,14 @@ let blockSpecialty = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await specialtyService.blockSpecialty(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await blockSpecialty(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let deleteSpecialty = async (req, res) => {
+export const deleteSpecialtyController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id) {
@@ -119,51 +78,26 @@ let deleteSpecialty = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await specialtyService.deleteSpecialty(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await deleteSpecialty(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let getAllSpecialtyAdmin = async (req, res) => {
+export const getAllSpecialtyAdminController = async (req, res) => {
     try {
-        if (req.query.page && req.query.limit) {
-            let page = parseInt(req.query.page);
-            let limit = parseInt(req.query.limit);
-            let limitValue = 25;
-            for (let i = 0; i < PAGINATE.length; i++) {
-                if (PAGINATE[i].id === limit) {
-                    limitValue = PAGINATE[i].value;
-                    break;
-                }
-            }
-            let search = req.query.search;
-            let response = await specialtyService.getAllSpecialtyAdmin(page, limitValue, search);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }
+        let page = req.query?.page || 1;
+        let limit = req.query?.limit || 25;
+        let search = req.query?.search || "";
+        let response = await getAllSpecialtyAdmin(page, limit, search);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-let getSpecialtyById = async (req, res) => {
+export const getSpecialtyByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (!data || !data.id) {
@@ -173,68 +107,31 @@ let getSpecialtyById = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await specialtyService.getSpecialtyById(data.id);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getSpecialtyById(data.id);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getSpecialtiesByDepartment = async (req, res) => {
+export const getSpecialtiesByDepartmentController = async (req, res) => {
     try {
-        let response = await specialtyService.getSpecialtiesByDepartment();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getSpecialtiesByDepartment();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getSpecialtiesByLaboratory = async (req, res) => {
+export const getSpecialtiesByLaboratoryController = async (req, res) => {
     try {
         const labId = req.query.labId;
-        let response = await specialtyService.getSpecialtiesByLaboratory(labId);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getSpecialtiesByLaboratory(labId);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    createSpecialty,
-    getSpecialtySelect,
-    getSpcialtyHome,
-    updateSpecialty,
-    blockSpecialty,
-    deleteSpecialty,
-    getAllSpecialtyAdmin,
-    getSpecialtyById,
-    getSpecialtiesByDepartment,
-    getSpecialtiesByLaboratory
 }
