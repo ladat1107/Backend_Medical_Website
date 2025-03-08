@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllRoles = async () => {
+export const getAllRoles = async () => {
     try {
         let role = await db.Role.findAll({
             where: {
@@ -17,15 +17,11 @@ const getAllRoles = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getRoleById = async (roleId) => {
+export const getRoleById = async (roleId) => {
     try {
         let role = await db.Role.findOne({
             where: {
@@ -41,15 +37,11 @@ const getRoleById = async (roleId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createRole = async (roleData) => {
+export const createRole = async (roleData) => {
     try {
         let role = await db.Role.create({
             name: roleData.name,
@@ -62,15 +54,11 @@ const createRole = async (roleData) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateRole = async (roleData) => {
+export const updateRole = async (roleData) => {
     try {
         let role = await db.Role.update({
             name: roleData.name,
@@ -85,17 +73,6 @@ const updateRole = async (roleData) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllRoles,
-    getRoleById,
-    createRole,
-    updateRole
 }

@@ -131,7 +131,7 @@ let sendEmailNotification = (data) => {
             })
 
         } catch (error) {
-            console.log("Gửi mail lỗi");
+            console.log("Gửi mail lỗi", error);
             reject({
                 EC: 500,
                 EM: "Gửi mail lỗi"

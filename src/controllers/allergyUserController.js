@@ -1,8 +1,9 @@
-import allergyUserService from '../services/allergyUserService';
+import  { createAllergyUser, deleteAllergyUser, getAllAllergyUsers, getAllergyUserByAllergyId, getAllergyUserByUserId, updateAllergyUser } from '../services/allergyUserService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllAllergyUsers = async (req, res) => {
+export const getAllAllergyUsersController = async (req, res) => {
     try {
-        let response = await allergyUserService.getAllAllergyUsers();
+        let response = await getAllAllergyUsers();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,24 +11,16 @@ const getAllAllergyUsers = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getAllergyUserByUserId = async (req, res) => {
+export const getAllergyUserByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await allergyUserService.getAllergyUserByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAllergyUserByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +30,16 @@ const getAllergyUserByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getAllergyUserByAllergyId = async (req, res) => {
+export const getAllergyUserByAllergyIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.allergyId) {
-            let response = await allergyUserService.getAllergyUserByAllergyId(data.allergyId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAllergyUserByAllergyId(data.allergyId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +49,16 @@ const getAllergyUserByAllergyId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createAllergyUser = async (req, res) => {
+export const createAllergyUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.allergyId && data.discoveryDate) {
-            let response = await allergyUserService.createAllergyUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createAllergyUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +68,16 @@ const createAllergyUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateAllergyUser = async (req, res) => {
+export const updateAllergyUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.allergyId && data.discoveryDate) {
-            let response = await allergyUserService.updateAllergyUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateAllergyUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,24 +87,16 @@ const updateAllergyUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteAllergyUser = async (req, res) => {
+export const deleteAllergyUserController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId && data.allergyId) {
-            let response = await allergyUserService.deleteAllergyUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteAllergyUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -145,19 +106,6 @@ const deleteAllergyUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllAllergyUsers,
-    getAllergyUserByUserId,
-    getAllergyUserByAllergyId,
-    createAllergyUser,
-    updateAllergyUser,
-    deleteAllergyUser
 }

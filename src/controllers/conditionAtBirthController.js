@@ -1,15 +1,12 @@
-import conditionAtBirthService from '../services/conditionAtBirthService';
+import conditionAtBirthService, { createConditionAtBirth, deleteConditionAtBirth, getConditionAtBirthById, getConditionAtBirthByUserId, updateConditionAtBirth } from '../services/conditionAtBirthService';
+import { ERROR_SERVER } from '../utils';
 
-const getConditionAtBirthById = async (req, res) => {
+export const getConditionAtBirthByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await conditionAtBirthService.getConditionAtBirthById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getConditionAtBirthById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -19,24 +16,16 @@ const getConditionAtBirthById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getConditionAtBirthByUserId = async (req, res) => {
+export const getConditionAtBirthByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await conditionAtBirthService.getConditionAtBirthByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getConditionAtBirthByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -46,24 +35,16 @@ const getConditionAtBirthByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createConditionAtBirth = async (req, res) => {
+export const createConditionAtBirthController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.typeOfBirth && data.weight && data.height && data.detail) {
-            let response = await conditionAtBirthService.createConditionAtBirth(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createConditionAtBirth(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -73,24 +54,16 @@ const createConditionAtBirth = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateConditionAtBirth = async (req, res) => {
+export const updateConditionAtBirthController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.typeOfBirth && data.weight && data.height && data.detail) {
-            let response = await conditionAtBirthService.updateConditionAtBirth(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateConditionAtBirth(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -100,24 +73,16 @@ const updateConditionAtBirth = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteConditionAtBirth = async (req, res) => {
+export const deleteConditionAtBirthController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await conditionAtBirthService.deleteConditionAtBirth(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteConditionAtBirth(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -127,18 +92,6 @@ const deleteConditionAtBirth = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getConditionAtBirthById,
-    getConditionAtBirthByUserId,
-    createConditionAtBirth,
-    updateConditionAtBirth,
-    deleteConditionAtBirth
 }

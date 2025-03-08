@@ -1,16 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const insertMedicine = async () => {
-    try {
-
-    } catch (error) {
-        console.log(error);
-        console.log("Lỗi hệ thống");
-    }
-}
-
-const getAllMedicines = async () => {
+export const getAllMedicines = async () => {
     try {
         let medicines = await db.Medicine.findAll({
             where: { status: status.ACTIVE },
@@ -31,15 +22,11 @@ const getAllMedicines = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllMedicinesForExam = async () => {
+export const getAllMedicinesForExam = async () => {
     try {
         let medicines = await db.Medicine.findAll({
             where: { status: status.ACTIVE },
@@ -61,15 +48,11 @@ const getAllMedicinesForExam = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getMedicineById = async (id) => {
+export const getMedicineById = async (id) => {
     try {
         let medicine = await db.Medicine.findOne({
             where: { id: id },
@@ -90,15 +73,11 @@ const getMedicineById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createMedicine = async (data) => {
+export const createMedicine = async (data) => {
     try {
         let newMedicine = await db.Medicine.create({
             name: data.name,
@@ -124,15 +103,11 @@ const createMedicine = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateMedicine = async (data) => {
+export const updateMedicine = async (data) => {
     try {
         let medicine = await db.Medicine.update({
             name: data.name,
@@ -159,15 +134,11 @@ const updateMedicine = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateInventory = async (medicineId, quantityChange) => {
+export const updateInventory = async (medicineId, quantityChange) => {
     const medicine = await db.Medicine.findByPk(medicineId);
 
     if (medicine) {
@@ -175,11 +146,11 @@ const updateInventory = async (medicineId, quantityChange) => {
             inventory: medicine.inventory - quantityChange
         });
     } else {
-      console.warn(`Medicine with id ${medicineId} not found`);
+        console.warn(`Medicine with id ${medicineId} not found`);
     }
 }
 
-const deleteMedicine = async (id) => {
+export const deleteMedicine = async (id) => {
     try {
         let medicine = await db.Medicine.update({
             status: status.INACTIVE
@@ -193,21 +164,6 @@ const deleteMedicine = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    insertMedicine,
-    getAllMedicines,
-    getAllMedicinesForExam,
-    getMedicineById,
-    createMedicine,
-    updateMedicine,
-    updateInventory,
-    deleteMedicine
 }

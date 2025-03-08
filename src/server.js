@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Server } from "socket.io";
+import http from "http";
 
 import configViewEngine from './config/configViewEngine';
 import initAdminRoute from "./router/admin"
@@ -13,10 +15,11 @@ import connectDB from './config/connectDB';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
+import { emitNewDateTicket } from './services/socketService';
 require('dotenv').config();
 
 const app = express();
-
+const server = http.createServer(app);
 const corsOptions = {
     origin: process.env.REACT_APP_BACKEND_URL, // Chỉ cho phép yêu cầu từ URL được xác định trong REACT_URL
     methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE', // Các phương thức yêu cầu muốn cho phép
@@ -67,9 +70,20 @@ app.use(cookieParser());
 // Configure view engine
 configViewEngine(app);
 
-// Initialize web routes
-authenRoute(app,passport);
+// 🔥 Thêm Socket.io vào Server
+const io = new Server(server, { cors: corsOptions, });
 
+// Sự kiện Socket.io
+io.on("connection", (socket) => {
+    console.log(`🟢 Client connected: ${socket.id}`);
+    socket.on("disconnect", () => {
+        console.log(`🔴 Client disconnected: ${socket.id}`);
+    });
+});
+emitNewDateTicket(io);
+
+// Initialize web routes
+authenRoute(app, passport);
 initWebRounte(app);
 initWebRounte(app);
 initWebAuthenRounte(app);
@@ -78,12 +92,12 @@ initDoctorRoute(app)
 
 connectDB();
 
+
 let PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
 });
 
-//insertGroup();
-
+export { io };
 export default app;

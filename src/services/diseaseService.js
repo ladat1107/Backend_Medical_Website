@@ -1,8 +1,8 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 const { Op } = require('sequelize');
 
-const getDiseaseByName = async (name) => {
+export  const getDiseaseByName = async (name) => {
     try {
         let diseases = await db.Disease.findAll({
             where: {
@@ -33,15 +33,11 @@ const getDiseaseByName = async (name) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllDisease = async () => {
+export const getAllDisease = async () => {
     try {
         let diseases = await db.Disease.findAll({
             where: {
@@ -70,15 +66,6 @@ const getAllDisease = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getDiseaseByName,
-    getAllDisease
 }

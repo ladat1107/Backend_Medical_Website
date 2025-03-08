@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getAllSurgicalHistoryUser = async () => {
+export const getAllSurgicalHistoryUser = async () => {
     try {
         let surgicalHistoryUser = await db.SurgicalhistoryUser.findAll({
             include: [{
@@ -22,15 +23,11 @@ const getAllSurgicalHistoryUser = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getSurgicalHistoryUserByUserId = async (userId) => {
+export const getSurgicalHistoryUserByUserId = async (userId) => {
     try {
         let surgicalHistoryUser = await db.SurgicalhistoryUser.findAll({
             where: { userId: userId },
@@ -49,15 +46,11 @@ const getSurgicalHistoryUserByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getSurgicalHistoryUserBySurgicalHistoryId = async (surgicalHistoryId) => {
+export const getSurgicalHistoryUserBySurgicalHistoryId = async (surgicalHistoryId) => {
     try {
         let surgicalHistoryUser = await db.SurgicalhistoryUser.findAll({
             where: { surgicalhistoryId: surgicalHistoryId },
@@ -76,15 +69,11 @@ const getSurgicalHistoryUserBySurgicalHistoryId = async (surgicalHistoryId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createSurgicalHistoryUser = async (data) => {
+export const createSurgicalHistoryUser = async (data) => {
     try {
         await db.SurgicalhistoryUser.create({
             userId: data.userId,
@@ -100,15 +89,11 @@ const createSurgicalHistoryUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateSurgicalHistoryUser = async (data) => {
+export const updateSurgicalHistoryUser = async (data) => {
     try {
         await db.SurgicalhistoryUser.update({
             description: data.description,
@@ -124,15 +109,11 @@ const updateSurgicalHistoryUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteSurgicalHistoryUser = async (userId, surgicalhistoryId) => {
+export const deleteSurgicalHistoryUser = async (userId, surgicalhistoryId) => {
     try {
         await db.SurgicalhistoryUser.destroy({
             where: { userId: userId, surgicalhistoryId: surgicalhistoryId }
@@ -144,19 +125,6 @@ const deleteSurgicalHistoryUser = async (userId, surgicalhistoryId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllSurgicalHistoryUser,
-    getSurgicalHistoryUserByUserId,
-    getSurgicalHistoryUserBySurgicalHistoryId,
-    createSurgicalHistoryUser,
-    updateSurgicalHistoryUser,
-    deleteSurgicalHistoryUser
 }

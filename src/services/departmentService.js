@@ -1,10 +1,9 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models/index";
-import { status, typeRoom } from "../utils/index";
+import { ERROR_SERVER, status, typeRoom } from "../utils/index";
 import descriptionService from "./descriptionService";
-import { raw } from "body-parser";
 
-const getAllDepartment = async (page, limit, search) => {
+export const getAllDepartment = async (page, limit, search) => {
     try {
         let department = await db.Department.findAndCountAll({
             where: {
@@ -55,14 +54,10 @@ const getAllDepartment = async (page, limit, search) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentDuty = async () => {
+export const getDepartmentDuty = async () => {
     try {
         let department = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -97,14 +92,10 @@ const getDepartmentDuty = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentHome = async () => {
+export const getDepartmentHome = async () => {
     try {
         let departments = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -116,14 +107,10 @@ const getDepartmentHome = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getAllNameDepartment = async () => {
+export const getAllNameDepartment = async () => {
     try {
         let department = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -140,14 +127,10 @@ const getAllNameDepartment = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentById = async (departmentId) => {
+export const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -195,15 +178,11 @@ const getDepartmentById = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllStaffInDepartment = async (departmentId) => {
+export const getAllStaffInDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId, status: status.ACTIVE },
@@ -227,15 +206,11 @@ const getAllStaffInDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createDepartment = async (data) => {
+export const createDepartment = async (data) => {
     try {
         let descriptionId = await descriptionService.createDescription(data);
         if (descriptionId) {
@@ -263,14 +238,10 @@ const createDepartment = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const updateDepartment = async (data) => {
+export const updateDepartment = async (data) => {
     try {
         let department = await db.Department.findOne({
             where: { id: data.id },
@@ -308,15 +279,11 @@ const updateDepartment = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const blockDepartment = async (departmentId) => {
+export const blockDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -348,14 +315,10 @@ const blockDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteDepartment = async (departmentId) => {
+export const deleteDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -406,25 +369,8 @@ const deleteDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getOutpatientDepartments = async () => { }
 
-module.exports = {
-    getAllDepartment,
-    getDepartmentDuty,
-    getDepartmentById,
-    getAllStaffInDepartment,
-    createDepartment,
-    updateDepartment,
-    deleteDepartment,
-    getAllNameDepartment,
-    blockDepartment,
-    getDepartmentHome,
-}

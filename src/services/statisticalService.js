@@ -1,6 +1,5 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models/index";
-import { status } from "../utils";
 import dayjs from "dayjs";
 
 export const getStatisticalAppoinment = async (req, res) => {

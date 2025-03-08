@@ -1,6 +1,7 @@
 import db from '../models/index';
+import { ERROR_SERVER } from '../utils';
 
-const getConditionAtBirthById = async (id) => {
+export const getConditionAtBirthById = async (id) => {
     try {
         let getConditionAtBirth = await db.ConditionAtBirth.findOne({
             where: { id: id },
@@ -14,15 +15,11 @@ const getConditionAtBirthById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getConditionAtBirthByUserId = async (userId) => {
+export const getConditionAtBirthByUserId = async (userId) => {
     try {
         let getConditionAtBirth = await db.ConditionAtBirth.findOne({
             where: { userId: userId },
@@ -36,15 +33,11 @@ const getConditionAtBirthByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createConditionAtBirth = async (data) => {
+export const createConditionAtBirth = async (data) => {
     try {
         let createConditionAtBirth = await db.ConditionAtBirth.create({
             userId: data.userId,
@@ -60,15 +53,11 @@ const createConditionAtBirth = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateConditionAtBirth = async (data) => {
+export const updateConditionAtBirth = async (data) => {
     try {
         let updateConditionAtBirth = await db.ConditionAtBirth.update({
             typeOfBirth: data.typeOfBirth,
@@ -85,15 +74,11 @@ const updateConditionAtBirth = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteConditionAtBirth = async (id) => {
+export const deleteConditionAtBirth = async (id) => {
     try {
         let deleteConditionAtBirth = await db.ConditionAtBirth.destroy({
             where: { id: id }
@@ -105,18 +90,7 @@ const deleteConditionAtBirth = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-module.exports = {
-    getConditionAtBirthById,
-    getConditionAtBirthByUserId,
-    createConditionAtBirth,
-    updateConditionAtBirth,
-    deleteConditionAtBirth
-}

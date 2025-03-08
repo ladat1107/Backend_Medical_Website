@@ -1,7 +1,7 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import db from '../models/index';
-import { PAYMENT_METHOD, paymentStatus, status, TYPE_PAYMENT } from '../utils';
+import { ERROR_SERVER, PAYMENT_METHOD, paymentStatus, status, TYPE_PAYMENT } from '../utils';
 import prescriptionService from './prescriptionService';
 import { Op } from 'sequelize';
 require('dotenv').config();
@@ -76,11 +76,7 @@ export const paymentMomo = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
@@ -125,11 +121,7 @@ export const paymentMomoCallback = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
 
     }
 }
@@ -228,11 +220,7 @@ export const appoinmentPayment = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 export const examinationPayment = async (req, res) => {
@@ -266,11 +254,7 @@ export const examinationPayment = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 export const paraclinicalPayment = async (req, res) => {
@@ -318,11 +302,7 @@ export const paraclinicalPayment = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 export const prescriptionPayment = async (req, res) => {
@@ -356,11 +336,7 @@ export const prescriptionPayment = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 

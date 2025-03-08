@@ -1,5 +1,5 @@
 import express from 'express';
-import userController from '../controllers/userController';
+import  { handleConfirmController, handleForgotPasswordController, handleLoginController, handleLoginGoogleController, handleRegisterUserController } from '../controllers/userController';
 import { refreshToken } from "../Middleware/JWTAction"
 require('dotenv').config();
 let router = express.Router();
@@ -20,12 +20,12 @@ let authenRoute = (app, passport) => {
         passport.authenticate('google', { scope: ['profile', 'email'] })
     );
 
-    app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), userController.handleLoginGoogle);
+    app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), handleLoginGoogleController);
 
-    router.post("/registerUser", userController.handleRegisterUser)
-    router.post("/handleLogin", userController.handleLogin)
-    router.post("/confirmUser", userController.handleConfirm)
-    router.post("/forgotPassword", userController.handleForgotPassword)
+    router.post("/registerUser", handleRegisterUserController)
+    router.post("/handleLogin", handleLoginController)
+    router.post("/confirmUser", handleConfirmController)
+    router.post("/forgotPassword", handleForgotPasswordController)
     router.get("/refreshToken", refreshToken)
     return app.use("/api/", router);
 }

@@ -1,8 +1,8 @@
-import allgergyService from '../services/allergyService';
+import { createAllergy, deleteAllergy, getAllAllergies, getAllergyById, updateAllergy } from '../services/allergyService';
 
-const getAllAllergies = async (req, res) => {
+export const getAllAllergiesController = async (req, res) => {
     try {
-        let response = await allgergyService.getAllAllergies();
+        let response = await getAllAllergies();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -18,16 +18,12 @@ const getAllAllergies = async (req, res) => {
     }
 }
 
-const getAllergyById = async (req, res) => {
+export const getAllergyByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await allgergyService.getAllergyById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAllergyById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -45,16 +41,12 @@ const getAllergyById = async (req, res) => {
     }
 }
 
-const createAllergy = async (req, res) => {
+export const createAllergyController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.agent && data.diseaseManifestation) {
-            let response = await allgergyService.createAllergy(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createAllergy(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -72,16 +64,12 @@ const createAllergy = async (req, res) => {
     }
 }
 
-const updateAllergy = async (req, res) => {
+export const updateAllergyController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.agent && data.diseaseManifestation) {
-            let response = await allgergyService.updateAllergy(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateAllergy(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -99,16 +87,12 @@ const updateAllergy = async (req, res) => {
     }
 }
 
-const deleteAllergy = async (req, res) => {
+export const deleteAllergyController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await allgergyService.deleteAllergy(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteAllergy(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -126,10 +110,3 @@ const deleteAllergy = async (req, res) => {
     }
 }
 
-module.exports = {
-    getAllAllergies,
-    getAllergyById,
-    createAllergy,
-    updateAllergy,
-    deleteAllergy
-}

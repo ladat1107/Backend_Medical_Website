@@ -1,10 +1,10 @@
-import { raw } from "body-parser";
 import db from "../models/index";
 import { getTodayTimestamp } from "../utils/getTodayTimestamp";
 import examinationService from "./examinationService";
-const { Op } = require('sequelize');
+import { ERROR_SERVER } from "../utils";
+export const { Op } = require('sequelize');
 
-const getAllAppointments = async () => {
+export const getAllAppointments = async () => {
     try {
         let appointment = await db.Appointment.findAll({
             include: [{
@@ -31,15 +31,11 @@ const getAllAppointments = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllAppointmentsByDate = async (date) => {
+export const getAllAppointmentsByDate = async (date) => {
     try {
         let appointment = await db.Appointment.findAll({
             where: { date: +date },
@@ -67,15 +63,11 @@ const getAllAppointmentsByDate = async (date) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAppointmentByUserId = async (userId) => {
+export const getAppointmentByUserId = async (userId) => {
     try {
         let appointment = await db.Appointment.findAll({
             where: { userId: userId },
@@ -103,15 +95,11 @@ const getAppointmentByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAppointmentByStaffId = async (staffId) => {
+export const getAppointmentByStaffId = async (staffId) => {
     try {
         let appointment = await db.Appointment.findAll({
             where: { staffId: staffId },
@@ -139,21 +127,17 @@ const getAppointmentByStaffId = async (staffId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const seachAppointment = async (data) => {
+export const seachAppointment = async (data) => {
     try {
         if (!data.search) data.search = "";
         if (data.from == '') data.from = 0;
         if (data.to == '') data.to = getTodayTimestamp();
 
-        
+
 
         let appointment = await db.Appointment.findAll({
             where: {
@@ -195,15 +179,11 @@ const seachAppointment = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const seachAppointmentWithStaffId = async (data) => {
+export const seachAppointmentWithStaffId = async (data) => {
     try {
         if (!data.search) data.search = "";
 
@@ -276,15 +256,11 @@ const seachAppointmentWithStaffId = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createAppointment = async (data) => {
+export const createAppointment = async (data) => {
     try {
         let examinationResponse = await examinationService.createExamination(data);
 
@@ -317,15 +293,11 @@ const createAppointment = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteAppointment = async (data) => {
+export const deleteAppointment = async (data) => {
     try {
         let appointment = await db.Appointment.destroy({
             where: { userId: data.userId, staffId: data.staffId, date: data.date, cid: data.cid },
@@ -337,21 +309,6 @@ const deleteAppointment = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllAppointments,
-    getAllAppointmentsByDate,
-    getAppointmentByUserId,
-    getAppointmentByStaffId,
-    seachAppointment,
-    seachAppointmentWithStaffId,
-    createAppointment,
-    deleteAppointment,
 }

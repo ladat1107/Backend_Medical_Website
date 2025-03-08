@@ -1,13 +1,12 @@
-import { Op, or } from "sequelize";
+import { Op } from "sequelize";
 import db, { sequelize } from "../models/index";
-import { status } from "../utils/index";
-import { raw } from "body-parser";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllRooms = async (page, limit, search, searchDepartment) => {
+export const getAllRooms = async (page, limit, search, searchDepartment) => {
     try {
         let whereCondition = {};
         // Kiểm tra điều kiện departmentId
-        if (searchDepartment != 0) {
+        if (+searchDepartment !== 0) {
             whereCondition.departmentId = searchDepartment;
         }
         let countRoom = await db.Room.count();
@@ -40,8 +39,8 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
 
             ],
             order: [['createdAt', 'DESC']],
-            offset: (page - 1) * limit,
-            limit: limit,
+            offset: (+page - 1) * +limit,
+            limit: +limit,
             raw: false,
             nest: true,
         });
@@ -53,14 +52,10 @@ const getAllRooms = async (page, limit, search, searchDepartment) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getRoomByDepartment = async (departmentId) => {
+export const getRoomByDepartment = async (departmentId) => {
     try {
         let room = await db.Room.findAll({
             where: { departmentId: departmentId, status: status.ACTIVE },
@@ -87,15 +82,11 @@ const getRoomByDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getRoomById = async (roomId) => {
+export const getRoomById = async (roomId) => {
     try {
         let room = await db.Room.findOne({
             where: { id: roomId },
@@ -130,16 +121,12 @@ const getRoomById = async (roomId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createRoom = async (data) => {
-    const t = await sequelize.transaction(); // Khởi tạo transaction
+export const createRoom = async (data) => {
+     const t = await sequelize.transaction(); // Khởi tạo transaction
     try {
         // Tạo phòng
         let room = await db.Room.create({
@@ -187,15 +174,11 @@ const createRoom = async (data) => {
     } catch (error) {
         console.log(error);
         await t.rollback(); // Nếu có lỗi thì rollback transaction
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateRoom = async (data) => {
+export const updateRoom = async (data) => {
     let transaction = await sequelize.transaction();
     try {
         let room = await db.Room.update({
@@ -247,15 +230,11 @@ const updateRoom = async (data) => {
     } catch (error) {
         await transaction.rollback();
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const blockRoom = async (id) => {
+export const blockRoom = async (id) => {
     try {
         let room = await db.Room.update({
             status: status.INACTIVE,
@@ -269,14 +248,10 @@ const blockRoom = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteRoom = async (id) => {
+export const deleteRoom = async (id) => {
     try {
         let room = await db.Room.findOne({
             where: { id: id }
@@ -308,20 +283,7 @@ const deleteRoom = async (id) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-module.exports = {
-    getAllRooms,
-    getRoomByDepartment,
-    getRoomById,
-    createRoom,
-    updateRoom,
-    blockRoom,
-    deleteRoom
-}

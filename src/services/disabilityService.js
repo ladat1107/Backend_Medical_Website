@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllDisability = async () => {
+export const getAllDisability = async () => {
     try {
         let disbility = await db.Disability.findAll({
             where: { status: status.ACTIVE },
@@ -15,15 +15,11 @@ const getAllDisability = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getDisabilityById = async (disbilityId) => {
+export const getDisabilityById = async (disbilityId) => {
     try {
         let disbility = await db.Disability.findOne({
             where: { id: disbilityId },
@@ -37,15 +33,11 @@ const getDisabilityById = async (disbilityId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createDisability = async (data) => {
+export const createDisability = async (data) => {
     try {
         let newDisbility = await db.Disability.create({
             bodyPart: data.bodyPart,
@@ -58,15 +50,11 @@ const createDisability = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateDisability = async (data) => {
+export const updateDisability = async (data) => {
     try {
         let updateDisbility = await db.Disability.update({
             bodyPart: data.bodyPart,
@@ -80,15 +68,11 @@ const updateDisability = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteDisability = async (disbilityId) => {
+export const deleteDisability = async (disbilityId) => {
     try {
         let deleteDisbility = await db.Disability.update({
             status: status.INACTIVE
@@ -102,18 +86,6 @@ const deleteDisability = async (disbilityId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllDisability,
-    getDisabilityById,
-    createDisability,
-    updateDisability,
-    deleteDisability
 }

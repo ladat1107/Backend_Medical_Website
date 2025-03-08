@@ -1,8 +1,9 @@
-import appointmentService from '../services/appointmentService';
+import  { createAppointment, deleteAppointment, getAllAppointments, getAllAppointmentsByDate, getAppointmentByStaffId, getAppointmentByUserId, seachAppointment, seachAppointmentWithStaffId } from '../services/appointmentService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllAppointments = async (req, res) => {
+export const getAllAppointmentsController = async (req, res) => {
     try {
-        let response = await appointmentService.getAllAppointments();
+        let response = await getAllAppointments();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,24 +11,16 @@ const getAllAppointments = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getAllAppointmentsByDate = async (req, res) => {
+export const getAllAppointmentsByDateController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.date) {
-            let response = await appointmentService.getAllAppointmentsByDate(data.date);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAllAppointmentsByDate(data.date);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +30,16 @@ const getAllAppointmentsByDate = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getAppointmentByUserId = async (req, res) => {
+export const getAppointmentByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await appointmentService.getAppointmentByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAppointmentByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +49,16 @@ const getAppointmentByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getAppointmentByStaffId = async (req, res) => {
+export const getAppointmentByStaffIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.staffId) {
-            let response = await appointmentService.getAppointmentByStaffId(data.staffId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAppointmentByStaffId(data.staffId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +68,16 @@ const getAppointmentByStaffId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const searchAppointment = async (req, res) => {
+export const searchAppointmentController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.page && data.limit) {
-            let response = await appointmentService.seachAppointment(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await seachAppointment(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,24 +87,16 @@ const searchAppointment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const seachAppointmentWithStaffId = async (req, res) => {
+export const seachAppointmentWithStaffIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.page && data.limit && data.staffId) {
-            let response = await appointmentService.seachAppointmentWithStaffId(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await seachAppointmentWithStaffId(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -145,24 +106,16 @@ const seachAppointmentWithStaffId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createAppointment = async (req, res) => {
+export const createAppointmentController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.staffId && data.date && data.time && data.cid && data.symptom !== undefined && data.specialNote !== undefined) {
-            let response = await appointmentService.createAppointment(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createAppointment(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -172,24 +125,16 @@ const createAppointment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteAppointment = async (req, res) => {
+export const deleteAppointmentController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.staffId && data.date && data.cid) {
-            let response = await appointmentService.deleteAppointment(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteAppointment(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -199,21 +144,7 @@ const deleteAppointment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-module.exports = {
-    getAllAppointments,
-    getAllAppointmentsByDate,
-    getAppointmentByUserId,
-    getAppointmentByStaffId,
-    searchAppointment,
-    seachAppointmentWithStaffId,
-    createAppointment,
-    deleteAppointment
-}

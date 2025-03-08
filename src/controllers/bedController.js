@@ -1,8 +1,9 @@
-import bedService from '../services/bedService';
+import { createBed, deleteBed, getAllBeds, getBedById, getBedByRoom, getBedEmpty, updateBed } from '../services/bedService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllBeds = async (req, res) => {
+export const getAllBedsController = async (req, res) => {
     try {
-        let response = await bedService.getAllBeds();
+        let response = await getAllBeds();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,24 +11,16 @@ const getAllBeds = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getBedByRoom = async (req, res) => {
+export const getBedByRoomController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.roomId) {
-            let response = await bedService.getBedByRoom(data.roomId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getBedByRoom(data.roomId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +30,16 @@ const getBedByRoom = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getBedById = async (req, res) => {
+export const getBedByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await bedService.getBedById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getBedById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,17 +49,13 @@ const getBedById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getBedEmpty = async (req, res) => {
+export const getBedEmptyController = async (req, res) => {
     try {
-        let response = await bedService.getBedEmpty();
+        let response = await getBedEmpty();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -82,24 +63,16 @@ const getBedEmpty = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createBed = async (req, res) => {
+export const createBedController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.name && data.roomId) {
-            let response = await bedService.createBed(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createBed(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -109,24 +82,16 @@ const createBed = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateBed = async (req, res) => {
+export const updateBedController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.name && data.roomId) {
-            let response = await bedService.updateBed(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateBed(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -136,24 +101,16 @@ const updateBed = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteBed = async (req, res) => {
+export const deleteBedController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await bedService.deleteBed(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteBed(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -163,20 +120,7 @@ const deleteBed = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-module.exports = {
-    getAllBeds,
-    getBedByRoom,
-    getBedById,
-    getBedEmpty,
-    createBed,
-    updateBed,
-    deleteBed
-}

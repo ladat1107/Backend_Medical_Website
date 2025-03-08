@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getAllAllergyUsers = async () => {
+export const getAllAllergyUsers = async () => {
     try {
         let allergyUsers = await db.AllergyUser.findAll({
             include: [{
@@ -22,15 +23,11 @@ const getAllAllergyUsers = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllergyUserByUserId = async (userId) => {
+export const getAllergyUserByUserId = async (userId) => {
     try {
         let allergyUser = await db.AllergyUser.findOne({
             where: { userId: userId },
@@ -49,15 +46,11 @@ const getAllergyUserByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllergyUserByAllergyId = async (allergyId) => {
+export const getAllergyUserByAllergyId = async (allergyId) => {
     try {
         let allergyUser = await db.AllergyUser.findOne({
             where: { allergyId: allergyId },
@@ -76,15 +69,11 @@ const getAllergyUserByAllergyId = async (allergyId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createAllergyUser = async (data) => {
+export const createAllergyUser = async (data) => {
     try {
         let allergyUser = await db.AllergyUser.create({
             userId: data.userId,
@@ -98,15 +87,11 @@ const createAllergyUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateAllergyUser = async (data) => {
+export const updateAllergyUser = async (data) => {
     try {
         let allergyUser = await db.AllergyUser.update({
             discoveryDate: data.discoveryDate,
@@ -120,15 +105,11 @@ const updateAllergyUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteAllergyUser = async (data) => {
+export const deleteAllergyUser = async (data) => {
     try {
         await db.AllergyUser.destroy({
             where: { userId: data.userId, allergyId: data.allergyId },
@@ -140,19 +121,6 @@ const deleteAllergyUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllAllergyUsers,
-    getAllergyUserByUserId,
-    getAllergyUserByAllergyId,
-    createAllergyUser,
-    updateAllergyUser,
-    deleteAllergyUser,
 }

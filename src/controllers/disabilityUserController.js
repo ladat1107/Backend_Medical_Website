@@ -1,8 +1,9 @@
-import disabilityUserServices from '../services/disabilityUserService';
+import  { createDisabilityUser, deleteDisabilityUser, getAllDisabilityUser, getDisabilityUserByDisabilityId, getDisabilityUserByUserId, updateDisabilityUser } from '../services/disabilityUserService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllDisabilityUsers = async (req, res) => {
+export const getAllDisabilityUsersController = async (req, res) => {
     try {
-        let response = await disabilityUserServices.getAllDisabilityUser();
+        let response = await getAllDisabilityUser();
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -10,24 +11,16 @@ const getAllDisabilityUsers = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getDisabilityUserByUserId = async (req, res) => {
+export const getDisabilityUserByUserIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await disabilityUserServices.getDisabilityUserByUserId(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getDisabilityUserByUserId(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +30,16 @@ const getDisabilityUserByUserId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getDisabilityUserByDisabilityId = async (req, res) => {
+export const getDisabilityUserByDisabilityIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.disabilityId) {
-            let response = await disabilityUserServices.getDisabilityUserByDisabilityId(data.disabilityId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getDisabilityUserByDisabilityId(data.disabilityId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +49,16 @@ const getDisabilityUserByDisabilityId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createDisabilityUser = async (req, res) => {
+export const createDisabilityUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
-            let response = await disabilityUserServices.createDisabilityUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createDisabilityUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +68,16 @@ const createDisabilityUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateDisabilityUser = async (req, res) => {
+export const updateDisabilityUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.userId && data.disabilityId && data.description && data.medicalFacilityRecords) {
-            let response = await disabilityUserServices.updateDisabilityUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateDisabilityUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,24 +87,16 @@ const updateDisabilityUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteDisabilityUser = async (req, res) => {
+export const deleteDisabilityUserController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId && data.disabilityId) {
-            let response = await disabilityUserServices.deleteDisabilityUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteDisabilityUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -145,19 +106,6 @@ const deleteDisabilityUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllDisabilityUsers,
-    getDisabilityUserByUserId,
-    getDisabilityUserByDisabilityId,
-    createDisabilityUser,
-    updateDisabilityUser,
-    deleteDisabilityUser
 }

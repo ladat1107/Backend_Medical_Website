@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllSurgicalHistories = async () => {
+export const getAllSurgicalHistories = async () => {
     try {
         let surgicalHistory = await db.SurgicalHistory.findAll({
             where: { status: status.ACTIVE },
@@ -15,15 +15,11 @@ const getAllSurgicalHistories = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getSurgicalHistoryById = async (id) => {
+export const getSurgicalHistoryById = async (id) => {
     try {
         let surgicalHistory = await db.SurgicalHistory.findOne({
             where: {
@@ -39,15 +35,11 @@ const getSurgicalHistoryById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createSurgicalHistory = async (data) => {
+export const createSurgicalHistory = async (data) => {
     try {
         let surgicalHistory = await db.SurgicalHistory.create({
             diseaseName: data.diseaseName,
@@ -61,15 +53,11 @@ const createSurgicalHistory = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateSurgicalHistory = async (data) => {
+export const updateSurgicalHistory = async (data) => {
     try {
         let surgicalHistory = await db.SurgicalHistory.update({
             diseaseName: data.diseaseName,
@@ -86,15 +74,11 @@ const updateSurgicalHistory = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteSurgicalHistory = async (id) => {
+export const deleteSurgicalHistory = async (id) => {
     try {
         let surgicalHistory = await db.SurgicalHistory.update({
             status: status.INACTIVE,
@@ -110,18 +94,6 @@ const deleteSurgicalHistory = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllSurgicalHistories,
-    getSurgicalHistoryById,
-    createSurgicalHistory,
-    updateSurgicalHistory,
-    deleteSurgicalHistory
 }

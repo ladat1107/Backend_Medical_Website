@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getAllAllergies = async () => {
+export const getAllAllergies = async () => {
     try {
         let allergies = await db.Allergy.findAll({
             where: { status: status.ACTIVE },
@@ -15,15 +15,11 @@ const getAllAllergies = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllergyById = async (id) => {
+export const getAllergyById = async (id) => {
     try {
         let allergy = await db.Allergy.findOne({
             where: { id: id },
@@ -37,15 +33,11 @@ const getAllergyById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createAllergy = async (data) => {
+export const createAllergy = async (data) => {
     try {
         let allergy = await db.Allergy.create({
             agent: data.agent,
@@ -59,15 +51,11 @@ const createAllergy = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateAllergy = async (data) => {
+export const updateAllergy = async (data) => {
     try {
         let allergy = await db.Allergy.update({
             agent: data.agent,
@@ -82,15 +70,11 @@ const updateAllergy = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteAllergy = async (id) => {
+export const deleteAllergy = async (id) => {
     try {
         let allergy = await db.Allergy.update({
             status: status.INACTIVE,
@@ -104,18 +88,6 @@ const deleteAllergy = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllAllergies,
-    getAllergyById,
-    createAllergy,
-    updateAllergy,
-    deleteAllergy
 }

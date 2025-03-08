@@ -1,6 +1,7 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
 
-const getAllDisabilityUser = async () => {
+export const getAllDisabilityUser = async () => {
     try {
         let disabilityUser = await db.DisabilityUser.findAll({
             include: [{
@@ -22,15 +23,11 @@ const getAllDisabilityUser = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getDisabilityUserByUserId = async (userId) => {
+export const getDisabilityUserByUserId = async (userId) => {
     try {
         let disabilityUser = await db.DisabilityUser.findOne({
             where: { userId: userId },
@@ -49,15 +46,11 @@ const getDisabilityUserByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getDisabilityUserByDisabilityId = async (disabilityId) => {
+export const getDisabilityUserByDisabilityId = async (disabilityId) => {
     try {
         let disabilityUser = await db.DisabilityUser.findOne({
             where: { disabilityId: disabilityId },
@@ -76,15 +69,11 @@ const getDisabilityUserByDisabilityId = async (disabilityId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createDisabilityUser = async (data) => {
+export const createDisabilityUser = async (data) => {
     try {
         await db.DisabilityUser.create({
             userId: data.userId,
@@ -99,15 +88,11 @@ const createDisabilityUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateDisabilityUser = async (data) => {
+export const updateDisabilityUser = async (data) => {
     try {
         await db.DisabilityUser.update({
             description: data.description,
@@ -122,15 +107,11 @@ const updateDisabilityUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteDisabilityUser = async (data) => {
+export const deleteDisabilityUser = async (data) => {
     try {
         await db.DisabilityUser.destroy({
             where: { userId: data.userId, disabilityId: data.disabilityId }
@@ -142,19 +123,6 @@ const deleteDisabilityUser = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllDisabilityUser,
-    getDisabilityUserByUserId,
-    getDisabilityUserByDisabilityId,
-    createDisabilityUser,
-    updateDisabilityUser,
-    deleteDisabilityUser
 }

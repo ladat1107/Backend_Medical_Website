@@ -1,13 +1,12 @@
-import { raw } from "body-parser";
-// import { Op, Sequelize } from "sequelize";
+
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
+import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
-const { Op, ConnectionTimedOutError, Sequelize, where, or } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 
-const getExaminationById = async (id) => {
+export const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
             where: { id: +id },
@@ -46,7 +45,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid'],
+                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid', "currentResident"],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -56,7 +55,7 @@ const getExaminationById = async (id) => {
                 {
                     model: db.Staff,
                     as: 'examinationStaffData',
-                    attributes: ['id', 'departmentId'],
+                    attributes: ['id', 'departmentId', 'position'],
                     include: [{
                         model: db.User,
                         as: 'staffUserData',
@@ -85,19 +84,13 @@ const getExaminationById = async (id) => {
         };
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-
-const getExaminationByUserId = async (userId, filter) => {
+export const getExaminationByUserId = async (userId, filter) => {
     try {
         let statusReq = filter?.status || status.ACTIVE;
-        if (statusReq === status.PENDING) {
-        }
+        // if (statusReq === status.PENDING) { }
         let examinations = await db.Examination.findAll({
             where: {
                 [Op.or]: [
@@ -147,15 +140,10 @@ const getExaminationByUserId = async (userId, filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-
-const createExamination = async (data) => {
+export const createExamination = async (data) => {
     try {
         let staff = await db.Staff.findOne({
             where: {
@@ -220,14 +208,10 @@ const createExamination = async (data) => {
         };
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const updateExamination = async (data, userId) => {
+export const updateExamination = async (data, userId) => {
     try {
         let paymentObject = {};
         let existExamination = await db.Examination.findOne({
@@ -278,14 +262,10 @@ const updateExamination = async (data, userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteExamination = async (id) => {
+export const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
             where: { id: id },
@@ -340,14 +320,10 @@ const deleteExamination = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getExaminations = async (date, status, staffId, page, limit, search, time) => {
+export const getExaminations = async (date, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
 
@@ -489,7 +465,7 @@ const getExaminations = async (date, status, staffId, page, limit, search, time)
         };
     }
 };
-const getScheduleApoinment = async (filter) => {
+export const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
         const results = await db.Examination.findAll({
@@ -515,15 +491,11 @@ const getScheduleApoinment = async (filter) => {
         };
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const getListToPay = async (date, statusPay, page, limit, search) => {
+export const getListToPay = async (date, statusPay, page, limit, search) => {
     try {
         // Prepare base where conditions
         const whereConditionExamination = {};
@@ -742,14 +714,3 @@ const getListToPay = async (date, statusPay, page, limit, search) => {
         };
     }
 };
-
-module.exports = {
-    getExaminationById,
-    getExaminationByUserId,
-    createExamination,
-    updateExamination,
-    deleteExamination,
-    getExaminations,
-    getListToPay,
-    getScheduleApoinment,
-}

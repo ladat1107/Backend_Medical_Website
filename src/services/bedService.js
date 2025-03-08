@@ -1,8 +1,8 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 import Sequelize from "sequelize";
 
-const getAllBeds = async () => {
+export const getAllBeds = async () => {
     try {
         let bed = await db.Bed.findAll({
             where: { status: status.ACTIVE },
@@ -16,15 +16,11 @@ const getAllBeds = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getBedByRoom = async (roomId) => {
+export const getBedByRoom = async (roomId) => {
     try {
         let bed = await db.Bed.findAll({
             where: { roomId: roomId, status: status.ACTIVE },
@@ -59,15 +55,11 @@ const getBedByRoom = async (roomId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getBedEmpty = async () => {
+export const getBedEmpty = async () => {
     try {
         let bed = await db.Bed.findAll({
             include: [
@@ -104,15 +96,11 @@ const getBedEmpty = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getBedById = async (bedId) => {
+export const getBedById = async (bedId) => {
     try {
         let bed = await db.Bed.findOne({
             where: { id: bedId, status: status.ACTIVE },
@@ -138,15 +126,11 @@ const getBedById = async (bedId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createBed = async (data) => {
+export const createBed = async (data) => {
     try {
         let bed = await db.Bed.create({
             name: data.name,
@@ -160,15 +144,11 @@ const createBed = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateBed = async (data) => {
+export const updateBed = async (data) => {
     try {
         let bed = await db.Bed.update({
             name: data.name,
@@ -183,15 +163,11 @@ const updateBed = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteBed = async (bedId) => {
+export const deleteBed = async (bedId) => {
     try {
         let bed = await db.Bed.update({
             status: status.INACTIVE,
@@ -205,20 +181,6 @@ const deleteBed = async (bedId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getAllBeds,
-    getBedByRoom,
-    getBedEmpty,
-    getBedById,
-    createBed,
-    updateBed,
-    deleteBed,
 }
