@@ -24,7 +24,9 @@ import { getAllAllergiesController, getAllergyByIdController } from '../controll
 import { createAllergyUserController, deleteAllergyUserController, getAllAllergyUsersController, getAllergyUserByAllergyIdController, getAllergyUserByUserIdController, updateAllergyUserController } from '../controllers/allergyUserController';
 import { createConditionAtBirthController, deleteConditionAtBirthController, getConditionAtBirthByIdController, getConditionAtBirthByUserIdController, updateConditionAtBirthController } from '../controllers/conditionAtBirthController';
 import { createInsuranceController, deleteInsuranceController, getInsuranceByIdController, getInsuranceByUserIdController, updateInsuranceController } from '../controllers/insuranceController';
-require('dotenv').config();
+//import { sendNotification } from '../services/socketService';
+import dotenv from 'dotenv';
+dotenv.config();
 
 let router = express.Router();
 let initWebRounte = (app) => {
@@ -177,7 +179,6 @@ let initWebRounte = (app) => {
     router.get("/getCurrentNumber", getTickets)
     router.put("/generateNumber", generalNumber)
     router.put("/generateNumberCurrent", generalNumberCurrent)
-
 
     return app.use("/api/", router);
 }

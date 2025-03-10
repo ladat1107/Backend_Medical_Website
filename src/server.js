@@ -16,7 +16,9 @@ import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
 import { emitNewDateTicket } from './services/socketService';
-require('dotenv').config();
+import initNotificationRoute from './router/notification';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -76,10 +78,20 @@ const io = new Server(server, { cors: corsOptions, });
 // Sự kiện Socket.io
 io.on("connection", (socket) => {
     console.log(`🟢 Client connected: ${socket.id}`);
+
+    // Cho phép client đăng ký nhận thông báo riêng
+    socket.on("registerUser", (userId) => {
+        // Liên kết socket ID với user ID
+        socket.join(userId);
+    });
+
     socket.on("disconnect", () => {
         console.log(`🔴 Client disconnected: ${socket.id}`);
     });
 });
+
+
+
 emitNewDateTicket(io);
 
 // Initialize web routes
@@ -88,7 +100,8 @@ initWebRounte(app);
 initWebRounte(app);
 initWebAuthenRounte(app);
 initAdminRoute(app);
-initDoctorRoute(app)
+initDoctorRoute(app);
+initNotificationRoute(app);
 
 connectDB();
 

@@ -1,4 +1,4 @@
-import examinationService, { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getScheduleApoinment, updateExamination } from '../services/examinationService';
+import { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination } from '../services/examinationService';
 import { ERROR_SERVER } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -98,6 +98,7 @@ export const deleteExaminationController = async (req, res) => {
 export const getExaminationsController = async (req, res) => {
     try {
         let date = req.query.date || null;
+        let toDate = req.query.toDate || null;
         let status = req.query.status || null;
         let staffId = req.query.staffId || null;
         let time = req.query.time || null;
@@ -106,7 +107,7 @@ export const getExaminationsController = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await getExaminations(date, status, staffId, +page, +limit, search, time);
+        let response = await getExaminations(date, toDate, status, staffId, +page, +limit, search, time);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
@@ -143,5 +144,24 @@ export const getScheduleApoinmentController = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getPatienStepsController = async (req, res) => {
+    try {
+        let data = req.query.examId;
+        let response = await getPatienSteps(data);
+        return res.status(200).json({
+            EC: response.EC,
+            EM: response.EM,
+            DT: response.DT
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: 500,
+            EM: "Lỗi server!",
+            DT: ""
+        })
     }
 }

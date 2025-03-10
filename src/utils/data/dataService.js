@@ -1,4 +1,4 @@
-import { ERROR_SERVER } from "../../../dist/utils/constraints"
+import { ERROR_SERVER } from "../../utils/index"
 
 export const getServiceHome = (req, res) => {
     try {

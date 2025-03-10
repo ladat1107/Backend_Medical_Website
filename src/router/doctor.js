@@ -9,10 +9,11 @@ import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleI
 import { getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
 import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
 import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
-import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, updateExaminationController } from '../controllers/examinationController';
+import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getPatienStepsController, updateExaminationController } from '../controllers/examinationController';
 import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 let router = express.Router();
 let initDoctorRoute = (app) => {
@@ -56,6 +57,7 @@ let initDoctorRoute = (app) => {
     router.post("/createExamination", createExaminationController)
     router.put("/updateExamination", updateExaminationController)
     router.put("/deleteExamination", deleteExaminationController)
+    router.get("/getPatienSteps", getPatienStepsController)
 
     //-- VitalSign
     router.get("/getVitalSignByExamId", getVitalSignByExamIdController)

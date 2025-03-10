@@ -19,6 +19,13 @@ export const emitNewDateTicket = async (io) => {
         });
         io.emit(SOCKET.EMIT_UPDATE_TICKET_NEW_DAY);
     }
-
-
 };
+
+export const sendNotification = (io, message, type = 'default') => {
+    io.emit("receiveNotification", { 
+      message, 
+      type,
+      timestamp: new Date().toISOString()
+    });
+  };
+
