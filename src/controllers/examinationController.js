@@ -1,4 +1,4 @@
-import examinationService, { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getScheduleApoinment, updateExamination } from '../services/examinationService';
+import { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination } from '../services/examinationService';
 import { ERROR_SERVER } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -107,7 +107,7 @@ export const getExaminationsController = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await getExaminations(date, status, staffId, +page, +limit, search, time);
+        let response = await getExaminations(date, toDate, status, staffId, +page, +limit, search, time);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
@@ -147,10 +147,10 @@ export const getScheduleApoinmentController = async (req, res) => {
     }
 }
 
-const getPatienSteps = async (req, res) => {
+export const getPatienStepsController = async (req, res) => {
     try {
         let data = req.query.examId;
-        let response = await examinationService.getPatienSteps(data);
+        let response = await getPatienSteps(data);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -164,8 +164,4 @@ const getPatienSteps = async (req, res) => {
             DT: ""
         })
     }
-}
-
-module.exports = {
-    getPatienSteps
 }

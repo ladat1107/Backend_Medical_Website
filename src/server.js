@@ -15,9 +15,10 @@ import connectDB from './config/connectDB';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
-import { emitNewDateTicket, sendNotification } from './services/socketService';
+import { emitNewDateTicket } from './services/socketService';
 import initNotificationRoute from './router/notification';
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);

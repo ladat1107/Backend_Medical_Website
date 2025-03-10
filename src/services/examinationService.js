@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
-const { Op, Sequelize } = require('sequelize');
+import { Op, Sequelize } from 'sequelize';
 
 
 export const getExaminationById = async (id) => {
@@ -90,7 +90,10 @@ export const getExaminationById = async (id) => {
 export const getExaminationByUserId = async (userId, filter) => {
     try {
         let statusReq = filter?.status || status.ACTIVE;
-        // if (statusReq === status.PENDING) { }
+        if (statusReq === status.PENDING) {
+            //Chả nhớ
+        }
+
         let examinations = await db.Examination.findAll({
             where: {
                 [Op.or]: [
@@ -323,7 +326,7 @@ export const deleteExamination = async (id) => {
         return ERROR_SERVER
     }
 }
-export const getExaminations = async (date, status, staffId, page, limit, search, time) => {
+export const getExaminations = async (date, toDate, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
 
@@ -715,7 +718,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         };
     }
 };
-const getPatienSteps = async (examId) => {
+export const getPatienSteps = async (examId) => {
     try {
         const examination = await db.Examination.findOne({
             where: { id: examId },
@@ -807,8 +810,3 @@ const getPatienSteps = async (examId) => {
         };
     }
 };
-
-
-module.exports = {
-    getPatienSteps
-}
