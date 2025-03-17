@@ -20,10 +20,6 @@ export const getAllStaff = async () => {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }],
             raw: true,
             nest: true,
@@ -99,10 +95,6 @@ export const getStaffById = async (staffId) => {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }],
             raw: true,
             nest: true,
@@ -178,10 +170,6 @@ export const getStaffByRole = async (roleId) => {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }]
         });
 
@@ -230,27 +218,17 @@ export const getStaffByName = async (name) => {
 
 export const createStaff = async (data, userId) => {
     try {
-        let positionInsert = ""
-        if (data.position) {
-            positionInsert = data.position.toString();
-        }
-        let descriptionId = await descriptionService.createDescription(data);
-        if (descriptionId) {
-            await db.Staff.create({
-                price: data?.price || 0,
-                position: positionInsert,
-                departmentId: data.departmentId,
-                shortDescription: data?.shortDescription || null,
-                specialtyId: data?.specialtyId || null,
-                status: status.ACTIVE,
-                descriptionId: descriptionId,
-                userId: userId
-            });
-            return true;
-        } else {
-            await descriptionService.deleteDescription(descriptionId);
-            return false;
-        }
+        await db.Staff.create({
+            price: data?.price || 0,
+            position: data?.position ? data.position.toString() : "",
+            departmentId: data.departmentId,
+            shortDescription: data?.shortDescription || null,
+            specialtyId: data?.specialtyId || null,
+            status: status.ACTIVE,
+            htmlDescription: data?.htmlDescription || null,
+            userId: userId
+        });
+        return true;
     } catch (error) {
         console.log(error);
         return false;
@@ -262,45 +240,31 @@ export const updateStaff = async (data) => {
             where: { userId: data.id }
         });
         if (staff) {
-            let description = await descriptionService.updateDescription(data, staff.descriptionId);
-            if (description) {
-                await staff.update({
-                    price: data.price,
-                    position: data.position,
-                    shortDescription: data?.shortDescription || null,
-                    specialtyId: data?.specialtyId,
-                    departmentId: data.departmentId,
-                });
-                return true
-            } else {
-                return false;
-            }
+            await staff.update({
+                price: data.price,
+                position: data.position,
+                shortDescription: data?.shortDescription || null,
+                specialtyId: data?.specialtyId,
+                htmlDescription: data?.htmlDescription || null,
+            });
+            return true
         }
-        else {
-            return false;
-        }
+        else return false;
     } catch (error) {
         console.log(error);
         return false;
     }
 }
 export const profileStaff = async (data) => {
-    let transaction = await sequelize.transaction();
     try {
-        await db.Description.update({
-            markDownContent: data.markDownContent,
-            htmlContent: data.htmlContent
-        }, {
-            where: { id: data.descriptionId }
-        }, { transaction });
         await db.Staff.update({
             shortDescription: data?.shortDescription || null,
+            htmlDescription: data?.htmlDescription || null,
             specialtyId: data?.specialtyId || null,
             position: data?.position?.toString() || null,
         }, {
             where: { id: data.id }
-        }, { transaction });
-        await transaction.commit();
+        });
         return {
             EC: 0,
             EM: "Cập nhật hồ sơ thành công",
@@ -308,7 +272,6 @@ export const profileStaff = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        await transaction.rollback();
         return ERROR_SERVER
     }
 }

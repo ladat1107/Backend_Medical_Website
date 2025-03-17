@@ -72,7 +72,7 @@ export const getAllStaffInDepartmentController = async (req, res) => {
 export const createDepartmentController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.image && data.deanId && data.address && data.markDownContent && data.htmlContent) {
+        if (data && data.name && data.image && data.deanId && data.address) {
             let response = await createDepartment(data);
             return res.status(200).json(response)
         } else {
@@ -92,7 +92,7 @@ export const updateDepartmentController = async (req, res) => {
     try {
         let data = req.body
         if (data && data.id && data.name && data.image && data.deanId && data.address
-            && data.markDownContent && data.htmlContent) {
+            && data.htmlDescription) {
             let response = await updateDepartment(data)
             return res.status(200).json(response)
         } else {
