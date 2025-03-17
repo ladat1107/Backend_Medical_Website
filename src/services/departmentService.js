@@ -135,12 +135,6 @@ export const getDepartmentById = async (departmentId) => {
         let department = await db.Department.findOne({
             where: { id: departmentId },
             include: [{
-                model: db.Description,
-                as: 'departmentDescriptionData',
-                attributes: ['markDownContent', 'htmlContent'],
-                required: false,
-                where: { status: status.ACTIVE },
-            }, {
                 model: db.Staff,
                 as: 'deanDepartmentData',
                 attributes: ['id', 'position'],
@@ -212,29 +206,19 @@ export const getAllStaffInDepartment = async (departmentId) => {
 
 export const createDepartment = async (data) => {
     try {
-        let descriptionId = await descriptionService.createDescription(data);
-        if (descriptionId) {
-            let department = await db.Department.create({
-                name: data?.name,
-                image: data?.image,
-                deanId: data?.deanId,
-                shortDescription: data?.shortDescription,
-                status: status.ACTIVE,
-                descriptionId: descriptionId,
-                address: data?.address
-            });
-            return {
-                EC: 0,
-                EM: "Tạo phòng ban thành công",
-                DT: department
-            }
-        } else {
-            await descriptionService.deleteDescription(descriptionId);
-            return {
-                EC: 500,
-                EM: "Tạo phòng ban thất bại",
-                DT: "",
-            }
+        let department = await db.Department.create({
+            name: data?.name,
+            image: data?.image,
+            deanId: data?.deanId,
+            shortDescription: data?.shortDescription,
+            status: status.ACTIVE,
+            address: data?.address,
+            htmlDescription: data?.htmlDescription || null,
+        });
+        return {
+            EC: 0,
+            EM: "Tạo phòng ban thành công",
+            DT: department
         }
     } catch (error) {
         console.log(error);
@@ -243,39 +227,21 @@ export const createDepartment = async (data) => {
 }
 export const updateDepartment = async (data) => {
     try {
-        let department = await db.Department.findOne({
+        let department = await db.Department.update({
+            name: data.name,
+            image: data?.image,
+            deanId: data.deanId,
+            shortDescription: data?.shortDescription,
+            htmlDescription: data?.htmlDescription || null,
+            status: data?.status,
+            address: data?.address
+        }, {
             where: { id: data.id },
         });
-        if (department) {
-            let description = await descriptionService.updateDescription(data, department.descriptionId);
-            if (description) {
-                await department.update({
-                    name: data.name,
-                    image: data?.image,
-                    deanId: data.deanId,
-                    shortDescription: data?.shortDescription,
-                    descriptionId: description.id,
-                    status: data?.status,
-                    address: data?.address
-                });
-                return {
-                    EC: 0,
-                    EM: "Cập nhật phòng ban thành công",
-                    DT: department
-                }
-            } else {
-                return {
-                    EC: 500,
-                    EM: "Cập nhật phòng ban thất bại",
-                    DT: "",
-                }
-            }
-        } else {
-            return {
-                EC: 404,
-                EM: "Không tìm thấy phòng ban",
-                DT: "",
-            }
+        return {
+            EC: 0,
+            EM: "Cập nhật phòng ban thành công",
+            DT: department
         }
     } catch (error) {
         console.log(error);
@@ -335,38 +301,13 @@ export const deleteDepartment = async (departmentId) => {
             await db.Room.update(
                 { departmentId: 1 }, // Giá trị cần cập nhật
                 {
-                    where: {
-                        departmentId: department.id
-                    }
+                    where: { departmentId: department.id }
                 }
             );
-            let description = await db.Description.destroy({
-                where: { id: department.descriptionId }
-            });
-            if (description) {
-                await db.Department.destroy({
-                    where: {
-                        id: department.id,
-                    },
-                });
-                return {
-                    EC: 0,
-                    EM: "Xóa phòng ban thành công",
-                    DT: department
-                }
-            } else {
-                return {
-                    EC: 500,
-                    EM: "Xóa phòng ban thất bại",
-                    DT: "",
-                }
-            }
-        }
-        return {
-            EC: 404,
-            EM: "Không tìm thấy phòng ban",
-            DT: "",
-        }
+            await db.Department.destroy({ where: { id: department.id } });
+
+            return { EC: 0, EM: "Xóa phòng ban thành công", DT: department }
+        } else return { EC: 400, EM: "Không tìm thấy phòng ban", DT: "", }
     } catch (error) {
         console.log(error);
         return ERROR_SERVER

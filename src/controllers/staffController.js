@@ -1,4 +1,4 @@
-import  { getAllStaff, getStaffbyDepartmentId, getStaffById, getStaffByName, getStaffByRole, getStaffNameById, profileStaff } from '../services/staffService';
+import { getAllStaff, getStaffbyDepartmentId, getStaffById, getStaffByName, getStaffByRole, getStaffNameById, profileStaff } from '../services/staffService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllStaffController = async (req, res) => {
@@ -108,7 +108,7 @@ export const getStaffByNameController = async (req, res) => {
 export const profileStaffController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.descriptionId && data.markDownContent && data.htmlContent && data.shortDescription) {
+        if (data && data.id && data.htmlDescription && data.shortDescription) {
             let response = await profileStaff(data);
             res.status(200).json(response);
         } else {

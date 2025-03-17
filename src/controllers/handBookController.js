@@ -1,4 +1,4 @@
-import  { createHandBook, getAllHandBooks, getHandbookAdmin, getHandBookById, getHandBookHome, updateHandBook, updateHandbookStatus } from '../services/handBookService';
+import { createHandBook, getAllHandBooks, getHandbookAdmin, getHandBookById, getHandBookHome, updateHandBook, updateHandbookStatus } from '../services/handBookService';
 import { ERROR_SERVER, ROLE } from '../utils';
 
 export const getAllHandBooksController = async (req, res) => {
@@ -70,7 +70,7 @@ export const createHandBookController = async (req, res) => {
         let data = req.body;
         data.author = req.user.staff;
         if (data && data.title && data.author && data.image
-            && data.htmlContent && data.markDownContent) {
+            && data.htmlDescription) {
             let response = await createHandBook(data);
             return res.status(200).json({
                 EC: response.EC,
@@ -95,7 +95,7 @@ export const updateHandBookController = async (req, res) => {
         let data = req.body;
         data.author = req.user.staff;
         if (data && data.id && data.title && data.author && data.image
-            && data.htmlContent && data.markDownContent) {
+            && data.htmlDescription) {
             let response = await updateHandBook(data);
             return res.status(200).json({
                 EC: response.EC,

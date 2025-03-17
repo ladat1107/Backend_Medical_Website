@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { Op } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
-import staffService from "./staffService";
+import staffService, { createStaff } from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
@@ -167,7 +167,7 @@ export const checkCid = async (cid) => {
 
 export const checkDuplicateFields = async (email, phoneNumber, cid) => {
     try {
-         const result = await db.User.findOne({
+        const result = await db.User.findOne({
             where: {
                 [Op.or]: [
                     { email },
@@ -298,13 +298,8 @@ export const getUserById = async (userId) => {
                 {
                     model: db.Staff,
                     as: "staffUserData",
-                    attributes: ["id", "price", "position", "departmentId", "specialtyId", "shortDescription"],
+                    attributes: ["id", "price", "position", "departmentId", "specialtyId", "shortDescription", "htmlDescription"],
                     include: [
-                        {
-                            model: db.Description,
-                            as: "staffDescriptionData",
-                            attributes: ["id", "markDownContent", "htmlContent"],
-                        },
                         {
                             model: db.Department,
                             as: 'staffDepartmentData',
@@ -420,7 +415,7 @@ export const createUser = async (data) => {
             }
         }
         if (data.staff) {
-         const staff = await staffService.createStaff(data, user.id);
+            const staff = await createStaff(data, user.id);
             if (!staff) {
                 await db.User.destroy({
                     where: { id: user.id }
@@ -447,11 +442,7 @@ export const createUser = async (data) => {
                         DT: "",
                     }
                 } else {
-                    return {
-                        EC: 200,
-                        EM: "Gửi email thất bại",
-                        DT: "",
-                    }
+                    return { EC: 200, EM: "Gửi email thất bại", DT: "", }
                 }
             }
         } else {
@@ -515,19 +506,15 @@ export const updateUser = async (data) => {
             }, {
                 where: { id: data.id },
             }, { transaction });
-            if (data.descriptionId) { // Nếu có descriptionId thì cập nhật thông tin Staff
-                await db.Description.update({
-                    markDownContent: data?.markDownContent,
-                    htmlContent: data?.htmlContent,
-                }, {
-                    where: { id: data.descriptionId },
-                }, { transaction });
+
+            if (data.staffId) { // Nếu có departmentId thì cập nhật thông tin Staff                
                 await db.Staff.update({
                     price: data?.price || null,
                     shortDescription: data?.shortDescription || null,
                     position: data?.position?.toString(),
                     departmentId: data?.departmentId,
                     specialtyId: data?.specialtyId || null,
+                    htmlDescription: data?.htmlDescription || null,
                 }, {
                     where: { userId: data.id },
                 }, { transaction });
@@ -587,13 +574,25 @@ export const blockUser = async (data) => {
     }
 }
 export const deleteUser = async (userId) => {
+    let transaction = await db.sequelize.transaction();;
     try {
         let user = await db.User.findOne({
             where: { id: userId },
         });
         if (user) {
             let name = user.lastName + " " + user.firstName;
-            await user.destroy();
+            let staff = await db.Staff.findOne({
+                where: { userId: userId },
+            })
+            if (staff) {
+                await db.Staff.destroy({
+                    where: { userId: userId },
+                }, { transaction });
+            }
+            await db.User.destroy({
+                where: { id: userId },
+            }, { transaction });
+            await transaction.commit();
             return {
                 EC: 0,
                 EM: `Xóa người dùng ${name} thành công`,
@@ -607,6 +606,7 @@ export const deleteUser = async (userId) => {
         }
     } catch (error) {
         console.log(error);
+        await transaction.rollback();
         return ERROR_SERVER
     }
 }

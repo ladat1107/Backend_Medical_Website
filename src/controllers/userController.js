@@ -158,7 +158,7 @@ export const createUserController = async (req, res) => {
         if (data) {
             let arr = ["lastName", "firstName", "cid", "roleId"];
             if ([3, 4, 5, 6, 7].includes(data.roleId)) {
-                arr.push("phoneNumber", "email", "markDownContent", "departmentId")
+                arr.push("phoneNumber", "email", "departmentId")
                 data.staff = true;
             }
             for (let i = 0; i < arr.length; i++) {

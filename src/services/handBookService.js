@@ -206,12 +206,6 @@ export const getHandBookById = async (handBookId, role) => {
             where: { id: handBookId },
             include: [
                 {
-                    model: db.Description,
-                    as: 'handbookDescriptionData',
-                    attributes: ['markDownContent', 'htmlContent'],
-                    where: { status: status.ACTIVE },
-                },
-                {
                     model: db.Staff,
                     as: 'handbookStaffData',
                     attributes: ['id', 'position'],
@@ -256,29 +250,19 @@ export const getHandBookById = async (handBookId, role) => {
 
 export const createHandBook = async (data) => {
     try {
-        let descriptionId = await descriptionService.createDescription(data);
-        if (descriptionId) {
-            let handBook = await db.Handbook.create({
-                title: data.title,
-                author: data.author,
-                image: data.image,
-                shortDescription: data?.shortDescription || null,
-                tags: data.tags || null,
-                status: status.PENDING,
-                descriptionId: descriptionId
-            });
-            return {
-                EC: 0,
-                EM: "Tạo cẩm nang thành công",
-                DT: handBook
-            }
-        } else {
-            await descriptionService.deleteDescription(descriptionId);
-            return {
-                EC: 500,
-                EM: "Tạo cẩm nang thất bại",
-                DT: "",
-            }
+        let handBook = await db.Handbook.create({
+            title: data.title,
+            author: data.author,
+            image: data.image,
+            shortDescription: data?.shortDescription || null,
+            tags: data.tags || null,
+            status: status.PENDING,
+            htmlDescription: data?.htmlDescription || null,
+        });
+        return {
+            EC: 0,
+            EM: "Tạo cẩm nang thành công",
+            DT: handBook
         }
     } catch (error) {
         console.log(error);
@@ -293,39 +277,19 @@ export const updateHandBook = async (data) => {
         });
         if (handBook) {
             if (handBook.author === data.author) {
-                let description = await descriptionService.updateDescription(data, handBook.descriptionId);
-                if (description) {
-                    await handBook.update({
-                        title: data.title,
-                        image: data.image,
-                        shortDescription: data?.shortDescription || null,
-                        tags: data.tags || null,
-                    });
-                    return {
-                        EC: 0,
-                        EM: "Cập nhật cẩm nang thành công",
-                        DT: handBook
-                    }
-                } else {
-                    return {
-                        EC: 500,
-                        EM: "Cập nhật cẩm nang thất bại",
-                        DT: "",
-                    }
-                }
+                await handBook.update({
+                    title: data.title,
+                    image: data.image,
+                    shortDescription: data?.shortDescription || null,
+                    htmlDescription: data?.htmlDescription || null,
+                    tags: data.tags || null,
+                });
+                return { EC: 0, EM: "Cập nhật cẩm nang thành công", DT: handBook }
             } else {
-                return {
-                    EC: 403,
-                    EM: "Cẩm nang không thuộc quyền sở hữu của bạn",
-                    DT: "",
-                }
+                return { EC: 403, EM: "Cẩm nang không thuộc quyền sở hữu của bạn", DT: "", }
             }
         } else {
-            return {
-                EC: 404,
-                EM: "Không tìm thấy cẩm nang",
-                DT: "",
-            }
+            return { EC: 404, EM: "Không tìm thấy cẩm nang", DT: "", }
         }
     } catch (error) {
         console.log(error);
