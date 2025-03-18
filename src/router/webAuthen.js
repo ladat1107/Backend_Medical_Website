@@ -1,5 +1,5 @@
 import express from 'express';
-import userController, { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
+import userController, { confirmBookingController, confirmTokenBookingController, getAllUserToNotifyController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
 import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
@@ -22,6 +22,8 @@ let initWebAuthenRounte = (app) => {
 
     router.get("/paymentAppoinmentMomo", appoinmentPayment)
     router.post("/callback", paymentMomoCallback)
+
+    router.get("/getAllUserToNotify", getAllUserToNotifyController)
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;

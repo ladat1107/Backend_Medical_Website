@@ -7,15 +7,16 @@ import session from 'express-session';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Server } from "socket.io";
 import http from "http";
+import jwt from 'jsonwebtoken';
 
 import configViewEngine from './config/configViewEngine';
-import initAdminRoute from "./router/admin"
-import initDoctorRoute from "./router/doctor"
+import initAdminRoute from "./router/admin";
+import initDoctorRoute from "./router/doctor";
 import connectDB from './config/connectDB';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
-import { emitNewDateTicket } from './services/socketService';
+import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
 import initNotificationRoute from './router/notification';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -23,10 +24,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const corsOptions = {
-    origin: process.env.REACT_APP_BACKEND_URL, // Chỉ cho phép yêu cầu từ URL được xác định trong REACT_URL
-    methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE', // Các phương thức yêu cầu muốn cho phép
-    allowedHeaders: 'X-Requested-With, content-type, Authorization', // Các header  muốn cho phép
-    credentials: true // Cho phép gửi cookie cùng với yêu cầu
+    origin: process.env.REACT_APP_BACKEND_URL,
+    methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+    allowedHeaders: 'X-Requested-With, content-type, Authorization',
+    credentials: true
 };
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -38,14 +39,14 @@ app.use(bodyParser.urlencoded({
 // Cấu hình express-session
 app.use(
     session({
-        secret: process.env.SECRET_SESSION, // Một chuỗi bí mật dùng để mã hóa session
-        resave: false, // Không lưu lại session nếu không thay đổi
-        saveUninitialized: true, // Lưu session ngay cả khi chưa khởi tạo
+        secret: process.env.SECRET_SESSION,
+        resave: false,
+        saveUninitialized: true,
     })
 );
 
 app.use(passport.initialize());
-app.use(passport.session()); // Sử dụng session để lưu trữ phiên
+app.use(passport.session());
 
 // Passport setup (cấu hình Google OAuth)
 passport.use(
@@ -56,7 +57,6 @@ passport.use(
             callbackURL: '/auth/google/callback',
         },
         (accessToken, refreshToken, profile, done) => {
-            // Thông tin người dùng nhận từ Google ==> console.log('Google Profile:', profile);
             done(null, profile);
         }
     )
@@ -72,31 +72,45 @@ app.use(cookieParser());
 // Configure view engine
 configViewEngine(app);
 
-// 🔥 Thêm Socket.io vào Server
-const io = new Server(server, { cors: corsOptions, });
+// Khởi tạo Socket.io
+const io = new Server(server, {
+    cors: {
+        origin: process.env.REACT_APP_BACKEND_URL || "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
 
-// Sự kiện Socket.io
-io.on("connection", (socket) => {
-    console.log(`🟢 Client connected: ${socket.id}`);
-
-    // Cho phép client đăng ký nhận thông báo riêng
-    socket.on("registerUser", (userId) => {
-        // Liên kết socket ID với user ID
-        socket.join(userId);
-    });
-
-    socket.on("disconnect", () => {
-        console.log(`🔴 Client disconnected: ${socket.id}`);
+// Xử lý kết nối Socket.io
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+    
+    // Xác thực và đăng ký người dùng
+    socket.on('authenticate', (token) => {
+        try {
+            // Verify token để lấy userId
+            const decoded = jwt.verify(token, process.env.SECURITY_KEY);
+            const userId = decoded.id;
+            
+            // Đăng ký socket cho người dùng
+            registerUserSocket(socket, userId);
+            
+            // Setup xử lý khi ngắt kết nối
+            socket.on('disconnect', () => {
+                removeUserSocket(userId);
+                console.log('User disconnected:', socket.id);
+            });
+        } catch (error) {
+            console.error('Authentication error:', error);
+        }
     });
 });
 
-
-
+// Khởi tạo các chức năng socket
 emitNewDateTicket(io);
 
 // Initialize web routes
 authenRoute(app, passport);
-initWebRounte(app);
 initWebRounte(app);
 initWebAuthenRounte(app);
 initAdminRoute(app);
@@ -104,7 +118,6 @@ initDoctorRoute(app);
 initNotificationRoute(app);
 
 connectDB();
-
 
 let PORT = process.env.PORT || 3000;
 
