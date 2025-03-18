@@ -21,11 +21,41 @@ export const emitNewDateTicket = async (io) => {
     }
 };
 
-export const sendNotification = (io, message, type = 'default') => {
-    io.emit("receiveNotification", { 
-      message, 
-      type,
-      timestamp: new Date().toISOString()
+// services/socketService.js
+export const NotificationType = {
+    DEFAULT: 'default',
+    SUCCESS: 'success',
+    WARNING: 'warning',
+    ERROR: 'error'
+};
+  
+const userSocketMap = new Map();
+
+export const registerUserSocket = (socket, userId) => {
+if (userId) {
+    userSocketMap.set(userId, socket);
+    console.log(`User ${userId} connected with socket ${socket.id}`);
+}};
+
+export const removeUserSocket = (userId) => {
+if (userId && userSocketMap.has(userId)) {
+    userSocketMap.delete(userId);
+    console.log(`User ${userId} disconnected`);
+}};
+
+export const sendNotification = (io, message, type = NotificationType.DEFAULT, recipients = []) => {
+if (recipients && recipients.length > 0) {
+    recipients.forEach(userId => {
+        const userSocket = userSocketMap.get(userId);
+        if (userSocket) {
+            userSocket.emit('notification', { message, type });
+            console.log(`Notification sent to user ${userId}`);
+        } else {
+            console.log(`User ${userId} is not connected`);
+        }
     });
-  };
+} else {
+    io.emit('notification', { message, type });
+    console.log('Notification sent to all users');
+}};
 
