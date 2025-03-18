@@ -1,5 +1,5 @@
 import { getExaminations } from '../services/examinationService';
-import  { createOrUpdateParaclinical, createParaclinical, createRequestParaclinical, deleteParaclinical, getParaclinicalByExamId, getParaclinicals, updateListPayParaclinicals, updateParaclinical } from '../services/paraclinicalService';
+import { createOrUpdateParaclinical, createParaclinical, createRequestParaclinical, deleteParaclinical, getParaclinicalByExamId, getParaclinicals, updateListPayParaclinicals, updateParaclinical } from '../services/paraclinicalService';
 import { ERROR_SERVER } from '../utils';
 
 export const getParaclinicalByExamIdController = async (req, res) => {
@@ -138,11 +138,7 @@ export const getExaminationsController = async (req, res) => {
         let search = req.query.search || '';
 
         let response = await getExaminations(date, status, staffId, +page, +limit, search, time);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -160,11 +156,7 @@ export const getParaclinicalsController = async (req, res) => {
         let search = req.query.search || '';
 
         let response = await getParaclinicals(date, status, staffId, +page, +limit, search);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

@@ -1,4 +1,4 @@
-import  { arrangeSchedule, createSchedule, deleteSchedule, getAllSchedules, getAllSchedulesAdmin, getScheduleByStaffId, getScheduleInWeek, updateScheduleStaff } from '../services/scheduleService';
+import { arrangeSchedule, createSchedule, deleteSchedule, getAllSchedules, getAllSchedulesAdmin, getScheduleByStaffId, getScheduleInWeek, updateScheduleStaff } from '../services/scheduleService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllSchedulesController = async (req, res) => {
@@ -53,11 +53,7 @@ export const createScheduleController = async (req, res) => {
     try {
         let data = req.body;
         let response = await createSchedule(data);
-        res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        });
+        res.status(200).json(response);
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -103,11 +99,7 @@ export const arrangScheduleController = async (req, res) => {
     try {
         let data = req.body;
         let response = await arrangeSchedule(data);
-        res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        });
+        res.status(200).json(response);
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -116,11 +108,7 @@ export const arrangScheduleController = async (req, res) => {
 export const getAllSchedulesAdminController = async (req, res) => {
     try {
         let response = await getAllSchedulesAdmin(req.query);
-        res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        });
+        res.status(200).json(response);
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

@@ -167,11 +167,7 @@ export const refundMomo = async (data) => {
 
         // Kiểm tra kết quả trả về
         if (response.data.resultCode === 0) {
-            return {
-                EC: 0,
-                EM: "Hoàn tiền thành công",
-                DT: response.data,
-            };
+            return { EC: 0, EM: "Hoàn tiền thành công", DT: response.data, };
         } else {
             return {
                 EC: response.data.resultCode,
@@ -212,11 +208,7 @@ export const appoinmentPayment = async (req, res) => {
             redirectUrl: 'http://localhost:3000/appointmentList',
         }
         let response = await paymentMomo(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
@@ -246,11 +238,7 @@ export const examinationPayment = async (req, res) => {
             update: dataReq
         }
         let response = await paymentMomo(body);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
@@ -294,11 +282,7 @@ export const paraclinicalPayment = async (req, res) => {
             redirectUrl: 'http://localhost:3000/cashier',
         }
         let response = await paymentMomo(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
@@ -328,11 +312,7 @@ export const prescriptionPayment = async (req, res) => {
             update: dataReq
         }
         let response = await paymentMomo(body);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { Op } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
-import staffService, { createStaff } from "./staffService";
+import { createStaff } from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
@@ -164,7 +164,6 @@ export const checkCid = async (cid) => {
         return false;
     }
 }
-
 export const checkDuplicateFields = async (email, phoneNumber, cid) => {
     try {
         const result = await db.User.findOne({
@@ -366,14 +365,11 @@ export const getUserByCid = async (cid) => {
     }
 }
 export const createUser = async (data) => {
+    let transaction = await db.sequelize.transaction();;
     try {
         data.password = "123456";
         if (data.email && !await checkEmail(data.email)) {
-            return {
-                EC: 200,
-                EM: "Email đã tồn tại",
-                DT: "",
-            }
+            return { EC: 200, EM: "Email đã tồn tại", DT: "", }
         }
         if (!await checkCid(data.cid)) {
             return {
@@ -395,55 +391,46 @@ export const createUser = async (data) => {
             tokenVersion: new Date().getTime(),
             dob: data.dob || null,
             address: data.address || null,
-        });
-        let insurance = null;
-        if (data.insuranceCode && user) {
-            insurance = await db.Insurance.create({
+        },
+            { transaction });
+        if (data?.insuranceCode && user) {
+            await db.Insurance.create({
                 insuranceCode: data.insuranceCode,
                 benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
                 userId: user.id
-            });
-            if (!insurance) {
-                await db.User.destroy({
-                    where: { id: user.id }
-                });
-                return {
-                    EC: 200,
-                    EM: "Tạo tài khoản thất bại",
-                    DT: "",
-                }
-            }
+            }, { transaction });
         }
-        if (data.staff) {
-            const staff = await createStaff(data, user.id);
-            if (!staff) {
-                await db.User.destroy({
-                    where: { id: user.id }
-                });
+        if (data?.staff && user) {
+            await db.Staff.create({
+                price: data?.price || 0,
+                position: data?.position ? data.position.toString() : "",
+                departmentId: data.departmentId,
+                shortDescription: data?.shortDescription || null,
+                specialtyId: data?.specialtyId || null,
+                status: status.ACTIVE,
+                htmlDescription: data?.htmlDescription || null,
+                userId: user.id
+            }, { transaction });
+
+            let mail = await sendEmailNotification(
+                {
+                    email: user.email,
+                    lastName: user.lastName,
+                    firstName: user.firstName,
+                    subject: "TÀI KHOẢN NHÂN VIÊN",
+                    content: ` <p>Chúc mừng bạn đã trở thành nhân viên của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>. </p>`
+                }
+            );
+            if (mail.EC === 0) {
+                await transaction.commit();
                 return {
-                    EC: 200,
-                    EM: "Tạo tài khoản thất bại",
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
                     DT: "",
                 }
             } else {
-                let mail = await sendEmailNotification(
-                    {
-                        email: user.email,
-                        lastName: user.lastName,
-                        firstName: user.firstName,
-                        subject: "TÀI KHOẢN NHÂN VIÊN",
-                        content: ` <p>Chúc mừng bạn đã trở thành nhân viên của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>. </p>`
-                    }
-                );
-                if (mail.EC === 0) {
-                    return {
-                        EC: 0,
-                        EM: "Thêm người dùng thành công",
-                        DT: "",
-                    }
-                } else {
-                    return { EC: 200, EM: "Gửi email thất bại", DT: "", }
-                }
+                await transaction.rollback();
+                return { EC: 200, EM: "Gửi email thất bại", DT: "", }
             }
         } else {
             if (user && data.email) {
@@ -455,12 +442,14 @@ export const createUser = async (data) => {
                     content: `Chúc mừng bạn đã trở thành người dùng của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>.`
                 })
                 if (mail.EC === 0) {
+                    await transaction.commit();
                     return {
                         EC: 0,
                         EM: "Thêm người dùng thành công",
                         DT: "",
                     }
                 } else {
+                    await transaction.rollback();
                     return {
                         EC: 200,
                         EM: "Gửi mail thông báo thất bại",
@@ -468,6 +457,7 @@ export const createUser = async (data) => {
                     }
                 }
             } else {
+                await transaction.commit();
                 return {
                     EC: 0,
                     EM: "Thêm người dùng thành công",
@@ -478,9 +468,9 @@ export const createUser = async (data) => {
                 }
             }
         }
-
     } catch (error) {
         console.log(error);
+        await transaction.rollback();
         return ERROR_SERVER
     }
 }
@@ -574,7 +564,7 @@ export const blockUser = async (data) => {
     }
 }
 export const deleteUser = async (userId) => {
-    let transaction = await db.sequelize.transaction();;
+    let transaction = await db.sequelize.transaction();
     try {
         let user = await db.User.findOne({
             where: { id: userId },
@@ -736,7 +726,6 @@ export const forgotPassword = async (email) => {
         return ERROR_SERVER
     }
 }
-
 export const getDoctorHome = async (filter) => {
     try {
         let condition = {};

@@ -1,14 +1,10 @@
-import  { createAppointment, deleteAppointment, getAllAppointments, getAllAppointmentsByDate, getAppointmentByStaffId, getAppointmentByUserId, seachAppointment, seachAppointmentWithStaffId } from '../services/appointmentService';
+import { createAppointment, deleteAppointment, getAllAppointments, getAllAppointmentsByDate, getAppointmentByStaffId, getAppointmentByUserId, seachAppointment, seachAppointmentWithStaffId } from '../services/appointmentService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllAppointmentsController = async (req, res) => {
     try {
         let response = await getAllAppointments();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

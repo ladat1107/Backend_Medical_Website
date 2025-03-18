@@ -4,11 +4,7 @@ import { ERROR_SERVER } from '../utils';
 export const getAllBedsController = async (req, res) => {
     try {
         let response = await getAllBeds();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -56,11 +52,7 @@ export const getBedByIdController = async (req, res) => {
 export const getBedEmptyController = async (req, res) => {
     try {
         let response = await getBedEmpty();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

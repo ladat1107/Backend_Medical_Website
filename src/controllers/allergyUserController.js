@@ -1,14 +1,10 @@
-import  { createAllergyUser, deleteAllergyUser, getAllAllergyUsers, getAllergyUserByAllergyId, getAllergyUserByUserId, updateAllergyUser } from '../services/allergyUserService';
+import { createAllergyUser, deleteAllergyUser, getAllAllergyUsers, getAllergyUserByAllergyId, getAllergyUserByUserId, updateAllergyUser } from '../services/allergyUserService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllAllergyUsersController = async (req, res) => {
     try {
         let response = await getAllAllergyUsers();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

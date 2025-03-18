@@ -7,11 +7,7 @@ export const getAllDepartmentController = async (req, res) => {
         let limit = req.query?.limit || 25;
         let search = req.query?.search || "";
         let response = await getAllDepartment(page, limit, search);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
@@ -21,11 +17,7 @@ export const getAllDepartmentController = async (req, res) => {
 export const getAllNameDepartmentController = async (req, res) => {
     try {
         let response = await getAllNameDepartment();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -146,11 +138,7 @@ export const blockDepartmentController = async (req, res) => {
 export const getDepartmentHomeController = async (req, res) => {
     try {
         let response = await getDepartmentHome();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
@@ -159,11 +147,7 @@ export const getDepartmentHomeController = async (req, res) => {
 export const getDepartmentDutyController = async (req, res) => {
     try {
         let response = await getDepartmentDuty();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

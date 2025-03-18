@@ -3,11 +3,7 @@ import { createAllergy, deleteAllergy, getAllAllergies, getAllergyById, updateAl
 export const getAllAllergiesController = async (req, res) => {
     try {
         let response = await getAllAllergies();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json({
