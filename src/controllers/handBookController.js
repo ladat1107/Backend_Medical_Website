@@ -9,7 +9,7 @@ export const getAllHandBooksController = async (req, res) => {
         let staffId = req.user.staff;
         let filter = req.query?.filter || "";
         let status = req.query?.status || null;
-        let response = await getAllHandBooks(page, limit > 500 ? 12 : limit, search, staffId, status, filter);
+        let response = await getAllHandBooks(page, limit > 500 ? 12 : limit, search, staffId, filter, status);
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
