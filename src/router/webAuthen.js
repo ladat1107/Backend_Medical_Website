@@ -9,8 +9,8 @@ require('dotenv').config();
 let router = express.Router();
 let initWebAuthenRounte = (app) => {
     // Cần check đăng nhập
-    router.all("*", checkTokenWithCookie) 
-    
+    router.all("*", checkTokenWithCookie)
+
     router.get("/getProfile", getUserByIdController)
     router.put("/profileUpdateInfo", profileInforController)
     router.get("/getMedicalHistories", getMedicalHistoriesController)

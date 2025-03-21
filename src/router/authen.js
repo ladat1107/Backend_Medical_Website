@@ -15,10 +15,7 @@ let authenRoute = (app, passport) => {
     });
 
     // Định tuyến
-    app.get(
-        '/auth/google',
-        passport.authenticate('google', { scope: ['profile', 'email'] })
-    );
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
     app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), handleLoginGoogleController);
 

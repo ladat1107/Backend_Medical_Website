@@ -39,9 +39,9 @@ app.use(bodyParser.urlencoded({
 // Cấu hình express-session
 app.use(
     session({
-        secret: process.env.SECRET_SESSION,
-        resave: false,
-        saveUninitialized: true,
+        secret: process.env.SECRET_SESSION, // Key để mã hóa session
+        resave: false, // Không lưu lại session nếu không thay đổi
+        saveUninitialized: true, // Lưu session ngay cả khi chưa khởi tạo
     })
 );
 

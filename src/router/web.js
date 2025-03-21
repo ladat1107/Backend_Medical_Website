@@ -24,6 +24,7 @@ import { getAllAllergiesController, getAllergyByIdController } from '../controll
 import { createAllergyUserController, deleteAllergyUserController, getAllAllergyUsersController, getAllergyUserByAllergyIdController, getAllergyUserByUserIdController, updateAllergyUserController } from '../controllers/allergyUserController';
 import { createConditionAtBirthController, deleteConditionAtBirthController, getConditionAtBirthByIdController, getConditionAtBirthByUserIdController, updateConditionAtBirthController } from '../controllers/conditionAtBirthController';
 import { createInsuranceController, deleteInsuranceController, getInsuranceByIdController, getInsuranceByUserIdController, updateInsuranceController } from '../controllers/insuranceController';
+import { messageSystem } from '../controllers/messageController';
 //import { sendNotification } from '../services/socketService';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -67,6 +68,10 @@ let initWebRounte = (app) => {
     router.get("/getDepartmentById", getDepartmentByIdController)
     router.get("/getAllStaffInDepartment", getAllStaffInDepartmentController)
     router.get("/getAllDepartment", getAllDepartmentController)
+
+    //-- Message
+    router.post("/messageSystem", messageSystem)
+
 
 
     //-- Staff
@@ -175,6 +180,10 @@ let initWebRounte = (app) => {
     router.get("/getSpecialtiesByDepartment", getSpecialtiesByDepartmentController)
     router.get("/getSpecialtiesByLaboratory", getSpecialtiesByLaboratoryController)
     router.get("/getServiceLaboratory", getServiceLaboratoryController)
+
+    // router.get("/getSpecialtiesByDepartment", specialtyController.getSpecialtiesByDepartment)
+    // router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
+    // router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
 
     router.get("/getCurrentNumber", getTickets)
     router.put("/generateNumber", generalNumber)

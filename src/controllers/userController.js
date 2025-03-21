@@ -22,6 +22,7 @@ export const handleRegisterUserController = async (req, res) => {
 export const handleConfirmController = async (req, res) => {
     try {
         let data = req.body;
+
         if (data && data.token) {
             let response = await confirmUser(data.token);
             return res.status(200).json(response)
