@@ -1,6 +1,6 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import { createStaff } from "./staffService";
@@ -731,6 +731,8 @@ export const getDoctorHome = async (filter) => {
         let condition = {};
         let includeOption = [];
         let search = filter?.search || "";
+        let departmentId = filter?.departmentId || null;
+        let specialtyId = filter?.specialtyId || null;
         let listStaff = [];
         if (filter?.page && filter?.limit) {
             let limit = +filter.limit > 36 ? 36 : +filter.limit;
@@ -753,11 +755,13 @@ export const getDoctorHome = async (filter) => {
                     },
                     {
                         model: db.Department,
+                        where: departmentId ? { id: departmentId } : {},
                         as: 'staffDepartmentData',
                         attributes: ['id', 'name'],
                     },
                     {
                         model: db.Specialty,
+                        where: specialtyId ? { id: specialtyId } : {},
                         as: 'staffSpecialtyData',
                         attributes: ['id', 'name'],
                     },
@@ -813,6 +817,7 @@ export const getDoctorHome = async (filter) => {
                         model: db.User,
                         as: 'staffUserData',
                         where: {
+                            status: status.ACTIVE,
                             roleId: ROLE.DOCTOR,
                             [Op.or]: [
                                 { firstName: { [Op.like]: `%${search}%` } },

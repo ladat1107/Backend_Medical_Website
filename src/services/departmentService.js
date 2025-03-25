@@ -1,7 +1,6 @@
 import { Op } from "sequelize";
 import db from "../models/index";
 import { ERROR_SERVER, status, typeRoom } from "../utils/index";
-import descriptionService from "./descriptionService";
 
 export const getAllDepartment = async (page, limit, search) => {
     try {
@@ -151,7 +150,7 @@ export const getDepartmentById = async (departmentId) => {
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar'],
+                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar', 'roleId'],
                     where: { status: status.ACTIVE },
                 }],
             }],

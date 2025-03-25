@@ -3,6 +3,7 @@ import userController, { confirmBookingController, confirmTokenBookingController
 import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
+import { upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 require('dotenv').config();
 
@@ -30,6 +31,8 @@ let initWebAuthenRounte = (app) => {
     router.put("/updateNotification", updateNotificationController)
     router.put("/markAllRead", markAllReadController)
 
+
+    router.put("/upsertConversation", upsertConversationController)
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;
