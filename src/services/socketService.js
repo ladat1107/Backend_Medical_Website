@@ -1,4 +1,3 @@
-import { console } from "inspector";
 import db from "../models";
 import { SOCKET } from "../utils";
 
@@ -29,45 +28,40 @@ export const NotificationType = {
     WARNING: 'warning',
     ERROR: 'error'
 };
-  
+
 const userSocketMap = new Map();
 
 export const registerUserSocket = (socket, userId) => {
-if (userId) {
-    userSocketMap.set(userId, socket);
-    console.log(`User ${userId} connected with socket ${socket.id}`);
-}};
+    if (userId) {
+        userSocketMap.set(userId, socket);
+    }
+};
 
 export const removeUserSocket = (userId) => {
-if (userId && userSocketMap.has(userId)) {
-    userSocketMap.delete(userId);
-    console.log(`User ${userId} disconnected`);
-}};
+    if (userId && userSocketMap.has(userId)) {
+        userSocketMap.delete(userId);
+    }
+};
 
 export const sendNotification = (io, title, htmlDescription, firstName, lastName, date, recipients = []) => {
-    console.log("Tên người gửi:", firstName, lastName);
+    // Kiểm tra io có tồn tại không
+    if (!io) {
+        console.error("IO không tồn tại!");
+        return;
+    }
+
     try {
-        console.log("Tên người gửi:", firstName, lastName);
-
         if (recipients && recipients.length > 0) {
-            console.log("Thông báo:", title, htmlDescription, date);
-            console.log("Tên người gửi:", firstName, lastName);
-
             recipients.forEach(userId => {
                 const userSocket = userSocketMap.get(userId);
                 if (userSocket) {
-                    userSocket.emit('notification', { title, htmlDescription, firstName, lastName, date });
-                    console.log(`Notification sent to user ${userId}`);
-                } else {
-                    console.log(`User ${userId} is not connected`);
+                    const notificationData = { title, htmlDescription, firstName, lastName, date };
+                    userSocket.emit('notification', notificationData);
                 }
             });
         } else {
-            console.log("Thông báo:", title, htmlDescription, date);
-            console.log("Tên người gửi:", firstName, lastName);
-
-            io.emit('notification', { title, htmlDescription, firstName, lastName, date });
-            console.log('Notification sent to all users');
+            const notificationData = { title, htmlDescription, firstName, lastName, date };
+            io.emit('notification', notificationData);
         }
     } catch (error) {
         console.error("Lỗi trong sendNotification:", error);

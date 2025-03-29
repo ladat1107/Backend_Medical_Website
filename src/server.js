@@ -83,22 +83,19 @@ const io = new Server(server, {
 
 // Xử lý kết nối Socket.io
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-    
     // Xác thực và đăng ký người dùng
     socket.on('authenticate', (token) => {
         try {
             // Verify token để lấy userId
             const decoded = jwt.verify(token, process.env.SECURITY_KEY);
             const userId = decoded.id;
-            
+
             // Đăng ký socket cho người dùng
             registerUserSocket(socket, userId);
-            
+
             // Setup xử lý khi ngắt kết nối
             socket.on('disconnect', () => {
                 removeUserSocket(userId);
-                console.log('User disconnected:', socket.id);
             });
         } catch (error) {
             console.error('Authentication error:', error);
