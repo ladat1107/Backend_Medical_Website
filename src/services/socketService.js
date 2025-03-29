@@ -1,3 +1,4 @@
+import { console } from "inspector";
 import db from "../models";
 import { SOCKET } from "../utils";
 
@@ -43,19 +44,33 @@ if (userId && userSocketMap.has(userId)) {
     console.log(`User ${userId} disconnected`);
 }};
 
-export const sendNotification = (io, message, type = NotificationType.DEFAULT, recipients = []) => {
-if (recipients && recipients.length > 0) {
-    recipients.forEach(userId => {
-        const userSocket = userSocketMap.get(userId);
-        if (userSocket) {
-            userSocket.emit('notification', { message, type });
-            console.log(`Notification sent to user ${userId}`);
+export const sendNotification = (io, title, htmlDescription, firstName, lastName, date, recipients = []) => {
+    console.log("Tên người gửi:", firstName, lastName);
+    try {
+        console.log("Tên người gửi:", firstName, lastName);
+
+        if (recipients && recipients.length > 0) {
+            console.log("Thông báo:", title, htmlDescription, date);
+            console.log("Tên người gửi:", firstName, lastName);
+
+            recipients.forEach(userId => {
+                const userSocket = userSocketMap.get(userId);
+                if (userSocket) {
+                    userSocket.emit('notification', { title, htmlDescription, firstName, lastName, date });
+                    console.log(`Notification sent to user ${userId}`);
+                } else {
+                    console.log(`User ${userId} is not connected`);
+                }
+            });
         } else {
-            console.log(`User ${userId} is not connected`);
+            console.log("Thông báo:", title, htmlDescription, date);
+            console.log("Tên người gửi:", firstName, lastName);
+
+            io.emit('notification', { title, htmlDescription, firstName, lastName, date });
+            console.log('Notification sent to all users');
         }
-    });
-} else {
-    io.emit('notification', { message, type });
-    console.log('Notification sent to all users');
-}};
+    } catch (error) {
+        console.error("Lỗi trong sendNotification:", error);
+    }
+};
 

@@ -180,6 +180,7 @@ let initWebRounte = (app) => {
     router.put("/generateNumber", generalNumber)
     router.put("/generateNumberCurrent", generalNumberCurrent)
 
+
     return app.use("/api/", router);
 }
 export default initWebRounte;

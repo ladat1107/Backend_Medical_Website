@@ -8,10 +8,10 @@ const router = express.Router();
 const initNotificationRoute = (app) => {
   router.post("/send-notification", 
     checkTokenWithCookie,
-    (req, res) => {
-      const { message, type, recipients } = req.body;
+    async (req, res) => {
+      const { title, htmlDescription, firstName, lastName, date, receiverIds } = req.body;
       
-      if (!message) {
+      if (!title || !htmlDescription) {
         return res.status(400).json({ 
           EC: 400,
           EM: "Thông báo không được để trống",
@@ -21,20 +21,12 @@ const initNotificationRoute = (app) => {
       
       try {
         // Chuyển đổi recipients thành mảng nếu chỉ có một ID
-        const recipientArray = Array.isArray(recipients) ? recipients : (recipients ? [recipients] : []);
+        const recipientArray = Array.isArray(receiverIds) ? receiverIds : (receiverIds ? [receiverIds] : []);
         
-        sendNotification(
-          io, 
-          message, 
-          type || NotificationType.DEFAULT,
-          recipientArray
-        );
-        
-        res.status(200).json({ 
-          EC: 0,
-          EM: "Gửi thông báo thành công",
-          DT: null
-        });
+        console.log("=== Trước khi gọi sendNotification ===");
+        sendNotification(io, title, htmlDescription, firstName, lastName, date, recipientArray);
+        console.log("=== Sau khi gọi sendNotification ===");
+
       } catch (error) {
         console.error('Lỗi gửi thông báo:', error);
         res.status(500).json({ 

@@ -1,4 +1,4 @@
-import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getAllUserToNotify, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
+import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
 import { COOKIE, ERROR_SERVER, ROLE, TIME } from '../utils';
 require('dotenv').config();
 export const handleRegisterUserController = async (req, res) => {
@@ -354,16 +354,6 @@ export const getMedicalHistoriesController = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(200).json(ERROR_SERVER)
-    }
-}
-
-export const getAllUserToNotifyController = async (req, res) => {
-    try {
-        let response = await getAllUserToNotify();
-        return res.status(200).json(response)
-    } catch (error) {
-        console.log(error);
         return res.status(500).json(ERROR_SERVER)
     }
-} 
+}
