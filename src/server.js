@@ -83,12 +83,14 @@ const io = new Server(server, {
 
 // Xử lý kết nối Socket.io
 io.on('connection', (socket) => {
-    // Xác thực và đăng ký người dùng
     socket.on('authenticate', (token) => {
         try {
             // Verify token để lấy userId
             const decoded = jwt.verify(token, process.env.SECURITY_KEY);
             const userId = decoded.id;
+
+            console.log('User connected with cookies:', socket.cookies);
+            console.log('User connected with token:', token);
 
             // Đăng ký socket cho người dùng
             registerUserSocket(socket, userId);

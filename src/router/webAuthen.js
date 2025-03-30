@@ -3,7 +3,7 @@ import userController, { confirmBookingController, confirmTokenBookingController
 import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
-import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, updateNotificationController } from '../controllers/notificationController';
+import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -28,6 +28,7 @@ let initWebAuthenRounte = (app) => {
     router.get("/getAllNotifications", getAllNotificationsController)
     router.post("/createNotification", createNotificationController)
     router.put("/updateNotification", updateNotificationController)
+    router.put("/markAllRead", markAllReadController)
 
     return app.use("/api/", router);
 }

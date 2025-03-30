@@ -1,4 +1,4 @@
-import { createNotification, getAllNotifications, getAllUserToNotify, updateNotification } from "../services/notificationService";
+import { createNotification, getAllNotifications, getAllUserToNotify, markAllRead, updateNotification } from "../services/notificationService";
 import { ERROR_SERVER, status } from "../utils/index";
 
 export const getAllNotificationsController = async (req, res) => {
@@ -63,6 +63,20 @@ export const updateNotificationController = async (req, res) => {
         
         let response = await updateNotification(data);
 
+        if (response.EC === 0) {
+            return res.status(200).json(response)
+        }
+        return res.status(500).json(ERROR_SERVER);
+    } catch (error) {
+        console.log(error);
+        return res.status(200).json(ERROR_SERVER)
+    }
+}
+
+export const markAllReadController = async (req, res) => {
+    try {
+        let userId = req.user.id;
+        let response = await markAllRead(userId);
         if (response.EC === 0) {
             return res.status(200).json(response)
         }

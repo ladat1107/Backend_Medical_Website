@@ -2,6 +2,7 @@ import db from "../models/index";
 import { generateUniqueKey } from "../utils/generateUniqueKey";
 import { ERROR_SERVER, status } from "../utils/index";
 import { Op, Sequelize } from 'sequelize';
+import { examinationPayment } from "./paymentService";
 
 export const getAllNotifications = async (page, limit, search, userId) => {
     try {
@@ -23,6 +24,10 @@ export const getAllNotifications = async (page, limit, search, userId) => {
                 receiverId: userId,
                 status: 1
             }
+        });
+
+        let totalNotifications = await db.Notification.count({
+            where: whereConditions
         });
 
         let notifications = await db.Notification.findAndCountAll({
@@ -63,7 +68,7 @@ export const getAllNotifications = async (page, limit, search, userId) => {
         return {
             EC: 0,
             EM: "Lấy thông báo thành công",
-            DT: {notifications,unreadCount}
+            DT: {notifications, unreadCount, totalNotifications}
         }
     } catch (error) {
         console.log(error);
@@ -386,6 +391,34 @@ export const updateNotification = async (data) => {
             EC: 0,
             EM: "Cập nhật thông báo thành công",
             DT: notification
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const markAllRead = async (userId) => {
+    try {
+        let notifications = await db.Notification.update({
+            status: 2,
+        }, {
+            where: {
+                receiverId: userId,
+                status: 1
+            }
+        });
+        if (!notifications) {
+            return {
+                EC: 404,
+                EM: "Đánh dấu tất cả thông báo đã đọc thất bại",
+                DT: "",
+            }
+        }
+        return {
+            EC: 0,
+            EM: "Đánh dấu tất cả thông báo đã đọc thành công",
+            DT: notifications
         }
     } catch (error) {
         console.log(error);
