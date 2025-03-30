@@ -60,52 +60,10 @@ export const ERROR_SERVER = {
     DT: null
 }
 
-// export const MESSAGE_TYPE = {
-//     COUNT_DEPARTMENTS: {
-//         type: "COUNT_DEPARTMENTS",
-//         array: ["bao nhieu khoa", "so khoa", "co bao nhieu khoa", 'may khoa', 'bn khoa', 'nhiu khoa', "nhieu khoa"]
-//     },
-//     LIST_DEPARTMENTS: {
-//         type: "LIST_DEPARTMENTS",
-//         array: ["danh sach khoa", "cac khoa", "nhung khoa", 'ke ten cac khoa', "ds khoa", "liet ke cac khoa", "liet ke khoa", 'khoa gi', 'khoa nao']
-//     },
-//     DEPARTMENT_TREATMENTS: {
-//         type: "DEPARTMENT_TREATMENTS",
-//         array: [`khoa ([\\w\\s]+) tri benh gi`, "khoa ([\\w\\s]+) tri benh", 'khoa ([\\w\\s]+) chua benh nao']
-//     },
-//     COUNT_DOCTORS_IN_DEPARTMENT: {
-//         type: "COUNT_DOCTORS_IN_DEPARTMENT",
-//         array: ["/khoa\s+([\w\s]+?)\s+(co\s+)?(bao nhieu|may|nhiu|nheu|nhieu)\s+(bac si|bs)/i"]
-//     },
-//     DOCTORS_TREAT_DISEASE: {
-//         type: "DOCTORS_TREAT_DISEASE",
-//         array: ["ai tri benh ([\\w\\s]+)", "ai chua benh ([\\w\\s]+)", "ai dieu tri benh ([\\w\\s]+)", "ai kham benh ([\\w\\s]+)", "ai kham ([\\w\\s]+)",
-//             'bac si nao tri benh ([\\w\\s]+)', 'bac si nao chua benh ([\\w\\s]+)', 'bac si nao dieu tri benh ([\\w\\s]+)',
-//             'bs nao chua benh ([\\w\\s]+)', 'bs nao tri benh ([\\w\\s]+)', 'bs nao dieu tri benh ([\\w\\s]+)']
-//     },
-//     UNKNOWN: "UNKNOWN"
-// }
-
-const MESSAGE_TYPE = {
-    COUNT_DEPARTMENTS: {
-        type: "COUNT_DEPARTMENTS",
-        requiredData: ''
-    },
-    LIST_DEPARTMENTS: {
-        type: "LIST_DEPARTMENTS",
-        requiredData: ''
-    },
-    DEPARTMENT_TREATMENTS: {
-        type: "DEPARTMENT_TREATMENTS",
-        requiredData: ''
-    },
-    COUNT_DOCTORS_IN_DEPARTMENT: {
-        type: "COUNT_DOCTORS_IN_DEPARTMENT",
-        requiredData: ''
-    },
-    DOCTORS_TREAT_DISEASE: {
-        type: "DOCTORS_TREAT_DISEASE",
-        requiredData: ''
-    },
-    UNKNOWN: "UNKNOWN"
+export const STATUS_MESSAGE = {
+    FAILED: "failed",
+    SENDING: "sending",
+    SENT: "sent",
+    RECEIVED: "received",
+    READ: "read"
 }

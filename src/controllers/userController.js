@@ -79,6 +79,19 @@ export const handleLoginController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER)
     }
 }
+export const handleLogoutController = async (req, res) => {
+    try {
+        res.clearCookie(COOKIE.refreshToken);
+        return res.status(200).json({
+            EC: 0,
+            EM: "Đăng xuất thành công",
+            DT: ""
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
 export const handleLoginGoogleController = async (req, res) => {
     try {
         let response = await loginGoogle(req?.user?._json, req?.user?.id);

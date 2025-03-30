@@ -13,6 +13,7 @@ import { createExaminationController, deleteExaminationController, getExaminatio
 import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
+import { getConversationForStaffController } from '../controllers/messageController';
 dotenv.config();
 
 let router = express.Router();
@@ -96,6 +97,9 @@ let initDoctorRoute = (app) => {
     router.post("/paymentParaclinicalMomo", paraclinicalPayment)
     router.post("/paymentExaminationMomo", examinationPayment)
     router.post("/paymentPrescriptionMomo", prescriptionPayment)
+
+    // -- Message
+    router.get("/getConversationForStaff", getConversationForStaffController)
     return app.use("/api/", router);
 }
 export default initDoctorRoute;

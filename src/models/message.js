@@ -2,6 +2,7 @@
 const {
     Model
 } = require('sequelize');
+const { STATUS_MESSAGE } = require('../utils');
 module.exports = (sequelize, DataTypes) => {
     class Message extends Model {
         static associate(models) {
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         content: DataTypes.TEXT,
         link: DataTypes.STRING(1000),
         status: {
-            type: DataTypes.ENUM('sent', 'delivered', 'read'),
+            type: DataTypes.ENUM(STATUS_MESSAGE.FAILED, STATUS_MESSAGE.SENDING, STATUS_MESSAGE.SENT, STATUS_MESSAGE.RECEIVED, STATUS_MESSAGE.READ),
             allowNull: false,
         }
     }, {

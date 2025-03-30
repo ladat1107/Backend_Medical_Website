@@ -22,6 +22,7 @@ export const hashPasswordUser = async (password) => {
         }
     }
 }
+
 export const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({

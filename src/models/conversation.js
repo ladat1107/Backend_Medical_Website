@@ -6,8 +6,16 @@ module.exports = (sequelize, DataTypes) => {
     class Conversation extends Model {
         static associate(models) {
             Conversation.hasMany(models.Message, {
-                foreignKey: 'conservationId',
+                foreignKey: 'conversationId',
                 as: 'messageData',
+            });
+            Conversation.belongsTo(models.User, {
+                foreignKey: 'patientId',
+                as: 'patientData',
+            });
+            Conversation.belongsTo(models.User, {
+                foreignKey: 'staffId',
+                as: 'staffData',
             });
         }
     }

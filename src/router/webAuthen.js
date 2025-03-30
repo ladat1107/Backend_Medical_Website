@@ -11,7 +11,7 @@ let router = express.Router();
 let initWebAuthenRounte = (app) => {
     // Cần check đăng nhập
     router.all("*", checkTokenWithCookie)
-
+       
     router.get("/getProfile", getUserByIdController)
     router.put("/profileUpdateInfo", profileInforController)
     router.get("/getMedicalHistories", getMedicalHistoriesController)
@@ -31,8 +31,8 @@ let initWebAuthenRounte = (app) => {
     router.put("/updateNotification", updateNotificationController)
     router.put("/markAllRead", markAllReadController)
 
-
-    router.put("/upsertConversation", upsertConversationController)
+    router.get("/getConversation", upsertConversationController)
+    
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;
