@@ -26,17 +26,17 @@ export const getAllUserToNotifyController = async (req, res) => {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
     }
-} 
+}
 
-export const  createNotificationController = async (req, res) => {
+export const createNotificationController = async (req, res) => {
     try {
         let data = req.body;
-        if(!data.dataNoti || !data.dataNoti.title || !data.dataNoti.htmlDescription || !data.dataNoti.receiverId || !data.dataNoti.status) {
+        if (!data.dataNoti || !data.dataNoti.title || !data.dataNoti.htmlDescription || !data.dataNoti.receiverId || !data.dataNoti.status) {
             return res.status(400).json({
                 EC: 400,
                 EM: "Dữ liệu không hợp lệ",
                 DT: ""
-            }) 
+            })
         }
         data.dataNoti.senderId = req.user.id;
         let notification = await createNotification(data);
@@ -53,14 +53,14 @@ export const  createNotificationController = async (req, res) => {
 export const updateNotificationController = async (req, res) => {
     try {
         let data = req.body;
-        if(!data.id || !data.title || !data.htmlDescription || !data.receiverId || !data.status) {
+        if (!data.id) {
             return res.status(400).json({
                 EC: 400,
                 EM: "Dữ liệu không hợp lệ",
                 DT: ""
-            }) 
+            })
         }
-        
+
         let response = await updateNotification(data);
 
         if (response.EC === 0) {
