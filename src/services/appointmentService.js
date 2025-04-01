@@ -137,8 +137,6 @@ export const seachAppointment = async (data) => {
         if (data.from == '') data.from = 0;
         if (data.to == '') data.to = getTodayTimestamp();
 
-
-
         let appointment = await db.Appointment.findAll({
             where: {
                 date: {

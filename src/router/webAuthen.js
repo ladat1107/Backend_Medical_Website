@@ -1,8 +1,9 @@
 import express from 'express';
-import userController, { confirmBookingController, confirmTokenBookingController, getAllUserToNotifyController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
+import userController, { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
 import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
+import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -24,6 +25,11 @@ let initWebAuthenRounte = (app) => {
     router.post("/callback", paymentMomoCallback)
 
     router.get("/getAllUserToNotify", getAllUserToNotifyController)
+    router.get("/getAllNotifications", getAllNotificationsController)
+    router.post("/createNotification", createNotificationController)
+    router.put("/updateNotification", updateNotificationController)
+    router.put("/markAllRead", markAllReadController)
+
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;

@@ -28,34 +28,43 @@ export const NotificationType = {
     WARNING: 'warning',
     ERROR: 'error'
 };
-  
+
 const userSocketMap = new Map();
 
 export const registerUserSocket = (socket, userId) => {
-if (userId) {
-    userSocketMap.set(userId, socket);
-    console.log(`User ${userId} connected with socket ${socket.id}`);
-}};
+    if (userId) {
+        userSocketMap.set(userId, socket);
+    }
+};
 
 export const removeUserSocket = (userId) => {
-if (userId && userSocketMap.has(userId)) {
-    userSocketMap.delete(userId);
-    console.log(`User ${userId} disconnected`);
-}};
+    if (userId && userSocketMap.has(userId)) {
+        userSocketMap.delete(userId);
+    }
+};
 
-export const sendNotification = (io, message, type = NotificationType.DEFAULT, recipients = []) => {
-if (recipients && recipients.length > 0) {
-    recipients.forEach(userId => {
-        const userSocket = userSocketMap.get(userId);
-        if (userSocket) {
-            userSocket.emit('notification', { message, type });
-            console.log(`Notification sent to user ${userId}`);
+export const sendNotification = (io, title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, recipients = []) => {
+    // Kiểm tra io có tồn tại không
+    if (!io) {
+        console.error("IO không tồn tại!");
+        return;
+    }
+
+    try {
+        if (recipients && recipients.length > 0) {
+            recipients.forEach(userId => {
+                const userSocket = userSocketMap.get(userId);
+                if (userSocket) {
+                    const notificationData = { title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode };
+                    userSocket.emit('notification', notificationData);
+                }
+            });
         } else {
-            console.log(`User ${userId} is not connected`);
+            const notificationData = { title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode };
+            io.emit('notification', notificationData);
         }
-    });
-} else {
-    io.emit('notification', { message, type });
-    console.log('Notification sent to all users');
-}};
+    } catch (error) {
+        console.error("Lỗi trong sendNotification:", error);
+    }
+};
 
