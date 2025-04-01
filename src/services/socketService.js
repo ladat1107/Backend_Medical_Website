@@ -43,7 +43,7 @@ export const removeUserSocket = (userId) => {
     }
 };
 
-export const sendNotification = (io, title, htmlDescription, firstName, lastName, date, attachedFiles, recipients = []) => {
+export const sendNotification = (io, title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, recipients = []) => {
     // Kiểm tra io có tồn tại không
     if (!io) {
         console.error("IO không tồn tại!");
@@ -55,12 +55,12 @@ export const sendNotification = (io, title, htmlDescription, firstName, lastName
             recipients.forEach(userId => {
                 const userSocket = userSocketMap.get(userId);
                 if (userSocket) {
-                    const notificationData = { title, htmlDescription, firstName, lastName, date, attachedFiles };
+                    const notificationData = { title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode };
                     userSocket.emit('notification', notificationData);
                 }
             });
         } else {
-            const notificationData = { title, htmlDescription, firstName, lastName, date };
+            const notificationData = { title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode };
             io.emit('notification', notificationData);
         }
     } catch (error) {

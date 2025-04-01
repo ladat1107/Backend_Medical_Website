@@ -333,7 +333,7 @@ export const getAllUserToNotifyFull = async () => {
 export const createNotification = async (data) => {
     try {
         let receiverIds = data.dataNoti.receiverId.split(",");
-        let notiCode = generateUniqueKey(16);
+        let notiCode = data.notiCode || generateUniqueKey(16);
 
         let notificationsData = receiverIds.map(receiverId => ({
             title: data.dataNoti.title,

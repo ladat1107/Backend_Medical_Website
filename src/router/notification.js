@@ -9,7 +9,7 @@ const initNotificationRoute = (app) => {
   router.post("/send-notification",
     checkTokenWithCookie,
     async (req, res) => {
-      const { title, htmlDescription, firstName, lastName, date, attachedFiles, receiverIds } = req.body;
+      const { title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, receiverIds } = req.body;
 
       if (!title || !htmlDescription) {
         return res.status(400).json({
@@ -23,7 +23,7 @@ const initNotificationRoute = (app) => {
         // Chuyển đổi recipients thành mảng nếu chỉ có một ID
         const recipientArray = Array.isArray(receiverIds) ? receiverIds : (receiverIds ? [receiverIds] : []);
 
-        sendNotification(io, title, htmlDescription, firstName, lastName, date, attachedFiles, recipientArray);
+        sendNotification(io, title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, recipientArray);
 
         return res.status(200).json({
           EC: 0,
