@@ -1,6 +1,6 @@
 import { messageAIService } from "../services/messageAIService";
-import { getConversation, getConversationForStaff } from "../services/messageUserService";
-import { ERROR_SERVER } from "../utils";
+import { createMessage, getConversation, getConversationForStaff } from "../services/messageUserService";
+import { ERROR_SERVER, STATUS_MESSAGE } from "../utils";
 
 export const messageSystem = async (req, res) => {
     try {
@@ -24,6 +24,7 @@ export const upsertConversationController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER);
     }
 }
+
 export const getConversationForStaffController = async (req, res) => {
     try {
         let staffId = req.user.id;
@@ -34,3 +35,16 @@ export const getConversationForStaffController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER);
     }
 }
+
+
+export const createMessageController = async (req, res) => {
+    try {
+        const { conversationId, senderId, content, link, createdAt } = req.body;
+        const message = await createMessage({ conversationId, senderId, content, link, createdAt, status: STATUS_MESSAGE.SENT });
+        return res.status(200).json(message);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ ERROR_SERVER });
+    }
+}
+

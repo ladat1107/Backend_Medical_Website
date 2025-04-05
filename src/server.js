@@ -16,7 +16,6 @@ import connectDB from './config/connectDB';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
-import socketController from './controllers/socketController';
 import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
 import initNotificationRoute from './router/notification';
 import dotenv from 'dotenv';
@@ -84,7 +83,6 @@ const io = new Server(server, {
 
 // Xử lý kết nối Socket.io
 io.on('connection', (socket) => {
-          
     // Xác thực và đăng ký người dùng
     socket.on('authenticate', (token) => {
         try {
@@ -109,7 +107,8 @@ io.on('connection', (socket) => {
     });
 
 });
-socketController(io);
+
+
 // Khởi tạo các chức năng socket
 emitNewDateTicket(io);
 

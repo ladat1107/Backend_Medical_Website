@@ -1,8 +1,7 @@
 import express from 'express';
-import { sendNotification, NotificationType } from '../services/socketService';
-import { io } from '../server';
+import { sendNotification } from '../services/socketService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction'; // Import middleware xác thực
-
+import { io } from '../server';
 const router = express.Router();
 
 const initNotificationRoute = (app) => {

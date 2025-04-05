@@ -1,17 +1,18 @@
 import express from 'express';
-import userController, { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
-import examinationController, { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
+import { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
+import { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
+import { createMessageController } from '../controllers/messageController';
 require('dotenv').config();
 
 let router = express.Router();
 let initWebAuthenRounte = (app) => {
     // Cần check đăng nhập
     router.all("*", checkTokenWithCookie)
-       
+
     router.get("/getProfile", getUserByIdController)
     router.put("/profileUpdateInfo", profileInforController)
     router.get("/getMedicalHistories", getMedicalHistoriesController)
@@ -32,7 +33,9 @@ let initWebAuthenRounte = (app) => {
     router.put("/markAllRead", markAllReadController)
 
     router.get("/getConversation", upsertConversationController)
-    
+
+    router.post("/createMessage", createMessageController)
+
     return app.use("/api/", router);
 }
 export default initWebAuthenRounte;
