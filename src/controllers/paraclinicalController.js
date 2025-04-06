@@ -167,7 +167,7 @@ export const updateListPayParaclinicalsController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.ids) {
-            let response = await updateListPayParaclinicals(data.ids, req.user.id);
+            let response = await updateListPayParaclinicals(data.ids, data.insurance, req.user.id);
             return res.status(200).json(response)
         } else {
             return res.status(200).json({

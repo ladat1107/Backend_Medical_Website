@@ -1,5 +1,5 @@
 import db from '../models/index';
-import prescriptionDetailService from './prescriptionDetailService';
+import { upsertPrescriptionDetail } from './prescriptionDetailService';
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { Op, Sequelize } from 'sequelize';
 
@@ -75,7 +75,7 @@ export const upsertPrescription = async (data) => {
             });
         }
 
-        let prescriptionDetail = await prescriptionDetailService.upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
+        let prescriptionDetail = await upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
 
         if (prescriptionDetail.EC !== 0) {
             return prescriptionDetail;
@@ -192,7 +192,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
-                        attributes: ['id', 'name', 'price'],
+                        attributes: ['id', 'name', 'price', 'isCovered'],
                         through: {
                             model: db.PrescriptionMedicine,
                             where: {
@@ -244,12 +244,16 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
 };
 
 export const updatePrescription = async (data, payment, userId) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+
     try {
         let prescription = await db.Prescription.findOne({
             where: { id: data.id },
+            transaction: t
         });
 
         if (!prescription) {
+            await t.rollback();
             return {
                 EC: 1,
                 EM: "Không tìm thấy đơn thuốc",
@@ -257,30 +261,43 @@ export const updatePrescription = async (data, payment, userId) => {
             };
         }
 
-        if (data.exam) {
-            await db.Examination.update({
-                insuaranceCode: data.exam.insuaranceCode,
-                insuranceCoverage: data.exam.insuranceCoverage,
+        // Cập nhật từng chi tiết đơn thuốc
+        for (let detail of data.presDetail) {
+            await db.PrescriptionDetail.update({
+                insuranceCovered: detail.insuranceCovered,
             }, {
-                where: { id: data.exam.examId }
-            })
-        }
-        if (data?.payment) {
-            payment = await db.Payment.create({
-                orderId: new Date().toISOString() + "_UserId__" + userId,
-                transId: prescription.id,
-                amount: prescription.totalMoney,
-                status: paymentStatus.PAID,
-                paymentMethod: data.payment,
-            })
+                where: {
+                    prescriptionId: detail.prescriptionId,
+                    medicineId: detail.medicineId
+                },
+                transaction: t
+            });
         }
 
+        let createdPayment = null;
+
+        if (data?.payment) {
+            createdPayment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: prescription.id,
+                amount: data.coveredPrice,
+                status: paymentStatus.PAID,
+                paymentMethod: data.payment,
+            }, { transaction: t });
+        }
+
+        // Cập nhật prescription
         await db.Prescription.update({
             status: paymentStatus.PAID,
-            paymentId: payment.id,
+            insuranceCovered: data.insuranceCovered,
+            coveredPrice: data.coveredPrice,
+            paymentId: createdPayment?.id || null,
         }, {
-            where: { id: data.id }
-        })
+            where: { id: data.id },
+            transaction: t
+        });
+
+        await t.commit(); // Thành công: lưu lại tất cả thay đổi
 
         return {
             EC: 0,
@@ -288,8 +305,8 @@ export const updatePrescription = async (data, payment, userId) => {
             DT: [1]
         };
 
-
     } catch (error) {
+        await t.rollback(); // Lỗi: hoàn tác toàn bộ
         console.log(error);
         return {
             EC: 500,
@@ -298,3 +315,4 @@ export const updatePrescription = async (data, payment, userId) => {
         };
     }
 };
+
