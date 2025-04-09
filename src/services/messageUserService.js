@@ -2,11 +2,12 @@
 import { Op } from "sequelize";
 import db from "../models/index"
 import { ERROR_SERVER, STATUS_MESSAGE } from "../utils";
-let assistantForCustomer = [{ id: 170 }, { id: 171 }, { id: 172 }];
+let assistantForCustomer = [];
 
 export const getConversation = async (userId, receiverId) => {
     let transaction = await db.sequelize.transaction();
     try {
+
         let conversation = await db.Conversation.findOne({
             where: {
                 patientId: receiverId || userId,
@@ -39,6 +40,7 @@ export const getConversation = async (userId, receiverId) => {
         }
         if (!conversation.staffId || !assistantForCustomer.some(assistant => assistant.id === conversation.staffId)) {
             let staffForConversation = assistantForCustomer[Math.floor(Math.random() * assistantForCustomer.length)];
+            console.log("staffForConversation 1", staffForConversation)
             await conversation.update({
                 staffId: staffForConversation?.id || null
             }, { transaction });
@@ -70,8 +72,12 @@ export const getConversation = async (userId, receiverId) => {
         return ERROR_SERVER;
     }
 }
+
 export const getConversationForStaff = async (staffId) => {
     try {
+        if (!assistantForCustomer.some(assistant => assistant.id === staffId)) {
+            assistantForCustomer.push({ id: staffId });
+        }
         let conversation = await db.Conversation.findAll({
             where: { staffId: staffId },
             include: [
@@ -96,12 +102,14 @@ export const getConversationForStaff = async (staffId) => {
             ],
             nest: true,
         })
+
         return { EC: 0, EM: "Nhân viên lấy cuộc hội thoại thành công", DT: conversation };
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;
     }
 }
+
 export const createMessage = async (data) => {
     let transaction = await db.sequelize.transaction();
     try {
@@ -126,6 +134,7 @@ export const createMessage = async (data) => {
         return ERROR_SERVER;
     }
 }
+
 export const updateMessageStatus = async (messageId, status) => {
     try {
         await db.Message.update({ status }, { where: { id: messageId } });
@@ -133,6 +142,7 @@ export const updateMessageStatus = async (messageId, status) => {
         console.log(error);
     }
 }
+
 export const getUnreadMessages = async (conversationId, userId) => {
     try {
         //Lấy tin nhắn chưa đọc của senderId khác userId và status khác READ
@@ -143,6 +153,7 @@ export const getUnreadMessages = async (conversationId, userId) => {
         return ERROR_SERVER;
     }
 }
+
 export const getConversationById = async (conversationId) => {
     try {
         const conversation = await db.Conversation.findOne({
@@ -163,6 +174,16 @@ export const getConversationById = async (conversationId) => {
             ]
         });
         return { EC: 0, EM: "Lấy cuộc hội thoại theo id thành công", DT: conversation };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+
+export const deleteAssistantForCustomer = async (staffId) => {
+    try {
+        assistantForCustomer = assistantForCustomer.filter(assistant => assistant.id !== staffId);
+        return { EC: 0, EM: "Rời khỏi cuộc hội thoại thành công", DT: assistantForCustomer };
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;
