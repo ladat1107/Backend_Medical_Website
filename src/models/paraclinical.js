@@ -71,6 +71,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
+        insuranceCovered: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        coveredPrice: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
         doctorId: {
             type: DataTypes.INTEGER,
             allowNull: false,

@@ -85,8 +85,9 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     socket.on('authenticate', (token) => {
         try {
-            // Verify token để lấy userId
-            const decoded = jwt.verify(token, process.env.SECURITY_KEY);
+            const pureToken = token.replace('Bearer ', '');
+            const decoded = jwt.verify(pureToken, process.env.SECURITY_KEY);
+
             const userId = decoded.id;
 
             console.log('User connected with cookies:', socket.cookies);

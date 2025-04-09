@@ -1,7 +1,7 @@
 import { session } from 'passport';
 import db from '../models/index';
 import { ERROR_SERVER } from '../utils';
-import medicineService from './medicineService';
+import medicineService, { updateInventory } from './medicineService';
 
 export const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
     try {
@@ -91,7 +91,7 @@ export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                 existingDetailsMap.delete(newDetail.medicineId);
 
                 if (quantityChange !== 0) {
-                    await medicineService.updateInventory(newDetail.medicineId, quantityChange);
+                    await updateInventory(newDetail.medicineId, quantityChange);
                 }
             } else {
                 const createdDetail = await db.PrescriptionDetail.create({
@@ -99,7 +99,7 @@ export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                     ...newDetail
                 });
                 updatedDetails.push(createdDetail);
-                await medicineService.updateInventory(newDetail.medicineId, newDetail.quantity);
+                await updateInventory(newDetail.medicineId, newDetail.quantity);
             }
         }
 
@@ -150,6 +150,7 @@ export const createPrescriptionDetail = async (prescriptionId, data) => {
 
 export const updatePrescriptionDetail = async (prescriptionId, data) => {
     try {
+
         let prescriptionDetail = await db.PrescriptionDetail.findOne({
             where: {
                 prescriptionId: prescriptionId,

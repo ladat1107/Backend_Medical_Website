@@ -91,6 +91,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
+        insuranceCovered: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        coveredPrice: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
         special: {
             type: DataTypes.STRING(100),
             allowNull: true,
@@ -123,7 +131,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        insuaranceCode: {
+        insuranceCode: {
             type: DataTypes.STRING(45),
             allowNull: true,
         },

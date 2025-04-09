@@ -70,6 +70,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(256),
             allowNull: true,
         },
+        isCovered: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+        },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,

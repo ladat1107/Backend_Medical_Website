@@ -1,7 +1,9 @@
 import { Op } from "sequelize";
 import db from "../models/index";
 import { status, paymentStatus, PAYMENT_METHOD, ERROR_SERVER } from "../utils/index";
-import specialtyService from "./specialtyService";
+import specialtyService, { getSpecialtiesByLaboratory } from "./specialtyService";
+import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import { coveredPrice } from "../utils/formatValue";
 
 export const getParaclinicalByExamId = async (examinationId) => {
     try {
@@ -57,7 +59,7 @@ export const createRequestParaclinical = async (data) => {
         let createResults = [];
         for (const item of data.listParaclinicals) {
 
-            const roomDataResponse = await specialtyService.getSpecialtiesByLaboratory(+item.id);
+            const roomDataResponse = await getSpecialtiesByLaboratory(+item.id);
 
             if (roomDataResponse.EC === 0 && roomDataResponse.DT) {
                 const roomData = roomDataResponse.DT;
@@ -394,51 +396,75 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
     }
 };
 
-export const updateListPayParaclinicals = async (ids, userId) => {
+export const updateListPayParaclinicals = async (ids, insurance, userId) => {
+    // Initialize transaction
+    const transaction = await db.sequelize.transaction();
+    
     try {
+        const insuranceCoverage = insurance ? getThirdDigitFromLeft(insurance) : 0
+
         let paraclinicals = await db.Paraclinical.findAll({
             where: {
                 id: {
                     [Op.in]: ids
                 }
-            }
+            },
+            transaction // Pass transaction to this query
         });
+        
         let price = 0;
         for (let paraclinical of paraclinicals) {
-            price += +paraclinical.price;
+            price += +paraclinical.price - coveredPrice(+paraclinical.price, insuranceCoverage);
         }
+        
+        // Create payment within the transaction
         let payment = await db.Payment.create({
             orderId: new Date().toISOString() + "_UserId__" + userId,
             transId: Math.floor(100000 + Math.random() * 900000),
             amount: price,
             paymentMethod: PAYMENT_METHOD.CASH,
             status: paymentStatus.PAID
-        });
-
-        const updateResults = await db.Paraclinical.update(
-            {
-                status: status.PAID,
-                paymentId: payment.id
-            }, {
-            where: {
-                id: {
-                    [Op.in]: ids
-                }
+        }, { transaction }); // Pass transaction to payment creation
+        
+        // Update all paraclinicals within the transaction
+        for (let paraclinical of paraclinicals) {
+            const updateResult = await db.Paraclinical.update(
+                {
+                    insuranceCovered: coveredPrice(+paraclinical.price, insuranceCoverage),
+                    coveredPrice: +paraclinical.price - coveredPrice(+paraclinical.price, insuranceCoverage),
+                    status: status.PAID,
+                    paymentId: payment.id
+                }, {
+                where: {
+                    id: paraclinical.id
+                },
+                transaction // Pass transaction here as well
+            });
+            
+            // Check if update was successful (returns [affectedCount])
+            if (!updateResult || updateResult[0] === 0) {
+                // If update failed, throw an error to trigger rollback
+                throw new Error(`Failed to update paraclinical with ID: ${paraclinical.id}`);
             }
         }
-        );
-
+        
+        // If we've reached here, all operations were successful, commit the transaction
+        await transaction.commit();
+        
         return {
             EC: 0,
             EM: 'Cập nhật danh sách xét nghiệm thành công!',
-            DT: updateResults,
+            DT: { success: true, paraclinicalCount: paraclinicals.length },
         };
 
     } catch (error) {
+        // If any error occurred, rollback the transaction
+        await transaction.rollback();
+        
         console.error('Error updating list paraclinicals:', error);
         return {
             EC: 500,
-            EM: 'Lỗi server!',
+            EM: 'Lỗi server: ' + error.message,
             DT: '',
         };
     }

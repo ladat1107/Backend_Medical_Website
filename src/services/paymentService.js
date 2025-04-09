@@ -343,7 +343,7 @@ const paymentExamination = async (data, payment) => {
         let dataUpdate = data.update;
         await db.Examination.update({
             insuranceCoverage: dataUpdate?.insuranceCoverage,
-            insuaranceCode: dataUpdate?.insuaranceCode,
+            insuranceCode: dataUpdate?.insuranceCode,
             status: dataUpdate?.status,
             paymentId: payment.id,
         }, {

@@ -4,6 +4,7 @@ import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
 import { Op, Sequelize } from 'sequelize';
+import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 
 
 export const getExaminationById = async (id) => {
@@ -70,7 +71,7 @@ export const getExaminationById = async (id) => {
                         model: db.Medicine,
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
-                        through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose']
+                        through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose', 'coveredPrice']
                     }],
                 }
             ],
@@ -176,6 +177,47 @@ export const createExamination = async (data) => {
             }
         });
 
+        let paymentObject = {};
+        if(data.insuranceCode){
+
+            // Update thông tin bảo hiểm từ TIẾP NHẬN
+            let existingInsurance = await db.Insurance.findOne({
+                where: { userId: +data.userId }
+            });
+            
+            if (existingInsurance) {
+                // Cập nhật bản ghi đã tồn tại
+                if(existingInsurance.insuranceCode !== data.insuranceCode){
+                    existingInsurance = await existingInsurance.update({
+                        insuranceCode: data.insuranceCode,
+                        benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
+                    });
+                }
+            } else {
+                // Thêm mới nếu chưa có
+                existingInsurance = await db.Insurance.create({
+                    insuranceCode: data.insuranceCode,
+                    benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
+                    userId: data.userId
+                });
+            }
+
+            if (!existingInsurance) {
+                return {
+                    EC: 404,
+                    EM: "Không tìm thấy bảo hiểm",
+                    DT: ""
+                }
+            }
+
+            paymentObject = {
+                insuranceCode: data.insuranceCode,
+                insuranceCoverage: getThirdDigitFromLeft(data.insuranceCode),
+                ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
+                ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice })
+            }
+        }
+
         // Tính số thứ tự tiếp theo (nếu không có bản ghi nào, bắt đầu từ 1)
         let nextNumber = maxNumber ? maxNumber + 1 : 1;
 
@@ -190,7 +232,6 @@ export const createExamination = async (data) => {
 
             price: staff.price,
             special: data.special,
-            insuranceCoverage: data.insuranceCoverage,
             comorbidities: data.comorbidities,
 
             // Số vào phòng bác sĩ (number) và tên phòng (roomName)
@@ -201,7 +242,8 @@ export const createExamination = async (data) => {
             time: data.time,
             visit_status: data.visit_status ? data.visit_status : 0,
             is_appointment: data.is_appointment ? data.is_appointment : 0,
-            insuaranceCode: data.insuaranceCode ? data.insuaranceCode : null,
+
+            ...paymentObject
         });
 
         return {
@@ -239,6 +281,47 @@ export const updateExamination = async (data, userId) => {
                 paymentId: payment.id,
             }
         }
+
+        if(data.insuranceCode){
+
+            // Update thông tin bảo hiểm từ TIẾP NHẬN
+            let existingInsurance = await db.Insurance.findOne({
+                where: { userId: userId }
+            });
+            
+            if (existingInsurance) {
+                // Cập nhật bản ghi đã tồn tại
+                if(existingInsurance.insuranceCode !== data.insuranceCode){
+                    existingInsurance = await existingInsurance.update({
+                        insuranceCode: data.insuranceCode,
+                        benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
+                    });
+                }
+            } else {
+                // Thêm mới nếu chưa có
+                existingInsurance = await db.Insurance.create({
+                    insuranceCode: data.insuranceCode,
+                    benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
+                    userId: userId
+                });
+            }
+
+            if (!existingInsurance) {
+                return {
+                    EC: 404,
+                    EM: "Không tìm thấy bảo hiểm",
+                    DT: ""
+                }
+            }
+
+            paymentObject = {
+                insuranceCode: data.insuranceCode,
+                insuranceCoverage: getThirdDigitFromLeft(data.insuranceCode),
+                ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
+                ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice })
+            }
+        }
+
         let examination = await db.Examination.update({
             symptom: data.symptom,
             diseaseName: data.diseaseName,
@@ -249,10 +332,9 @@ export const updateExamination = async (data, userId) => {
             medicalTreatmentTier: data.medicalTreatmentTier,
             price: data.price,
             special: data.special,
-            insuranceCoverage: data.insuranceCoverage,
+
             comorbidities: data.comorbidities,
             visit_status: data.visit_status ? data.visit_status : 0,
-            insuaranceCode: data.insuaranceCode,
             status: data.status,
             ...paymentObject
         }, {
@@ -361,8 +443,8 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         }
 
         // Status filter
-        if (status) {
-            whereCondition.status = status === 4 ? { [Op.in]: [4, 5, 6] } : status;
+        if (status !== undefined && status !== null) {
+            whereCondition.status = +status === 4 ? { [Op.in]: [4, 5, 6] } : +status;
         }
         
         // Appointment filter
@@ -498,7 +580,6 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
-
 export const getListToPay = async (date, statusPay, page, limit, search) => {
     try {
         // Prepare base where conditions
@@ -535,7 +616,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         // Fetch data with associations
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
-            attributes: ['id', 'userId', 'staffId', 'price', 'insuranceCoverage', 'insuaranceCode', 'symptom', 'roomName', 'visit_status', 'special', 'createdAt'],
+            attributes: ['id', 'userId', 'staffId', 'price', 'insuranceCoverage', 'insuranceCode', 'symptom', 'roomName', 'visit_status', 'special', 'createdAt'],
             include: [
                 {
                     model: db.User,
@@ -577,19 +658,19 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                 {
                     model: db.Examination,
                     as: 'examinationResultParaclincalData',
-                    attributes: ['id', 'symptom', 'insuranceCoverage', 'insuaranceCode', 'special', 'visit_status'],
+                    attributes: ['id', 'symptom', 'insuranceCoverage', 'insuranceCode', 'special', 'visit_status'],
                     include: [
                         {
                             model: db.User,
                             as: 'userExaminationData',
                             attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
-                            include: [
-                                {
-                                    model: db.Insurance,
-                                    as: 'userInsuranceData',
-                                    attributes: ['insuranceCode'],
-                                },
-                            ],
+                            // include: [
+                            //     {
+                            //         model: db.Insurance,
+                            //         as: 'userInsuranceData',
+                            //         attributes: ['insuranceCode'],
+                            //     },
+                            // ],
                             where: search ? {
                                 [Op.or]: [
                                     { firstName: { [Op.like]: `%${search}%` } },
@@ -686,7 +767,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         const sortedList = combinedList.sort((itemA, itemB) => {
             const dateA = new Date(itemA.createdAt);
             const dateB = new Date(itemB.createdAt);
-            return dateB.getTime() - dateA.getTime(); // Mới nhất lên đầu
+            return dateA.getTime() - dateB.getTime();
         });
 
         // Áp dụng phân trang
