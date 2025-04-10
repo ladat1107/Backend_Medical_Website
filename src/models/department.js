@@ -17,11 +17,7 @@ module.exports = (sequelize, DataTypes) => {
                 through: 'DepartmentSymptoms',
                 foreignKey: 'id',
                 as: 'symptomData',
-            });
-            // Department.belongsTo(models.Description, {
-            //     foreignKey: 'descriptionId',
-            //     as: 'departmentDescriptionData',
-            // });
+            });          
             Department.belongsTo(models.Staff, {
                 foreignKey: 'deanId',
                 as: 'deanDepartmentData',

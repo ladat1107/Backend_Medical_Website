@@ -1,8 +1,7 @@
 import db from "../models/index";
 import { generateUniqueKey } from "../utils/generateUniqueKey";
 import { ERROR_SERVER, status } from "../utils/index";
-import { Op, Sequelize } from 'sequelize';
-import { examinationPayment } from "./paymentService";
+import { Op } from 'sequelize';
 
 export const getAllNotifications = async (page, limit, search, userId) => {
     try {
@@ -46,7 +45,7 @@ export const getAllNotifications = async (page, limit, search, userId) => {
                 //         attributes: ['name']
                 //     }],
                 // }]
-            },{
+            }, {
                 model: db.AttachFile,
                 as: 'NotificationAttachFileData',
                 attributes: ['link', 'type'],
@@ -56,7 +55,7 @@ export const getAllNotifications = async (page, limit, search, userId) => {
             order: [['date', 'DESC']],
             distinct: true,
         });
-        
+
         if (!notifications || notifications.count === 0) {
             return {
                 EC: 404,
@@ -64,11 +63,11 @@ export const getAllNotifications = async (page, limit, search, userId) => {
                 DT: "",
             }
         }
-        
+
         return {
             EC: 0,
             EM: "Lấy thông báo thành công",
-            DT: {notifications, unreadCount, totalNotifications}
+            DT: { notifications, unreadCount, totalNotifications }
         }
     } catch (error) {
         console.log(error);
@@ -187,7 +186,6 @@ export const getAllUserToNotify = async (userId, roleId) => {
     }
 };
 
-
 export const getAllUserToNotifyFull = async () => {
     try {
         let users = await db.User.findAll({
@@ -255,7 +253,7 @@ export const getAllUserToNotifyFull = async () => {
             // Check if user is staff or regular user
             if (user.staffUserData && user.staffUserData.length > 0) {
                 const department = user.staffUserData[0].staffDepartmentData;
-                
+
                 // Create staff user object without department information
                 const staffUser = {
                     ...plainUser,
@@ -270,10 +268,10 @@ export const getAllUserToNotifyFull = async () => {
                     if (dean && dean.userId === user.id) {
                         staffUser.isDean = true;
                     }
-                    
+
                     // Find or create department group
                     let departmentGroup = departmentGroups.find(group => group.id === departmentId);
-                    
+
                     if (!departmentGroup) {
                         departmentGroup = {
                             id: departmentId,
@@ -283,7 +281,7 @@ export const getAllUserToNotifyFull = async () => {
                         };
                         departmentGroups.push(departmentGroup);
                     }
-                    
+
                     // Add user to department group
                     departmentGroup.users.push(staffUser);
                 }
@@ -347,7 +345,7 @@ export const createNotification = async (data) => {
 
         let attachedFilesWithNotiCode = data.attachedFiles.map(file => ({
             ...file,
-            notiCode: notiCode 
+            notiCode: notiCode
         }));
         let notifications = await db.Notification.bulkCreate(notificationsData);
         let attachFiles = await db.AttachFile.bulkCreate(attachedFilesWithNotiCode);

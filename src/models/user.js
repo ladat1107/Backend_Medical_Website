@@ -54,6 +54,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'diseaseData',
       });
+      User.hasOne(models.Conversation, {
+        foreignKey: 'patientId',
+        as: 'patientData',
+      })
+      User.hasMany(models.Conversation, {
+        foreignKey: 'staffId',
+        as: 'staffData',
+      })
       User.hasMany(models.Examination, {
         foreignKey: 'userId',
         as: 'userExaminationData',

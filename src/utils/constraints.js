@@ -59,3 +59,11 @@ export const ERROR_SERVER = {
     EM: "Lỗi hệ thống",
     DT: null
 }
+
+export const STATUS_MESSAGE = {
+    FAILED: "failed",
+    SENDING: "sending",
+    SENT: "sent",
+    RECEIVED: "received",
+    READ: "read"
+}

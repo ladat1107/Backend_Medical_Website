@@ -1,5 +1,5 @@
 import express from 'express';
-import  { handleConfirmController, handleForgotPasswordController, handleLoginController, handleLoginGoogleController, handleRegisterUserController } from '../controllers/userController';
+import { handleConfirmController, handleForgotPasswordController, handleLoginController, handleLoginGoogleController, handleLogoutController, handleRegisterUserController } from '../controllers/userController';
 import { refreshToken } from "../Middleware/JWTAction"
 require('dotenv').config();
 let router = express.Router();
@@ -15,15 +15,13 @@ let authenRoute = (app, passport) => {
     });
 
     // Định tuyến
-    app.get(
-        '/auth/google',
-        passport.authenticate('google', { scope: ['profile', 'email'] })
-    );
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
     app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), handleLoginGoogleController);
 
     router.post("/registerUser", handleRegisterUserController)
     router.post("/handleLogin", handleLoginController)
+    router.post("/handleLogout", handleLogoutController)
     router.post("/confirmUser", handleConfirmController)
     router.post("/forgotPassword", handleForgotPasswordController)
     router.get("/refreshToken", refreshToken)

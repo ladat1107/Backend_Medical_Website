@@ -22,6 +22,7 @@ export const handleRegisterUserController = async (req, res) => {
 export const handleConfirmController = async (req, res) => {
     try {
         let data = req.body;
+
         if (data && data.token) {
             let response = await confirmUser(data.token);
             return res.status(200).json(response)
@@ -73,6 +74,19 @@ export const handleLoginController = async (req, res) => {
         })
         delete response.DT.refreshToken;
         return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+export const handleLogoutController = async (req, res) => {
+    try {
+        res.clearCookie(COOKIE.refreshToken);
+        return res.status(200).json({
+            EC: 0,
+            EM: "Đăng xuất thành công",
+            DT: ""
+        })
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
