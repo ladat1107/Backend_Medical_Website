@@ -1,5 +1,5 @@
 
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import db from "../models/index"
 import { ERROR_SERVER, STATUS_MESSAGE } from "../utils";
 let assistantForCustomer = [];
@@ -40,7 +40,6 @@ export const getConversation = async (userId, receiverId) => {
         }
         if (!conversation.staffId || !assistantForCustomer.some(assistant => assistant.id === conversation.staffId)) {
             let staffForConversation = assistantForCustomer[Math.floor(Math.random() * assistantForCustomer.length)];
-            console.log("staffForConversation 1", staffForConversation)
             await conversation.update({
                 staffId: staffForConversation?.id || null
             }, { transaction });
@@ -184,6 +183,29 @@ export const deleteAssistantForCustomer = async (staffId) => {
     try {
         assistantForCustomer = assistantForCustomer.filter(assistant => assistant.id !== staffId);
         return { EC: 0, EM: "Rời khỏi cuộc hội thoại thành công", DT: assistantForCustomer };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+
+export const getNumberMessageUnread = async (userId) => {
+    try {
+        const numberMessageUnread = await db.Conversation.findOne({
+            where: { patientId: userId },
+            include: [
+                {
+                    model: db.Message,
+                    as: "messageData",
+                    where: { status: { [Op.ne]: STATUS_MESSAGE.READ }, senderId: { [Op.ne]: userId } }
+                }
+            ]
+        })
+        if (numberMessageUnread && numberMessageUnread.dataValues.messageData.length > 0) {
+            return { EC: 0, EM: "Lấy số tin nhắn chưa đọc thành công", DT: numberMessageUnread.dataValues.messageData.length };
+        } else {
+            return { EC: 0, EM: "Không có tin nhắn chưa đọc", DT: 0 };
+        }
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;

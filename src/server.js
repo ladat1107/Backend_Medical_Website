@@ -83,17 +83,27 @@ const io = new Server(server, {
 
 // Xử lý kết nối Socket.io
 io.on('connection', (socket) => {
-    // Xác thực và đăng ký người dùng
-    socket.on('authenticate', (token) => {
+
+    socket.on('authenticate', async (token) => {
         try {
             const pureToken = token.replace('Bearer ', '');
-            const decoded = jwt.verify(pureToken, process.env.SECURITY_KEY);
+            const cookieHeader = socket.handshake.headers.cookie;
+
+            // Nếu muốn parse cookie:
+            const parsedCookies = cookieHeader?.split(';').reduce((acc, cookie) => {
+                const [key, value] = cookie.trim().split('=');
+                acc[key] = decodeURIComponent(value);
+                return acc;
+            }, {}) || {};
+
+            const refreshToken = parsedCookies['refreshToken'];
+            if (!refreshToken) {
+                return socket.emit('error', 'No refresh token found');
+            }
+            
+            const decoded = jwt.verify(refreshToken, process.env.SECURITY_KEY);
 
             const userId = decoded.id;
-
-            console.log('User connected with cookies:', socket.cookies);
-            console.log('User connected with token:', token);
-
             // Đăng ký socket cho người dùng
             registerUserSocket(socket, userId);
 

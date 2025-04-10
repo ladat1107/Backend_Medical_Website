@@ -3,7 +3,7 @@ import { confirmBookingController, confirmTokenBookingController, getMedicalHist
 import { deleteExaminationController, getExaminationByUserIdController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
-import { upsertConversationController } from '../controllers/messageController';
+import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 import { createMessageController } from '../controllers/messageController';
 require('dotenv').config();
@@ -33,6 +33,7 @@ let initWebAuthenRounte = (app) => {
     router.put("/markAllRead", markAllReadController)
 
     router.get("/getConversation", upsertConversationController)
+    router.get("/getNumberMessageUnread", getNumberMessageUnreadController)
 
     router.post("/createMessage", createMessageController)
 
