@@ -14,7 +14,7 @@ export const createToken = (payload, time) => {
     }
     return token;
 }
-const verifyToken = (token) => {
+export const verifyToken = (token) => {
     let key = process.env.SECURITY_KEY;
     let decoded = null;
     try {

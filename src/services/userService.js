@@ -1,9 +1,8 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op, where } from 'sequelize';
+import { Op } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
-import { createStaff } from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
@@ -674,6 +673,7 @@ export const confirmUser = async (token) => {
         return ERROR_SERVER
     }
 }
+
 export const forgotPassword = async (email) => {
     try {
         let password = "123456";
@@ -1132,6 +1132,7 @@ export const confirmTokenBooking = async (token) => {
                     visit_status: 0,
                     is_appointment: 1,
                     bookFor: data.profile.bookFor ? data.profile.id : null,
+                    oldParaclinical: data?.profile?.oldParaclinical || null,
                 }, { transaction });
                 if (examination) {
                     await transaction.commit();
