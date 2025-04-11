@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination } from '../services/examinationService';
+import { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -76,6 +76,16 @@ export const updateExaminationController = async (req, res) => {
     }
 }
 
+export const updateOldParaclinicalController = async (req, res) => {
+    try {
+        let data = req.body;
+        let response = await updateOldParaclinical(data);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
 export const deleteExaminationController = async (req, res) => {
     try {
         const { id } = req.query;

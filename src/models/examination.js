@@ -152,6 +152,8 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
         },
+        oldParaclinical: DataTypes.TEXT,
+        reExaminationDate: DataTypes.DATE,
     }, {
         sequelize,
         modelName: 'Examination',

@@ -178,16 +178,16 @@ export const createExamination = async (data) => {
         });
 
         let paymentObject = {};
-        if(data.insuranceCode){
+        if (data.insuranceCode) {
 
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
                 where: { userId: +data.userId }
             });
-            
+
             if (existingInsurance) {
                 // Cập nhật bản ghi đã tồn tại
-                if(existingInsurance.insuranceCode !== data.insuranceCode){
+                if (existingInsurance.insuranceCode !== data.insuranceCode) {
                     existingInsurance = await existingInsurance.update({
                         insuranceCode: data.insuranceCode,
                         benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
@@ -242,6 +242,7 @@ export const createExamination = async (data) => {
             time: data.time,
             visit_status: data.visit_status ? data.visit_status : 0,
             is_appointment: data.is_appointment ? data.is_appointment : 0,
+            oldParaclinical: data?.oldParaclinical || null,
 
             ...paymentObject
         });
@@ -282,16 +283,16 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
-        if(data.insuranceCode){
+        if (data.insuranceCode) {
 
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
                 where: { userId: userId }
             });
-            
+
             if (existingInsurance) {
                 // Cập nhật bản ghi đã tồn tại
-                if(existingInsurance.insuranceCode !== data.insuranceCode){
+                if (existingInsurance.insuranceCode !== data.insuranceCode) {
                     existingInsurance = await existingInsurance.update({
                         insuranceCode: data.insuranceCode,
                         benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
@@ -446,7 +447,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         if (status !== undefined && status !== null) {
             whereCondition.status = +status === 4 ? { [Op.in]: [4, 5, 6] } : +status;
         }
-        
+
         // Appointment filter
         // if (is_appointment) {
         //     whereCondition.is_appointment = is_appointment;
@@ -580,6 +581,28 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
+export const updateOldParaclinical = async (data) => {
+    try {
+        let { id, oldParaclinical } = data;
+        let updateOldParaclinical = await db.Examination.update({ oldParaclinical: oldParaclinical }, { where: { id } });
+        if (updateOldParaclinical[0] === 0) {
+            return {
+                EC: 404,
+                EM: "Không tìm thấy khám bệnh",
+                DT: ""
+            }
+        }
+        return {
+            EC: 0,
+            EM: "Cập nhật thành công",
+            DT: updateOldParaclinical
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
 export const getListToPay = async (date, statusPay, page, limit, search) => {
     try {
         // Prepare base where conditions
