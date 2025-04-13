@@ -1,6 +1,6 @@
 import db from "../models/index";
 import { generateUniqueKey } from "../utils/generateUniqueKey";
-import { ERROR_SERVER, status } from "../utils/index";
+import { ERROR_SERVER, ROLE, status } from "../utils/index";
 import { Op } from 'sequelize';
 
 export const getAllNotifications = async (page, limit, search, userId) => {
@@ -83,7 +83,10 @@ export const getAllUserToNotify = async (userId, roleId) => {
 
         let users = await db.User.findAll({
             where: {
-                status: status.ACTIVE
+                status: status.ACTIVE,
+                roleId: {
+                    [Op.ne]: ROLE.ADMIN // not equal
+                }
             },
             attributes: ['id', 'email', 'firstName', 'lastName'],
             include: [{
@@ -190,7 +193,10 @@ export const getAllUserToNotifyFull = async () => {
     try {
         let users = await db.User.findAll({
             where: {
-                status: status.ACTIVE
+                status: status.ACTIVE,
+                roleId: {
+                    [Op.ne]: ROLE.ADMIN // not equal
+                }
             },
             attributes: ['id', 'email', 'firstName', 'lastName'],
             include: [{

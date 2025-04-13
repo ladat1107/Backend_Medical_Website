@@ -112,7 +112,7 @@ export const createSchedule = async (data) => {
                         {
                             model: db.User, // Model User liên kết với Staff
                             as: 'staffUserData', // Alias trong association
-                            attributes: ['lastName', 'firstName'], // Lấy thông tin tên nhân viên
+                            attributes: ['id', 'lastName', 'firstName'], // Added 'id' to attributes
                         },
                     ],
                 },
@@ -135,11 +135,42 @@ export const createSchedule = async (data) => {
         }
         //Thêm dữ liệu mới
         let schedule = await db.Schedule.bulkCreate(data, { transaction });
+        
+        // Fetch the newly created schedules with the user id included
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: new Date(data[0].date),
+                roomId: data[0].roomId,
+                staffId: {
+                    [Op.in]: data.map(item => item.staffId),
+                },
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+        
         await transaction.commit();
         return {
             EC: 0,
             EM: "Tạo thông tin lịch trực thành công",
-            DT: schedule,
+            DT: createdSchedules,
         };
     } catch (error) {
         await transaction.rollback();
@@ -334,8 +365,34 @@ export const arrangeSchedule = async (data) => {
             }
         }
         await db.Schedule.bulkCreate(schedule, { transaction });
+
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: { [Op.between]: [start, end] }
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId', 'specialtyId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+
         await transaction.commit();
-        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule } };
+        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule: createdSchedules  } };
     } catch (error) {
         await transaction.rollback();
         console.error(error);

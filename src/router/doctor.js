@@ -14,6 +14,7 @@ import { createOrUpdateVitalSignController, createVitalSignController, deleteVit
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
 import { deleteAssistantForCustomerController, getConversationForStaffController } from '../controllers/messageController';
+import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
 dotenv.config();
 
 let router = express.Router();
@@ -28,6 +29,8 @@ let initDoctorRoute = (app) => {
     // router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
 
     router.get("/getStaffNameById", getStaffNameByIdController)
+    router.get("/getArrayUserId", getArrayUserIdController)
+    router.get("/getArrayAdminId", getArrayAdminIdController)
 
     //--  HandBook
     router.get("/getAllHandBooks", getAllHandBooksController)
@@ -101,6 +104,8 @@ let initDoctorRoute = (app) => {
     // -- Message
     router.get("/getConversationForStaff", getConversationForStaffController)
     router.delete("/deleteAssistantForCustomer", deleteAssistantForCustomerController)
+
+
     return app.use("/api/", router);
 }
 export default initDoctorRoute;
