@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         registrationNumber: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
         unit: {
             type: DataTypes.STRING,
@@ -34,8 +33,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        mfg: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
         exp: {
-            type: DataTypes.STRING(256),
+            type: DataTypes.DATE,
             allowNull: true,
         },
         approvalNumber: {
@@ -75,6 +78,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             defaultValue: 0,
         },
+        insuranceCovered: {
+            type: DataTypes.DECIMAL(5, 4),
+            allowNull: false,
+            defaultValue: 0
+        },
+        batchNumber: {
+            type: DataTypes.STRING(256),
+            allowNull: false,
+        },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -82,6 +94,12 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Medicine',
+        indexes: [
+            {
+                unique: true,
+                fields: ['registrationNumber', 'batchNumber']
+            }
+        ]
     });
     return Medicine;
 };

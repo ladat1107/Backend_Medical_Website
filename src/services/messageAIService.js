@@ -2,9 +2,8 @@ import { ERROR_SERVER, ROLE, status } from '../utils';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import db from '../models';
 //import { removeVietnameseTones } from '../utils/function';
-import { Op, where } from 'sequelize';
-import { raw, text } from 'body-parser';
-import specialty from '../models/specialty';
+import { Op, } from 'sequelize';
+
 require('dotenv').config();
 let API_KEY = process.env.GEMINI_API_KEY;
 if (!API_KEY) {
@@ -202,7 +201,7 @@ const findInformationDepartmentExactly = async (param) => {
 const findInformationDepartmentIncludeName = async (param) => {
     try {
         let findAll = await db.Department.findAll({
-            where: { name: { [Op.like]: `%${param}%` } },
+            where: { name: { [Op.like]: `% ${param} %` } },
             include: [
                 {
                     model: db.Staff, as: "staffDepartmentData"
@@ -304,8 +303,8 @@ const findDoctorBySymptom = async (param) => {
             where: {
                 status: status.ACTIVE,
                 [Op.or]: [
-                    { name: { [Op.like]: `%${param}%` } },
-                    { shortDescription: { [Op.like]: `%${param}%` } }
+                    { name: { [Op.like]: `% ${param} %` } },
+                    { shortDescription: { [Op.like]: `% ${param} %` } }
                 ]
             },
             include: [{

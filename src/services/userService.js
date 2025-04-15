@@ -1000,6 +1000,7 @@ export const getUserInsuarance = async (userId) => {
         };
     }
 }
+
 export const confirmBooking = async (data) => {
     try {
         let user = await db.User.findOne({
