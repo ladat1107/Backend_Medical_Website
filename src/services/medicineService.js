@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import db from "../models/index";
 import { ERROR_SERVER, status } from "../utils/index";
 
@@ -77,29 +78,58 @@ export const getMedicineById = async (id) => {
     }
 }
 
-export const createMedicine = async (data) => {
+export const getAllMedicinesAdmin = async () => {
     try {
-        let newMedicine = await db.Medicine.create({
-            name: data.name,
-            price: data.price,
-            registrationNumber: data.registrationNumber,
-            unit: data.unit,
-            inventory: data.inventory,
-            exp: data.exp,
-            approvalNumber: data.approvalNumber,
-            approvalDate: data.approvalDate,
-            dosageForm: data.dosageForm,
-            manufacturerCountry: data.manufacturerCountry,
-            description: data.description,
-            activeIngredient: data.activeIngredient,
-            group: data.group,
-            concentration: data.concentration,
-            status: status.ACTIVE,
+        let medicines = await db.Medicine.findAll({
+            order: [['updatedAt', 'DESC']],
+            raw: true,
         });
         return {
             EC: 0,
+            EM: "Lấy thông tin thuốc thành công",
+            DT: medicines
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const createMedicine = async (medicines) => {
+    try {
+        if (!medicines.length) return { EC: 400, EM: "Không có dữ liệu để tạo thuốc", DT: "" };
+        const keyPairs = medicines.map(m => ({
+            registrationNumber: m.registrationNumber,
+            batchNumber: m.batchNumber
+        }));
+
+        // Truy vấn 1 lần duy nhất để kiểm tra xem có trùng không
+        const existing = await db.Medicine.findAll({
+            where: {
+                [Op.or]: keyPairs
+            },
+            attributes: ['registrationNumber', 'batchNumber', 'name']
+        });
+
+        // 2. Nếu có bất kỳ bản ghi nào trùng thì không insert
+        if (existing.length > 0) {
+            let error = "";
+            existing.forEach(e => {
+                error += `Lô thuốc ${e.batchNumber} của ${e.name} đã tồn tại\n`;
+            });
+            return {
+                EC: 1,
+                EM: 'Đã có bản ghi trùng trong cơ sở dữ liệu',
+                DT: error
+            };
+        }
+
+        // 3. Nếu không có trùng thì insert toàn bộ (1 lần)
+        await db.Medicine.bulkCreate(medicines, { validate: true });
+        return {
+            EC: 0,
             EM: "Tạo mới thuốc thành công",
-            DT: newMedicine
+            DT: ""
         }
     } catch (error) {
         console.log(error);
@@ -109,24 +139,31 @@ export const createMedicine = async (data) => {
 
 export const updateMedicine = async (data) => {
     try {
-        let medicine = await db.Medicine.update({
-            name: data.name,
-            price: data.price,
-            registrationNumber: data.registrationNumber,
-            unit: data.unit,
-            inventory: data.inventory,
-            exp: data.exp,
-            approvalNumber: data.approvalNumber,
-            approvalDate: data.approvalDate,
-            dosageForm: data.dosageForm,
-            manufacturerCountry: data.manufacturerCountry,
-            description: data.description,
-            activeIngredient: data.activeIngredient,
-            group: data.group,
-            concentration: data.concentration,
-        }, {
+        // tìm thuốc có trùng 2 trường registrationNumber và batchNumber đó mà không phải id của data.id
+        let existing = await db.Medicine.findAll({
+            where: {
+                registrationNumber: data.registrationNumber,
+                batchNumber: data.batchNumber,
+                id: { [Op.ne]: data.id }
+            }
+        })
+        if (existing.length > 0) {
+            return {
+                EC: 400,
+                EM: "Số lô thuốc và số đăng ký đã tồn tại. Vui lòng kiểm tra lại",
+                DT: ""
+            }
+        }
+        let medicine = await db.Medicine.update({ ...data, isCovered: data?.insuranceCovered ? 1 : 0 }, {
             where: { id: data.id }
         });
+        if (!medicine) {
+            return {
+                EC: 400,
+                EM: "Cập nhật thông tin thuốc thất bại",
+                DT: ""
+            }
+        }
         return {
             EC: 0,
             EM: "Cập nhật thông tin thuốc thành công",
@@ -149,12 +186,26 @@ export const updateInventory = async (medicineId, quantityChange) => {
         console.warn(`Medicine with id ${medicineId} not found`);
     }
 }
-
-export const deleteMedicine = async (id) => {
+export const blockMedicine = async (id) => {
     try {
         let medicine = await db.Medicine.update({
             status: status.INACTIVE
         }, {
+            where: { id: id }
+        });
+        return {
+            EC: 0,
+            EM: "Khóa thuốc thành công",
+            DT: medicine
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+export const deleteMedicine = async (id) => {
+    try {
+        let medicine = await db.Medicine.destroy({
             where: { id: id }
         });
         return {
