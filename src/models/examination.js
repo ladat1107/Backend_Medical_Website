@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         staffId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'staffs', // Tên bảng tham chiếu
                 key: 'id',
@@ -154,6 +154,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         oldParaclinical: DataTypes.TEXT,
         reExaminationDate: DataTypes.DATE,
+        dischargeStatus: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
     }, {
         sequelize,
         modelName: 'Examination',

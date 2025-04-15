@@ -1,6 +1,6 @@
 import express from 'express';
 import { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
-import { deleteExaminationController, getExaminationByUserIdController, updateOldParaclinicalController } from '../controllers/examinationController';
+import { deleteExaminationController, getExaminationByUserIdController, getExamToNoticeController, updateOldParaclinicalController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
@@ -39,6 +39,8 @@ let initWebAuthenRounte = (app) => {
     
 
     router.post("/createMessage", createMessageController)
+
+    router.get("/getExamToNotice", getExamToNoticeController)
 
     return app.use("/api/", router);
 }

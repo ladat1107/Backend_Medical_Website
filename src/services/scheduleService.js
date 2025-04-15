@@ -52,7 +52,36 @@ export const getScheduleByStaffId = async (staffId) => {
         return ERROR_SERVER
     }
 }
-
+export const getScheduleByStaffIdFromToday = async (staffId) => {
+    try {
+        let schedule = await db.Schedule.findAll({
+            where: { 
+                staffId: staffId,
+                date: {
+                    [Op.gte]: new Date(),
+                }
+             },
+            attributes: ['roomId', 'date'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: [],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            }],
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch trực thành công",
+            DT: schedule
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
 export const getScheduleInWeek = async (data) => {
     try {
         let schedule = await db.Schedule.findAll({

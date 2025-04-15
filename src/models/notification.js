@@ -32,11 +32,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         senderId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         receiverId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
         notiCode: {
             type: DataTypes.STRING,

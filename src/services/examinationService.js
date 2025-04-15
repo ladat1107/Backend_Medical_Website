@@ -1,4 +1,3 @@
-
 import dayjs from "dayjs";
 import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
@@ -337,10 +336,40 @@ export const updateExamination = async (data, userId) => {
             comorbidities: data.comorbidities,
             visit_status: data.visit_status ? data.visit_status : 0,
             status: data.status,
+            reExaminationDate: data.reExaminationDate || null,
+            dischargeStatus: data.dischargeStatus || null,
+
             ...paymentObject
         }, {
             where: { id: data.id }
         });
+
+        console.log("examination", existExamination);
+
+        if(examination && data.reExaminationDate === 4 && data.dischargeDate && data.createReExamination){
+            await db.Examination.create({
+                userId: existExamination.userId,
+                staffId: existExamination.staffId,
+                symptom: existExamination.symptom,
+                admissionDate: data.reExaminationDate,
+                dischargeDate: data.reExaminationDate,
+                reason: 'Tái khám theo lịch hẹn',
+                status: status.PENDING,
+                price: existExamination.price,
+                special: existExamination.special,
+                comorbidities: existExamination.comorbidities,
+
+                // Số vào phòng bác sĩ (number) và tên phòng (roomName)
+                number: existExamination.number + 1,
+                roomName: existExamination.roomName,
+
+                // Thông tin cho người đặt trước
+                time: existExamination.time,
+                visit_status: 0,
+                is_appointment: 1,
+            })
+        }
+
         return {
             EC: 0,
             EM: "Cập nhật khám bệnh thành công",
@@ -351,6 +380,7 @@ export const updateExamination = async (data, userId) => {
         return ERROR_SERVER
     }
 }
+
 export const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
@@ -409,6 +439,7 @@ export const deleteExamination = async (id) => {
         return ERROR_SERVER
     }
 }
+
 export const getExaminations = async (date, toDate, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
@@ -552,6 +583,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         };
     }
 };
+
 export const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
@@ -581,6 +613,7 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
+
 export const updateOldParaclinical = async (data) => {
     try {
         let { id, oldParaclinical } = data;
@@ -822,6 +855,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         };
     }
 };
+
 export const getPatienSteps = async (examId) => {
     try {
         const examination = await db.Examination.findOne({
@@ -914,6 +948,46 @@ export const getPatienSteps = async (examId) => {
         };
     }
 };
+
+export const getExamToNotice = async () => {
+    try {
+        // Get tomorrow's date
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow
+
+        const endOfTomorrow = new Date(tomorrow);
+        endOfTomorrow.setHours(23, 59, 59, 999); // End of tomorrow
+        
+        // Find examinations with reExaminationDate set to tomorrow
+        const examinations = await db.Examination.findAll({
+            where: {
+                reExaminationDate: {
+                    [Op.between]: [tomorrow, endOfTomorrow]
+                }
+            },
+            attributes: ['id', 'userId', 'reExaminationDate', 'diseaseName'],
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber'],
+                }
+            ],
+            raw: true,
+            nest: true
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy danh sách tái khám thành công",
+            DT: examinations
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
 
 export const getAllExaminationsAdmin = async () => {
     try {

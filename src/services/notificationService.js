@@ -2,9 +2,15 @@ import db from "../models/index";
 import { generateUniqueKey } from "../utils/generateUniqueKey";
 import { ERROR_SERVER, ROLE, status } from "../utils/index";
 import { Op } from 'sequelize';
+import { getExamToNotice } from "./examinationService";
+import { io } from "../server";
+import { sendNotification } from "./socketService";
+
+const cron = require('node-cron');
 
 export const getAllNotifications = async (page, limit, search, userId) => {
     try {
+
         let whereConditions = {
             receiverId: userId
         };
@@ -429,3 +435,66 @@ export const markAllRead = async (userId) => {
         return ERROR_SERVER
     }
 }
+
+function scheduleDaily6AM(taskFunction) {
+    // Biểu thức '0 6 * * *' có ý nghĩa:
+    // - 0: phút thứ 0
+    // - 6: giờ thứ 6 (6 giờ sáng)
+    // - * * *: mọi ngày, mọi tháng, mọi ngày trong tuần
+    const task = cron.schedule('0 6 * * *', () => {
+      console.log(`Đang thực hiện công việc theo lịch lúc 6 giờ sáng: ${new Date()}`);
+      taskFunction();
+    });
+    
+    console.log('Đã lên lịch công việc vào 6 giờ sáng mỗi ngày');
+    return task;
+}
+  
+// Sử dụng hàm
+const morningJob = scheduleDaily6AM(async () => {
+    // Thực hiện công việc của bạn ở đây
+    console.log('Đang thực hiện công việc được lên lịch vào 6 giờ sáng');
+    const examToNotice = await getExamToNotice();
+
+    if (!examToNotice || examToNotice.length === 0) {
+        console.log('Không có thông báo nào để gửi');
+        return;
+    }
+    
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    // Format về dạng dd/mm/yyyy
+    const appointmentDate = tomorrow.toLocaleDateString('vi-VN');
+
+    const title = "🩺Thông báo lịch tái khám";
+    const htmlDescription = `<p>Bệnh nhân có lịch tái khám vào ngày <strong>${appointmentDate}</strong>. Vui lòng đến đúng giờ để được phục vụ tốt nhất 👨‍⚕️.</p>`;
+
+    const recipientArray = examToNotice?.DT.map(item => item.userId);
+    const notiCode = generateUniqueKey(16);
+
+    const createNoti = await createNotification({
+        dataNoti: {
+            title: title,
+            htmlDescription: htmlDescription,
+            senderId: null,
+            receiverId: recipientArray.join(","),
+            status: 1,
+        },
+        attachedFiles: [], // Nếu có tệp đính kèm, thêm vào đây
+        notiCode: notiCode,
+    });
+
+    if (createNoti.EC !== 0) {
+        console.error('Lỗi tạo thông báo:', createNoti.EM);
+        return;
+    }
+
+    const firstName = "Hoa Sen";
+    const lastName = "Bệnh viện";
+    const date = new Date();
+    const attachedFiles = []; // Có thể thêm tệp đính kèm nếu cần
+
+    sendNotification(io, title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, recipientArray);
+});
+

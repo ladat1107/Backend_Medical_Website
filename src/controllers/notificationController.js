@@ -6,13 +6,10 @@ export const getAllNotificationsController = async (req, res) => {
         let { page, limit, search } = req.query;
         let userId = req.user.id;
         let notifications = await getAllNotifications(page, limit, search, userId);
-        if (notifications.EC === 0) {
-            return res.status(200).json(notifications)
-        }
-        return res.status(500).json(ERROR_SERVER);
+        return res.status(200).json(notifications)
     } catch (error) {
         console.log(error);
-        return res.status(200).json(ERROR_SERVER)
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
@@ -39,14 +36,12 @@ export const createNotificationController = async (req, res) => {
             })
         }
         data.dataNoti.senderId = req.user.id;
+
         let notification = await createNotification(data);
-        if (notification.EC === 0) {
-            return res.status(200).json(notification)
-        }
-        return res.status(500).json(ERROR_SERVER);
+        return res.status(200).json(notification)
     } catch (error) {
         console.log(error);
-        return res.status(200).json(ERROR_SERVER)
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
@@ -63,10 +58,7 @@ export const updateNotificationController = async (req, res) => {
 
         let response = await updateNotification(data);
 
-        if (response.EC === 0) {
-            return res.status(200).json(response)
-        }
-        return res.status(500).json(ERROR_SERVER);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(200).json(ERROR_SERVER)
@@ -77,10 +69,7 @@ export const markAllReadController = async (req, res) => {
     try {
         let userId = req.user.id;
         let response = await markAllRead(userId);
-        if (response.EC === 0) {
-            return res.status(200).json(response)
-        }
-        return res.status(500).json(ERROR_SERVER);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(200).json(ERROR_SERVER)
