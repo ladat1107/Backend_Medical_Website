@@ -60,7 +60,7 @@ export const getScheduleByStaffIdFromToday = async (staffId) => {
                 date: {
                     [Op.gte]: new Date(),
                 }
-             },
+            },
             attributes: ['roomId', 'date'],
             include: [{
                 model: db.Room,
@@ -82,6 +82,61 @@ export const getScheduleByStaffIdFromToday = async (staffId) => {
         return ERROR_SERVER
     }
 }
+
+export const getStaffForReExamination = async (staffId, date) => {
+    try {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        let schedule = await db.Schedule.findAll({
+            where: {
+                date: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
+            },
+            attributes: ['roomId', 'date', 'staffId'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: ['id', 'name'],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            },{
+                model: db.Staff,
+                as: 'staffScheduleData',
+                attributes: ['id', 'departmentId', 'price'],
+            }],
+            raw: true,
+            nest: true,
+        });
+
+        let result = null;
+        
+        // Nếu có kết quả
+        if (schedule && schedule.length > 0) {
+            // Tìm nhân viên khớp staffId
+            const matchingStaff = schedule.find(item => item.staffId === staffId);
+            
+            // Nếu tìm thấy staffId khớp, trả về nó
+            if (matchingStaff) {
+                result = matchingStaff;
+            } else {
+                // Không tìm thấy staffId khớp, trả về bất kỳ item nào (item đầu tiên)
+                result = schedule[0];
+            }
+        }
+        // Nếu không có kết quả, result vẫn là null
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
 export const getScheduleInWeek = async (data) => {
     try {
         let schedule = await db.Schedule.findAll({

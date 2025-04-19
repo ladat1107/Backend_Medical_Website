@@ -1269,7 +1269,7 @@ export const getMedicalHistories = async (userId) => {
                     as: 'folkData'
                 }
             ],
-            order: [["createdAt", "DESC"]],
+            order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
 
         return {

@@ -4,6 +4,7 @@ import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
 import { Op, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import { getStaffForReExamination } from "./scheduleService";
 
 
 export const getExaminationById = async (id) => {
@@ -338,36 +339,71 @@ export const updateExamination = async (data, userId) => {
             status: data.status,
             reExaminationDate: data.reExaminationDate || null,
             dischargeStatus: data.dischargeStatus || null,
+            reExaminationTime: data.time || null,
 
             ...paymentObject
         }, {
             where: { id: data.id }
         });
 
-        console.log("examination", existExamination);
+        if(examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination){
+            console.log("Tạo lịch tái khám");
 
-        if(examination && data.reExaminationDate === 4 && data.dischargeDate && data.createReExamination){
-            await db.Examination.create({
-                userId: existExamination.userId,
-                staffId: existExamination.staffId,
-                symptom: existExamination.symptom,
-                admissionDate: data.reExaminationDate,
-                dischargeDate: data.reExaminationDate,
-                reason: 'Tái khám theo lịch hẹn',
-                status: status.PENDING,
-                price: existExamination.price,
-                special: existExamination.special,
-                comorbidities: existExamination.comorbidities,
+            const st = await getStaffForReExamination(existExamination.staffId, data.reExaminationDate);
 
-                // Số vào phòng bác sĩ (number) và tên phòng (roomName)
-                number: existExamination.number + 1,
-                roomName: existExamination.roomName,
+            console.log("Staff tái khám", st);
 
-                // Thông tin cho người đặt trước
-                time: existExamination.time,
-                visit_status: 0,
-                is_appointment: 1,
-            })
+            const insuranceCode = await db.Insurance.findOne({
+                where: { userId: existExamination.userId },
+                attributes: ['insuranceCode']
+            });
+            const reExam = await db.Examination.findOne({
+                where: {
+                    parentExaminationId: existExamination.id,
+                }
+            });
+
+            //console.log("Lịch tái khám", reExam);
+
+            if (reExam) {
+                await db.Examination.update({
+                    staffId: st ? st.staffId : null,
+                    admissionDate: data.reExaminationDate,
+                    dischargeDate: data.reExaminationDate,
+                    reason: 'Tái khám theo lịch hẹn',
+                    time: data.time,
+                    roomName: st ? st.scheduleRoomData.name : null,
+                    price: st ? st?.staffScheduleData.price : null,
+                }, {
+                    where: { id: reExam.id }
+                })
+            } else {
+                await db.Examination.create({
+                    userId: existExamination.userId,
+                    staffId: st ? st.staffId : null,
+                    symptom: existExamination.symptom,
+                    admissionDate: data.reExaminationDate,
+                    dischargeDate: data.reExaminationDate,
+                    reason: 'Tái khám theo lịch hẹn',
+                    status: status.PENDING,
+                    price: st ? st?.staffScheduleData.price : null,
+                    special: existExamination.special,
+                    comorbidities: existExamination.comorbidities,
+
+                    insuranceCode: insuranceCode.insuranceCode,
+                    insuranceCoverage: getThirdDigitFromLeft(insuranceCode.insuranceCode),
+
+                    // Số vào phòng bác sĩ (number) và tên phòng (roomName)
+                    //number: existExamination.number + 1,
+                    roomName: st ? st.scheduleRoomData.name : null,
+
+                    // Thông tin cho người đặt trước
+                    time: data.time,
+                    visit_status: 0,
+                    is_appointment: 1,
+                    parentExaminationId: existExamination.id,
+                })
+            }
         }
 
         return {
