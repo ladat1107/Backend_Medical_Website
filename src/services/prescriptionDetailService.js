@@ -84,7 +84,7 @@ export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                     unit: newDetail.unit,
                     price: newDetail.price,
                     session: newDetail.session,
-                    dose: +newDetail.dose,
+                    dose: newDetail.dose,
                     dosage: newDetail.dosage
                 });
                 updatedDetails.push(existingDetail);

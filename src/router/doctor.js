@@ -15,6 +15,7 @@ import { createOrUpdateParaclinicalController, createParaclinicalController, cre
 import dotenv from 'dotenv';
 import { deleteAssistantForCustomerController, getConversationForStaffController } from '../controllers/messageController';
 import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
+import { getAvailableRoomsController } from '../controllers/roomController';
 dotenv.config();
 
 let router = express.Router();
@@ -105,6 +106,9 @@ let initDoctorRoute = (app) => {
     // -- Message
     router.get("/getConversationForStaff", getConversationForStaffController)
     router.delete("/deleteAssistantForCustomer", deleteAssistantForCustomerController)
+
+    // -- Room
+    router.get("/getAvailableRooms", getAvailableRoomsController)
 
 
     return app.use("/api/", router);

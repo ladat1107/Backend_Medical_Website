@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'parentExaminationId',
                 as: 'ReExaminationData',
             });
+            Examination.belongsTo(models.Room, {
+                foreignKey: 'roomId',
+                as: 'examinationRoomData',
+            });
         }
     }
     Examination.init({
@@ -122,6 +126,16 @@ module.exports = (sequelize, DataTypes) => {
         roomName: {
             type: DataTypes.STRING(256),
             allowNull: true,
+        },
+        roomId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'rooms', // Tên bảng tham chiếu
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
         },
         number: {
             type: DataTypes.INTEGER,

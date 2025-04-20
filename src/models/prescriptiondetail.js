@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         dose: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(128),
             allowNull: false,
         },
     }, {

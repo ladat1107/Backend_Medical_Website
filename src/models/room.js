@@ -35,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'roomId',
                 as: 'roomParaclinicalData',
             });
+            Room.hasMany(models.Examination, {
+                foreignKey: 'roomId',
+                as: 'examinationRoomData',
+            });
         }
     }
     Room.init({
@@ -63,11 +67,14 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
         },
+        capacity: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-
     }, {
         sequelize,
         modelName: 'Room',

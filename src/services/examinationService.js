@@ -5,6 +5,7 @@ import { refundMomo } from "./paymentService";
 import { Op, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
+import room from "../models/room";
 
 
 export const getExaminationById = async (id) => {
@@ -72,6 +73,20 @@ export const getExaminationById = async (id) => {
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
                         through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose', 'coveredPrice']
+                    }],
+                },
+                {
+                    model: db.Room,
+                    as: 'examinationRoomData',
+                    attributes: ['id', 'name'],
+                    include: [{
+                        model: db.Department,
+                        as: 'roomDepartmentData',
+                        attributes: ['id', 'name'],
+                    },{
+                        model: db.ServiceType,
+                        as: 'serviceData',
+                        attributes: ['id', 'name', 'price'],
                     }],
                 }
             ],
@@ -340,6 +355,9 @@ export const updateExamination = async (data, userId) => {
             reExaminationDate: data.reExaminationDate || null,
             dischargeStatus: data.dischargeStatus || null,
             reExaminationTime: data.time || null,
+
+            roomName: data.roomName || null,
+            roomId: data.roomId || null,
 
             ...paymentObject
         }, {

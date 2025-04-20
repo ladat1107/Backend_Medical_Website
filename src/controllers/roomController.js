@@ -1,4 +1,4 @@
-import  { blockRoom, createRoom, deleteRoom, getAllRooms, getRoomByDepartment, getRoomById, updateRoom } from '../services/roomService';
+import  { blockRoom, createRoom, deleteRoom, getAllRooms, getAvailableRooms, getRoomByDepartment, getRoomById, updateRoom } from '../services/roomService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllRoomAdminController = async (req, res) => {
@@ -121,6 +121,16 @@ export const deleteRoomController = async (req, res) => {
                 DT: ""
             })
         }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getAvailableRoomsController = async (req, res) => {
+    try {
+        let response = await getAvailableRooms();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
