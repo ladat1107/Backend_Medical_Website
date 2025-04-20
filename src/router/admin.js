@@ -16,6 +16,7 @@ import { blockMedicineController, createMedicineController, deleteMedicineContro
 import { createAllergyController, deleteAllergyController, updateAllergyController } from '../controllers/allergyController';
 import { createDisabilityController, deleteDisabilityController, updateDisabilityController } from '../controllers/disabilityController';
 import { createSurgicalHistoryController, deleteSurgicalHistoryController, updateSurgicalHistoryController } from '../controllers/surgicalHistoryController';
+import { getAllExaminationsAdminController, getExaminationByIdAdminController } from '../controllers/examinationController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -81,21 +82,27 @@ let initAdminRoute = (app) => {
     router.put("/updateScheduleStaff", updateScheduleStaffController)
     router.delete("/deleteSchedule", deleteScheduleController)
 
-    // ----> Admin statistical 
+    // ----> Admin statistical
     router.get("/getStatisticalAppoinment", getStatisticalAppoinment)
 
-    //----------------------------------------------------------------------------------------------------------------------------------------
-    // ----> Admin
+
+    // ----> Admin Medicine
     router.get("/getAllMedicinesAdmin", getAllMedicinesAdminController)
     router.post("/createMedicine", createMedicineController)
     router.put("/updateMedicineAdmin", updateMedicineController)
     router.put("/blockMedicine", blockMedicineController)
     router.delete("/deleteMedicine", deleteMedicineController)
 
+    // ----> Admin Examination
+    router.get("/getAllExaminationsAdmin", getAllExaminationsAdminController)
+    router.get("/getExaminationByIdAdmin", getExaminationByIdAdminController)
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
     // ----> Admin
     router.post("/createAllergy", createAllergyController)
     router.put("/updateAllergy", updateAllergyController)
     router.put("/deleteAllergy", deleteAllergyController)
+
     // ----> Admin
     router.post("/createDisability", createDisabilityController)
     router.put("/updateDisability", updateDisabilityController)

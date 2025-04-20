@@ -1,5 +1,7 @@
-import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
+import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserByInsuranceCode, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
 import { COOKIE, ERROR_SERVER, ROLE, TIME } from '../utils';
+import { formatUnicode } from '../utils/formatUnicode';
+import { decodeHexToString, formatDobQR, splitName } from '../utils/function';
 require('dotenv').config();
 export const handleRegisterUserController = async (req, res) => {
     try {
@@ -184,7 +186,6 @@ export const createUserController = async (req, res) => {
                     })
                 }
             }
-
             let response = await createUser(data);
             return res.status(200).json(response)
         } else {
@@ -257,6 +258,68 @@ export const deleteUserController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER)
     }
 }
+export const getUserByQrCodeController = async (req, res) => {
+    try {
+        let data = req?.query?.qrCode?.split("|");
+        let response = {};
+        if (data?.length === 7) {
+            response = await getUserByCid(data[0]);
+            if (response.EC === 200) {
+                const dataQrDecode = formatUnicode(req?.query?.qrCode);
+                const dataQrDecodeSplit = dataQrDecode.split("|");
+                const fullName = splitName(dataQrDecodeSplit[2]);
+                const dob = formatDobQR(dataQrDecodeSplit[3]);
+                return res.status(200).json({
+                    EC: 1, EM: "Tạo tài khoản mới", DT: {
+                        type: "cid",
+                        data: {
+                            cid: dataQrDecodeSplit[0],
+                            lastName: fullName.lastName,
+                            firstName: fullName.firstName,
+                            dob: dob,
+                            gender: dataQrDecodeSplit[4] === "Nam" ? "0" : "1",
+                            address: dataQrDecodeSplit[5],
+                        }
+                    }
+                });
+            }
+            else return res.status(200).json(response);
+        } else if (data?.length === 17) {
+            response = await getUserByInsuranceCode(data[0]);
+            if (response.EC === 200) {
+                const decodeName = decodeHexToString(data[1]);
+                const decodeAddress = decodeHexToString(data[15]);
+                const fullName = splitName(decodeName);
+                return res.status(200).json({
+                    EC: 1, EM: "Tạo tài khoản mới", DT: {
+                        type: "insuranceCode",
+                        data: {
+                            insuranceCode: data[0],
+                            lastName: fullName.lastName,
+                            firstName: fullName.firstName,
+                            dob: data[2],
+                            gender: +data[3] === 1 ? "0" : "1",
+                            address: decodeAddress,
+                            residentialCode: data[5],
+                            dateOfIssue: data[6],
+                            exp: data[7]?.includes("/") ? data[7] : null,
+                        }
+                    }
+                });
+            }
+            else return res.status(200).json(response);
+        } else return res.status(200).json({
+            EC: 400,
+            EM: "Mã QR không hợp lệ",
+            DT: ""
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
 export const getDoctorHomeController = async (req, res) => {
     try {
         let response = await getDoctorHome(req.query);

@@ -28,6 +28,7 @@ export const getAllSchedules = async () => {
         return ERROR_SERVER
     }
 }
+
 export const getScheduleByStaffId = async (staffId) => {
     try {
         let schedule = await db.Schedule.findAll({
@@ -51,6 +52,7 @@ export const getScheduleByStaffId = async (staffId) => {
         return ERROR_SERVER
     }
 }
+
 export const getScheduleInWeek = async (data) => {
     try {
         let schedule = await db.Schedule.findAll({
@@ -83,6 +85,7 @@ export const getScheduleInWeek = async (data) => {
         return ERROR_SERVER
     }
 }
+
 export const createSchedule = async (data) => {
     let transaction = await db.sequelize.transaction();
     try {
@@ -144,6 +147,7 @@ export const createSchedule = async (data) => {
         return ERROR_SERVER;
     }
 };
+
 export const updateScheduleStaff = async (data) => {
     try {
         let schedule = await db.Schedule.update({
@@ -161,6 +165,7 @@ export const updateScheduleStaff = async (data) => {
         return ERROR_SERVER
     }
 }
+
 export const deleteSchedule = async (data) => {
     try {
         let schedule = await db.Schedule.destroy({
@@ -176,6 +181,7 @@ export const deleteSchedule = async (data) => {
         return ERROR_SERVER
     }
 }
+
 export const arrangeSchedule = async (data) => {
     const transaction = await db.sequelize.transaction();
     try {
@@ -336,6 +342,7 @@ export const arrangeSchedule = async (data) => {
         return { EC: 500, EM: 'Lỗi server!', DT: '' };
     }
 };
+
 export const getAllSchedulesAdmin = async (filter) => {
     try {
         let condition = {};

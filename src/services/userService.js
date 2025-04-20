@@ -338,7 +338,7 @@ export const getUserByCid = async (cid) => {
         let user = await db.User.findOne({
             where: { cid: cid },
             attributes: ["id", "phoneNumber", "lastName", "firstName",
-                "cid", "dob", "gender",],
+                "cid", "dob", "gender"],
             include: [{
                 model: db.Insurance,
                 as: "userInsuranceData",
@@ -347,6 +347,37 @@ export const getUserByCid = async (cid) => {
             raw: true,
             nest: true,
         });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin người dùng thành công",
+                DT: user
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+export const getUserByInsuranceCode = async (insuranceCode) => {
+    try {
+        let user = await db.User.findOne({
+            include: [{
+                model: db.Insurance,
+                as: "userInsuranceData",
+                where: { insuranceCode: insuranceCode },
+                attributes: ["insuranceCode"]
+            }],
+            where: { status: status.ACTIVE },
+            attributes: ["id", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address"],
+            raw: true,
+            nest: true,
+        })
         if (user) {
             return {
                 EC: 0,
@@ -391,12 +422,20 @@ export const createUser = async (data) => {
             tokenVersion: new Date().getTime(),
             dob: data.dob || null,
             address: data.address || null,
+            gender: data?.gender || null,
         },
             { transaction });
+        let insurance = null;
+
         if (data?.insuranceCode && user) {
-            await db.Insurance.create({
+            insurance = await db.Insurance.create({
                 insuranceCode: data.insuranceCode,
                 benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
+                dateOfIssue: data?.dateOfIssue || null,
+                exp: data?.exp || null,
+                residentialCode: data?.residentialCode || null,
+                continuousFiveYearPeriod: data?.continuousFiveYearPeriod || null,
+                status: status.ACTIVE,
                 userId: user.id
             }, { transaction });
         }

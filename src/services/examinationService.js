@@ -914,3 +914,143 @@ export const getPatienSteps = async (examId) => {
         };
     }
 };
+
+export const getAllExaminationsAdmin = async () => {
+    try {
+        let examinations = await db.Examination.findAll({
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName'],
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'firstName', 'lastName'],
+                        },
+                    ]
+                },
+                {
+                    model: db.Payment,
+                    as: 'paymentData',
+                    attributes: ['id', 'status', 'amount', 'paymentMethod'],
+                },
+            ],
+            nest: true,
+        })
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công',
+            DT: examinations
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getExaminationByIdAdmin = async (id) => {
+    try {
+        let examination = await db.Examination.findOne({
+            where: { id: id },
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid', 'phoneNumber'],
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price', 'departmentId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'firstName', 'lastName', 'phoneNumber', 'email'],
+                        },
+                        {
+                            model: db.Department,
+                            as: 'staffDepartmentData',
+                            attributes: ['id', 'name'],
+                        }
+                    ]
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'examinationResultParaclincalData',
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'roomParaclinicalData',
+                        },
+                        {
+                            model: db.ServiceType,
+                            as: 'paraclinicalData',
+                            attributes: ['id', 'name', 'price'],
+                        },
+                        {
+                            model: db.Staff,
+                            as: 'doctorParaclinicalData',
+                            attributes: ['id', 'position', 'price'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'staffUserData',
+                                    attributes: ['id', 'firstName', 'lastName', 'phoneNumber', 'email'],
+                                },
+                                {
+                                    model: db.Department,
+                                    as: 'staffDepartmentData',
+                                    attributes: ['id', 'name'],
+                                }
+                            ]
+                        },
+                        {
+                            model: db.Payment,
+                            as: 'paymentData',
+                            attributes: ['id', 'status', 'amount', 'paymentMethod'],
+                        }
+                    ],
+                    separate: true,
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionExamData',
+                    attributes: ['id', 'note', 'totalMoney'],
+                    include: [{
+                        model: db.Medicine,
+                        as: 'prescriptionDetails',
+                        attributes: ['id', 'name', 'price'],
+                        through: ['quantity', 'unit', 'dosage', 'price']
+                    }],
+                },
+                {
+                    model: db.Payment,
+                    as: 'paymentData',
+                    attributes: ['id', 'status', 'amount', 'paymentMethod'],
+                },
+                {
+                    model: db.VitalSign,
+                    as: 'examinationVitalSignData',
+                }
+            ],
+            nest: true,
+        })
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công',
+            DT: examination
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+
+    }
+}

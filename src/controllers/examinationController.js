@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getExaminationById, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -165,5 +165,26 @@ export const getPatienStepsController = async (req, res) => {
             EM: "Lỗi server!",
             DT: ""
         })
+    }
+}
+
+export const getAllExaminationsAdminController = async (req, res) => {
+    try {
+        let response = await getAllExaminationsAdmin();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getExaminationByIdAdminController = async (req, res) => {
+    try {
+        let data = req.query;
+        let response = await getExaminationByIdAdmin(data.id);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
     }
 }
