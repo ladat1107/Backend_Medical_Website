@@ -19,6 +19,7 @@ import initWebRounte from './router/web';
 import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
 import initNotificationRoute from './router/notification';
 import dotenv from 'dotenv';
+import { formatUnicode } from './utils/formatUnicode';
 dotenv.config();
 
 const app = express();
@@ -100,7 +101,7 @@ io.on('connection', (socket) => {
             if (!refreshToken) {
                 return socket.emit('error', 'No refresh token found');
             }
-            
+
             const decoded = jwt.verify(refreshToken, process.env.SECURITY_KEY);
 
             const userId = decoded.id;

@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         initialHealthcareRegistrationCode: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(1000),
             allowNull: true,
         },
         continuousFiveYearPeriod: {
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
-        
+
     }, {
         sequelize,
         modelName: 'Insurance',

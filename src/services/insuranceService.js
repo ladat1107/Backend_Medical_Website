@@ -4,7 +4,7 @@ import { ERROR_SERVER } from "../utils";
 export const getInsuranceById = async (id) => {
     try {
         let insuarance = await db.Insurance.findOne({
-            where: { id: id },
+            where: { id: id },            
             raw: true,
             nest: true,
         });
@@ -108,3 +108,7 @@ export const deleteInsurance = async (id) => {
         return ERROR_SERVER
     }
 }
+
+
+
+

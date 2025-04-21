@@ -7,7 +7,7 @@ import { getAllDepartmentController, getAllNameDepartmentController, getAllStaff
 import { getHandBookByIdController, getHandBookHomeController } from '../controllers/handBookController';
 import { getScheduleApoinmentController } from '../controllers/examinationController';
 import { getServiceHome } from '../utils/data/dataService';
-import { createUserController, getDoctorHomeController, getUserByCidController, getUserByIdController, getUserInsuaranceController, profilePasswordController } from '../controllers/userController';
+import { createUserController, getDoctorHomeController, getUserByCidController, getUserByIdController, getUserByQrCodeController, getUserInsuaranceController, profilePasswordController } from '../controllers/userController';
 import { getAllStaffController, getStaffByIdController, getStaffByNameController, getStaffByRoleController, profileStaffController } from '../controllers/staffController';
 import { getAllServiceTypesController, getServiceLaboratoryController, getServiceTypeByIdController } from '../controllers/serviceTypeController';
 import { getRoomByDepartmentController, getRoomByIdController } from '../controllers/roomController';
@@ -180,6 +180,7 @@ let initWebRounte = (app) => {
     router.get("/getSpecialtiesByDepartment", getSpecialtiesByDepartmentController)
     router.get("/getSpecialtiesByLaboratory", getSpecialtiesByLaboratoryController)
     router.get("/getServiceLaboratory", getServiceLaboratoryController)
+    router.get("/getUserByQrCode", getUserByQrCodeController)
 
     // router.get("/getSpecialtiesByDepartment", specialtyController.getSpecialtiesByDepartment)
     // router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
