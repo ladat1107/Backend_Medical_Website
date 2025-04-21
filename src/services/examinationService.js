@@ -1,10 +1,11 @@
-
 import dayjs from "dayjs";
 import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
 import { Op, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import { getStaffForReExamination } from "./scheduleService";
+import room from "../models/room";
 
 
 export const getExaminationById = async (id) => {
@@ -72,6 +73,20 @@ export const getExaminationById = async (id) => {
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
                         through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose', 'coveredPrice']
+                    }],
+                },
+                {
+                    model: db.Room,
+                    as: 'examinationRoomData',
+                    attributes: ['id', 'name'],
+                    include: [{
+                        model: db.Department,
+                        as: 'roomDepartmentData',
+                        attributes: ['id', 'name'],
+                    },{
+                        model: db.ServiceType,
+                        as: 'serviceData',
+                        attributes: ['id', 'name', 'price'],
                     }],
                 }
             ],
@@ -244,6 +259,8 @@ export const createExamination = async (data) => {
             is_appointment: data.is_appointment ? data.is_appointment : 0,
             oldParaclinical: data?.oldParaclinical || null,
 
+            isWrongTreatment: data.isWrongTreatment || 0,
+
             ...paymentObject
         });
 
@@ -337,10 +354,79 @@ export const updateExamination = async (data, userId) => {
             comorbidities: data.comorbidities,
             visit_status: data.visit_status ? data.visit_status : 0,
             status: data.status,
+            reExaminationDate: data.reExaminationDate || null,
+            dischargeStatus: data.dischargeStatus || null,
+            reExaminationTime: data.time || null,
+
+            roomName: data.roomName || null,
+            roomId: data.roomId || null,
+            isWrongTreatment: data.isWrongTreatment || 0,
+
             ...paymentObject
         }, {
             where: { id: data.id }
         });
+
+        if(examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination){
+            console.log("Tạo lịch tái khám");
+
+            const st = await getStaffForReExamination(existExamination.staffId, data.reExaminationDate);
+
+            console.log("Staff tái khám", st);
+
+            const insuranceCode = await db.Insurance.findOne({
+                where: { userId: existExamination.userId },
+                attributes: ['insuranceCode']
+            });
+            const reExam = await db.Examination.findOne({
+                where: {
+                    parentExaminationId: existExamination.id,
+                }
+            });
+
+            //console.log("Lịch tái khám", reExam);
+
+            if (reExam) {
+                await db.Examination.update({
+                    staffId: st ? st.staffId : null,
+                    admissionDate: data.reExaminationDate,
+                    dischargeDate: data.reExaminationDate,
+                    reason: 'Tái khám theo lịch hẹn',
+                    time: data.time,
+                    roomName: st ? st.scheduleRoomData.name : null,
+                    price: st ? st?.staffScheduleData.price : null,
+                }, {
+                    where: { id: reExam.id }
+                })
+            } else {
+                await db.Examination.create({
+                    userId: existExamination.userId,
+                    staffId: st ? st.staffId : null,
+                    symptom: existExamination.symptom,
+                    admissionDate: data.reExaminationDate,
+                    dischargeDate: data.reExaminationDate,
+                    reason: 'Tái khám theo lịch hẹn',
+                    status: status.PENDING,
+                    price: st ? st?.staffScheduleData.price : null,
+                    special: existExamination.special,
+                    comorbidities: existExamination.comorbidities,
+
+                    insuranceCode: insuranceCode.insuranceCode,
+                    insuranceCoverage: getThirdDigitFromLeft(insuranceCode.insuranceCode),
+
+                    // Số vào phòng bác sĩ (number) và tên phòng (roomName)
+                    //number: existExamination.number + 1,
+                    roomName: st ? st.scheduleRoomData.name : null,
+
+                    // Thông tin cho người đặt trước
+                    time: data.time,
+                    visit_status: 0,
+                    is_appointment: 1,
+                    parentExaminationId: existExamination.id,
+                })
+            }
+        }
+
         return {
             EC: 0,
             EM: "Cập nhật khám bệnh thành công",
@@ -351,6 +437,7 @@ export const updateExamination = async (data, userId) => {
         return ERROR_SERVER
     }
 }
+
 export const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
@@ -409,6 +496,7 @@ export const deleteExamination = async (id) => {
         return ERROR_SERVER
     }
 }
+
 export const getExaminations = async (date, toDate, status, staffId, page, limit, search, time) => {
     try {
         const whereCondition = {};
@@ -552,6 +640,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         };
     }
 };
+
 export const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
@@ -581,6 +670,7 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
+
 export const updateOldParaclinical = async (data) => {
     try {
         let { id, oldParaclinical } = data;
@@ -822,6 +912,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
         };
     }
 };
+
 export const getPatienSteps = async (examId) => {
     try {
         const examination = await db.Examination.findOne({
@@ -914,6 +1005,46 @@ export const getPatienSteps = async (examId) => {
         };
     }
 };
+
+export const getExamToNotice = async () => {
+    try {
+        // Get tomorrow's date
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow
+
+        const endOfTomorrow = new Date(tomorrow);
+        endOfTomorrow.setHours(23, 59, 59, 999); // End of tomorrow
+        
+        // Find examinations with reExaminationDate set to tomorrow
+        const examinations = await db.Examination.findAll({
+            where: {
+                reExaminationDate: {
+                    [Op.between]: [tomorrow, endOfTomorrow]
+                }
+            },
+            attributes: ['id', 'userId', 'reExaminationDate', 'diseaseName'],
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber'],
+                }
+            ],
+            raw: true,
+            nest: true
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy danh sách tái khám thành công",
+            DT: examinations
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
 
 export const getAllExaminationsAdmin = async () => {
     try {

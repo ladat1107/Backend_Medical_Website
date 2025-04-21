@@ -5,7 +5,7 @@ import { examinationPayment, paraclinicalPayment, prescriptionPayment } from '..
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getStaffNameByIdController } from '../controllers/staffController';
 import { createHandBookController, getAllHandBooksController, updateHandBookController } from '../controllers/handBookController';
-import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleInWeekController } from '../controllers/scheduleController';
+import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleByStaffIdFromTodayController, getScheduleInWeekController } from '../controllers/scheduleController';
 import { getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
 import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
 import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
@@ -14,6 +14,8 @@ import { createOrUpdateVitalSignController, createVitalSignController, deleteVit
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
 import { deleteAssistantForCustomerController, getConversationForStaffController } from '../controllers/messageController';
+import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
+import { getAvailableRoomsController } from '../controllers/roomController';
 dotenv.config();
 
 let router = express.Router();
@@ -28,6 +30,8 @@ let initDoctorRoute = (app) => {
     // router.delete("/deleteSpecialty", specialtyController.deleteSpecialty)
 
     router.get("/getStaffNameById", getStaffNameByIdController)
+    router.get("/getArrayUserId", getArrayUserIdController)
+    router.get("/getArrayAdminId", getArrayAdminIdController)
 
     //--  HandBook
     router.get("/getAllHandBooks", getAllHandBooksController)
@@ -38,6 +42,7 @@ let initDoctorRoute = (app) => {
     router.get("/getAllSchedules", getAllSchedulesController)
     router.get("/getScheduleByStaffId", getScheduleByStaffIdController)
     router.get("/getScheduleInWeek", getScheduleInWeekController)
+    router.get("/getScheduleByStaffIdFromToday", getScheduleByStaffIdFromTodayController)
 
     //-- Prescription
     router.get("/getPrescriptionByExaminationId", getPrescriptionByExaminationIdController)
@@ -101,6 +106,11 @@ let initDoctorRoute = (app) => {
     // -- Message
     router.get("/getConversationForStaff", getConversationForStaffController)
     router.delete("/deleteAssistantForCustomer", deleteAssistantForCustomerController)
+
+    // -- Room
+    router.get("/getAvailableRooms", getAvailableRoomsController)
+
+
     return app.use("/api/", router);
 }
 export default initDoctorRoute;

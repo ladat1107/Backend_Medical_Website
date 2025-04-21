@@ -1269,7 +1269,7 @@ export const getMedicalHistories = async (userId) => {
                     as: 'folkData'
                 }
             ],
-            order: [["createdAt", "DESC"]],
+            order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
 
         return {
@@ -1284,5 +1284,61 @@ export const getMedicalHistories = async (userId) => {
             EM: "Lỗi server!",
             DT: null,
         };
+    }
+}
+
+export const getArrayUserId = async () => {
+    try {
+        let user = await db.User.findAll({
+            where: {
+                status: status.ACTIVE,
+                roleId: ROLE.PATIENT
+            },
+            attributes: ['id']
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy danh sách người dùng thành công",
+                DT: user,
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getArrayAdminId = async () => {
+    try {
+        let user = await db.User.findAll({
+            where: {
+                status: status.ACTIVE,
+                roleId: ROLE.ADMIN
+            },
+            attributes: ['id']
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy danh sách người dùng thành công",
+                DT: user,
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
     }
 }

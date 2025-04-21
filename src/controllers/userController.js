@@ -1,4 +1,4 @@
-import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserByInsuranceCode, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
+import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getArrayAdminId, getArrayUserId, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
 import { COOKIE, ERROR_SERVER, ROLE, TIME } from '../utils';
 import { formatUnicode } from '../utils/formatUnicode';
 import { decodeHexToString, formatDobQR, splitName } from '../utils/function';
@@ -429,6 +429,26 @@ export const getMedicalHistoriesController = async (req, res) => {
         let response = await getMedicalHistories(userId);
         return res.status(200).json(response)
 
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getArrayUserIdController = async (req, res) => {
+    try {
+        let response = await getArrayUserId();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getArrayAdminIdController = async (req, res) => {
+    try {
+        let response = await getArrayAdminId();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

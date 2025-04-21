@@ -52,6 +52,90 @@ export const getScheduleByStaffId = async (staffId) => {
         return ERROR_SERVER
     }
 }
+export const getScheduleByStaffIdFromToday = async (staffId) => {
+    try {
+        let schedule = await db.Schedule.findAll({
+            where: { 
+                staffId: staffId,
+                date: {
+                    [Op.gte]: new Date(),
+                }
+            },
+            attributes: ['roomId', 'date'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: [],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            }],
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch trực thành công",
+            DT: schedule
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getStaffForReExamination = async (staffId, date) => {
+    try {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        let schedule = await db.Schedule.findAll({
+            where: {
+                date: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
+            },
+            attributes: ['roomId', 'date', 'staffId'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: ['id', 'name'],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            },{
+                model: db.Staff,
+                as: 'staffScheduleData',
+                attributes: ['id', 'departmentId', 'price'],
+            }],
+            raw: true,
+            nest: true,
+        });
+
+        let result = null;
+        
+        // Nếu có kết quả
+        if (schedule && schedule.length > 0) {
+            // Tìm nhân viên khớp staffId
+            const matchingStaff = schedule.find(item => item.staffId === staffId);
+            
+            // Nếu tìm thấy staffId khớp, trả về nó
+            if (matchingStaff) {
+                result = matchingStaff;
+            } else {
+                // Không tìm thấy staffId khớp, trả về bất kỳ item nào (item đầu tiên)
+                result = schedule[0];
+            }
+        }
+        // Nếu không có kết quả, result vẫn là null
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
 
 export const getScheduleInWeek = async (data) => {
     try {
@@ -112,7 +196,7 @@ export const createSchedule = async (data) => {
                         {
                             model: db.User, // Model User liên kết với Staff
                             as: 'staffUserData', // Alias trong association
-                            attributes: ['lastName', 'firstName'], // Lấy thông tin tên nhân viên
+                            attributes: ['id', 'lastName', 'firstName'], // Added 'id' to attributes
                         },
                     ],
                 },
@@ -135,11 +219,42 @@ export const createSchedule = async (data) => {
         }
         //Thêm dữ liệu mới
         let schedule = await db.Schedule.bulkCreate(data, { transaction });
+        
+        // Fetch the newly created schedules with the user id included
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: new Date(data[0].date),
+                roomId: data[0].roomId,
+                staffId: {
+                    [Op.in]: data.map(item => item.staffId),
+                },
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+        
         await transaction.commit();
         return {
             EC: 0,
             EM: "Tạo thông tin lịch trực thành công",
-            DT: schedule,
+            DT: createdSchedules,
         };
     } catch (error) {
         await transaction.rollback();
@@ -334,8 +449,34 @@ export const arrangeSchedule = async (data) => {
             }
         }
         await db.Schedule.bulkCreate(schedule, { transaction });
+
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: { [Op.between]: [start, end] }
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId', 'specialtyId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+
         await transaction.commit();
-        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule } };
+        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule: createdSchedules  } };
     } catch (error) {
         await transaction.rollback();
         console.error(error);

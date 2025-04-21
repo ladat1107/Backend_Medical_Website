@@ -157,7 +157,7 @@ export const getHandbookAdmin = async (page, limit, search, status, filter) => {
         if (status) {
             whereCondition.status = +status;
         }
-        console.log("whereCondition", whereCondition);
+        //console.log("whereCondition", whereCondition);
         let handbooks = await db.Handbook.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -300,7 +300,7 @@ export const updateHandBook = async (data) => {
 export const updateHandbookStatus = async (data) => {
     try {
         let handBook = await db.Handbook.findOne({
-            where: { id: data.id },
+            where: { id: data.id }
         });
         if (handBook) {
             await handBook.update({

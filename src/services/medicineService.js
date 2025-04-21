@@ -31,7 +31,7 @@ export const getAllMedicinesForExam = async () => {
     try {
         let medicines = await db.Medicine.findAll({
             where: { status: status.ACTIVE },
-            attributes: ['id', 'name', 'price', 'unit'],
+            attributes: ['id', 'name', 'price', 'unit', 'batchNumber','inventory','exp'],
             raw: true,
             nest: true,
         });

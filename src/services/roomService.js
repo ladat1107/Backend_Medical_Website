@@ -287,3 +287,85 @@ export const deleteRoom = async (id) => {
     }
 }
 
+export const getAvailableRooms = async () => {
+    try {
+        // Get all rooms with active status and service types with ID 3 or 4
+        let rooms = await db.Room.findAll({
+            where: { 
+                status: status.ACTIVE,
+                capacity: { [Op.gt]: 0 } // Only include rooms with defined capacity
+            },
+            include: [
+                {
+                    model: db.Department,
+                    as: 'roomDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.ServiceType,
+                    as: 'serviceData',
+                    attributes: ['id', 'name', 'price'],
+                    required: true,
+                    where: {
+                        status: status.ACTIVE,
+                        id: {
+                            [Op.or]: [3, 4]
+                        }
+                    },
+                    through: { attributes: [] } // Exclude join table attributes
+                }
+            ],
+            raw: false,
+            nest: true,
+        });
+
+        // Get examination counts for each room
+        const roomExamCounts = await Promise.all(
+            rooms.map(async (room) => {
+                const count = await db.Examination.count({
+                    where: {
+                        roomId: room.id,
+                        medicalTreatmentTier: 1, // Only count examinations with medical treatment tier 1
+                        status: status.EXAMINING // Only count active examinations
+                    }
+                });
+                return { roomId: room.id, count };
+            })
+        );
+
+        // Create a map of room ID to examination count for easy lookup
+        const roomCountMap = roomExamCounts.reduce((map, item) => {
+            map[item.roomId] = item.count;
+            return map;
+        }, {});
+
+        // Filter rooms where examination count is less than room capacity
+        const availableRooms = rooms.filter(room => {
+            const examCount = roomCountMap[room.id] || 0;
+            return room.capacity > examCount;
+        });
+
+        // Add available capacity information to each room
+        const roomsWithCapacity = availableRooms.map(room => {
+            const examCount = roomCountMap[room.id] || 0;
+            
+            return {
+                ...room.dataValues,
+                availableCapacity: room.capacity - examCount,
+                totalCapacity: room.capacity,
+                currentExamCount: examCount,
+                serviceData: room.serviceData // Maintain the service data as is
+            };
+        });
+
+        return {
+            EC: 0,
+            EM: "Lấy thông tin phòng thành công",
+            DT: roomsWithCapacity
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+

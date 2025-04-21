@@ -192,7 +192,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
-                        attributes: ['id', 'name', 'price', 'isCovered'],
+                        attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
                         through: {
                             model: db.PrescriptionMedicine,
                             where: {
