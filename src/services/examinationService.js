@@ -259,6 +259,8 @@ export const createExamination = async (data) => {
             is_appointment: data.is_appointment ? data.is_appointment : 0,
             oldParaclinical: data?.oldParaclinical || null,
 
+            isWrongTreatment: data.isWrongTreatment || 0,
+
             ...paymentObject
         });
 
@@ -358,6 +360,7 @@ export const updateExamination = async (data, userId) => {
 
             roomName: data.roomName || null,
             roomId: data.roomId || null,
+            isWrongTreatment: data.isWrongTreatment || 0,
 
             ...paymentObject
         }, {

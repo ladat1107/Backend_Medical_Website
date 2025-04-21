@@ -191,6 +191,10 @@ module.exports = (sequelize, DataTypes) => {
         reExaminationTime: {
             type: DataTypes.INTEGER,
             allowNull: true,
+        },
+        isWrongTreatment: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
         }
     }, {
         sequelize,
