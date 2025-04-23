@@ -163,14 +163,19 @@ export const getExaminationByUserId = async (userId, filter) => {
     }
 }
 export const createExamination = async (data) => {
+    // Initialize transaction
+    const transaction = await db.sequelize.transaction();
+    
     try {
         let staff = await db.Staff.findOne({
             where: {
                 id: data.staffId
-            }
+            },
+            transaction
         });
 
         if (!staff) {
+            await transaction.rollback();
             return {
                 EC: 404,
                 EM: "Nhân viên không tồn tại",
@@ -189,7 +194,8 @@ export const createExamination = async (data) => {
                 admissionDate: {
                     [Op.gte]: today  // Chỉ lấy các bản ghi từ ngày hôm nay trở đi
                 }
-            }
+            },
+            transaction
         });
 
         let paymentObject = {};
@@ -197,7 +203,8 @@ export const createExamination = async (data) => {
 
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
-                where: { userId: +data.userId }
+                where: { userId: +data.userId },
+                transaction
             });
 
             if (existingInsurance) {
@@ -206,7 +213,7 @@ export const createExamination = async (data) => {
                     existingInsurance = await existingInsurance.update({
                         insuranceCode: data.insuranceCode,
                         benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
-                    });
+                    }, { transaction });
                 }
             } else {
                 // Thêm mới nếu chưa có
@@ -214,10 +221,11 @@ export const createExamination = async (data) => {
                     insuranceCode: data.insuranceCode,
                     benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
                     userId: data.userId
-                });
+                }, { transaction });
             }
 
             if (!existingInsurance) {
+                await transaction.rollback();
                 return {
                     EC: 404,
                     EM: "Không tìm thấy bảo hiểm",
@@ -260,9 +268,22 @@ export const createExamination = async (data) => {
             oldParaclinical: data?.oldParaclinical || null,
 
             isWrongTreatment: data.isWrongTreatment || 0,
+            medicalTreatmentTier: data.medicalTreatmentTier || null,
 
             ...paymentObject
-        });
+        }, { transaction });
+
+        //Tạo thanh toán tạm ứng
+        if(+data.medicalTreatmentTier === 1){
+            await db.AdvanceMoney.create({
+                exam_id: examination.id,
+                date: new Date(),
+                status: status.ACTIVE,
+            }, { transaction });
+        }
+
+        // Commit transaction if all operations are successful
+        await transaction.commit();
 
         return {
             EC: 0,
@@ -270,23 +291,33 @@ export const createExamination = async (data) => {
             DT: examination
         };
     } catch (error) {
+        // Rollback transaction if any operation fails
+        await transaction.rollback();
         console.log(error);
         return ERROR_SERVER;
     }
 };
+
 export const updateExamination = async (data, userId) => {
+    // Initialize transaction
+    const transaction = await db.sequelize.transaction();
+    
     try {
         let paymentObject = {};
         let existExamination = await db.Examination.findOne({
-            where: { id: data.id }
+            where: { id: data.id },
+            transaction
         });
+        
         if (!existExamination) {
+            await transaction.rollback();
             return {
                 EC: 404,
                 EM: "Không tìm thấy khám bệnh",
                 DT: ""
             }
         }
+        
         if (data.payment) {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
@@ -294,17 +325,18 @@ export const updateExamination = async (data, userId) => {
                 amount: existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
-            })
+            }, { transaction });
+            
             paymentObject = {
                 paymentId: payment.id,
             }
         }
 
         if (data.insuranceCode) {
-
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
-                where: { userId: userId }
+                where: { userId: userId },
+                transaction
             });
 
             if (existingInsurance) {
@@ -313,7 +345,7 @@ export const updateExamination = async (data, userId) => {
                     existingInsurance = await existingInsurance.update({
                         insuranceCode: data.insuranceCode,
                         benefitLevel: getThirdDigitFromLeft(data.insuranceCode)
-                    });
+                    }, { transaction });
                 }
             } else {
                 // Thêm mới nếu chưa có
@@ -321,10 +353,11 @@ export const updateExamination = async (data, userId) => {
                     insuranceCode: data.insuranceCode,
                     benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
                     userId: userId
-                });
+                }, { transaction });
             }
 
             if (!existingInsurance) {
+                await transaction.rollback();
                 return {
                     EC: 404,
                     EM: "Không tìm thấy bảo hiểm",
@@ -347,7 +380,6 @@ export const updateExamination = async (data, userId) => {
             admissionDate: data.admissionDate,
             dischargeDate: data.dischargeDate,
             reason: data.reason,
-            medicalTreatmentTier: data.medicalTreatmentTier,
             price: data.price,
             special: data.special,
 
@@ -361,11 +393,29 @@ export const updateExamination = async (data, userId) => {
             roomName: data.roomName || null,
             roomId: data.roomId || null,
             isWrongTreatment: data.isWrongTreatment || 0,
+            ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
 
             ...paymentObject
         }, {
-            where: { id: data.id }
+            where: { id: data.id },
+            transaction
         });
+
+        // Kiểm tra bản ghi AdvanceMoney đã tồn tại chưa trước khi tạo mới
+        if (+data.medicalTreatmentTier === 1) {
+            const existingAdvanceMoney = await db.AdvanceMoney.findOne({
+                where: { exam_id: data.id },
+                transaction
+            });
+            
+            if (!existingAdvanceMoney) {
+                await db.AdvanceMoney.create({
+                    exam_id: data.id,
+                    date: new Date(),
+                    status: status.ACTIVE,
+                }, { transaction });
+            }
+        }
 
         if(examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination){
             console.log("Tạo lịch tái khám");
@@ -376,12 +426,15 @@ export const updateExamination = async (data, userId) => {
 
             const insuranceCode = await db.Insurance.findOne({
                 where: { userId: existExamination.userId },
-                attributes: ['insuranceCode']
+                attributes: ['insuranceCode'],
+                transaction
             });
+            
             const reExam = await db.Examination.findOne({
                 where: {
                     parentExaminationId: existExamination.id,
-                }
+                },
+                transaction
             });
 
             //console.log("Lịch tái khám", reExam);
@@ -396,8 +449,9 @@ export const updateExamination = async (data, userId) => {
                     roomName: st ? st.scheduleRoomData.name : null,
                     price: st ? st?.staffScheduleData.price : null,
                 }, {
-                    where: { id: reExam.id }
-                })
+                    where: { id: reExam.id },
+                    transaction
+                });
             } else {
                 await db.Examination.create({
                     userId: existExamination.userId,
@@ -423,9 +477,12 @@ export const updateExamination = async (data, userId) => {
                     visit_status: 0,
                     is_appointment: 1,
                     parentExaminationId: existExamination.id,
-                })
+                }, { transaction });
             }
         }
+
+        // Commit transaction if all operations are successful
+        await transaction.commit();
 
         return {
             EC: 0,
@@ -433,8 +490,10 @@ export const updateExamination = async (data, userId) => {
             DT: examination
         }
     } catch (error) {
+        // Rollback transaction if any operation fails
+        await transaction.rollback();
         console.log(error);
-        return ERROR_SERVER
+        return ERROR_SERVER;
     }
 }
 
@@ -706,6 +765,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
 
             whereConditionExamination.admissionDate = {
                 [Op.between]: [startOfDay, endOfDay],
+                medicalTreatmentTier: 2,
             };
             whereConditionParaclinical.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
@@ -1183,5 +1243,94 @@ export const getExaminationByIdAdmin = async (id) => {
         console.log(error);
         return ERROR_SERVER
 
+    }
+}
+
+export const getListAdvanceMoney = async (page, limit, search) => {
+    try {
+        const examinations = await db.Examination.findAll({
+            where: {
+                medicalTreatmentTier: 1,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
+                    // Add search condition to include
+                    where: search ? {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } }
+                        ]
+                    } : {},
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }]
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                    ],
+                },
+                {
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyExaminationData',
+                    attributes: ['id', 'amount', 'date', 'status'],
+                    where: {
+                        status: status.ACTIVE
+                    },
+                    required: true,
+                },
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: limit,
+            offset: (page - 1) * limit,
+            distinct: true // Ensures correct count with joins
+        });
+
+        const totalItems = await db.Examination.count({
+            where: {
+                medicalTreatmentTier: 1,
+                status: status.WAITING,
+            },
+            include: [
+                {
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyExaminationData',
+                    where: {
+                        status: status.ACTIVE
+                    },
+                    required: true,
+                },
+            ],
+        });
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công!',
+            DT: {
+                totalItems: totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                examinations: examinations,
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching examinations:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
     }
 }

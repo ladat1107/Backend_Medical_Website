@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -193,6 +193,20 @@ export const getExaminationByIdAdminController = async (req, res) => {
 export const getExamToNoticeController = async (req, res) => {
     try {
         let response = await getExamToNotice();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getListAdvanceMoneyController = async (req, res) => {
+    try {
+        let data = req.query;
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 20;
+        const search = req.query.search || '';
+        let response = await getListAdvanceMoney(+page, +limit, search);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
