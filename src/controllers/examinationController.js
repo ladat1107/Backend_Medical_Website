@@ -35,7 +35,7 @@ export const getExaminationByUserIdController = async (req, res) => {
 export const createExaminationController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.userId && data.staffId && data.symptom
+        if (data && data.userId && data.symptom
         ) {
             let response = await createExamination(data);
             return res.status(200).json(response)
@@ -206,7 +206,8 @@ export const getListAdvanceMoneyController = async (req, res) => {
         const page = req.query.page || 1;
         const limit = req.query.limit || 20;
         const search = req.query.search || '';
-        let response = await getListAdvanceMoney(+page, +limit, search);
+        const statusPay = req.query.statusPay || null;
+        let response = await getListAdvanceMoney(+page, +limit, search, statusPay);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);

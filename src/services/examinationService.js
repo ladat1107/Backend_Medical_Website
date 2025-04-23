@@ -174,14 +174,14 @@ export const createExamination = async (data) => {
             transaction
         });
 
-        if (!staff) {
-            await transaction.rollback();
-            return {
-                EC: 404,
-                EM: "Nhân viên không tồn tại",
-                DT: ""
-            };
-        }
+        // if (!staff) {
+        //     await transaction.rollback();
+        //     return {
+        //         EC: 404,
+        //         EM: "Nhân viên không tồn tại",
+        //         DT: ""
+        //     };
+        // }
 
         // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
         const today = new Date();
@@ -247,19 +247,20 @@ export const createExamination = async (data) => {
         // Tạo bản ghi Examination mới
         let examination = await db.Examination.create({
             userId: data.userId,
-            staffId: data.staffId,
+            staffId: data.staffId || null,
             symptom: data.symptom,
             admissionDate: new Date(),
             dischargeDate: new Date(),
             status: data.status,
 
-            price: staff.price,
+            price: staff ? staff?.price : null,
             special: data.special,
             comorbidities: data.comorbidities,
 
             // Số vào phòng bác sĩ (number) và tên phòng (roomName)
             number: nextNumber,
             roomName: data.roomName,
+            roomId: data.roomId || null,
 
             // Thông tin cho người đặt trước
             time: data.time,
@@ -401,19 +402,19 @@ export const updateExamination = async (data, userId) => {
             transaction
         });
 
-        // Kiểm tra bản ghi AdvanceMoney đã tồn tại chưa trước khi tạo mới
-        if (+data.medicalTreatmentTier === 1) {
-            const existingAdvanceMoney = await db.AdvanceMoney.findOne({
-                where: { exam_id: data.id },
-                transaction
-            });
-            
-            if (!existingAdvanceMoney) {
+        //Tạo yêu cầu thanh toán tạm ứng
+        if(existExamination && existExamination.medicalTreatmentTier !== +data.medicalTreatmentTier){
+            if(+data.medicalTreatmentTier === 1){
                 await db.AdvanceMoney.create({
-                    exam_id: data.id,
+                    exam_id: existExamination.id,
                     date: new Date(),
                     status: status.ACTIVE,
                 }, { transaction });
+            } else if (existExamination.medicalTreatmentTier === 1 && +data.medicalTreatmentTier === 2) {
+                await db.AdvanceMoney.delete({
+                    where: { exam_id: existExamination.id },
+                    transaction
+                })
             }
         }
 
@@ -658,6 +659,20 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
                         },
                     ],
                 },
+                {
+                    model: db.Room,
+                    as: 'examinationRoomData',
+                    attributes: ['id', 'name'],
+                    include: [{
+                        model: db.Department,
+                        as: 'roomDepartmentData',
+                        attributes: ['id', 'name'],
+                    },{
+                        model: db.ServiceType,
+                        as: 'serviceData',
+                        attributes: ['id', 'name', 'price'],
+                    }],
+                }
             ],
             limit: limit_query,
             offset,
@@ -1246,12 +1261,19 @@ export const getExaminationByIdAdmin = async (id) => {
     }
 }
 
-export const getListAdvanceMoney = async (page, limit, search) => {
+export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
     try {
+        const whereConditionExamination = {
+            medicalTreatmentTier: 1,
+        };
+        if (statusPay <= 4) {
+            whereConditionExamination.status = statusPay;
+        } else if (statusPay > 4) {
+            whereConditionExamination.status = { [Op.gte]: statusPay };
+        }   
+
         const examinations = await db.Examination.findAll({
-            where: {
-                medicalTreatmentTier: 1,
-            },
+            where: whereConditionExamination,
             include: [
                 {
                     model: db.User,
