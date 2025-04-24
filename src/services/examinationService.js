@@ -380,17 +380,16 @@ export const updateExamination = async (data, userId) => {
             reason: data.reason,
             price: data.price,
             special: data.special,
-
             comorbidities: data.comorbidities,
-            visit_status: data.visit_status ? data.visit_status : 0,
             status: data.status,
-            reExaminationDate: data.reExaminationDate || null,
-            dischargeStatus: data.dischargeStatus || null,
-            reExaminationTime: data.time || null,
 
-            roomName: data.roomName || null,
-            roomId: data.roomId || null,
-            isWrongTreatment: data.isWrongTreatment || 0,
+            ...(data.visit_status != null && { visit_status: data.visit_status }),
+            ...(data.reExaminationDate != null && { reExaminationDate: data.reExaminationDate }),
+            ...(data.dischargeStatus != null && { dischargeStatus: data.dischargeStatus }),
+            ...(data.time != null && { reExaminationTime: data.time }),
+            ...(data.roomName != null && { roomName: data.roomName }),
+            ...(data.roomId != null && { roomId: data.roomId }),
+            ...(data.isWrongTreatment != null && { isWrongTreatment: data.isWrongTreatment }),
             ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
 
             ...paymentObject

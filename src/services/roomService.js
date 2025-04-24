@@ -326,7 +326,11 @@ export const getAvailableRooms = async () => {
                     where: {
                         roomId: room.id,
                         medicalTreatmentTier: 1, // Only count examinations with medical treatment tier 1
-                        status: status.EXAMINING // Only count active examinations
+                        [Op.or]: [
+                            { status: status.EXAMINING },
+                            { status: status.PAID },
+                            { status: status.WAITING }
+                        ]
                     }
                 });
                 return { roomId: room.id, count };
