@@ -16,7 +16,7 @@ export const getAllStaff = async () => {
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            }, {
+            },{
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
