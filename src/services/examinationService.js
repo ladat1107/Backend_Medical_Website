@@ -45,7 +45,6 @@ export const getExaminationById = async (id) => {
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'lastName', 'firstName', 'dob', 'gender', 'phoneNumber', 'cid', "currentResident"],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -247,8 +246,8 @@ export const createExamination = async (data) => {
             userId: data.userId,
             staffId: data.staffId || null,
             symptom: data.symptom,
-            admissionDate: new Date(),
-            dischargeDate: new Date(),
+            admissionDate: data.admissionDate || new Date(),
+            dischargeDate: data.dischargeDate,
             status: data.status,
 
             price: staff ? staff?.price : null,
