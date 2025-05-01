@@ -57,7 +57,7 @@ export const updateVitalSign = async (data) => {
             breathingRate: data.breathingRate,
             glycemicIndex: data.glycemicIndex,
         }, {
-            where: { examinationId: data.examinationId }
+            where: { id: data.id }
         });
         return {
             EC: 0,
@@ -70,10 +70,10 @@ export const updateVitalSign = async (data) => {
     }
 }
 
-export const deleteVitalSign = async (examinationId) => {
+export const deleteVitalSign = async (id) => {
     try {
         let vitalSign = await db.VitalSign.destroy({
-            where: { examinationId: examinationId }
+            where: { id: id }
         });
         return {
             EC: 0,

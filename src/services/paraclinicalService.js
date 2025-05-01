@@ -69,13 +69,16 @@ export const createRequestParaclinical = async (data) => {
                     paraclinical: item.id,
                     paracName: item.label,
                     price: item.price,
-                    status: status.WAITING,
-                    paymentStatus: paymentStatus.UNPAID,
+                    status: data?.isInpatient ? status.PAID : status.WAITING,
+                    paymentStatus: data?.isInpatient ? paymentStatus.PAID : paymentStatus.UNPAID,
                     doctorId: roomData.staffId,
                     roomId: roomData.id
                 };
 
                 const result = await createParaclinical(dataParaclinical);
+                result.DT.dataValues.staffName = roomData.staffName;
+                result.DT.dataValues.roomName = roomData.name;
+
                 createResults.push(result);
             } else {
                 createResults.push({
@@ -124,20 +127,20 @@ export const createParaclinical = async (data) => {
         }
 
         //tim xem co ton tai xet nghiem chua
-        let existParaclinical = await db.Paraclinical.findOne({
-            where: {
-                examinationId: data.examinationId,
-                paraclinical: data.paraclinical
-            }
-        });
+        // let existParaclinical = await db.Paraclinical.findOne({
+        //     where: {
+        //         examinationId: data.examinationId,
+        //         paraclinical: data.paraclinical
+        //     }
+        // });
 
-        if (existParaclinical) {
-            return {
-                EC: 404,
-                EM: "Xét nghiệm đã tồn tại",
-                DT: ""
-            }
-        }
+        // if (existParaclinical) {
+        //     return {
+        //         EC: 404,
+        //         EM: "Xét nghiệm đã tồn tại",
+        //         DT: ""
+        //     }
+        // }
 
         let paraclinical = await db.Paraclinical.create(data);
 

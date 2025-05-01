@@ -370,27 +370,53 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
+        // let examination = await db.Examination.update({
+        //     symptom: data.symptom,
+        //     diseaseName: data.diseaseName,
+        //     treatmentResult: data.treatmentResult,
+        //     admissionDate: data.admissionDate,
+        //     dischargeDate: data.dischargeDate,
+        //     reason: data.reason,
+        //     price: data.price,
+        //     special: data.special,
+        //     comorbidities: data.comorbidities,
+        //     status: data.status,
+
+        //     ...(data.visit_status != null && { visit_status: data.visit_status }),
+        //     ...(data.reExaminationDate != null && { reExaminationDate: data.reExaminationDate }),
+        //     ...(data.dischargeStatus != null && { dischargeStatus: data.dischargeStatus }),
+        //     ...(data.time != null && { reExaminationTime: data.time }),
+        //     ...(data.roomName != null && { roomName: data.roomName }),
+        //     ...(data.roomId != null && { roomId: data.roomId }),
+        //     ...(data.isWrongTreatment != null && { isWrongTreatment: data.isWrongTreatment }),
+        //     ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
+
+        //     ...paymentObject
+        // }, {
+        //     where: { id: data.id },
+        //     transaction
+        // });
+
         let examination = await db.Examination.update({
-            symptom: data.symptom,
-            diseaseName: data.diseaseName,
-            treatmentResult: data.treatmentResult,
-            admissionDate: data.admissionDate,
-            dischargeDate: data.dischargeDate,
-            reason: data.reason,
-            price: data.price,
-            special: data.special,
-            comorbidities: data.comorbidities,
-            status: data.status,
-
-            ...(data.visit_status != null && { visit_status: data.visit_status }),
-            ...(data.reExaminationDate != null && { reExaminationDate: data.reExaminationDate }),
-            ...(data.dischargeStatus != null && { dischargeStatus: data.dischargeStatus }),
-            ...(data.time != null && { reExaminationTime: data.time }),
-            ...(data.roomName != null && { roomName: data.roomName }),
-            ...(data.roomId != null && { roomId: data.roomId }),
-            ...(data.isWrongTreatment != null && { isWrongTreatment: data.isWrongTreatment }),
-            ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
-
+            ...(data.symptom !== undefined && { symptom: data.symptom }),
+            ...(data.diseaseName !== undefined && { diseaseName: data.diseaseName }),
+            ...(data.treatmentResult !== undefined && { treatmentResult: data.treatmentResult }),
+            ...(data.admissionDate !== undefined && { admissionDate: data.admissionDate }),
+            ...(data.dischargeDate !== undefined && { dischargeDate: data.dischargeDate }),
+            ...(data.reason !== undefined && { reason: data.reason }),
+            ...(data.price !== undefined && { price: data.price }),
+            ...(data.special !== undefined && { special: data.special }),
+            ...(data.comorbidities !== undefined && { comorbidities: data.comorbidities }),
+            ...(data.status !== undefined && { status: data.status }),
+            ...(data.visit_status !== undefined && { visit_status: data.visit_status }),
+            ...(data.reExaminationDate !== undefined && { reExaminationDate: data.reExaminationDate }),
+            ...(data.dischargeStatus !== undefined && { dischargeStatus: data.dischargeStatus }),
+            ...(data.time !== undefined && { reExaminationTime: data.time }),
+            ...(data.roomName !== undefined && { roomName: data.roomName }),
+            ...(data.roomId !== undefined && { roomId: data.roomId }),
+            ...(data.isWrongTreatment !== undefined && { isWrongTreatment: data.isWrongTreatment }),
+            ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }),
+            
             ...paymentObject
         }, {
             where: { id: data.id },

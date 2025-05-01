@@ -44,9 +44,7 @@ export const createVitalSignController = async (req, res) => {
 export const updateVitalSignController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.examinationId && data.height && data.weight && data.fetalWeight !== undefined
-            && data.pulse && data.temperature && data.hightBloodPressure && data.lowBloodPressure
-            && data.breathingRate && data.glycemicIndex) {
+        if (data && data.id) {
             let response = await updateVitalSign(data);
             return res.status(200).json(response)
         } else {
@@ -65,8 +63,8 @@ export const updateVitalSignController = async (req, res) => {
 export const deleteVitalSignController = async (req, res) => {
     try {
         let data = req.query;
-        if (data && data.examinationId) {
-            let response = await deleteVitalSign(data.examinationId);
+        if (data && data.id) {
+            let response = await deleteVitalSign(data.id);
             return res.status(200).json(response)
         } else {
             return res.status(200).json({
