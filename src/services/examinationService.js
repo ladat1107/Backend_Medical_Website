@@ -484,9 +484,7 @@ export const updateExamination = async (data, userId) => {
                 await db.Examination.create({
                     userId: existExamination.userId,
                     staffId: st ? st.staffId : null,
-                    symptom: existExamination.symptom,
                     admissionDate: data.reExaminationDate,
-                    dischargeDate: data.reExaminationDate,
                     reason: 'Tái khám theo lịch hẹn',
                     status: status.PENDING,
                     price: st ? st?.staffScheduleData.price : null,
