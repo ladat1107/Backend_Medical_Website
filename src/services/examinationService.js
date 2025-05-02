@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
-import { Op, Sequelize } from 'sequelize';
+import { Op, or, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
 
@@ -64,7 +64,6 @@ export const getExaminationById = async (id) => {
                 {
                     model: db.Prescription,
                     as: 'prescriptionExamData',
-                    attributes: ['id', 'note', 'totalMoney'],
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
@@ -88,6 +87,9 @@ export const getExaminationById = async (id) => {
                 }
             ],
             nest: true,
+            order: [
+                [{ model: db.Prescription, as: 'prescriptionExamData' }, 'createdAt', 'DESC']
+            ]
         });
 
         return {

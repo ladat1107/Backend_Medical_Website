@@ -2,6 +2,7 @@ import db from '../models/index';
 import { upsertPrescriptionDetail } from './prescriptionDetailService';
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { Op, Sequelize } from 'sequelize';
+import dayjs from 'dayjs';
 
 export const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
@@ -315,4 +316,92 @@ export const updatePrescription = async (data, payment, userId) => {
         };
     }
 };
+
+export const createPrescription = async (data) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+
+    try {
+        const todayStart = dayjs().startOf('day').toDate()
+        const todayEnd = dayjs().endOf('day').toDate();
+
+        const todayPrescriptions = await db.Prescription.findOne({
+            where: {
+                examinationId: data.examinationId,
+                createdAt: {
+                    [Op.between]: [todayStart, todayEnd],
+                }
+            },
+            transaction: t
+        });
+
+        if (todayPrescriptions) {
+            await db.PrescriptionDetail.destroy({
+                where: {
+                    prescriptionId: todayPrescriptions.id,
+                },
+                transaction: t
+            });
+        
+            await todayPrescriptions.destroy({ transaction: t });
+        }
+
+        // 1. Tạo đơn thuốc
+        const prescription = await db.Prescription.create({
+            examinationId: data.examinationId,
+            note: data.note,
+            totalMoney: data.totalMoney,
+            status: paymentStatus.PAID,
+        }, { transaction: t });
+
+        if (!prescription) {
+            await t.rollback();
+            return {
+                EC: 1,
+                EM: "Tạo đơn thuốc không thành công",
+                DT: "",
+            };
+        }
+
+        // 2. Tạo chi tiết đơn thuốc từ mảng
+        const details = data.prescriptionDetails.map(item => ({
+            prescriptionId: prescription.id,
+            medicineId: item.medicineId,
+            quantity: item.quantity,
+            unit: item.unit,
+            price: item.price,
+            session: item.session,
+            dose: item.dose,
+            dosage: item.dosage,
+        }));
+
+        await db.PrescriptionDetail.bulkCreate(details, { transaction: t });
+
+        // 3. Cập nhật endDate cho đơn thuốc cũ
+        if (data.oldPresId) {
+            await db.Prescription.update({
+                endDate: new Date()
+            }, {
+                where: { id: data.oldPresId },
+                transaction: t
+            });
+        }
+
+        await t.commit(); // Commit nếu mọi thứ thành công
+
+        return {
+            EC: 0,
+            EM: "Tạo đơn thuốc thành công",
+            DT: prescription,
+        };
+    } catch (error) {
+        await t.rollback(); // Rollback nếu có lỗi
+        console.error(error);
+        return {
+            EC: 1,
+            EM: "Lỗi server khi tạo đơn thuốc",
+            DT: "",
+        };
+    } 
+};
+
 
