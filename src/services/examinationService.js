@@ -85,8 +85,7 @@ export const getExaminationById = async (id) => {
                     }],
                 },{
                     model: db.AdvanceMoney,
-                    as: 'advanceMoneyData',
-                    attributes: ['id', 'amount', 'status'],
+                    as: 'advanceMoneyExaminationData',
                 },
             ],
             nest: true,
