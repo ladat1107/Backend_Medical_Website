@@ -73,7 +73,7 @@ export const createRequestParaclinical = async (data) => {
                     paymentStatus: data?.isInpatient ? paymentStatus.PAID : paymentStatus.UNPAID,
                     doctorId: roomData.staffId,
                     roomId: roomData.id,
-                    insuranceCovered: examination.insuranceCovered,
+                    insuranceCovered: coveredPrice(item.price, examination.insuranceCoverage),
                 };
 
                 const result = await createParaclinical(dataParaclinical);

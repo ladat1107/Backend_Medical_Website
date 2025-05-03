@@ -11,14 +11,15 @@ const COVERED = {
 }
 
 export const coveredPrice = (price, coveredLevel) => {
+    const numericPrice = Number(price);
+    if (!numericPrice || isNaN(numericPrice)) return 0;
+    if (!coveredLevel) return 0;
 
-    if (!price) return 0;
-    if (!coveredLevel) return price;
+    const covered = COVERED[coveredLevel];
 
-    const covered = COVERED[coveredLevel] || 0;
-
-    if (covered) {
-        return price * covered;
+    if (covered !== undefined && covered !== null) {
+        return numericPrice * covered;
     }
-    return price || 0;
+    
+    return 0;
 }

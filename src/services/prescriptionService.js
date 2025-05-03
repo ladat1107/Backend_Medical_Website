@@ -377,9 +377,12 @@ export const createPrescription = async (data) => {
         await db.PrescriptionDetail.bulkCreate(details, { transaction: t });
 
         // 3. Cập nhật endDate cho đơn thuốc cũ
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
         if (data.oldPresId) {
             await db.Prescription.update({
-                endDate: new Date()
+                endDate: yesterday
             }, {
                 where: { id: data.oldPresId },
                 transaction: t

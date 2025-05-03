@@ -67,7 +67,6 @@ export const getExaminationById = async (id) => {
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
-                        attributes: ['id', 'name', 'price'],
                         through: ['quantity', 'unit', 'dosage', 'price', 'session', 'dose', 'coveredPrice']
                     }],
                 },
@@ -84,7 +83,11 @@ export const getExaminationById = async (id) => {
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
                     }],
-                }
+                },{
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyData',
+                    attributes: ['id', 'amount', 'status'],
+                },
             ],
             nest: true,
             order: [
