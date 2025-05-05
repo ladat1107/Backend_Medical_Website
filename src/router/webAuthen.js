@@ -6,6 +6,7 @@ import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 import { createMessageController } from '../controllers/messageController';
+import { createAdvanceMoneyController } from '../controllers/advanceMoneyController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -42,6 +43,7 @@ let initWebAuthenRounte = (app) => {
 
     router.get("/getExamToNotice", getExamToNoticeController)
     router.get("/getListInpations", getListInpationsController)
+    router.post("/createAdvanceMoney", createAdvanceMoneyController)
 
     return app.use("/api/", router);
 }

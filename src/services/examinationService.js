@@ -1282,11 +1282,11 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
         const whereConditionExamination = {
             medicalTreatmentTier: 1,
         };
-        if (statusPay <= 4) {
-            whereConditionExamination.status = statusPay;
-        } else if (statusPay > 4) {
-            whereConditionExamination.status = { [Op.gte]: statusPay };
-        }   
+        // if (statusPay <= 4) {
+        //     whereConditionExamination.status = statusPay;
+        // } else if (statusPay > 4) {
+        //     whereConditionExamination.status = { [Op.gte]: statusPay };
+        // }   
 
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
@@ -1322,7 +1322,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                 as: 'advanceMoneyExaminationData',
                 attributes: ['id', 'amount', 'date', 'status'],
                 where: {
-                    status: paymentStatus.PENDING,
+                    status: statusPay,
                 },
                 required: true,
             },{
@@ -1355,7 +1355,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                     model: db.AdvanceMoney,
                     as: 'advanceMoneyExaminationData',
                     where: {
-                        status: paymentStatus.PENDING,
+                        status: statusPay,
                     },
                     required: true,
                 },
