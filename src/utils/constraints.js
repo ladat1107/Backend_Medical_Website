@@ -1,4 +1,5 @@
 export const status = {
+    DONE_INPATIENT: 8, // Dành cho việc hoàn thành thu thêm/trả lại tiền tạm ứng cho bệnh nhân nội trú
     DONE: 7, // đã khám xong
     EXAMINING: 6, // đang khám
     PAID: 5, // đã thanh toán chờ để khám
@@ -11,7 +12,8 @@ export const status = {
 export const paymentStatus = {
     UNPAID: 0,
     PENDING: 1,
-    PAID: 2
+    PAID: 2,
+    DISCHARGE_PAID: 3, // Đã trả cho đơn thuốc nội trú MANG VỀ
 }
 
 export const typeRoom = {

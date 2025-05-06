@@ -1445,26 +1445,18 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(toDate).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            if (statusExam === status.DONE) {
+            if(+statusExam === status.DONE) {
                 whereCondition.dischargeDate = {
                     [Op.between]: [startOfDay, endOfDay],
                 };
             }
         }
 
-        const searchCondition = search ? {
-            [Op.or]: [
-                { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-                { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
-            ]
-        } : {};
-
         let departmentId = staff.staffDepartmentData.id;
 
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...whereCondition,
-                ...searchCondition
             },
             include: [
                 {

@@ -218,7 +218,7 @@ export const getListAdvanceMoneyController = async (req, res) => {
 
 export const getListInpationsController = async (req, res) => {
     try {
-        const date = req.query.date || null;
+        const date = req.query.currentDate || null;
         const toDate = req.query.toDate || null;
         const statusExam = req.query.status || status.EXAMINING;
         const staffId = req.user.staff || null;

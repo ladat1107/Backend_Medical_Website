@@ -3,6 +3,7 @@ import { upsertPrescriptionDetail } from './prescriptionDetailService';
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { Op, Sequelize } from 'sequelize';
 import dayjs from 'dayjs';
+import { raw } from 'body-parser';
 
 export const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
@@ -151,7 +152,8 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
          const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...searchCondition,
-                status: 7
+                status: 7,
+                medicalTreatmentTier: 2,
             },
             include: [
                 {
@@ -317,6 +319,7 @@ export const updatePrescription = async (data, payment, userId) => {
     }
 };
 
+//Chỉ dùng cho nội trú
 export const createPrescription = async (data) => {
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
@@ -338,36 +341,70 @@ export const createPrescription = async (data) => {
             }
         }
 
-        const todayStart = dayjs().startOf('day').toDate()
-        const todayEnd = dayjs().endOf('day').toDate();
+        if(data.prescriptionType === 1) {
+            const todayStart = dayjs().startOf('day').toDate()
+            const todayEnd = dayjs().endOf('day').toDate();
 
-        const todayPrescriptions = await db.Prescription.findOne({
-            where: {
-                examinationId: data.examinationId,
-                createdAt: {
-                    [Op.between]: [todayStart, todayEnd],
-                }
-            },
-            transaction: t
-        });
-
-        if (todayPrescriptions) {
-            await db.PrescriptionDetail.destroy({
+            const todayPrescriptions = await db.Prescription.findOne({
                 where: {
-                    prescriptionId: todayPrescriptions.id,
+                    examinationId: data.examinationId,
+                    createdAt: {
+                        [Op.between]: [todayStart, todayEnd],
+                    }
                 },
+                include: [{
+                    model: db.Medicine,
+                    as: 'prescriptionDetails',
+                    attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
+                    through: {
+                        model: db.PrescriptionMedicine,
+                        required: true
+                    },
+                    raw: true,
+                    required: true
+                }],
                 transaction: t
             });
-        
-            await todayPrescriptions.destroy({ transaction: t });
-        }
 
+            if (todayPrescriptions) { 
+                // Lấy chi tiết đơn thuốc cũ trước khi xóa để cộng lại vào kho
+                const oldPrescriptionDetails = await db.PrescriptionDetail.findAll({
+                    where: {
+                        prescriptionId: todayPrescriptions.id,
+                    },
+                    transaction: t
+                });
+                
+                // Cộng lại số lượng thuốc vào kho
+                for (const detail of oldPrescriptionDetails) {
+                    const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
+                    if (medicine) {
+                        await medicine.update(
+                            { inventory: medicine.inventory + detail.quantity },
+                            { transaction: t }
+                        );
+                    }
+                }
+                
+                // Xóa chi tiết đơn thuốc
+                await db.PrescriptionDetail.destroy({
+                    where: {
+                        prescriptionId: todayPrescriptions.id,
+                    },
+                    transaction: t
+                });
+            
+                // Xóa đơn thuốc
+                await todayPrescriptions.destroy({ transaction: t });
+            }
+        }
+        
         // 1. Tạo đơn thuốc
         const prescription = await db.Prescription.create({
             examinationId: data.examinationId,
             note: data.note,
             totalMoney: data.totalMoney,
-            status: paymentStatus.PAID,
+            status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID, 
         }, { transaction: t });
 
         if (!prescription) {
@@ -393,17 +430,51 @@ export const createPrescription = async (data) => {
 
         await db.PrescriptionDetail.bulkCreate(details, { transaction: t });
 
+        // Cập nhật số lượng thuốc trong kho
+        for (const item of data.prescriptionDetails) {
+            const medicine = await db.Medicine.findOne(
+                {
+                    where: { id: item.medicineId },
+                    transaction: t // Pass transaction to the query
+                }
+            );
+            
+            if (!medicine) {
+                throw new Error(`Không tìm thấy thuốc với id ${item.medicineId}`);
+            }
+            
+            // Kiểm tra số lượng có đủ không
+            if (medicine.inventory < item.quantity) {
+                throw new Error(`Số lượng thuốc ${medicine.name} không đủ để kê đơn`);
+            }
+            
+            // Cập nhật số lượng thuốc
+            await medicine.update(
+                { inventory: medicine.inventory - item.quantity },
+                { transaction: t }
+            );
+        }
+
         // 3. Cập nhật endDate cho đơn thuốc cũ
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
 
         if (data.oldPresId) {
-            await db.Prescription.update({
-                endDate: yesterday
-            }, {
-                where: { id: data.oldPresId },
-                transaction: t
-            });
+            if(data.prescriptionType === 1){
+                await db.Prescription.update({
+                    endDate: yesterday
+                }, {
+                    where: { id: data.oldPresId },
+                    transaction: t
+                });
+            } else {
+                await db.Prescription.update({
+                    endDate: new Date()
+                }, {
+                    where: { id: data.oldPresId },
+                    transaction: t
+                });
+            }
         }
 
         if(examination.medicalTreatmentTier === 1) {
