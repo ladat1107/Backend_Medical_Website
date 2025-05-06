@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'examinationResultParaclincalData',
             });
-            Examination.hasOne(models.VitalSign, {
+            Examination.hasMany(models.VitalSign, {
                 foreignKey: 'examinationId',
                 as: 'examinationVitalSignData',
             });
@@ -44,6 +44,10 @@ module.exports = (sequelize, DataTypes) => {
             Examination.belongsTo(models.Room, {
                 foreignKey: 'roomId',
                 as: 'examinationRoomData',
+            });
+            Examination.hasMany(models.AdvanceMoney, {
+                foreignKey: 'exam_id',
+                as: 'advanceMoneyExaminationData',
             });
         }
     }

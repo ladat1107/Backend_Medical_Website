@@ -1,4 +1,4 @@
-import { getPrescriptionByExaminationId, getPrescriptions, updatePrescription, upsertPrescription } from '../services/prescriptionService';
+import { createPrescription, getPrescriptionByExaminationId, getPrescriptions, updatePrescription, upsertPrescription } from '../services/prescriptionService';
 import { ERROR_SERVER } from '../utils';
 
 export const getPrescriptionByExaminationIdController = async (req, res) => {
@@ -53,6 +53,17 @@ export const updatePrescriptionController = async (req, res) => {
     try {
         let data = req.body;
         let response = await updatePrescription(data, null, req.user.id);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const createPrescriptionController = async (req, res) => {
+    try {
+        let data = req.body;
+        let response = await createPrescription(data);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);

@@ -1,11 +1,12 @@
 import express from 'express';
 import { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
-import { deleteExaminationController, getExaminationByUserIdController, getExamToNoticeController, updateOldParaclinicalController } from '../controllers/examinationController';
+import { deleteExaminationController, getExaminationByUserIdController, getExamToNoticeController, getListAdvanceMoneyController, getListInpationsController, updateOldParaclinicalController } from '../controllers/examinationController';
 import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 import { createMessageController } from '../controllers/messageController';
+import { createAdvanceMoneyController } from '../controllers/advanceMoneyController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -36,11 +37,13 @@ let initWebAuthenRounte = (app) => {
     router.get("/getConversation", upsertConversationController)
     router.get("/getNumberMessageUnread", getNumberMessageUnreadController)
 
-    
+    router.get("/getListAdvanceMoney", getListAdvanceMoneyController)
 
     router.post("/createMessage", createMessageController)
 
     router.get("/getExamToNotice", getExamToNoticeController)
+    router.get("/getListInpatients", getListInpationsController)
+    router.post("/createAdvanceMoney", createAdvanceMoneyController)
 
     return app.use("/api/", router);
 }

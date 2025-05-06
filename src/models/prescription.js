@@ -57,6 +57,10 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
         },
+        endDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
     }, {
         sequelize,
         modelName: 'Prescription',

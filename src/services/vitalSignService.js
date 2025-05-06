@@ -1,5 +1,5 @@
 import db from "../models/index";
-import { ERROR_SERVER } from "../utils";
+import { ERROR_SERVER, status } from "../utils";
 
 export const getVitalSignByExamId = async (examinationId) => {
     try {
@@ -20,7 +20,25 @@ export const getVitalSignByExamId = async (examinationId) => {
 }
 
 export const createVitalSign = async (data) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
+        let examination = await db.Examination.findOne({
+            where: {
+                id: data.examinationId
+            },
+            transaction // Pass transaction to the query
+        });
+
+        if (!examination) {
+            await transaction.rollback(); // Rollback if examination not found
+            return {
+                EC: 404,
+                EM: "Không tìm thấy phiên khám",
+                DT: ""
+            }
+        }
+
         let vitalSign = await db.VitalSign.create({
             examinationId: data.examinationId,
             height: data.height,
@@ -32,13 +50,22 @@ export const createVitalSign = async (data) => {
             lowBloodPressure: data.lowBloodPressure,
             breathingRate: data.breathingRate,
             glycemicIndex: data.glycemicIndex || null,
-        });
+        }, { transaction }); // Pass transaction to the create
+
+        if(examination.medicalTreatmentTier === 1) {
+            await examination.update({
+                status: status.EXAMINING,
+            }, { transaction }); // Pass transaction to the update
+        }
+
+        await transaction.commit(); // Commit the transaction
         return {
             EC: 0,
             EM: "Tạo sinh hiệu thành công",
             DT: vitalSign
         }
     } catch (error) {
+        await transaction.rollback();
         console.log(error);
         return ERROR_SERVER
     }
@@ -57,7 +84,7 @@ export const updateVitalSign = async (data) => {
             breathingRate: data.breathingRate,
             glycemicIndex: data.glycemicIndex,
         }, {
-            where: { examinationId: data.examinationId }
+            where: { id: data.id }
         });
         return {
             EC: 0,
@@ -70,10 +97,10 @@ export const updateVitalSign = async (data) => {
     }
 }
 
-export const deleteVitalSign = async (examinationId) => {
+export const deleteVitalSign = async (id) => {
     try {
         let vitalSign = await db.VitalSign.destroy({
-            where: { examinationId: examinationId }
+            where: { id: id }
         });
         return {
             EC: 0,

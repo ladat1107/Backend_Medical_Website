@@ -31,8 +31,10 @@ export const getParaclinicalByExamId = async (examinationId) => {
 }
 
 export const createRequestParaclinical = async (data) => {
+    // Initialize transaction
+    const transaction = await db.sequelize.transaction();
+    
     try {
-
         if (data.listParaclinicals.length === 0) {
             return {
                 EC: 400,
@@ -44,10 +46,12 @@ export const createRequestParaclinical = async (data) => {
         let examination = await db.Examination.findOne({
             where: {
                 id: data.examinationId
-            }
+            },
+            transaction // Pass transaction to the query
         });
 
         if (!examination) {
+            await transaction.rollback(); // Rollback if examination not found
             return {
                 EC: 404,
                 EM: "Không tìm thấy phiên khám",
@@ -69,15 +73,21 @@ export const createRequestParaclinical = async (data) => {
                     paraclinical: item.id,
                     paracName: item.label,
                     price: item.price,
-                    status: status.WAITING,
-                    paymentStatus: paymentStatus.UNPAID,
+                    status: data?.isInpatient ? status.PAID : status.WAITING,
+                    paymentStatus: data?.isInpatient ? paymentStatus.PAID : paymentStatus.UNPAID,
                     doctorId: roomData.staffId,
-                    roomId: roomData.id
+                    roomId: roomData.id,
+                    insuranceCovered: coveredPrice(item.price, examination.insuranceCoverage),
                 };
 
-                const result = await createParaclinical(dataParaclinical);
+                // Pass transaction to createParaclinical
+                const result = await createParaclinical(dataParaclinical, transaction);
+                result.DT.dataValues.staffName = roomData.staffName;
+                result.DT.dataValues.roomName = roomData.name;
+
                 createResults.push(result);
             } else {
+                // If we can't find a laboratory, add error to results and continue
                 createResults.push({
                     EC: 404,
                     EM: "Không tìm thấy phòng xét nghiệm",
@@ -86,14 +96,22 @@ export const createRequestParaclinical = async (data) => {
             }
         }
 
+        if(examination.medicalTreatmentTier === 1) {
+            await examination.update({
+                status: status.EXAMINING,
+            }, { transaction }); // Pass transaction to the update
+        }
+
         // Kiểm tra xem tất cả đều thành công
         if (createResults.every(result => result.EC === 0)) {
+            await transaction.commit(); // Commit transaction if everything succeeded
             return {
                 EC: 0,
                 EM: "Tạo tất cả xét nghiệm thành công",
                 DT: createResults
             };
         } else {
+            await transaction.rollback(); // Rollback if any creation failed
             return {
                 EC: 206,
                 EM: "Một số xét nghiệm không tạo được",
@@ -102,17 +120,19 @@ export const createRequestParaclinical = async (data) => {
         }
 
     } catch (error) {
+        await transaction.rollback(); // Rollback on any error
         console.log(error);
         return ERROR_SERVER
     }
 }
 
-export const createParaclinical = async (data) => {
+export const createParaclinical = async (data, transaction = null) => {
     try {
         let examination = await db.Examination.findOne({
             where: {
                 id: data.examinationId
-            }
+            },
+            transaction // Pass transaction to this query as well
         });
 
         if (!examination) {
@@ -123,24 +143,7 @@ export const createParaclinical = async (data) => {
             }
         }
 
-        //tim xem co ton tai xet nghiem chua
-        let existParaclinical = await db.Paraclinical.findOne({
-            where: {
-                examinationId: data.examinationId,
-                paraclinical: data.paraclinical
-            }
-        });
-
-        if (existParaclinical) {
-            return {
-                EC: 404,
-                EM: "Xét nghiệm đã tồn tại",
-                DT: ""
-            }
-        }
-
-        let paraclinical = await db.Paraclinical.create(data);
-
+        let paraclinical = await db.Paraclinical.create(data, { transaction });
         return {
             EC: 0,
             EM: "Tạo xét nghiệm thành công",

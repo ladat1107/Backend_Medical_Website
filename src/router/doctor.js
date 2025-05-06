@@ -6,7 +6,7 @@ import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getStaffNameByIdController } from '../controllers/staffController';
 import { createHandBookController, getAllHandBooksController, updateHandBookController } from '../controllers/handBookController';
 import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleByStaffIdFromTodayController, getScheduleInWeekController } from '../controllers/scheduleController';
-import { getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
+import { createPrescriptionController, getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
 import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
 import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
 import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getPatienStepsController, updateExaminationController } from '../controllers/examinationController';
@@ -109,6 +109,7 @@ let initDoctorRoute = (app) => {
 
     // -- Room
     router.get("/getAvailableRooms", getAvailableRoomsController)
+    router.post("/createPrescription", createPrescriptionController)
 
 
     return app.use("/api/", router);

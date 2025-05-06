@@ -1,5 +1,5 @@
-import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
-import { ERROR_SERVER } from '../utils';
+import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { ERROR_SERVER, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
     try {
@@ -35,7 +35,7 @@ export const getExaminationByUserIdController = async (req, res) => {
 export const createExaminationController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.userId && data.staffId && data.symptom
+        if (data && data.userId && data.symptom
         ) {
             let response = await createExamination(data);
             return res.status(200).json(response)
@@ -193,6 +193,39 @@ export const getExaminationByIdAdminController = async (req, res) => {
 export const getExamToNoticeController = async (req, res) => {
     try {
         let response = await getExamToNotice();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getListAdvanceMoneyController = async (req, res) => {
+    try {
+        let data = req.query;
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 20;
+        const search = req.query.search || '';
+        const statusPay = req.query.statusPay || null;
+        let response = await getListAdvanceMoney(+page, +limit, search, statusPay);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getListInpationsController = async (req, res) => {
+    try {
+        const date = req.query.date || null;
+        const toDate = req.query.toDate || null;
+        const statusExam = req.query.status || status.EXAMINING;
+        const staffId = req.user.staff || null;
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 20;
+        const search = req.query.search || '';
+
+        let response = await getListInpations(date, toDate, statusExam, staffId, +page, +limit, search);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
