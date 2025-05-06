@@ -321,6 +321,23 @@ export const createPrescription = async (data) => {
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
     try {
+
+        let examination = await db.Examination.findOne({
+            where: {
+                id: data.examinationId
+            },
+            transaction: t // Pass transaction to the query
+        });
+
+        if (!examination) {
+            await transaction.rollback(); // Rollback if examination not found
+            return {
+                EC: 404,
+                EM: "Không tìm thấy phiên khám",
+                DT: ""
+            }
+        }
+
         const todayStart = dayjs().startOf('day').toDate()
         const todayEnd = dayjs().endOf('day').toDate();
 
@@ -387,6 +404,12 @@ export const createPrescription = async (data) => {
                 where: { id: data.oldPresId },
                 transaction: t
             });
+        }
+
+        if(examination.medicalTreatmentTier === 1) {
+            await examination.update({
+                status: status.EXAMINING,
+            }, { transaction: t }); // Pass transaction to the update
         }
 
         await t.commit(); // Commit nếu mọi thứ thành công

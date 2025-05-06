@@ -6,6 +6,8 @@ import { Op, or, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
 
+const cron = require('node-cron');
+
 export const getExaminationById = async (id) => {
     try {
         let examination = await db.Examination.findOne({
@@ -276,7 +278,7 @@ export const createExamination = async (data) => {
         }, { transaction });
 
         //Tạo thanh toán tạm ứng
-        if(+data.medicalTreatmentTier === 1){
+        if(+data.medicalTreatmentTier === 1 && data.status === status.WAITING){
             await db.AdvanceMoney.create({
                 exam_id: examination.id,
                 date: new Date(),
@@ -436,7 +438,9 @@ export const updateExamination = async (data, userId) => {
                 where: { id: data.advanceId },
                 transaction
             });
-        } else if(existExamination && existExamination.medicalTreatmentTier !== +data.medicalTreatmentTier){
+        } else if(existExamination && 
+            (existExamination.medicalTreatmentTier !== +data.medicalTreatmentTier || existExamination.status === status.PENDING)
+        ){
             if(+data.medicalTreatmentTier === 1){
                 await db.AdvanceMoney.create({
                     exam_id: existExamination.id,
@@ -1383,7 +1387,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
 }
 export const getListInpations = async (date, toDate, statusExam, staffId, page, limit, search) => {
     try {
-        let staff = await db.Staff.findAll({
+        let staff = await db.Staff.findOne({
             where: { id: staffId },
             include: [{
                 model: db.Department,
@@ -1425,7 +1429,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             ]
         } : {};
 
-        let departmentId = staff[0].staffDepartmentData.id;
+        let departmentId = staff.staffDepartmentData.id;
 
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
@@ -1479,6 +1483,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
                     }],
+                    required: true,
                 }
             ],
             limit: limit,
@@ -1507,3 +1512,40 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
         };
     }
 }
+
+function reStatusInpatients(taskFunction) {
+    const task = cron.schedule('0 0 * * *', () => {
+      console.log(`Đang thực hiện công việc theo lịch lúc 0 giờ sáng: ${new Date()}`);
+      taskFunction();
+    });
+    
+    console.log('Đã lên lịch công việc vào 0 giờ sáng mỗi ngày');
+    return task;
+}
+
+const reStatusInpatientsJob = reStatusInpatients(async () => {
+    // Thực hiện công việc của bạn ở đây
+    console.log('Đang thực hiện công việc được lên lịch vào 0 giờ sáng');
+    const inpatients = await db.Inpatient.findAll({
+        where: {
+            medicalTreatmentTier: 1,
+            status: status.EXAMINING,
+            dischargeDate: null
+        }
+    });
+
+    if (!inpatients || inpatients.length === 0) {
+        console.log('Không có bệnh nhân nào cần thay đổi trạng thái');
+        return;
+    }
+
+    await db.Inpatient.update({
+        status: status.WAITING
+    }, {
+        where: {
+            id: inpatients.map(inpatient => inpatient.id)
+        }
+    });
+
+    console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
+})

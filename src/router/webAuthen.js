@@ -42,7 +42,7 @@ let initWebAuthenRounte = (app) => {
     router.post("/createMessage", createMessageController)
 
     router.get("/getExamToNotice", getExamToNoticeController)
-    router.get("/getListInpations", getListInpationsController)
+    router.get("/getListInpatients", getListInpationsController)
     router.post("/createAdvanceMoney", createAdvanceMoneyController)
 
     return app.use("/api/", router);
