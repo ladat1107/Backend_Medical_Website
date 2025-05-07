@@ -7,6 +7,7 @@ import { getNumberMessageUnreadController, upsertConversationController } from '
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 import { createMessageController } from '../controllers/messageController';
 import { createAdvanceMoneyController } from '../controllers/advanceMoneyController';
+import { deletePrescriptionController } from '../controllers/prescriptionController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -44,6 +45,7 @@ let initWebAuthenRounte = (app) => {
     router.get("/getExamToNotice", getExamToNoticeController)
     router.get("/getListInpatients", getListInpationsController)
     router.post("/createAdvanceMoney", createAdvanceMoneyController)
+    router.delete("/deletePrescription", deletePrescriptionController)
 
     return app.use("/api/", router);
 }

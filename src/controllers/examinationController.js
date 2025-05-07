@@ -218,10 +218,11 @@ export const getListAdvanceMoneyController = async (req, res) => {
 
 export const getListInpationsController = async (req, res) => {
     try {
+        //console.log(req.user);
         const date = req.query.currentDate || null;
         const toDate = req.query.toDate || null;
         const statusExam = req.query.status || status.EXAMINING;
-        const staffId = req.user.staff || null;
+        const staffId = req.user.roleId === ROLE.ACCOUNTANT ? null : req.user.staff || null;
         const page = req.query.page || 1;
         const limit = req.query.limit || 20;
         const search = req.query.search || '';

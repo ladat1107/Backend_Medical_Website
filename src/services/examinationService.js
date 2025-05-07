@@ -376,33 +376,6 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
-        // let examination = await db.Examination.update({
-        //     symptom: data.symptom,
-        //     diseaseName: data.diseaseName,
-        //     treatmentResult: data.treatmentResult,
-        //     admissionDate: data.admissionDate,
-        //     dischargeDate: data.dischargeDate,
-        //     reason: data.reason,
-        //     price: data.price,
-        //     special: data.special,
-        //     comorbidities: data.comorbidities,
-        //     status: data.status,
-
-        //     ...(data.visit_status != null && { visit_status: data.visit_status }),
-        //     ...(data.reExaminationDate != null && { reExaminationDate: data.reExaminationDate }),
-        //     ...(data.dischargeStatus != null && { dischargeStatus: data.dischargeStatus }),
-        //     ...(data.time != null && { reExaminationTime: data.time }),
-        //     ...(data.roomName != null && { roomName: data.roomName }),
-        //     ...(data.roomId != null && { roomId: data.roomId }),
-        //     ...(data.isWrongTreatment != null && { isWrongTreatment: data.isWrongTreatment }),
-        //     ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
-
-        //     ...paymentObject
-        // }, {
-        //     where: { id: data.id },
-        //     transaction
-        // });
-
         let examination = await db.Examination.update({
             ...(data.symptom !== undefined && { symptom: data.symptom }),
             ...(data.diseaseName !== undefined && { diseaseName: data.diseaseName }),
@@ -428,6 +401,14 @@ export const updateExamination = async (data, userId) => {
             where: { id: data.id },
             transaction
         });
+
+        if(existExamination.status === status.DONE && existExamination.dischargeStatus === 4 
+            && data.status === status.EXAMINING && !data.dischargeStatus){
+            await db.Examination.destroy({
+                where: { parentExaminationId: existExamination.id },
+                transaction: transaction 
+            });
+        }
 
         //Thanh toán tạm ứng
         if (data.advanceId) {
@@ -1417,21 +1398,24 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
 }
 export const getListInpations = async (date, toDate, statusExam, staffId, page, limit, search) => {
     try {
-        let staff = await db.Staff.findOne({
-            where: { id: staffId },
-            include: [{
-                model: db.Department,
-                as: 'staffDepartmentData'
-            }],
-            raw: true,
-            nest: true,
-        })
-
-        if (!staff) {
-            return {
-                EC: 404,
-                EM: "Không tìm thấy nhân viên",
-                DT: "",
+        let staff = null;
+        if(staffId) {
+            staff = await db.Staff.findOne({
+                where: { id: staffId },
+                include: [{
+                    model: db.Department,
+                    as: 'staffDepartmentData'
+                }],
+                raw: true,
+                nest: true,
+            })
+    
+            if (!staff) {
+                return {
+                    EC: 404,
+                    EM: "Không tìm thấy nhân viên",
+                    DT: "",
+                }
             }
         }
 
@@ -1452,7 +1436,12 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             }
         }
 
-        let departmentId = staff.staffDepartmentData.id;
+        let whereRoomCondition = {};
+        if (staff && staff.staffDepartmentData && staff.staffDepartmentData.id) {
+            whereRoomCondition = {
+                id: staff.staffDepartmentData.id
+            };
+        }
 
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
@@ -1496,9 +1485,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                         model: db.Department,
                         as: 'roomDepartmentData',
                         attributes: ['id', 'name'],
-                        where: {
-                            id: departmentId
-                        },
+                        where: whereRoomCondition,
                         required: true,
                     }, {
                         model: db.ServiceType,
