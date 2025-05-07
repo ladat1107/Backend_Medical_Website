@@ -325,7 +325,7 @@ export const updateExamination = async (data, userId) => {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
-                amount: data.advanceId ? data.advanceMoney : existExamination.price,
+                amount: data.advanceId ? data.advanceMoney : data.status === 8 ? data.amount : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
             }, { transaction });
