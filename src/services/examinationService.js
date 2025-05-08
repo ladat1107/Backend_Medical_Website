@@ -1296,6 +1296,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
     try {
         const whereConditionExamination = {
             medicalTreatmentTier: 1,
+            status: { [Op.lt]: status.DONE },
         };
         // if (statusPay <= 4) {
         //     whereConditionExamination.status = statusPay;
@@ -1419,7 +1420,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             }
         }
 
-        const whereCondition = {
+        let whereCondition = {
             medicalTreatmentTier: 1,
             status: +statusExam
         };
@@ -1433,6 +1434,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                 whereCondition.dischargeDate = {
                     [Op.between]: [startOfDay, endOfDay],
                 };
+                whereCondition.status = { [Op.gte]: +statusExam };
             }
         }
 
@@ -1522,6 +1524,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
     }
 }
 
+//#region Lịch trình thay đổi trạng thái bệnh nhân nội trú
 function reStatusInpatients(taskFunction) {
     const task = cron.schedule('0 0 * * *', () => {
         console.log(`Đang thực hiện công việc theo lịch lúc 0 giờ sáng: ${new Date()}`);
@@ -1558,3 +1561,4 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
+//#endregion

@@ -1246,7 +1246,6 @@ export const getMedicalHistories = async (userId) => {
                         {
                             model: db.Prescription,
                             as: 'prescriptionExamData',
-                            attributes: ['id', 'note', 'totalMoney'],
                             include: [{
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
