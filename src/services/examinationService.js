@@ -96,6 +96,37 @@ export const getExaminationById = async (id) => {
             ]
         });
 
+        if (!examination) {
+            return {
+                EC: 404,
+                EM: "Không tìm thấy khám bệnh",
+                DT: ""
+            }
+        }
+
+        examination = JSON.parse(JSON.stringify(examination));
+        if (examination.comorbidities) {
+            const diseaseCodes = examination.comorbidities.split(',').filter(code => code.trim() !== '');
+            if (diseaseCodes.length > 0) {
+                const diseaseDetails = await db.Disease.findAll({
+                    where: {
+                        code: diseaseCodes
+                    },
+                    attributes: ['id', 'code', 'name']
+                });
+                
+                // Thêm thông tin chi tiết bệnh vào kết quả
+                examination.comorbiditiesDetails = diseaseDetails;
+            } else {
+                examination.comorbiditiesDetails = [];
+            }
+        } else {
+            examination.comorbiditiesDetails = [];
+        }
+
+        console.log("Lịch sử khám bệnh", examination);
+        console.log("Lịch sử khám bệnh 2", examination.comorbiditiesDetails);
+
         return {
             EC: 0,
             EM: "Lấy thông tin khám bệnh thành công",
