@@ -395,7 +395,9 @@ export const updateExamination = async (data, userId) => {
             ...(data.roomId !== undefined && { roomId: data.roomId }),
             ...(data.isWrongTreatment !== undefined && { isWrongTreatment: data.isWrongTreatment }),
             ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }),
-
+            ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
+            ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice }),
+            
             ...paymentObject
         }, {
             where: { id: data.id },
