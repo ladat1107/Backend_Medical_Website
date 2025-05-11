@@ -80,12 +80,12 @@ export const getExaminationById = async (id) => {
                         model: db.Department,
                         as: 'roomDepartmentData',
                         attributes: ['id', 'name'],
-                    },{
+                    }, {
                         model: db.ServiceType,
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
                     }],
-                },{
+                }, {
                     model: db.AdvanceMoney,
                     as: 'advanceMoneyExaminationData',
                 },
@@ -168,7 +168,7 @@ export const getExaminationByUserId = async (userId, filter) => {
 export const createExamination = async (data) => {
     // Initialize transaction
     const transaction = await db.sequelize.transaction();
-    
+
     try {
         let staff = await db.Staff.findOne({
             where: {
@@ -278,7 +278,7 @@ export const createExamination = async (data) => {
         }, { transaction });
 
         //Tạo thanh toán tạm ứng
-        if(+data.medicalTreatmentTier === 1 && data.status === status.WAITING){
+        if (+data.medicalTreatmentTier === 1 && data.status === status.WAITING) {
             await db.AdvanceMoney.create({
                 exam_id: examination.id,
                 date: new Date(),
@@ -304,14 +304,14 @@ export const createExamination = async (data) => {
 export const updateExamination = async (data, userId) => {
     // Initialize transaction
     const transaction = await db.sequelize.transaction();
-    
+
     try {
         let paymentObject = {};
         let existExamination = await db.Examination.findOne({
             where: { id: data.id },
             transaction
         });
-        
+
         if (!existExamination) {
             await transaction.rollback();
             return {
@@ -320,16 +320,16 @@ export const updateExamination = async (data, userId) => {
                 DT: ""
             }
         }
-        
+
         if (data.payment) {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
-                amount: data.advanceId ? data.advanceMoney :  existExamination.price,
+                amount: data.advanceId ? data.advanceMoney : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
             }, { transaction });
-            
+
             paymentObject = {
                 paymentId: payment.id,
             }
@@ -422,7 +422,7 @@ export const updateExamination = async (data, userId) => {
             ...(data.roomId !== undefined && { roomId: data.roomId }),
             ...(data.isWrongTreatment !== undefined && { isWrongTreatment: data.isWrongTreatment }),
             ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }),
-            
+
             ...paymentObject
         }, {
             where: { id: data.id },
@@ -430,7 +430,7 @@ export const updateExamination = async (data, userId) => {
         });
 
         //Thanh toán tạm ứng
-        if(data.advanceId){
+        if (data.advanceId) {
             await db.AdvanceMoney.update({
                 amount: data?.advanceMoney || 0,
                 status: paymentStatus.PAID,
@@ -438,10 +438,10 @@ export const updateExamination = async (data, userId) => {
                 where: { id: data.advanceId },
                 transaction
             });
-        } else if(existExamination && 
+        } else if (existExamination &&
             (existExamination.medicalTreatmentTier !== +data.medicalTreatmentTier || existExamination.status === status.PENDING)
-        ){
-            if(+data.medicalTreatmentTier === 1){
+        ) {
+            if (+data.medicalTreatmentTier === 1) {
                 await db.AdvanceMoney.create({
                     exam_id: existExamination.id,
                     date: new Date(),
@@ -455,7 +455,7 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
-        if(examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination){
+        if (examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination) {
             const st = await getStaffForReExamination(existExamination.staffId, data.reExaminationDate);
 
             const insuranceCode = await db.Insurance.findOne({
@@ -463,7 +463,7 @@ export const updateExamination = async (data, userId) => {
                 attributes: ['insuranceCode'],
                 transaction
             });
-            
+
             const reExam = await db.Examination.findOne({
                 where: {
                     parentExaminationId: existExamination.id,
@@ -696,7 +696,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
                         model: db.Department,
                         as: 'roomDepartmentData',
                         attributes: ['id', 'name'],
-                    },{
+                    }, {
                         model: db.ServiceType,
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
@@ -1113,7 +1113,7 @@ export const getExamToNotice = async () => {
 
         const endOfTomorrow = new Date(tomorrow);
         endOfTomorrow.setHours(23, 59, 59, 999); // End of tomorrow
-        
+
         // Find examinations with reExaminationDate set to tomorrow
         const examinations = await db.Examination.findAll({
             where: {
@@ -1180,6 +1180,69 @@ export const getAllExaminationsAdmin = async () => {
     } catch (error) {
         console.log(error);
         return ERROR_SERVER
+    }
+}
+export const getStatisticsExamination = async (filter) => {
+    try {
+        const { startDate, endDate } = filter;
+        let whereCondition = {};
+        if (startDate && endDate) {
+            whereCondition.admissionDate = {
+                [Op.between]: [startDate, endDate]
+            }
+        }
+        const examinations = await db.Examination.findAll({
+            where: whereCondition,
+            include: [{
+                model: db.Payment,
+                as: 'paymentData',
+            }, {
+                model: db.Staff,
+                as: 'examinationStaffData',
+                attributes: ['id', 'position', 'price'],
+                include: [{
+                    model: db.User,
+                    as: 'staffUserData',
+                    attributes: ['id', 'firstName', 'lastName', 'phoneNumber', 'email', "status", "cid"],
+                }, {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                }]
+            },
+            {
+                model: db.Paraclinical,
+                as: 'examinationResultParaclincalData',
+                include: [
+                    {
+                        model: db.Payment,
+                        as: 'paymentData',
+                    }
+                ]
+            },
+            {
+                model: db.Prescription,
+                as: 'prescriptionExamData',
+                include: [
+                    {
+                        model: db.Payment,
+                        as: 'paymentData',
+                    }
+                ]
+            },
+            ],
+            nest: true,
+        })
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công',
+            DT: examinations
+        }
+
+
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
     }
 }
 export const getExaminationByIdAdmin = async (id) => {
@@ -1310,7 +1373,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                     as: "userInsuranceData",
                     attributes: ["insuranceCode"]
                 }]
-            },{
+            }, {
                 model: db.Staff,
                 as: 'examinationStaffData',
                 attributes: ['id', 'position', 'price'],
@@ -1321,7 +1384,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                         attributes: ['firstName', 'lastName']
                     },
                 ],
-            },{
+            }, {
                 model: db.AdvanceMoney,
                 as: 'advanceMoneyExaminationData',
                 attributes: ['id', 'amount', 'date', 'status'],
@@ -1329,7 +1392,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                     status: statusPay,
                 },
                 required: true,
-            },{
+            }, {
                 model: db.Room,
                 as: 'examinationRoomData',
                 attributes: ['id', 'name'],
@@ -1337,7 +1400,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                     model: db.Department,
                     as: 'roomDepartmentData',
                     attributes: ['id', 'name'],
-                },{
+                }, {
                     model: db.ServiceType,
                     as: 'serviceData',
                     attributes: ['id', 'name', 'price'],
@@ -1415,7 +1478,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(toDate).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            if(statusExam === status.DONE) {
+            if (statusExam === status.DONE) {
                 whereCondition.dischargeDate = {
                     [Op.between]: [startOfDay, endOfDay],
                 };
@@ -1478,7 +1541,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                             id: departmentId
                         },
                         required: true,
-                    },{
+                    }, {
                         model: db.ServiceType,
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
@@ -1515,10 +1578,10 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
 
 function reStatusInpatients(taskFunction) {
     const task = cron.schedule('0 0 * * *', () => {
-      console.log(`Đang thực hiện công việc theo lịch lúc 0 giờ sáng: ${new Date()}`);
-      taskFunction();
+        console.log(`Đang thực hiện công việc theo lịch lúc 0 giờ sáng: ${new Date()}`);
+        taskFunction();
     });
-    
+
     console.log('Đã lên lịch công việc vào 0 giờ sáng mỗi ngày');
     return task;
 }

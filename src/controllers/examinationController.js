@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getPatienSteps, getScheduleApoinment, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { createExamination, deleteExamination, getAllExaminationsAdmin, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -170,7 +170,13 @@ export const getPatienStepsController = async (req, res) => {
 
 export const getAllExaminationsAdminController = async (req, res) => {
     try {
-        let response = await getAllExaminationsAdmin();
+        let data = req?.query || null;
+        let response = null;
+        if (Object.keys(data).length > 0) {
+            response = await getStatisticsExamination(data);
+        } else {
+            response = await getAllExaminationsAdmin();
+        }
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
