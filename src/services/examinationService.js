@@ -1143,45 +1143,6 @@ export const getExamToNotice = async () => {
         return ERROR_SERVER;
     }
 }
-export const getAllExaminationsAdmin = async () => {
-    try {
-        let examinations = await db.Examination.findAll({
-            include: [
-                {
-                    model: db.User,
-                    as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName'],
-                },
-                {
-                    model: db.Staff,
-                    as: 'examinationStaffData',
-                    attributes: ['id', 'position'],
-                    include: [
-                        {
-                            model: db.User,
-                            as: 'staffUserData',
-                            attributes: ['id', 'firstName', 'lastName'],
-                        },
-                    ]
-                },
-                {
-                    model: db.Payment,
-                    as: 'paymentData',
-                    attributes: ['id', 'status', 'amount', 'paymentMethod'],
-                },
-            ],
-            nest: true,
-        })
-        return {
-            EC: 0,
-            EM: 'Lấy danh sách khám bệnh thành công',
-            DT: examinations
-        }
-    } catch (error) {
-        console.log(error);
-        return ERROR_SERVER
-    }
-}
 export const getStatisticsExamination = async (filter) => {
     try {
         const { startDate, endDate } = filter;
@@ -1193,43 +1154,49 @@ export const getStatisticsExamination = async (filter) => {
         }
         const examinations = await db.Examination.findAll({
             where: whereCondition,
-            include: [{
-                model: db.Payment,
-                as: 'paymentData',
-            }, {
-                model: db.Staff,
-                as: 'examinationStaffData',
-                attributes: ['id', 'position', 'price'],
-                include: [{
+            include: [
+                {
                     model: db.User,
-                    as: 'staffUserData',
-                    attributes: ['id', 'firstName', 'lastName', 'phoneNumber', 'email', "status", "cid"],
+                    as: 'userExaminationData',
+                    attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'cid'],
+                },
+                {
+                    model: db.Payment,
+                    as: 'paymentData',
                 }, {
-                    model: db.Department,
-                    as: 'staffDepartmentData',
-                    attributes: ['id', 'name'],
-                }]
-            },
-            {
-                model: db.Paraclinical,
-                as: 'examinationResultParaclincalData',
-                include: [
-                    {
-                        model: db.Payment,
-                        as: 'paymentData',
-                    }
-                ]
-            },
-            {
-                model: db.Prescription,
-                as: 'prescriptionExamData',
-                include: [
-                    {
-                        model: db.Payment,
-                        as: 'paymentData',
-                    }
-                ]
-            },
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [{
+                        model: db.User,
+                        as: 'staffUserData',
+                        attributes: ['id', 'firstName', 'lastName', 'phoneNumber', 'email', "status", "cid"],
+                    }, {
+                        model: db.Department,
+                        as: 'staffDepartmentData',
+                        attributes: ['id', 'name'],
+                    }]
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'examinationResultParaclincalData',
+                    include: [
+                        {
+                            model: db.Payment,
+                            as: 'paymentData',
+                        }
+                    ]
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionExamData',
+                    include: [
+                        {
+                            model: db.Payment,
+                            as: 'paymentData',
+                        }
+                    ]
+                },
             ],
             nest: true,
         })
