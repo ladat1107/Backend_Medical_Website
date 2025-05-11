@@ -1342,7 +1342,6 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
             include: [{
                 model: db.User,
                 as: 'userExaminationData',
-                attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                 // Add search condition to include
                 where: search ? {
                     [Op.or]: [
@@ -1486,7 +1485,6 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -1545,6 +1543,98 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                 totalPages: Math.ceil(count / limit),
                 currentPage: page,
                 examinations: examinations,
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching examinations:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+}
+export const getMedicalRecords = async (status, medicalTreatmentTier, page, limit, search) => {
+    try {
+        const whereCondition = {
+            medicalTreatmentTier: medicalTreatmentTier
+        };
+
+        // Status filter
+        if (status !== undefined && status !== null) {
+            whereCondition.status = 
+                +status === 6 ? { 
+                    [Op.lte]: 6
+                } : status === 7 ? {
+                    [Op.gte]: 7
+                } : status;
+        }
+
+        let offset, limit_query;
+        const { count, rows: examinations } = await db.Examination.findAndCountAll({
+            where: {
+                ...whereCondition
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    }],
+                    // Add search condition to include
+                    where: search ? {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } }
+                        ]
+                    } : {}
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'examinationRoomData',
+                    attributes: ['id', 'name'],
+                    include: [{
+                        model: db.Department,
+                        as: 'roomDepartmentData',
+                        attributes: ['id', 'name'],
+                    },{
+                        model: db.ServiceType,
+                        as: 'serviceData',
+                        attributes: ['id', 'name', 'price'],
+                    }],
+                }
+            ],
+            limit: limit_query,
+            offset, 
+            distinct: true // Ensures correct count with joins
+        });
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công!',
+            DT: {
+                totalItems: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page,
+                totalPatient: totalPatient,
+                totalAppointment: totalAppointment,
+                examinations: examinations,
+
             },
         };
     } catch (error) {
