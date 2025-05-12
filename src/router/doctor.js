@@ -9,7 +9,7 @@ import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleB
 import { createPrescriptionController, getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
 import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
 import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
-import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getPatienStepsController, updateExaminationController } from '../controllers/examinationController';
+import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getMedicalRecordsController, getPatienStepsController, updateExaminationController } from '../controllers/examinationController';
 import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
@@ -110,6 +110,7 @@ let initDoctorRoute = (app) => {
     // -- Room
     router.get("/getAvailableRooms", getAvailableRoomsController)
     router.post("/createPrescription", createPrescriptionController)
+    router.get("/getMedicalRecords", getMedicalRecordsController)
 
 
     return app.use("/api/", router);

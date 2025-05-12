@@ -234,3 +234,19 @@ export const getListInpationsController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER)
     }
 }
+
+export const getMedicalRecordsController = async (req, res) => {
+    try {
+        const status = req.query.status || status.EXAMINING;
+        const medicalTreatmentTier = req.query.medicalTreatmentTier || 1;
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 20;
+        const search = req.query.search || '';
+
+        let response = await getMedicalRecords(+status, medicalTreatmentTier, +page, +limit, search);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}

@@ -632,6 +632,8 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         // Staff ID filter
         if (staffId) {
             whereCondition.staffId = staffId;
+        } else {
+            whereCondition.medicalTreatmentTier = 2;
         }
 
         // Status filter
@@ -639,23 +641,10 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
             whereCondition.status = +status === 4 ? { [Op.in]: [4, 5, 6] } : +status;
         }
 
-        // Appointment filter
-        // if (is_appointment) {
-        //     whereCondition.is_appointment = is_appointment;
-        // }
-
         // Time filter
         if (time) {
             whereCondition.time = time;
         }
-
-        // Search filter (across user's first and last name)
-        const searchCondition = search ? {
-            [Op.or]: [
-                { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-                { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
-            ]
-        } : {};
 
         let offset, limit_query;
         if (status === 2) {
@@ -670,7 +659,6 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...whereCondition,
-                ...searchCondition
             },
             include: [
                 {
@@ -686,7 +674,9 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {}
                 },
@@ -1346,7 +1336,9 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                 where: search ? {
                     [Op.or]: [
                         { firstName: { [Op.like]: `%${search}%` } },
-                        { lastName: { [Op.like]: `%${search}%` } }
+                        { lastName: { [Op.like]: `%${search}%` } },
+                        { phoneNumber: { [Op.like]: `%${search}%` } },
+                        { cid: { [Op.like]: `%${search}%` } }
                     ]
                 } : {},
                 include: [{
@@ -1494,7 +1486,9 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {}
                 },
@@ -1564,7 +1558,8 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
         if (status !== undefined && status !== null) {
             whereCondition.status = 
                 +status === 6 ? { 
-                    [Op.lte]: 6
+                    [Op.lte]: 6,
+                    [Op.gte]: 4
                 } : status === 7 ? {
                     [Op.gte]: 7
                 } : status;
@@ -1583,12 +1578,18 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
                         model: db.Insurance,
                         as: "userInsuranceData",
                         attributes: ["insuranceCode"]
+                    },{
+                        model: db.Relative,
+                        as: 'userRelativeData',
+                        attributes: ['id', 'fullName', 'cid', 'phoneNumber', 'relationship', 'address'],
                     }],
                     // Add search condition to include
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {}
                 },
@@ -1624,6 +1625,8 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
             distinct: true // Ensures correct count with joins
         });
 
+        console.log('examinations', examinations);
+
         return {
             EC: 0,
             EM: 'Lấy danh sách khám bệnh thành công!',
@@ -1631,8 +1634,6 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
                 totalItems: count,
                 totalPages: Math.ceil(count / limit),
                 currentPage: page,
-                totalPatient: totalPatient,
-                totalAppointment: totalAppointment,
                 examinations: examinations,
 
             },
