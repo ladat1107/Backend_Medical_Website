@@ -250,3 +250,22 @@ export const getMedicalRecordsController = async (req, res) => {
         return res.status(500).json(ERROR_SERVER)
     }
 }
+
+export const updateInpatientRoomController = async (req, res) => {
+    try {
+        const data = req.body;
+        if (data && data.examId && data.roomId) {
+            let response = await updateInpatientRoom(data.examId, data.roomId);
+            return res.status(200).json(response)
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}

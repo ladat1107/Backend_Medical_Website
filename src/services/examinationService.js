@@ -5,6 +5,8 @@ import { refundMomo } from "./paymentService";
 import { Op, or, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
+import { timingSafeEqual } from "crypto";
+import { start } from "repl";
 
 const cron = require('node-cron');
 
@@ -89,6 +91,26 @@ export const getExaminationById = async (id) => {
                     model: db.AdvanceMoney,
                     as: 'advanceMoneyExaminationData',
                 },
+                {
+                    model: db.InpatientRoom,
+                    as: 'inpatientRoomExaminationData',
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'inpatientRoomRoomData',
+                            attributes: ['id', 'name'],
+                            include: [{
+                                model: db.Department,
+                                as: 'roomDepartmentData',
+                                attributes: ['id', 'name'],
+                            },{
+                                model: db.ServiceType,
+                                as: 'serviceData',
+                                attributes: ['id', 'name', 'price'],
+                            }],
+                        }
+                    ],
+                }
             ],
             nest: true,
             order: [
@@ -208,15 +230,6 @@ export const createExamination = async (data) => {
             transaction
         });
 
-        // if (!staff) {
-        //     await transaction.rollback();
-        //     return {
-        //         EC: 404,
-        //         EM: "Nhân viên không tồn tại",
-        //         DT: ""
-        //     };
-        // }
-
         // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
         const today = new Date();
         today.setHours(0, 0, 0, 0);  // Đặt lại giờ để so sánh chỉ theo ngày
@@ -314,6 +327,13 @@ export const createExamination = async (data) => {
                 exam_id: examination.id,
                 date: new Date(),
                 status: status.ACTIVE,
+            }, { transaction });
+
+            await db.InpatientRoom.create({
+                examId: examination.id,
+                startDate: new Date(),
+                roomId: data.roomId,
+                roomName: data.roomName
             }, { transaction });
         }
 
@@ -461,6 +481,14 @@ export const updateExamination = async (data, userId) => {
                     date: new Date(),
                     status: paymentStatus.PENDING,
                 }, { transaction });
+
+                await db.InpatientRoom.create({
+                    examId: existExamination.id,
+                    startDate: new Date(),
+                    roomId: data.roomId,
+                    roomName: data.roomName
+                }, { transaction });
+
             } else if (existExamination.medicalTreatmentTier === 1 && +data.medicalTreatmentTier === 2) {
                 await db.AdvanceMoney.delete({
                     where: { exam_id: existExamination.id },
@@ -1520,7 +1548,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                         attributes: ['id', 'name', 'price'],
                     }],
                     required: true,
-                }
+                },
             ],
             limit: limit,
             offset: (page - 1) * limit,
@@ -1646,6 +1674,94 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
             DT: '',
         };
     }
+}
+
+export const updateInpatientRoom = async (examId, roomId) => { 
+    const t = await db.sequelize.transaction();
+    try { 
+        const existingInpatientRoom = await db.InpatientRoom.findOne({ 
+            where: { 
+                examId: examId, 
+                endDate: null 
+            },
+            transaction: t,
+            raw: false
+        }); 
+
+        let yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); 
+
+        let existingStartDate = new Date(existingInpatientRoom.startDate);
+        existingStartDate.setHours(0, 0, 0, 0);
+
+        if (existingInpatientRoom) { 
+            if(yesterday < existingStartDate) {
+                await existingInpatientRoom.destroy({
+                    transaction: t
+                })
+            } else {
+                await existingInpatientRoom.update({ 
+                    endDate: yesterday
+                }, { 
+                    transaction: t 
+                }); 
+            }
+        } 
+
+        const getRoom = await db.Room.findOne({
+            where: { id: roomId },
+            transaction: t
+        });
+
+        await db.Examination.update({
+            roomId: roomId,
+            roomName: getRoom.name
+        }, {
+            where: { id: examId },
+            transaction: t
+        });
+
+        await db.InpatientRoom.destroy({
+            where: {
+                examId: examId,
+                startDate: {
+                    [Op.between]: [
+                        new Date().setHours(0, 0, 0, 0),  
+                        new Date().setHours(23, 59, 59, 999) 
+                    ]
+                }
+            },
+            transaction: t
+        });
+ 
+        const newInpatientRoom = await db.InpatientRoom.create({ 
+            examId: examId, 
+            roomId: roomId, 
+            roomName: getRoom.name,
+            startDate: new Date() 
+        }, { 
+            transaction: t 
+        }); 
+ 
+        await t.commit();
+        return { 
+            EC: 0, 
+            EM: 'Cập nhật phòng thành công', 
+            DT: newInpatientRoom 
+        }; 
+ 
+    } catch (error) { 
+        await t.rollback();
+
+        console.error('Error updating inpatient room:', error); 
+        return { 
+            EC: 500, 
+            EM: 'Lỗi server', 
+            DT: null, 
+            error: error.message 
+        }; 
+    } 
 }
 
 //#region Lịch trình thay đổi trạng thái bệnh nhân nội trú

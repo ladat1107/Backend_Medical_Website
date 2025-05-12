@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'exam_id',
                 as: 'advanceMoneyExaminationData',
             });
+            Examination.hasMany(models.InpatientRoom, {
+                foreignKey: 'examId',
+                as: 'inpatientRoomExaminationData',
+            });
         }
     }
     Examination.init({
