@@ -6,8 +6,8 @@ import prescriptionService from './prescriptionService';
 import { Op } from 'sequelize';
 require('dotenv').config();
 
-let accessKey = 'F8BBA842ECF85';
-let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+let accessKey = process.env.ACCESSKEY_MOMO;
+let secretKey = process.env.SECRETKEY_MOMO;
 
 export const paymentMomo = async (data) => {
     try {
@@ -205,7 +205,7 @@ export const appoinmentPayment = async (req, res) => {
             id: examination.id,
             type: TYPE_PAYMENT.APPOINMENT,
             price: examination.price,
-            redirectUrl: 'http://localhost:3000/appointmentList',
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/appointmentList`,
         }
         let response = await paymentMomo(data);
         return res.status(200).json(response)
@@ -230,11 +230,12 @@ export const examinationPayment = async (req, res) => {
                 DT: ""
             })
         }
+
         let body = {
             id: examination.id,
             type: TYPE_PAYMENT.EXAMINATION,
             price: examination.price,
-            redirectUrl: 'http://localhost:3000/cashier',
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
             update: dataReq
         }
         let response = await paymentMomo(body);
@@ -279,7 +280,7 @@ export const paraclinicalPayment = async (req, res) => {
             id: ids,
             type: TYPE_PAYMENT.PARA_CLINICAL,
             price: price,
-            redirectUrl: 'http://localhost:3000/cashier',
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
         }
         let response = await paymentMomo(data);
         return res.status(200).json(response)
@@ -308,7 +309,7 @@ export const prescriptionPayment = async (req, res) => {
             id: prescription.id,
             type: TYPE_PAYMENT.PRESCRIPTION,
             price: prescription.totalMoney,
-            redirectUrl: 'http://localhost:3000/prescribe',
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/prescribe`,
             update: dataReq
         }
         let response = await paymentMomo(body);

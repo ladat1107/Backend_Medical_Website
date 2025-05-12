@@ -1,4 +1,5 @@
 import { blockMedicine, createMedicine, deleteMedicine, getAllMedicines, getAllMedicinesAdmin, getAllMedicinesForExam, getMedicineById, updateMedicine } from "../services/medicineService";
+import { getPrescriptionUsed } from "../services/prescriptionService";
 import { ERROR_SERVER } from "../utils";
 
 export const getAllMedicinesController = async (req, res) => {
@@ -95,6 +96,17 @@ export const deleteMedicineController = async (req, res) => {
                 DT: ""
             })
         }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER);
+    }
+}
+
+export const getPrescriptionUsedController = async (req, res) => {
+    try {
+        let data = req.query;
+        let response = await getPrescriptionUsed(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER);

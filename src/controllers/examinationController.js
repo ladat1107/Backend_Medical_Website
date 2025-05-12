@@ -55,13 +55,8 @@ export const createExaminationController = async (req, res) => {
 export const updateExaminationController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id
-            // && data.symptom && data.diseaseName
-            // && data.treatmentResult && data.admissionDate && data.dischargeDate && data.reason
-            // && data.medicalTreatmentTier && data.paymentDoctorStatus && data.price !== undefined
-            // && data.special !== undefined && data.insuranceCoverage
-        ) {
-            let response = await updateExamination(data, req.user.id);
+        if (data && data.id) {
+            let response = await updateExamination(data, req.user.id); 
             return res.status(200).json(response)
         } else {
             return res.status(200).json({

@@ -12,7 +12,7 @@ import { createBedController, deleteBedController, updateBedController } from '.
 import { createPatientController, updatePatientController } from '../controllers/patientController';
 import { createRoleController, updateRoleController } from '../controllers/roleController';
 import { arrangScheduleController, createScheduleController, deleteScheduleController, getAllSchedulesAdminController, updateScheduleStaffController } from '../controllers/scheduleController';
-import { blockMedicineController, createMedicineController, deleteMedicineController, getAllMedicinesAdminController, updateMedicineController } from '../controllers/medicineController';
+import { blockMedicineController, createMedicineController, deleteMedicineController, getAllMedicinesAdminController, getPrescriptionUsedController, updateMedicineController } from '../controllers/medicineController';
 import { createAllergyController, deleteAllergyController, updateAllergyController } from '../controllers/allergyController';
 import { createDisabilityController, deleteDisabilityController, updateDisabilityController } from '../controllers/disabilityController';
 import { createSurgicalHistoryController, deleteSurgicalHistoryController, updateSurgicalHistoryController } from '../controllers/surgicalHistoryController';
@@ -88,6 +88,7 @@ let initAdminRoute = (app) => {
 
     // ----> Admin Medicine
     router.get("/getAllMedicinesAdmin", getAllMedicinesAdminController)
+    router.get("/getPrescriptionUsed", getPrescriptionUsedController)
     router.post("/createMedicine", createMedicineController)
     router.put("/updateMedicineAdmin", updateMedicineController)
     router.put("/blockMedicine", blockMedicineController)
