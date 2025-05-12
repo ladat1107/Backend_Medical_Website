@@ -114,7 +114,7 @@ let initWebRounte = (app) => {
     router.get("/getRelativesByUserId", getRelativesByUserIdController)
     router.post("/createRelative", createRelativeController)
     router.put("/updateRelative", updateRelativeController)
-    router.put("/deleteRelative", deleteRelativeController)
+    router.delete("/deleteRelative", deleteRelativeController)
 
     //-- FamilyHistory
     router.get("/getAllFamilyHistories", getAllFamilyHistoriesController)

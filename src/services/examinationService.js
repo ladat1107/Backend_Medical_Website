@@ -5,6 +5,8 @@ import { refundMomo } from "./paymentService";
 import { Op, or, Sequelize } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
+import { timingSafeEqual } from "crypto";
+import { start } from "repl";
 
 const cron = require('node-cron');
 
@@ -89,12 +91,63 @@ export const getExaminationById = async (id) => {
                     model: db.AdvanceMoney,
                     as: 'advanceMoneyExaminationData',
                 },
+                {
+                    model: db.InpatientRoom,
+                    as: 'inpatientRoomExaminationData',
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'inpatientRoomRoomData',
+                            attributes: ['id', 'name'],
+                            include: [{
+                                model: db.Department,
+                                as: 'roomDepartmentData',
+                                attributes: ['id', 'name'],
+                            },{
+                                model: db.ServiceType,
+                                as: 'serviceData',
+                                attributes: ['id', 'name', 'price'],
+                            }],
+                        }
+                    ],
+                }
             ],
             nest: true,
             order: [
                 [{ model: db.Prescription, as: 'prescriptionExamData' }, 'createdAt', 'DESC']
             ]
         });
+
+        if (!examination) {
+            return {
+                EC: 404,
+                EM: "Không tìm thấy khám bệnh",
+                DT: ""
+            }
+        }
+
+        examination = JSON.parse(JSON.stringify(examination));
+        if (examination.comorbidities) {
+            const diseaseCodes = examination.comorbidities.split(',').filter(code => code.trim() !== '');
+            if (diseaseCodes.length > 0) {
+                const diseaseDetails = await db.Disease.findAll({
+                    where: {
+                        code: diseaseCodes
+                    },
+                    attributes: ['id', 'code', 'name']
+                });
+                
+                // Thêm thông tin chi tiết bệnh vào kết quả
+                examination.comorbiditiesDetails = diseaseDetails;
+            } else {
+                examination.comorbiditiesDetails = [];
+            }
+        } else {
+            examination.comorbiditiesDetails = [];
+        }
+
+        console.log("Lịch sử khám bệnh", examination);
+        console.log("Lịch sử khám bệnh 2", examination.comorbiditiesDetails);
 
         return {
             EC: 0,
@@ -176,15 +229,6 @@ export const createExamination = async (data) => {
             },
             transaction
         });
-
-        // if (!staff) {
-        //     await transaction.rollback();
-        //     return {
-        //         EC: 404,
-        //         EM: "Nhân viên không tồn tại",
-        //         DT: ""
-        //     };
-        // }
 
         // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
         const today = new Date();
@@ -284,6 +328,13 @@ export const createExamination = async (data) => {
                 date: new Date(),
                 status: status.ACTIVE,
             }, { transaction });
+
+            await db.InpatientRoom.create({
+                examId: examination.id,
+                startDate: new Date(),
+                roomId: data.roomId,
+                roomName: data.roomName
+            }, { transaction });
         }
 
         // Commit transaction if all operations are successful
@@ -325,7 +376,7 @@ export const updateExamination = async (data, userId) => {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
-                amount: data.advanceId ? data.advanceMoney : existExamination.price,
+                amount: data.advanceId ? data.advanceMoney : data.status === 8 ? data.amount : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
             }, { transaction });
@@ -376,33 +427,6 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
-        // let examination = await db.Examination.update({
-        //     symptom: data.symptom,
-        //     diseaseName: data.diseaseName,
-        //     treatmentResult: data.treatmentResult,
-        //     admissionDate: data.admissionDate,
-        //     dischargeDate: data.dischargeDate,
-        //     reason: data.reason,
-        //     price: data.price,
-        //     special: data.special,
-        //     comorbidities: data.comorbidities,
-        //     status: data.status,
-
-        //     ...(data.visit_status != null && { visit_status: data.visit_status }),
-        //     ...(data.reExaminationDate != null && { reExaminationDate: data.reExaminationDate }),
-        //     ...(data.dischargeStatus != null && { dischargeStatus: data.dischargeStatus }),
-        //     ...(data.time != null && { reExaminationTime: data.time }),
-        //     ...(data.roomName != null && { roomName: data.roomName }),
-        //     ...(data.roomId != null && { roomId: data.roomId }),
-        //     ...(data.isWrongTreatment != null && { isWrongTreatment: data.isWrongTreatment }),
-        //     ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }), // Chỉ cập nhật nếu có giá trị mới
-
-        //     ...paymentObject
-        // }, {
-        //     where: { id: data.id },
-        //     transaction
-        // });
-
         let examination = await db.Examination.update({
             ...(data.symptom !== undefined && { symptom: data.symptom }),
             ...(data.diseaseName !== undefined && { diseaseName: data.diseaseName }),
@@ -422,12 +446,22 @@ export const updateExamination = async (data, userId) => {
             ...(data.roomId !== undefined && { roomId: data.roomId }),
             ...(data.isWrongTreatment !== undefined && { isWrongTreatment: data.isWrongTreatment }),
             ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }),
-
+            ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
+            ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice }),
+            
             ...paymentObject
         }, {
             where: { id: data.id },
             transaction
         });
+
+        if(existExamination.status === status.DONE && existExamination.dischargeStatus === 4 
+            && data.status === status.EXAMINING && !data.dischargeStatus){
+            await db.Examination.destroy({
+                where: { parentExaminationId: existExamination.id },
+                transaction: transaction 
+            });
+        }
 
         //Thanh toán tạm ứng
         if (data.advanceId) {
@@ -447,6 +481,14 @@ export const updateExamination = async (data, userId) => {
                     date: new Date(),
                     status: paymentStatus.PENDING,
                 }, { transaction });
+
+                await db.InpatientRoom.create({
+                    examId: existExamination.id,
+                    startDate: new Date(),
+                    roomId: data.roomId,
+                    roomName: data.roomName
+                }, { transaction });
+
             } else if (existExamination.medicalTreatmentTier === 1 && +data.medicalTreatmentTier === 2) {
                 await db.AdvanceMoney.delete({
                     where: { exam_id: existExamination.id },
@@ -618,6 +660,8 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         // Staff ID filter
         if (staffId) {
             whereCondition.staffId = staffId;
+        } else {
+            whereCondition.medicalTreatmentTier = 2;
         }
 
         // Status filter
@@ -625,23 +669,10 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
             whereCondition.status = +status === 4 ? { [Op.in]: [4, 5, 6] } : +status;
         }
 
-        // Appointment filter
-        // if (is_appointment) {
-        //     whereCondition.is_appointment = is_appointment;
-        // }
-
         // Time filter
         if (time) {
             whereCondition.time = time;
         }
-
-        // Search filter (across user's first and last name)
-        const searchCondition = search ? {
-            [Op.or]: [
-                { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-                { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
-            ]
-        } : {};
 
         let offset, limit_query;
         if (status === 2) {
@@ -656,7 +687,6 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...whereCondition,
-                ...searchCondition
             },
             include: [
                 {
@@ -672,7 +702,9 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {}
                 },
@@ -1315,6 +1347,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
     try {
         const whereConditionExamination = {
             medicalTreatmentTier: 1,
+            status: { [Op.lt]: status.DONE },
         };
         // if (statusPay <= 4) {
         //     whereConditionExamination.status = statusPay;
@@ -1327,12 +1360,13 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
             include: [{
                 model: db.User,
                 as: 'userExaminationData',
-                attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                 // Add search condition to include
                 where: search ? {
                     [Op.or]: [
                         { firstName: { [Op.like]: `%${search}%` } },
-                        { lastName: { [Op.like]: `%${search}%` } }
+                        { lastName: { [Op.like]: `%${search}%` } },
+                        { phoneNumber: { [Op.like]: `%${search}%` } },
+                        { cid: { [Op.like]: `%${search}%` } }
                     ]
                 } : {},
                 include: [{
@@ -1417,25 +1451,28 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
 }
 export const getListInpations = async (date, toDate, statusExam, staffId, page, limit, search) => {
     try {
-        let staff = await db.Staff.findOne({
-            where: { id: staffId },
-            include: [{
-                model: db.Department,
-                as: 'staffDepartmentData'
-            }],
-            raw: true,
-            nest: true,
-        })
-
-        if (!staff) {
-            return {
-                EC: 404,
-                EM: "Không tìm thấy nhân viên",
-                DT: "",
+        let staff = null;
+        if(staffId) {
+            staff = await db.Staff.findOne({
+                where: { id: staffId },
+                include: [{
+                    model: db.Department,
+                    as: 'staffDepartmentData'
+                }],
+                raw: true,
+                nest: true,
+            })
+    
+            if (!staff) {
+                return {
+                    EC: 404,
+                    EM: "Không tìm thấy nhân viên",
+                    DT: "",
+                }
             }
         }
 
-        const whereCondition = {
+        let whereCondition = {
             medicalTreatmentTier: 1,
             status: +statusExam
         };
@@ -1445,32 +1482,29 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(toDate).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            if (statusExam === status.DONE) {
+            if(+statusExam === status.DONE) {
                 whereCondition.dischargeDate = {
                     [Op.between]: [startOfDay, endOfDay],
                 };
+                whereCondition.status = { [Op.gte]: +statusExam };
             }
         }
 
-        const searchCondition = search ? {
-            [Op.or]: [
-                { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-                { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
-            ]
-        } : {};
-
-        let departmentId = staff.staffDepartmentData.id;
+        let whereRoomCondition = {};
+        if (staff && staff.staffDepartmentData && staff.staffDepartmentData.id) {
+            whereRoomCondition = {
+                id: staff.staffDepartmentData.id
+            };
+        }
 
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...whereCondition,
-                ...searchCondition
             },
             include: [
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
@@ -1480,7 +1514,9 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {}
                 },
@@ -1504,9 +1540,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                         model: db.Department,
                         as: 'roomDepartmentData',
                         attributes: ['id', 'name'],
-                        where: {
-                            id: departmentId
-                        },
+                        where: whereRoomCondition,
                         required: true,
                     }, {
                         model: db.ServiceType,
@@ -1514,7 +1548,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                         attributes: ['id', 'name', 'price'],
                     }],
                     required: true,
-                }
+                },
             ],
             limit: limit,
             offset: (page - 1) * limit,
@@ -1542,7 +1576,195 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
         };
     }
 }
+export const getMedicalRecords = async (status, medicalTreatmentTier, page, limit, search) => {
+    try {
+        const whereCondition = {
+            medicalTreatmentTier: medicalTreatmentTier
+        };
 
+        // Status filter
+        if (status !== undefined && status !== null) {
+            whereCondition.status = 
+                +status === 6 ? { 
+                    [Op.lte]: 6,
+                    [Op.gte]: 4
+                } : status === 7 ? {
+                    [Op.gte]: 7
+                } : status;
+        }
+
+        let offset, limit_query;
+        const { count, rows: examinations } = await db.Examination.findAndCountAll({
+            where: {
+                ...whereCondition
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'userExaminationData',
+                    include: [{
+                        model: db.Insurance,
+                        as: "userInsuranceData",
+                        attributes: ["insuranceCode"]
+                    },{
+                        model: db.Relative,
+                        as: 'userRelativeData',
+                        attributes: ['id', 'fullName', 'cid', 'phoneNumber', 'relationship', 'address'],
+                    }],
+                    // Add search condition to include
+                    where: search ? {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${search}%` } },
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
+                        ]
+                    } : {}
+                },
+                {
+                    model: db.Staff,
+                    as: 'examinationStaffData',
+                    attributes: ['id', 'position', 'price'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['firstName', 'lastName']
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'examinationRoomData',
+                    attributes: ['id', 'name'],
+                    include: [{
+                        model: db.Department,
+                        as: 'roomDepartmentData',
+                        attributes: ['id', 'name'],
+                    },{
+                        model: db.ServiceType,
+                        as: 'serviceData',
+                        attributes: ['id', 'name', 'price'],
+                    }],
+                }
+            ],
+            limit: limit_query,
+            offset, 
+            distinct: true // Ensures correct count with joins
+        });
+
+        console.log('examinations', examinations);
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách khám bệnh thành công!',
+            DT: {
+                totalItems: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page,
+                examinations: examinations,
+
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching examinations:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server!',
+            DT: '',
+        };
+    }
+}
+
+export const updateInpatientRoom = async (examId, roomId) => { 
+    const t = await db.sequelize.transaction();
+    try { 
+        const existingInpatientRoom = await db.InpatientRoom.findOne({ 
+            where: { 
+                examId: examId, 
+                endDate: null 
+            },
+            transaction: t,
+            raw: false
+        }); 
+
+        let yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); 
+
+        let existingStartDate = new Date(existingInpatientRoom.startDate);
+        existingStartDate.setHours(0, 0, 0, 0);
+
+        if (existingInpatientRoom) { 
+            if(yesterday < existingStartDate) {
+                await existingInpatientRoom.destroy({
+                    transaction: t
+                })
+            } else {
+                await existingInpatientRoom.update({ 
+                    endDate: yesterday
+                }, { 
+                    transaction: t 
+                }); 
+            }
+        } 
+
+        const getRoom = await db.Room.findOne({
+            where: { id: roomId },
+            transaction: t
+        });
+
+        await db.Examination.update({
+            roomId: roomId,
+            roomName: getRoom.name
+        }, {
+            where: { id: examId },
+            transaction: t
+        });
+
+        await db.InpatientRoom.destroy({
+            where: {
+                examId: examId,
+                startDate: {
+                    [Op.between]: [
+                        new Date().setHours(0, 0, 0, 0),  
+                        new Date().setHours(23, 59, 59, 999) 
+                    ]
+                }
+            },
+            transaction: t
+        });
+ 
+        const newInpatientRoom = await db.InpatientRoom.create({ 
+            examId: examId, 
+            roomId: roomId, 
+            roomName: getRoom.name,
+            startDate: new Date() 
+        }, { 
+            transaction: t 
+        }); 
+ 
+        await t.commit();
+        return { 
+            EC: 0, 
+            EM: 'Cập nhật phòng thành công', 
+            DT: newInpatientRoom 
+        }; 
+ 
+    } catch (error) { 
+        await t.rollback();
+
+        console.error('Error updating inpatient room:', error); 
+        return { 
+            EC: 500, 
+            EM: 'Lỗi server', 
+            DT: null, 
+            error: error.message 
+        }; 
+    } 
+}
+
+//#region Lịch trình thay đổi trạng thái bệnh nhân nội trú
 function reStatusInpatients(taskFunction) {
     const task = cron.schedule('0 0 * * *', () => {
         console.log(`Đang thực hiện công việc theo lịch lúc 0 giờ sáng: ${new Date()}`);
@@ -1579,3 +1801,4 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
+//#endregion

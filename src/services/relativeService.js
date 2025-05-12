@@ -70,7 +70,7 @@ export const createRelative = async (data) => {
             phoneNumber: data.phoneNumber,
             relationship: data.relationship,
             address: data.address,
-            email: data.email,
+            email: data.email || "",
             status: status.ACTIVE,
             userId: data.userId,
         });
@@ -112,9 +112,7 @@ export const updateRelative = async (data) => {
 
 export const deleteRelative = async (id) => {
     try {
-        let relative = await db.Relative.update({
-            status: status.INACTIVE,
-        }, {
+        let relative = await db.Relative.destroy({
             where: {
                 id: id,
             }

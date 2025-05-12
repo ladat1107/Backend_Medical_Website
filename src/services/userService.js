@@ -1219,9 +1219,22 @@ export const getMedicalHistories = async (userId) => {
                     model: db.Examination,
                     as: "userExaminationData",
                     where: {
-                        status: status.DONE
+                        [Op.or]: [
+                            { status: status.DONE },
+                            { status: status.DONE_INPATIENT },
+                        ]
                     },
                     include: [
+                        {
+                            model: db.Staff,
+                            as: 'examinationStaffData',
+                            attributes: ['id', 'departmentId', 'position'],
+                            include: [{
+                                model: db.User,
+                                as: 'staffUserData',
+                                attributes: ['id', 'lastName', 'firstName'],
+                            }],
+                        },
                         {
                             model: db.VitalSign,
                             as: 'examinationVitalSignData',
@@ -1230,6 +1243,16 @@ export const getMedicalHistories = async (userId) => {
                             model: db.Paraclinical,
                             as: 'examinationResultParaclincalData',
                             include: [
+                                {
+                                    model: db.Staff,
+                                    as: 'doctorParaclinicalData',
+                                    attributes: ['id', 'departmentId'],
+                                    include: [{
+                                        model: db.User,
+                                        as: 'staffUserData',
+                                        attributes: ['id', 'lastName', 'firstName'],
+                                    }],
+                                },
                                 {
                                     model: db.Room,
                                     as: 'roomParaclinicalData',
@@ -1246,7 +1269,6 @@ export const getMedicalHistories = async (userId) => {
                         {
                             model: db.Prescription,
                             as: 'prescriptionExamData',
-                            attributes: ['id', 'note', 'totalMoney'],
                             include: [{
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
@@ -1257,6 +1279,7 @@ export const getMedicalHistories = async (userId) => {
                                 through: ['quantity', 'unit', 'dosage', 'price']
                             }],
                         }
+                        // Tạm thời loại bỏ include Comorbidities gây lỗi
                     ],
                     nest: true,
                 },
@@ -1272,16 +1295,48 @@ export const getMedicalHistories = async (userId) => {
             order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
 
+        // Xử lý thêm cho trường hợp comorbidities là chuỗi mã bệnh
+        const result = JSON.parse(JSON.stringify(medicalHistories));
+        
+        // Xử lý cho mỗi user
+        for (let user of result) {
+            if (user.userExaminationData && user.userExaminationData.length > 0) {
+                // Xử lý cho mỗi examination
+                for (let examination of user.userExaminationData) {
+                    // Xử lý cho trường comorbidities có sẵn (chuỗi code bệnh)
+                    if (examination.comorbidities) {
+                        const diseaseCodes = examination.comorbidities.split(',').filter(code => code.trim() !== '');
+                        
+                        if (diseaseCodes.length > 0) {
+                            const diseaseDetails = await db.Disease.findAll({
+                                where: {
+                                    code: diseaseCodes
+                                },
+                                attributes: ['id', 'code', 'name']
+                            });
+                            
+                            // Thêm thông tin chi tiết bệnh vào kết quả
+                            examination.comorbiditiesDetails = diseaseDetails;
+                        } else {
+                            examination.comorbiditiesDetails = [];
+                        }
+                    } else {
+                        examination.comorbiditiesDetails = [];
+                    }
+                }
+            }
+        }
+
         return {
             EC: 0,
             EM: "Lấy thông tin lịch sử khám bệnh thành công",
-            DT: medicalHistories,
+            DT: result,
         };
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi chính trong getMedicalHistories:', error);
         return {
             EC: 500,
-            EM: "Lỗi server!",
+            EM: "Lỗi server! " + (error.message || ''),
             DT: null,
         };
     }

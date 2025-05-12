@@ -1,4 +1,4 @@
-import { createPrescription, getPrescriptionByExaminationId, getPrescriptions, updatePrescription, upsertPrescription } from '../services/prescriptionService';
+import { createPrescription, deletePrescription, getPrescriptionByExaminationId, getPrescriptions, updatePrescription, upsertPrescription } from '../services/prescriptionService';
 import { ERROR_SERVER } from '../utils';
 
 export const getPrescriptionByExaminationIdController = async (req, res) => {
@@ -71,3 +71,13 @@ export const createPrescriptionController = async (req, res) => {
     }
 }
 
+export const deletePrescriptionController = async (req, res) => {
+    try {
+        const { id } = req.query;
+        let response = await deletePrescription(id);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}

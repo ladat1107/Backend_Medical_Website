@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getMedicalRecords, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateInpatientRoom, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -218,16 +218,52 @@ export const getListAdvanceMoneyController = async (req, res) => {
 
 export const getListInpationsController = async (req, res) => {
     try {
-        const date = req.query.date || null;
+        //console.log(req.user);
+        const date = req.query.currentDate || null;
         const toDate = req.query.toDate || null;
         const statusExam = req.query.status || status.EXAMINING;
-        const staffId = req.user.staff || null;
+        const staffId = req.user.roleId === ROLE.ACCOUNTANT ? null : req.user.staff || null;
         const page = req.query.page || 1;
         const limit = req.query.limit || 20;
         const search = req.query.search || '';
 
         let response = await getListInpations(date, toDate, statusExam, staffId, +page, +limit, search);
         return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getMedicalRecordsController = async (req, res) => {
+    try {
+        const status = req.query.status || status.EXAMINING;    
+        const medicalTreatmentTier = req.query.medicalTreatmentTier || 1;
+        const page = req.query.page || 1;
+        const limit = req.query.limit || 20;
+        const search = req.query.search || '';
+
+        let response = await getMedicalRecords(+status, medicalTreatmentTier, +page, +limit, search);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const updateInpatientRoomController = async (req, res) => {
+    try {
+        const data = req.body;
+        if (data && data.examId && data.roomId) {
+            let response = await updateInpatientRoom(data.examId, data.roomId);
+            return res.status(200).json(response)
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Dữ liệu không được trống!",
+                DT: ""
+            })
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
