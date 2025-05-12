@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateOldParaclinical } from '../services/examinationService';
+import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getMedicalRecords, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateInpatientRoom, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -237,7 +237,7 @@ export const getListInpationsController = async (req, res) => {
 
 export const getMedicalRecordsController = async (req, res) => {
     try {
-        const status = req.query.status || status.EXAMINING;
+        const status = req.query.status || status.EXAMINING;    
         const medicalTreatmentTier = req.query.medicalTreatmentTier || 1;
         const page = req.query.page || 1;
         const limit = req.query.limit || 20;
