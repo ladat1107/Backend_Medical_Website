@@ -309,7 +309,7 @@ export const getAvailableRooms = async (medicalTreatmentTier) => {
                     where: {
                         status: status.ACTIVE,
                         id: {
-                            [Op.or]: +medicalTreatmentTier === 3 ? [212] : 
+                            [Op.or]: +medicalTreatmentTier === 3 ? [6] : 
                                     +medicalTreatmentTier === 1 ? [3, 4] : null
                         }
                     },

@@ -1817,7 +1817,10 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
     console.log('Đang thực hiện công việc được lên lịch vào 0 giờ sáng');
     const inpatients = await db.Inpatient.findAll({
         where: {
-            medicalTreatmentTier: 1,
+            [Op.or]: [
+                {medicalTreatmentTier: 1},
+                {medicalTreatmentTier: 3}
+            ],
             status: status.EXAMINING,
             dischargeDate: null
         }
