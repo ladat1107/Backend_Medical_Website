@@ -1,5 +1,5 @@
 import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getMedicalRecords, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateInpatientRoom, updateOldParaclinical } from '../services/examinationService';
-import { ERROR_SERVER, status } from '../utils';
+import { ERROR_SERVER, ROLE, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
     try {

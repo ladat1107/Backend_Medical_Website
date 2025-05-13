@@ -2,11 +2,12 @@ import dayjs from "dayjs";
 import db from "../models/index";
 import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
 import { refundMomo } from "./paymentService";
-import { Op, or, Sequelize } from 'sequelize';
+import { Op, or, Sequelize, where } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
 import { timingSafeEqual } from "crypto";
 import { start } from "repl";
+import { stat } from "fs";
 
 const cron = require('node-cron');
 
@@ -146,9 +147,6 @@ export const getExaminationById = async (id) => {
             examination.comorbiditiesDetails = [];
         }
 
-        console.log("Lịch sử khám bệnh", examination);
-        console.log("Lịch sử khám bệnh 2", examination.comorbiditiesDetails);
-
         return {
             EC: 0,
             EM: "Lấy thông tin khám bệnh thành công",
@@ -230,20 +228,20 @@ export const createExamination = async (data) => {
             transaction
         });
 
-        // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);  // Đặt lại giờ để so sánh chỉ theo ngày
+        // // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
+        // const today = new Date();
+        // today.setHours(0, 0, 0, 0);  // Đặt lại giờ để so sánh chỉ theo ngày
 
-        // Tìm số thứ tự lớn nhất của phòng trong ngày hôm nay
-        let maxNumber = await db.Examination.max('number', {
-            where: {
-                roomName: data.roomName,
-                admissionDate: {
-                    [Op.gte]: today  // Chỉ lấy các bản ghi từ ngày hôm nay trở đi
-                }
-            },
-            transaction
-        });
+        // // Tìm số thứ tự lớn nhất của phòng trong ngày hôm nay
+        // let maxNumber = await db.Examination.max('number', {
+        //     where: {
+        //         roomName: data.roomName,
+        //         admissionDate: {
+        //             [Op.gte]: today  // Chỉ lấy các bản ghi từ ngày hôm nay trở đi
+        //         }
+        //     },
+        //     transaction
+        // });
 
         let paymentObject = {};
         if (data.insuranceCode) {
@@ -288,8 +286,8 @@ export const createExamination = async (data) => {
             }
         }
 
-        // Tính số thứ tự tiếp theo (nếu không có bản ghi nào, bắt đầu từ 1)
-        let nextNumber = maxNumber ? maxNumber + 1 : 1;
+        // // Tính số thứ tự tiếp theo (nếu không có bản ghi nào, bắt đầu từ 1)
+        // let nextNumber = maxNumber ? maxNumber + 1 : 1;
 
         // Tạo bản ghi Examination mới
         let examination = await db.Examination.create({
@@ -305,7 +303,7 @@ export const createExamination = async (data) => {
             comorbidities: data.comorbidities,
 
             // Số vào phòng bác sĩ (number) và tên phòng (roomName)
-            number: nextNumber,
+            //number: nextNumber,
             roomName: data.roomName,
             roomId: data.roomId || null,
 
@@ -322,11 +320,14 @@ export const createExamination = async (data) => {
         }, { transaction });
 
         //Tạo thanh toán tạm ứng
-        if (+data.medicalTreatmentTier === 1 && data.status === status.WAITING) {
+        if (+data.medicalTreatmentTier === 1 && data.status === status.WAITING
+            || +data.medicalTreatmentTier === 3 && data.status === status.PAID
+        ) {
             await db.AdvanceMoney.create({
                 exam_id: examination.id,
                 date: new Date(),
                 status: status.ACTIVE,
+                amount: 2000000,
             }, { transaction });
 
             await db.InpatientRoom.create({
@@ -475,38 +476,64 @@ export const updateExamination = async (data, userId) => {
             });
         }
 
-        //Thanh toán tạm ứng
-        if (data.advanceId) {
-            await db.AdvanceMoney.update({
-                amount: data?.advanceMoney || 0,
-                status: paymentStatus.PAID,
-            }, {
-                where: { id: data.advanceId },
+        if (existExamination &&
+            (existExamination.medicalTreatmentTier === 2 && (+data.medicalTreatmentTier == 1 || +data.medicalTreatmentTier === 3))
+        ) {
+            const allParaclinical = await db.Paraclinical.findAll({
+                where: {
+                    examinationId: existExamination.id,
+                    [Op.or]: [
+                        { status: status.PAID },
+                        { status: status.EXAMINING },
+                        { status: status.DONE }
+                    ]
+                },
                 transaction
             });
-        } else if (existExamination &&
-            (existExamination.medicalTreatmentTier !== +data.medicalTreatmentTier || existExamination.status === status.PENDING)
-        ) {
-            if (+data.medicalTreatmentTier === 1) {
-                await db.AdvanceMoney.create({
-                    exam_id: existExamination.id,
-                    date: new Date(),
-                    status: paymentStatus.PENDING,
-                }, { transaction });
 
-                await db.InpatientRoom.create({
-                    examId: existExamination.id,
-                    startDate: new Date(),
-                    roomId: data.roomId,
-                    roomName: data.roomName
-                }, { transaction });
+            //tính tổng price trỏng all paraclinical
+            let totalPrice = 0;
+            allParaclinical.forEach(item => {
+                totalPrice += item.coveredPrice;
+            });
 
-            } else if (existExamination.medicalTreatmentTier === 1 && +data.medicalTreatmentTier === 2) {
-                await db.AdvanceMoney.delete({
-                    where: { exam_id: existExamination.id },
-                    transaction
-                })
-            }
+            await db.AdvanceMoney.create({
+                exam_id: existExamination.id,
+                date: new Date(),
+                status: paymentStatus.PAID,
+                amount: existExamination.coveredPrice + totalPrice,
+            }, { transaction });
+
+            await db.AdvanceMoney.create({
+                exam_id: existExamination.id,
+                date: new Date(),
+                status: paymentStatus.PENDING,
+            }, { transaction });
+
+            await db.InpatientRoom.create({
+                examId: existExamination.id,
+                startDate: new Date(),
+                roomId: data.roomId,
+                roomName: data.roomName
+            }, { transaction });
+
+            await existExamination.update({
+                staffId: null,
+                status: status.WAITING,
+                price: null,
+                insuranceCovered: null,
+                coveredPrice: null,
+            }, { transaction });
+
+            await db.Paraclinical.update({
+                status: status.PAID,  
+            }, {
+                where: {
+                    examinationId: existExamination.id,
+                    status: status.WAITING
+                },
+                transaction
+            })
         }
 
         if (examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination) {
@@ -524,8 +551,6 @@ export const updateExamination = async (data, userId) => {
                 },
                 transaction
             });
-
-            //console.log("Lịch tái khám", reExam);
 
             if (reExam) {
                 await db.Examination.update({
@@ -1358,14 +1383,11 @@ export const getExaminationByIdAdmin = async (id) => {
 export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
     try {
         const whereConditionExamination = {
-            medicalTreatmentTier: 1,
+            medicalTreatmentTier: {
+                [Op.or]: [1, 3]
+            },
             status: { [Op.lt]: status.DONE },
-        };
-        // if (statusPay <= 4) {
-        //     whereConditionExamination.status = statusPay;
-        // } else if (statusPay > 4) {
-        //     whereConditionExamination.status = { [Op.gte]: statusPay };
-        // }   
+        }; 
 
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
@@ -1485,7 +1507,10 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
         }
 
         let whereCondition = {
-            medicalTreatmentTier: 1,
+            [Op.or]: [
+                { medicalTreatmentTier: 1 },
+                { medicalTreatmentTier: 3 }
+            ],
             status: +statusExam
         };
 

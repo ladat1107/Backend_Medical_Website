@@ -47,11 +47,11 @@ export const createRequestParaclinical = async (data) => {
             where: {
                 id: data.examinationId
             },
-            transaction // Pass transaction to the query
+            transaction
         });
 
         if (!examination) {
-            await transaction.rollback(); // Rollback if examination not found
+            await transaction.rollback();
             return {
                 EC: 404,
                 EM: "Không tìm thấy phiên khám",
@@ -59,7 +59,6 @@ export const createRequestParaclinical = async (data) => {
             }
         }
 
-        // Mảng lưu trạng thái các lần tạo
         let createResults = [];
         for (const item of data.listParaclinicals) {
 
@@ -78,16 +77,15 @@ export const createRequestParaclinical = async (data) => {
                     doctorId: roomData.staffId,
                     roomId: roomData.id,
                     insuranceCovered: coveredPrice(item.price, examination.insuranceCoverage),
+                    coveredPrice: +item.price - coveredPrice(item.price, examination.insuranceCoverage),
                 };
 
-                // Pass transaction to createParaclinical
                 const result = await createParaclinical(dataParaclinical, transaction);
                 result.DT.dataValues.staffName = roomData.staffName;
                 result.DT.dataValues.roomName = roomData.name;
 
                 createResults.push(result);
             } else {
-                // If we can't find a laboratory, add error to results and continue
                 createResults.push({
                     EC: 404,
                     EM: "Không tìm thấy phòng xét nghiệm",
@@ -288,22 +286,10 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
             };
         }
 
-        // // Staff ID filter
-        // if (staffId) {
-        //     whereCondition.staffId = staffId;
-        // }
-
         // Status filter
         if (status) {
             whereCondition.status = status;
         }
-        // Search filter (across user's first and last name)
-        // const searchCondition = search ? {
-        //     [Op.or]: [
-        //         { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
-        //         { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
-        //     ]
-        // } : {};
 
         let offset, limit_query;
         if (status === 2) {
@@ -318,13 +304,11 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
         const { count, rows: paraclinicals } = await db.Paraclinical.findAndCountAll({
             where: {
                 ...whereCondition,
-                // ...searchCondition
             },
             include: [
                 {
                     model: db.Examination,
                     as: 'examinationResultParaclincalData',
-                    attributes: ['special'],
                     include: [
                         {
                             model: db.User,
@@ -339,7 +323,9 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
                             where: search ? {
                                 [Op.or]: [
                                     { firstName: { [Op.like]: `%${search}%` } },
-                                    { lastName: { [Op.like]: `%${search}%` } }
+                                    { lastName: { [Op.like]: `%${search}%` } },
+                                    { cid: { [Op.like]: `%${search}%` } },
+                                    { phoneNumber: { [Op.like]: `%${search}%` } },
                                 ]
                             } : {},
                             required: true
@@ -374,7 +360,11 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
             limit: limit_query,
             offset,
             order: [
-                ['createdAt', 'ASC']],
+                // Ưu tiên sắp xếp medicalTreatmentTier = 3 lên đầu
+                [db.Sequelize.literal(`CASE WHEN "examinationResultParaclincalData"."medicalTreatmentTier" = 3 THEN 0 ELSE 1 END`), 'ASC'],
+                // Sau đó sắp xếp theo thời gian từ cũ đến mới
+                ['createdAt', 'ASC']
+            ],
             distinct: true // Ensures correct count with joins
         });
 

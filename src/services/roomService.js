@@ -287,7 +287,7 @@ export const deleteRoom = async (id) => {
     }
 }
 
-export const getAvailableRooms = async () => {
+export const getAvailableRooms = async (medicalTreatmentTier) => {
     try {
         // Get all rooms with active status and service types with ID 3 or 4
         let rooms = await db.Room.findAll({
@@ -309,7 +309,8 @@ export const getAvailableRooms = async () => {
                     where: {
                         status: status.ACTIVE,
                         id: {
-                            [Op.or]: [3, 4]
+                            [Op.or]: +medicalTreatmentTier === 3 ? [212] : 
+                                    +medicalTreatmentTier === 1 ? [3, 4] : null
                         }
                     },
                     through: { attributes: [] } // Exclude join table attributes
@@ -325,7 +326,10 @@ export const getAvailableRooms = async () => {
                 const count = await db.Examination.count({
                     where: {
                         roomId: room.id,
-                        medicalTreatmentTier: 1, // Only count examinations with medical treatment tier 1
+                        [Op.or]: [
+                            { medicalTreatmentTier: 1 },
+                            { medicalTreatmentTier: 3 }
+                        ],
                         [Op.or]: [
                             { status: status.EXAMINING },
                             { status: status.PAID },
