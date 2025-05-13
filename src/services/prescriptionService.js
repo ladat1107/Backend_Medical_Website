@@ -506,6 +506,84 @@ export const createPrescription = async (data) => {
     }
 };
 
+export const deletePrescription = async (prescriptionId) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+    try {
+        const prescription = await db.Prescription.findOne({
+            where: { id: +prescriptionId },
+            include: [{
+                model: db.Medicine,
+                as: 'prescriptionDetails',
+                attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
+                through: {
+                    model: db.PrescriptionMedicine,
+                    required: true
+                },
+                raw: true,
+                required: true
+            }],
+            transaction: t
+        });
+
+        console.log("prescription", prescriptionId);
+
+        if (!prescription) {
+            return {
+                EC: 1,
+                EM: "Không tìm thấy đơn thuốc",
+                DT: "",
+            };
+        }
+
+        const oldPrescriptionDetails = await db.PrescriptionDetail.findAll({
+            where: {
+                prescriptionId: prescription.id,
+            },
+            transaction: t
+        });
+
+        // Cộng lại số lượng thuốc vào kho
+        for (const detail of oldPrescriptionDetails) {
+            const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
+            if (medicine) {
+                await medicine.update(
+                    { inventory: medicine.inventory + detail.quantity },
+                    { transaction: t }
+                );
+            }
+        }
+
+        // Xóa chi tiết đơn thuốc
+        await db.PrescriptionDetail.destroy({
+            where: {
+                prescriptionId: prescription.id,
+            },
+            transaction: t
+        });
+
+        await db.Prescription.destroy({
+            where: { id: prescriptionId },
+            transaction: t
+        });
+
+        await t.commit();
+
+        return {
+            EC: 0,
+            EM: "Xóa đơn thuốc thành công",
+            DT: true,
+        };
+    } catch (error) {
+        await t.rollback(); // Rollback nếu có lỗi
+        console.error(error);
+        return {
+            EC: 500,
+            EM: "Lỗi từ server",
+            DT: "",
+        };
+    }
+}
+
 export const getPrescriptionUsed = async (filter) => {
     try {
         const { startDate, endDate } = filter;
