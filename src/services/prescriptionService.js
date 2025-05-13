@@ -509,7 +509,6 @@ export const createPrescription = async (data) => {
 export const getPrescriptionUsed = async (filter) => {
     try {
         const { startDate, endDate } = filter;
-        console.log(startDate, endDate)
         const prescription = await db.Prescription.findAll({
             where: {
                 createdAt: {

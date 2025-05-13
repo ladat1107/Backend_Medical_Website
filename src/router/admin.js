@@ -17,6 +17,7 @@ import { createAllergyController, deleteAllergyController, updateAllergyControll
 import { createDisabilityController, deleteDisabilityController, updateDisabilityController } from '../controllers/disabilityController';
 import { createSurgicalHistoryController, deleteSurgicalHistoryController, updateSurgicalHistoryController } from '../controllers/surgicalHistoryController';
 import { getAllExaminationsAdminController, getExaminationByIdAdminController } from '../controllers/examinationController';
+import { getPaymentAdminController } from '../controllers/paymentController';
 require('dotenv').config();
 
 let router = express.Router();
@@ -97,6 +98,9 @@ let initAdminRoute = (app) => {
     // ----> Admin Examination
     router.get("/getAllExaminationsAdmin", getAllExaminationsAdminController)
     router.get("/getExaminationByIdAdmin", getExaminationByIdAdminController)
+
+    // ----> Admin Payment
+    router.get("/getPaymentAdmin", getPaymentAdminController)
 
     //----------------------------------------------------------------------------------------------------------------------------------------
     // ----> Admin

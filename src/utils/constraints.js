@@ -4,7 +4,7 @@ export const status = {
     EXAMINING: 6, // đang khám
     PAID: 5, // đã thanh toán chờ để khám
     WAITING: 4, // chờ thanh toán
-    REJECT: 3, // không duyệt
+    REJECT: 3, // không duyệt của handbook
     PENDING: 2, // chờ duyệt << sẽ để thêm ở exam để nhân viên tiếp nhận lấy ra --> nhân viên tiếp nhận ok thì chuyển lên 4
     ACTIVE: 1,
     INACTIVE: 0
@@ -13,7 +13,8 @@ export const paymentStatus = {
     UNPAID: 0,
     PENDING: 1,
     PAID: 2,
-    DISCHARGE_PAID: 3, // Đã trả cho đơn thuốc nội trú MANG VỀ
+    DISCHARGE_PAID: 3, // Đã trả cho đơn thuốc nội trú MANG VỀ 
+    REFUNDED: 4, // Hoàn tiền
 }
 
 export const typeRoom = {

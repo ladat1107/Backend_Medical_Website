@@ -379,3 +379,56 @@ const paymentParaclinical = async (data, payment) => {
         return false;
     }
 }
+
+export const getPaymentAdmin = async (fillter) => {
+    try {
+        let { startDate, endDate } = fillter;
+        let payments = await db.Payment.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [startDate, endDate]
+                },
+            },
+            include: [
+                {
+                    model: db.Examination,
+                    as: 'examinationData',
+                    attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status', 'medicalTreatmentTier'],
+                    include: [{
+                        model: db.Paraclinical,
+                        as: 'examinationResultParaclincalData',
+                        attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status'],
+                        required: false,
+                    }, {
+                        model: db.Prescription,
+                        as: 'prescriptionExamData',
+                        attributes: ['id', 'totalMoney', 'insuranceCovered', 'coveredPrice', 'status'],
+                        required: false,
+                    }],
+                    required: false,
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'paraclinicalData',
+                    attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status'],
+                    required: false,
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionData',
+                    attributes: ['id', 'totalMoney', 'insuranceCovered', 'coveredPrice', 'status'],
+                    required: false,
+                }
+            ],
+            nest: true
+        });
+        return {
+            EC: 0,
+            EM: "Lấy danh sách thanh toán thành công",
+            DT: payments
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}

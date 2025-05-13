@@ -363,6 +363,13 @@ export const updateExamination = async (data, userId) => {
             transaction
         });
 
+        let receiver = await db.User.findOne({
+            where: { id: userId },
+            attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'cid'],
+            raw: true,
+            transaction
+        });
+
         if (!existExamination) {
             await transaction.rollback();
             return {
@@ -373,12 +380,17 @@ export const updateExamination = async (data, userId) => {
         }
 
         if (data.payment) {
+            let details = {};
+            if (receiver) {
+                details = { ...details, receiver, responseTime: new Date().toISOString() }
+            }
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
                 amount: data.advanceId ? data.advanceMoney : data.status === 8 ? data.amount : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
+                details: JSON.stringify(details)
             }, { transaction });
 
             paymentObject = {
@@ -607,7 +619,8 @@ export const deleteExamination = async (id) => {
                 }
             } else {
                 await db.Payment.update({
-                    status: paymentStatus.UNPAID,
+                    status: paymentStatus.REFUNDED,
+                    amount: existExamination.paymentData.amount * 0.2,
                 }, {
                     where: { id: existExamination.paymentData.id }
                 })
