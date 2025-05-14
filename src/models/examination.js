@@ -187,7 +187,7 @@ module.exports = (sequelize, DataTypes) => {
         dischargeStatus: {
             type: DataTypes.INTEGER,
             allowNull: true,
-        }, 
+        },
         parentExaminationId: {
             type: DataTypes.INTEGER,
             allowNull: true,

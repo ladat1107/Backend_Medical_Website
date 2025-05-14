@@ -109,12 +109,12 @@ export const upsertPrescription = async (data) => {
 
 export const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     try {
-         const whereCondition = {};
+        const whereCondition = {};
 
         // Date filter
         if (date) {
-             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
-             const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
+            const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
+            const endOfDay = new Date(date).setHours(23, 59, 59, 999); // Kết thúc ngày
 
             whereCondition.createdAt = {
                 [Op.between]: [startOfDay, endOfDay],
@@ -132,7 +132,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
         // }
 
         // Search filter (across user's first and last name)
-         const searchCondition = search ? {
+        const searchCondition = search ? {
             [Op.or]: [
                 { '$userExaminationData.firstName$': { [Op.like]: `%${search}%` } },
                 { '$userExaminationData.lastName$': { [Op.like]: `%${search}%` } }
@@ -149,7 +149,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
             limit_query = limit;
         }
 
-         const { count, rows: examinations } = await db.Examination.findAndCountAll({
+        const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...searchCondition,
                 status: 7,
@@ -399,6 +399,7 @@ export const createPrescription = async (data) => {
             });
         
             // Xóa đơn thuốc
+
             await todayPrescriptions.destroy({ transaction: t });
         }
         
@@ -481,7 +482,7 @@ export const createPrescription = async (data) => {
             }
         }
 
-        if(examination.medicalTreatmentTier === 1) {
+        if (examination.medicalTreatmentTier === 1) {
             await examination.update({
                 status: status.EXAMINING,
             }, { transaction: t }); // Pass transaction to the update
@@ -502,7 +503,7 @@ export const createPrescription = async (data) => {
             EM: "Lỗi server khi tạo đơn thuốc",
             DT: "",
         };
-    } 
+    }
 };
 
 export const deletePrescription = async (prescriptionId) => {
@@ -540,7 +541,7 @@ export const deletePrescription = async (prescriptionId) => {
             },
             transaction: t
         });
-        
+
         // Cộng lại số lượng thuốc vào kho
         for (const detail of oldPrescriptionDetails) {
             const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
@@ -551,7 +552,7 @@ export const deletePrescription = async (prescriptionId) => {
                 );
             }
         }
-        
+
         // Xóa chi tiết đơn thuốc
         await db.PrescriptionDetail.destroy({
             where: {
@@ -580,6 +581,37 @@ export const deletePrescription = async (prescriptionId) => {
             EM: "Lỗi từ server",
             DT: "",
         };
+    }
+}
+
+export const getPrescriptionUsed = async (filter) => {
+    try {
+        const { startDate, endDate } = filter;
+        const prescription = await db.Prescription.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            include: [{
+                model: db.Medicine,
+                as: 'prescriptionDetails',
+                attributes: ['id', 'name', "unit", "exp", "inventory"],
+                through: {
+                    attributes: ['quantity']
+                }
+            }],
+            nest: true,
+        })
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách đơn thuốc thành công',
+            DT: prescription,
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
     }
 }
 
