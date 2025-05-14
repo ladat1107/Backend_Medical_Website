@@ -8,6 +8,7 @@ import { getStaffForReExamination } from "./scheduleService";
 import { timingSafeEqual } from "crypto";
 import { start } from "repl";
 import { stat } from "fs";
+import e from "express";
 
 const cron = require('node-cron');
 
@@ -476,8 +477,9 @@ export const updateExamination = async (data, userId) => {
             });
         }
 
+        //Nhập viện
         if (existExamination &&
-            (existExamination.medicalTreatmentTier === 2 && (+data.medicalTreatmentTier == 1 || +data.medicalTreatmentTier === 3))
+            (existExamination.medicalTreatmentTier === 2 && (+data.medicalTreatmentTier === 1 || +data.medicalTreatmentTier === 3))
         ) {
             const allParaclinical = await db.Paraclinical.findAll({
                 where: {
@@ -536,6 +538,32 @@ export const updateExamination = async (data, userId) => {
             })
         }
 
+        //Hoàn thành thanh toán tạm ứng ở kế toán
+        if(data.advanceId) {
+            await db.AdvanceMoney.update({
+                amount: +data.advanceMoney,
+                status: paymentStatus.PAID,
+            }, {
+                where: { id: data.advanceId },
+                transaction
+            });
+        }
+
+        // Sửa phòng nội trú ở kế toán
+        if(existExamination && data.updateRoomId && data.roomId ){
+            await db.InpatientRoom.update({
+                roomId: data.roomId,
+                roomName: data.roomName
+            }, {
+                where: { 
+                    examId: existExamination.id,
+                    roomId: data.updateRoomId
+                },
+                transaction
+            });
+        }
+
+        // Tạo lịch tái khám nếu có
         if (examination && data.dischargeStatus === 4 && data.reExaminationDate && data.createReExamination) {
             const st = await getStaffForReExamination(existExamination.staffId, data.reExaminationDate);
 
@@ -893,11 +921,6 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
             whereConditionParaclinical.status = { [Op.gte]: statusPay };
         }
 
-        // Pagination
-        // const pageNum = page || 1;
-        // const limitNum = limit || 10;
-        // const offset = (pageNum - 1) * limitNum;
-
         // Fetch data with associations
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
@@ -905,12 +928,12 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
-                    // Add search condition to include
                     where: search ? {
                         [Op.or]: [
                             { firstName: { [Op.like]: `%${search}%` } },
-                            { lastName: { [Op.like]: `%${search}%` } }
+                            { lastName: { [Op.like]: `%${search}%` } },
+                            { phoneNumber: { [Op.like]: `%${search}%` } },
+                            { cid: { [Op.like]: `%${search}%` } }
                         ]
                     } : {},
                     include: [{
@@ -942,22 +965,19 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                     model: db.Examination,
                     as: 'examinationResultParaclincalData',
                     attributes: ['id', 'symptom', 'insuranceCoverage', 'insuranceCode', 'special', 'visit_status', 'isWrongTreatment', 'medicalTreatmentTier', 'createdAt'],
+                    where: {
+                        medicalTreatmentTier: 2
+                    },
                     include: [
                         {
                             model: db.User,
                             as: 'userExaminationData',
-                            attributes: ['id', 'firstName', 'lastName', 'email', 'cid'],
-                            // include: [
-                            //     {
-                            //         model: db.Insurance,
-                            //         as: 'userInsuranceData',
-                            //         attributes: ['insuranceCode'],
-                            //     },
-                            // ],
                             where: search ? {
                                 [Op.or]: [
                                     { firstName: { [Op.like]: `%${search}%` } },
-                                    { lastName: { [Op.like]: `%${search}%` } }
+                                    { lastName: { [Op.like]: `%${search}%` } },
+                                    { phoneNumber: { [Op.like]: `%${search}%` } },
+                                    { cid: { [Op.like]: `%${search}%` } }
                                 ]
                             } : {},
                             required: true,
@@ -1441,10 +1461,13 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                     attributes: ['id', 'name', 'price'],
                 }],
             }],
-            order: [['createdAt', 'DESC']],
+            order: [
+                ['medicalTreatmentTier', 'DESC'],
+                ['createdAt', 'ASC']
+            ],
             limit: limit,
             offset: (page - 1) * limit,
-            distinct: true // Ensures correct count with joins
+            distinct: true 
         });
 
         const totalItems = await db.Examination.count({

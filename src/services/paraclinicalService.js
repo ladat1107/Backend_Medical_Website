@@ -94,11 +94,9 @@ export const createRequestParaclinical = async (data) => {
             }
         }
 
-        if(examination.medicalTreatmentTier === 1) {
-            await examination.update({
-                status: status.EXAMINING,
-            }, { transaction }); // Pass transaction to the update
-        }
+        await examination.update({
+            status: status.EXAMINING,
+        }, { transaction }); 
 
         // Kiểm tra xem tất cả đều thành công
         if (createResults.every(result => result.EC === 0)) {
@@ -360,12 +358,23 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
             limit: limit_query,
             offset,
             order: [
-                // Ưu tiên sắp xếp medicalTreatmentTier = 3 lên đầu
-                [db.Sequelize.literal(`CASE WHEN "examinationResultParaclincalData"."medicalTreatmentTier" = 3 THEN 0 ELSE 1 END`), 'ASC'],
-                // Sau đó sắp xếp theo thời gian từ cũ đến mới
+                // Sắp xếp theo thời gian từ cũ đến mới
                 ['createdAt', 'ASC']
             ],
             distinct: true // Ensures correct count with joins
+        });
+
+        // Sắp xếp kết quả sau khi truy vấn dựa trên medicalTreatmentTier
+        const sortedParaclinicals = [...paraclinicals].sort((a, b) => {
+            const tierA = a.examinationResultParaclincalData?.medicalTreatmentTier || 0;
+            const tierB = b.examinationResultParaclincalData?.medicalTreatmentTier || 0;
+            
+            // Đưa các bản ghi có medicalTreatmentTier = 3 lên đầu
+            if (tierA === 3 && tierB !== 3) return -1;
+            if (tierA !== 3 && tierB === 3) return 1;
+            
+            // Nếu cùng mức độ ưu tiên, sắp xếp theo thời gian
+            return new Date(a.createdAt) - new Date(b.createdAt);
         });
 
         return {
@@ -375,8 +384,7 @@ export const getParaclinicals = async (date, status, staffId, page, limit, searc
                 totalItems: count,
                 totalPages: Math.ceil(count / limit),
                 currentPage: page,
-                examinations: paraclinicals,
-
+                examinations: sortedParaclinicals,
             },
         };
     } catch (error) {
