@@ -103,7 +103,7 @@ export const getExaminationById = async (id) => {
                                 model: db.Department,
                                 as: 'roomDepartmentData',
                                 attributes: ['id', 'name'],
-                            },{
+                            }, {
                                 model: db.ServiceType,
                                 as: 'serviceData',
                                 attributes: ['id', 'name', 'price'],
@@ -136,7 +136,7 @@ export const getExaminationById = async (id) => {
                     },
                     attributes: ['id', 'code', 'name']
                 });
-                
+
                 // Thêm thông tin chi tiết bệnh vào kết quả
                 examination.comorbiditiesDetails = diseaseDetails;
             } else {
@@ -460,18 +460,18 @@ export const updateExamination = async (data, userId) => {
             ...(data.medicalTreatmentTier !== undefined && { medicalTreatmentTier: data.medicalTreatmentTier }),
             ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
             ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice }),
-            
+
             ...paymentObject
         }, {
             where: { id: data.id },
             transaction
         });
 
-        if(existExamination.status === status.DONE && existExamination.dischargeStatus === 4 
-            && data.status === status.EXAMINING && !data.dischargeStatus){
+        if (existExamination.status === status.DONE && existExamination.dischargeStatus === 4
+            && data.status === status.EXAMINING && !data.dischargeStatus) {
             await db.Examination.destroy({
                 where: { parentExaminationId: existExamination.id },
-                transaction: transaction 
+                transaction: transaction
             });
         }
 
@@ -1325,7 +1325,6 @@ export const getExaminationByIdAdmin = async (id) => {
                 {
                     model: db.Prescription,
                     as: 'prescriptionExamData',
-                    attributes: ['id', 'note', 'totalMoney'],
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
@@ -1465,7 +1464,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
 export const getListInpations = async (date, toDate, statusExam, staffId, page, limit, search) => {
     try {
         let staff = null;
-        if(staffId) {
+        if (staffId) {
             staff = await db.Staff.findOne({
                 where: { id: staffId },
                 include: [{
@@ -1475,7 +1474,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
                 raw: true,
                 nest: true,
             })
-    
+
             if (!staff) {
                 return {
                     EC: 404,
@@ -1495,7 +1494,7 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Bắt đầu ngày
             const endOfDay = new Date(toDate).setHours(23, 59, 59, 999); // Kết thúc ngày
 
-            if(+statusExam === status.DONE) {
+            if (+statusExam === status.DONE) {
                 whereCondition.dischargeDate = {
                     [Op.between]: [startOfDay, endOfDay],
                 };
@@ -1597,8 +1596,8 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
 
         // Status filter
         if (status !== undefined && status !== null) {
-            whereCondition.status = 
-                +status === 6 ? { 
+            whereCondition.status =
+                +status === 6 ? {
                     [Op.lte]: 6,
                     [Op.gte]: 4
                 } : status === 7 ? {
@@ -1619,7 +1618,7 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
                         model: db.Insurance,
                         as: "userInsuranceData",
                         attributes: ["insuranceCode"]
-                    },{
+                    }, {
                         model: db.Relative,
                         as: 'userRelativeData',
                         attributes: ['id', 'fullName', 'cid', 'phoneNumber', 'relationship', 'address'],
@@ -1654,7 +1653,7 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
                         model: db.Department,
                         as: 'roomDepartmentData',
                         attributes: ['id', 'name'],
-                    },{
+                    }, {
                         model: db.ServiceType,
                         as: 'serviceData',
                         attributes: ['id', 'name', 'price'],
@@ -1662,7 +1661,7 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
                 }
             ],
             limit: limit_query,
-            offset, 
+            offset,
             distinct: true // Ensures correct count with joins
         });
 
@@ -1689,38 +1688,38 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
     }
 }
 
-export const updateInpatientRoom = async (examId, roomId) => { 
+export const updateInpatientRoom = async (examId, roomId) => {
     const t = await db.sequelize.transaction();
-    try { 
-        const existingInpatientRoom = await db.InpatientRoom.findOne({ 
-            where: { 
-                examId: examId, 
-                endDate: null 
+    try {
+        const existingInpatientRoom = await db.InpatientRoom.findOne({
+            where: {
+                examId: examId,
+                endDate: null
             },
             transaction: t,
             raw: false
-        }); 
+        });
 
         let yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0); 
+        yesterday.setHours(0, 0, 0, 0);
 
         let existingStartDate = new Date(existingInpatientRoom.startDate);
         existingStartDate.setHours(0, 0, 0, 0);
 
-        if (existingInpatientRoom) { 
-            if(yesterday < existingStartDate) {
+        if (existingInpatientRoom) {
+            if (yesterday < existingStartDate) {
                 await existingInpatientRoom.destroy({
                     transaction: t
                 })
             } else {
-                await existingInpatientRoom.update({ 
+                await existingInpatientRoom.update({
                     endDate: yesterday
-                }, { 
-                    transaction: t 
-                }); 
+                }, {
+                    transaction: t
+                });
             }
-        } 
+        }
 
         const getRoom = await db.Room.findOne({
             where: { id: roomId },
@@ -1740,41 +1739,41 @@ export const updateInpatientRoom = async (examId, roomId) => {
                 examId: examId,
                 startDate: {
                     [Op.between]: [
-                        new Date().setHours(0, 0, 0, 0),  
-                        new Date().setHours(23, 59, 59, 999) 
+                        new Date().setHours(0, 0, 0, 0),
+                        new Date().setHours(23, 59, 59, 999)
                     ]
                 }
             },
             transaction: t
         });
- 
-        const newInpatientRoom = await db.InpatientRoom.create({ 
-            examId: examId, 
-            roomId: roomId, 
+
+        const newInpatientRoom = await db.InpatientRoom.create({
+            examId: examId,
+            roomId: roomId,
             roomName: getRoom.name,
-            startDate: new Date() 
-        }, { 
-            transaction: t 
-        }); 
- 
+            startDate: new Date()
+        }, {
+            transaction: t
+        });
+
         await t.commit();
-        return { 
-            EC: 0, 
-            EM: 'Cập nhật phòng thành công', 
-            DT: newInpatientRoom 
-        }; 
- 
-    } catch (error) { 
+        return {
+            EC: 0,
+            EM: 'Cập nhật phòng thành công',
+            DT: newInpatientRoom
+        };
+
+    } catch (error) {
         await t.rollback();
 
-        console.error('Error updating inpatient room:', error); 
-        return { 
-            EC: 500, 
-            EM: 'Lỗi server', 
-            DT: null, 
-            error: error.message 
-        }; 
-    } 
+        console.error('Error updating inpatient room:', error);
+        return {
+            EC: 500,
+            EM: 'Lỗi server',
+            DT: null,
+            error: error.message
+        };
+    }
 }
 
 //#region Lịch trình thay đổi trạng thái bệnh nhân nội trú
