@@ -52,7 +52,7 @@ export const getPrescriptionsController = async (req, res) => {
 export const updatePrescriptionController = async (req, res) => {
     try {
         let data = req.body;
-        let response = await updatePrescription(data, null, req.user.id);
+        let response = await updatePrescription(data, req.user.id);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);

@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 import db from "../models/index";
 import { COOKIE, TIME } from "../utils";
-import { where } from "sequelize";
 require('dotenv').config();
-const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callback"];
+const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callbackMomo"];
 export const createToken = (payload, time) => {
     let key = process.env.SECURITY_KEY;
     let token = null;

@@ -1119,7 +1119,6 @@ export const confirmTokenBooking = async (token) => {
                 }
             }
             if (data.profile.bookFor) {
-                console.log("Book for another person");
                 let password = "123456";
                 let hashPassword = await hashPasswordUser(password);
                 user = await db.User.create({
@@ -1163,7 +1162,7 @@ export const confirmTokenBooking = async (token) => {
                     status: status.PENDING,
                     paymentDoctorStatus: paymentStatus.UNPAID,
 
-                    price: staff.price,
+                    price: data?.profile?.price,
                     special: data?.profile?.special,
                     roomName: data?.schedule?.room?.name || null,
 
@@ -1297,7 +1296,7 @@ export const getMedicalHistories = async (userId) => {
 
         // Xử lý thêm cho trường hợp comorbidities là chuỗi mã bệnh
         const result = JSON.parse(JSON.stringify(medicalHistories));
-        
+
         // Xử lý cho mỗi user
         for (let user of result) {
             if (user.userExaminationData && user.userExaminationData.length > 0) {
@@ -1306,7 +1305,7 @@ export const getMedicalHistories = async (userId) => {
                     // Xử lý cho trường comorbidities có sẵn (chuỗi code bệnh)
                     if (examination.comorbidities) {
                         const diseaseCodes = examination.comorbidities.split(',').filter(code => code.trim() !== '');
-                        
+
                         if (diseaseCodes.length > 0) {
                             const diseaseDetails = await db.Disease.findAll({
                                 where: {
@@ -1314,7 +1313,7 @@ export const getMedicalHistories = async (userId) => {
                                 },
                                 attributes: ['id', 'code', 'name']
                             });
-                            
+
                             // Thêm thông tin chi tiết bệnh vào kết quả
                             examination.comorbiditiesDetails = diseaseDetails;
                         } else {

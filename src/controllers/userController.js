@@ -1,4 +1,4 @@
-import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getArrayAdminId, getArrayUserId, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
+import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getArrayAdminId, getArrayUserId, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserByInsuranceCode, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
 import { COOKIE, ERROR_SERVER, ROLE, TIME } from '../utils';
 import { formatUnicode } from '../utils/formatUnicode';
 import { decodeHexToString, formatDobQR, splitName } from '../utils/function';
