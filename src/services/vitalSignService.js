@@ -50,13 +50,11 @@ export const createVitalSign = async (data) => {
             lowBloodPressure: data.lowBloodPressure,
             breathingRate: data.breathingRate,
             glycemicIndex: data.glycemicIndex || null,
-        }, { transaction }); // Pass transaction to the create
+        }, { transaction });
 
-        if(examination.medicalTreatmentTier === 1) {
-            await examination.update({
-                status: status.EXAMINING,
-            }, { transaction }); // Pass transaction to the update
-        }
+        await examination.update({
+            status: status.EXAMINING,
+        }, { transaction });
 
         await transaction.commit(); // Commit the transaction
         return {
@@ -72,6 +70,7 @@ export const createVitalSign = async (data) => {
 }
 
 export const updateVitalSign = async (data) => {
+    const transaction = await db.sequelize.transaction();
     try {
         let vitalSign = await db.VitalSign.update({
             height: data.height,
@@ -84,14 +83,25 @@ export const updateVitalSign = async (data) => {
             breathingRate: data.breathingRate,
             glycemicIndex: data.glycemicIndex,
         }, {
-            where: { id: data.id }
+            where: { id: data.id },
+            transaction 
         });
+
+        await db.Examination.update({
+            status: status.EXAMINING,
+        }, {
+            where: { id: data.examinationId },
+            transaction
+        });
+
+        await transaction.commit(); // Commit the transaction
         return {
             EC: 0,
             EM: "Cập nhật sinh hiệu thành công",
             DT: vitalSign
         }
     } catch (error) {
+        await transaction.rollback(); // Rollback the transaction in case of error
         console.log(error);
         return ERROR_SERVER
     }
@@ -114,12 +124,15 @@ export const deleteVitalSign = async (id) => {
 }
 
 export const createOrUpdateVitalSign = async (data) => {
+    const transaction = await db.sequelize.transaction();
     try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingVitalSign = await db.VitalSign.findOne({
-            where: { examinationId: data.examinationId }
+            where: { examinationId: data.examinationId },
+            transaction
         });
 
+        let newVitalSign;
         if (existingVitalSign) {
             // Cập nhật bản ghi nếu đã tồn tại
             await existingVitalSign.update({
@@ -132,16 +145,11 @@ export const createOrUpdateVitalSign = async (data) => {
                 lowBloodPressure: data.lowBloodPressure,
                 breathingRate: data.breathingRate,
                 glycemicIndex: data.glycemicIndex,
-            });
+            }, { transaction });
 
-            return {
-                EC: 0,
-                EM: "Cập nhật sinh hiệu thành công",
-                DT: existingVitalSign
-            };
         } else {
             // Tạo bản ghi mới nếu chưa tồn tại
-            const newVitalSign = await db.VitalSign.create({
+            newVitalSign = await db.VitalSign.create({
                 examinationId: data.examinationId,
                 height: data.height,
                 weight: data.weight,
@@ -152,15 +160,24 @@ export const createOrUpdateVitalSign = async (data) => {
                 lowBloodPressure: data.lowBloodPressure,
                 breathingRate: data.breathingRate,
                 glycemicIndex: data.glycemicIndex,
-            });
-
-            return {
-                EC: 0,
-                EM: "Tạo sinh hiệu thành công",
-                DT: newVitalSign
-            };
+            }, { transaction });
         }
+
+        await db.Examination.update({
+            status: status.EXAMINING,
+        }, {
+            where: { id: data.examinationId },
+            transaction
+        });
+
+        await transaction.commit(); // Commit the transaction
+        return {
+            EC: 0,
+            EM: "Cập nhật sinh hiệu thành công",
+            DT: existingVitalSign ? existingVitalSign : newVitalSign
+        };
     } catch (error) {
+        await transaction.rollback(); // Rollback the transaction in case of error
         console.log(error);
         return {
             EC: 500,

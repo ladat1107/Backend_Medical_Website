@@ -129,7 +129,8 @@ export const deleteRoomController = async (req, res) => {
 
 export const getAvailableRoomsController = async (req, res) => {
     try {
-        let response = await getAvailableRooms();
+        let medicalTreatmentTier = req.query.medicalTreatmentTier || null;
+        let response = await getAvailableRooms(medicalTreatmentTier);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);

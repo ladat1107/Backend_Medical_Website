@@ -482,11 +482,9 @@ export const createPrescription = async (data) => {
             }
         }
 
-        if (examination.medicalTreatmentTier === 1) {
-            await examination.update({
-                status: status.EXAMINING,
-            }, { transaction: t }); // Pass transaction to the update
-        }
+        await examination.update({
+            status: status.EXAMINING,
+        }, { transaction: t }); 
 
         await t.commit(); // Commit nếu mọi thứ thành công
 

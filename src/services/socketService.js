@@ -1,6 +1,7 @@
 import db from "../models";
 import { SOCKET } from "../utils";
 
+
 export const emitNewDateTicket = async (io) => {
     const today = new Date().toISOString().split("T")[0];
 
@@ -68,3 +69,17 @@ export const sendNotification = (io, title, htmlDescription, firstName, lastName
     }
 };
 
+export const updateNumberTicket = (io, ticket) => {
+    if (!io) {
+        console.error("IO không tồn tại!");
+        return;
+    }
+
+    try {
+        userSocketMap.forEach((socket, userId) => {
+            socket.emit('updateTicket', ticket);
+        });
+    } catch (error) {
+        console.error("Lỗi trong updateNumberTicket:", error);
+    }
+}

@@ -1,5 +1,7 @@
 import db from '../models/index';
 import { ERROR_SERVER } from '../utils';
+import { io } from "../server";
+import { updateNumberTicket } from './socketService';
 const numberType = {
     priorityNumber: "priorityNumber",
     normalNumber: "normalNumber"
@@ -90,11 +92,21 @@ export const generalNumberCurrent = async (req, res) => {
                         id: ticket[0].id
                     }
                 })
+                
+
+                let updateTicket =  await db.Ticket.findOne({
+                    where: {
+                        id: ticket[0].id
+                    }
+                })
+                
+                updateNumberTicket(io, updateTicket)
                 return res.status(200).json({
                     EC: 0,
                     EM: 'Thành công',
                     DT: +ticket[0].priorityNumberCurrent + 1,
                 });
+
             } else if (type === numberType.normalNumber) {
                 if (ticket[0].normalNumberCurrent === ticket[0].normalNumber) {
                     return res.status(200).json({
@@ -110,6 +122,14 @@ export const generalNumberCurrent = async (req, res) => {
                         id: ticket[0].id
                     }
                 })
+
+                let updateTicket =  await db.Ticket.findOne({
+                    where: {
+                        id: ticket[0].id
+                    }
+                })
+                
+                updateNumberTicket(io, updateTicket)
                 return res.status(200).json({
                     EC: 0,
                     EM: 'Thành công',
@@ -120,6 +140,5 @@ export const generalNumberCurrent = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
-
     }
 }
