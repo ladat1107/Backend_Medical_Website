@@ -5,10 +5,6 @@ import { refundMomo } from "./paymentService";
 import { Op, or, Sequelize, where } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
-import { timingSafeEqual } from "crypto";
-import { start } from "repl";
-import { stat } from "fs";
-import e from "express";
 
 const cron = require('node-cron');
 

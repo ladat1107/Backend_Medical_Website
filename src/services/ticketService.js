@@ -140,6 +140,5 @@ export const generalNumberCurrent = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)
-
     }
 }
