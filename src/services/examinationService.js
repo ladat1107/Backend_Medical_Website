@@ -1329,8 +1329,6 @@ export const getStatisticsExamination = async (filter) => {
             EM: 'Lấy danh sách khám bệnh thành công',
             DT: examinations
         }
-
-
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;
@@ -1872,7 +1870,7 @@ function reStatusInpatients(taskFunction) {
 const reStatusInpatientsJob = reStatusInpatients(async () => {
     // Thực hiện công việc của bạn ở đây
     console.log('Đang thực hiện công việc được lên lịch vào 0 giờ sáng');
-    const inpatients = await db.InpatientRoom.findAll({
+    const inpatients = await db.Examination.findAll({
         where: {
             [Op.or]: [
                 { medicalTreatmentTier: 1 },
@@ -1888,7 +1886,7 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
         return;
     }
 
-    await db.Inpatient.update({
+    await db.Examination.update({
         status: status.WAITING
     }, {
         where: {
@@ -1898,4 +1896,3 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
-

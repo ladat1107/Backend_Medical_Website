@@ -55,7 +55,7 @@ export const getScheduleByStaffId = async (staffId) => {
 export const getScheduleByStaffIdFromToday = async (staffId) => {
     try {
         let schedule = await db.Schedule.findAll({
-            where: { 
+            where: {
                 staffId: staffId,
                 date: {
                     [Op.gte]: new Date(),
@@ -90,7 +90,7 @@ export const getStaffForReExamination = async (staffId, date) => {
 
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
-        
+
         let schedule = await db.Schedule.findAll({
             where: {
                 date: {
@@ -104,7 +104,7 @@ export const getStaffForReExamination = async (staffId, date) => {
                 attributes: ['id', 'name'],
                 where: { departmentId: typeRoom.CLINIC, },
                 required: true,
-            },{
+            }, {
                 model: db.Staff,
                 as: 'staffScheduleData',
                 attributes: ['id', 'departmentId', 'price'],
@@ -114,12 +114,12 @@ export const getStaffForReExamination = async (staffId, date) => {
         });
 
         let result = null;
-        
+
         // Nếu có kết quả
         if (schedule && schedule.length > 0) {
             // Tìm nhân viên khớp staffId
             const matchingStaff = schedule.find(item => item.staffId === staffId);
-            
+
             // Nếu tìm thấy staffId khớp, trả về nó
             if (matchingStaff) {
                 result = matchingStaff;
@@ -219,7 +219,7 @@ export const createSchedule = async (data) => {
         }
         //Thêm dữ liệu mới
         let schedule = await db.Schedule.bulkCreate(data, { transaction });
-        
+
         // Fetch the newly created schedules with the user id included
         const createdSchedules = await db.Schedule.findAll({
             where: {
@@ -249,7 +249,7 @@ export const createSchedule = async (data) => {
             ],
             transaction,
         });
-        
+
         await transaction.commit();
         return {
             EC: 0,
@@ -328,7 +328,7 @@ export const arrangeSchedule = async (data) => {
                     model: db.ServiceType,
                     as: 'serviceData',
                     attributes: ['id', 'name'],
-                    where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY] }, status: status.ACTIVE },
+                    where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY, typeRoom.LABORATORY] }, status: status.ACTIVE },
                     through: { attributes: [] },
                 },
             ],
@@ -476,7 +476,7 @@ export const arrangeSchedule = async (data) => {
         });
 
         await transaction.commit();
-        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule: createdSchedules  } };
+        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule: createdSchedules } };
     } catch (error) {
         await transaction.rollback();
         console.error(error);

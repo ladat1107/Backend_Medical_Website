@@ -20,6 +20,10 @@ export const paymentStatus = {
 export const typeRoom = {
     CLINIC: 2,
     DUTY: 1,
+    INPATIENT_NORMAL: 3,
+    INPATIENT_VIP: 4,
+    LABORATORY: 5,
+    EMERGENCY: 6
 }
 export const department = {
     CLINIC: 2,

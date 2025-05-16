@@ -23,26 +23,12 @@ export const getAllServiceTypes = async () => {
 export const getServiceSearch = async () => {
     try {
         let serviceType = await db.ServiceType.findAll({
-            where: {
-                status: status.ACTIVE,
-            },
-            attributes: ['id', 'name'],
-            raw: true,
-            nest: true,
+            where: { status: status.ACTIVE },
         });
-        let result = [];
-        if (serviceType.length > 0) {
-            serviceType.forEach(element => {
-                result.push({
-                    value: element.id,
-                    label: element.name,
-                })
-            });
-        }
         return {
             EC: 0,
             EM: "Lấy thông tin loại phòng thành công",
-            DT: result
+            DT: serviceType
         }
     } catch (error) {
         console.log(error);
