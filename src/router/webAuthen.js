@@ -1,7 +1,7 @@
 import express from 'express';
 import { confirmBookingController, confirmTokenBookingController, getMedicalHistoriesController, getUserByIdController, profileInforController } from '../controllers/userController';
 import { deleteExaminationController, getExaminationByUserIdController, getExamToNoticeController, getListAdvanceMoneyController, getListInpationsController, updateOldParaclinicalController } from '../controllers/examinationController';
-import { appoinmentPayment, examinationPayment, paraclinicalPayment, paymentMomo, paymentMomoCallback } from '../services/paymentService';
+import { paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
@@ -26,8 +26,7 @@ let initWebAuthenRounte = (app) => {
     router.put("/updateOldParaclinical", updateOldParaclinicalController)
     router.delete("/cancelAppoinment", deleteExaminationController)
 
-    router.get("/paymentAppoinmentMomo", appoinmentPayment)
-    router.post("/callback", paymentMomoCallback)
+    router.post("/callbackMomo", paymentMomoCallback)
 
     router.get("/getAllUserToNotify", getAllUserToNotifyController)
     router.get("/getAllNotifications", getAllNotificationsController)
@@ -47,6 +46,6 @@ let initWebAuthenRounte = (app) => {
     router.post("/createAdvanceMoney", createAdvanceMoneyController)
     router.delete("/deletePrescription", deletePrescriptionController)
 
-    return app.use("/api/", router);
+    return app.use("/api", router);
 }
 export default initWebAuthenRounte;

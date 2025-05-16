@@ -1,15 +1,19 @@
 import { Op } from "sequelize";
 import db, { sequelize } from "../models/index";
 import { ERROR_SERVER, status } from "../utils/index";
+import dayjs from "dayjs";
 
-export const getAllRooms = async (page, limit, search, searchDepartment) => {
+export const getAllRooms = async (page, limit, search, filter) => {
     try {
         let whereCondition = {};
+
         // Kiểm tra điều kiện departmentId
-        if (+searchDepartment !== 0) {
-            whereCondition.departmentId = searchDepartment;
+        if (filter?.departmentId) {
+            whereCondition.departmentId = +filter?.departmentId;
         }
-        let countRoom = await db.Room.count();
+        if (filter?.status) {
+            whereCondition.status = +filter?.status;
+        }
         let room = await db.Room.findAndCountAll({
             where: {
                 ...whereCondition,
@@ -22,29 +26,29 @@ export const getAllRooms = async (page, limit, search, searchDepartment) => {
                     attributes: ['id', 'name'],
                 },
                 {
-                    model: db.Bed,
-                    as: 'bedRoomData',
-                    required: false,
-                },
-                {
                     model: db.ServiceType,
                     as: 'serviceData',
-                    attributes: ['name'],
-                    required: false,
+                    attributes: ['id', 'name'],
+                    required: filter?.typeRoom ? true : false,
+                    where: filter?.typeRoom ? { id: +filter?.typeRoom } : undefined,
                     through: {
-                        attributes: []
+                        attributes: [],
                     },
-
+                    nest: true,
+                }, {
+                    model: db.Examination,
+                    as: 'examinationRoomData',
+                    attributes: ['id'],
+                    where: { status: { [Op.ne]: status.DONE_INPATIENT } },
+                    required: false,
                 }
-
             ],
             order: [['createdAt', 'DESC']],
             offset: (+page - 1) * +limit,
             limit: +limit,
-            raw: false,
             nest: true,
+            distinct: true,
         });
-        room.count = countRoom;
         return {
             EC: 0,
             EM: "Lấy thông tin phòng thành công",
@@ -94,16 +98,49 @@ export const getRoomById = async (roomId) => {
                 {
                     model: db.ServiceType,
                     as: 'serviceData',
-                    attributes: ['id'],
+                    attributes: ['id', 'name', 'price', 'description'],
+                    required: false,
                 },
                 {
-                    model: db.Bed,
-                    as: 'bedRoomData',
+                    model: db.Examination,
+                    as: "examinationRoomData",
+                    where: { status: { [Op.ne]: status.DONE_INPATIENT } },
                     required: false,
-                    raw: true,
+                    include: [
+                        {
+                            model: db.User,
+                            as: "userExaminationData",
+                            attributes: ['id', 'lastName', 'firstName', 'phoneNumber', 'avatar'],
+                        }
+                    ]
+                }, {
+                    model: db.Schedule,
+                    as: "scheduleRoomData",
+                    where: { date: dayjs().format('YYYY-MM-DD') },
+                    required: false,
+                    include: [
+                        {
+                            model: db.Staff,
+                            as: "staffScheduleData",
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: "staffUserData",
+                                    attributes: ['id', 'lastName', 'firstName', 'phoneNumber', 'avatar', 'email'],
+                                    include: [
+                                        { model: db.Role, as: "userRoleData", attributes: ['id', 'name'] }
+                                    ]
+                                },
+                                {
+                                    model: db.Specialty,
+                                    as: "staffSpecialtyData",
+                                    attributes: ['id', 'name'],
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
-            raw: false,
             nest: true,
         });
         if (room) {
@@ -126,13 +163,14 @@ export const getRoomById = async (roomId) => {
 }
 
 export const createRoom = async (data) => {
-     const t = await sequelize.transaction(); // Khởi tạo transaction
+    const t = await sequelize.transaction(); // Khởi tạo transaction
     try {
         // Tạo phòng
         let room = await db.Room.create({
             name: data.name,
             departmentId: data.departmentId,
             medicalExamination: data?.medicalExamination || null,
+            capacity: data.capacity,
             status: status.ACTIVE,
         }, { transaction: t });
 
@@ -149,22 +187,7 @@ export const createRoom = async (data) => {
                 throw new Error("Lỗi thêm dịch vụ"); // Nếu thất bại thì ném lỗi
             }
         }
-        // Nếu phòng được tạo và có bedQuantity thì tạo giường
-        if (room && data.bedQuantity > 0) {
-            let arrData = [];
-            for (let i = 1; i <= +data.bedQuantity; i++) {
-                let name = "Giường số " + i + " - " + room.name;
-                arrData.push({
-                    name: name,
-                    roomId: room.id,
-                    status: status.INACTIVE,
-                });
-            }
-            let bed = await db.Bed.bulkCreate(arrData, { transaction: t });
-            if (!bed) {
-                throw new Error("Lỗi thêm giường"); // Nếu thất bại thì ném lỗi
-            }
-        }
+
         await t.commit(); // Nếu mọi thứ thành công thì commit transaction
         return {
             EC: 0,
@@ -186,47 +209,35 @@ export const updateRoom = async (data) => {
             departmentId: data.departmentId,
             status: data.status,
             medicalExamination: data?.medicalExamination,
+            capacity: data.capacity,
         }, {
             where: { id: data.id }
         }, { transaction: transaction });
-        if (room) {
-            await db.RoomServiceType.destroy({
-                where: { roomId: data.id }  // Replace `someRoomId` with the room ID you're deleting
-            }, { transaction: transaction });
-            if (data.serviceIds.length > 0) {
-                let arrData = data.serviceIds.map(item => {
-                    return {
-                        roomId: data.id,
-                        serviceId: item,
-                    }
-                });
-                let roomService = await db.RoomServiceType.bulkCreate(arrData, { transaction: transaction });
-                if (!roomService) {
-                    throw new Error("Lỗi thêm dịch vụ"); // Nếu thất bại thì ném lỗi
+
+        await db.RoomServiceType.destroy({
+            where: { roomId: data.id }  // Replace `someRoomId` with the room ID you're deleting
+        }, { transaction: transaction });
+
+        if (data.serviceIds.length > 0) {
+            let arrData = data.serviceIds.map(item => {
+                return {
+                    roomId: data.id,
+                    serviceId: item,
                 }
-            }
-            if (data.oldBed < data.newBed) {
-                let arrData = [];
-                for (let i = +data.oldBed + 1; i <= +data.newBed; i++) {
-                    let name = "Giường số " + i + " - " + data.name;
-                    arrData.push({
-                        name: name,
-                        roomId: data.id,
-                        status: status.INACTIVE,
-                    });
-                }
-                let bed = await db.Bed.bulkCreate(arrData, { transaction: transaction });
-                if (!bed) {
-                    throw new Error("Lỗi thêm giường"); // Nếu thất bại thì ném lỗi
-                }
-            }
-            await transaction.commit();
-            return {
-                EC: 0,
-                EM: "Cập nhật phòng thành công",
-                DT: room
+            });
+            let roomService = await db.RoomServiceType.bulkCreate(arrData, { transaction: transaction });
+            if (!roomService) {
+                throw new Error("Lỗi thêm dịch vụ"); // Nếu thất bại thì ném lỗi
             }
         }
+
+        await transaction.commit();
+        return {
+            EC: 0,
+            EM: "Cập nhật phòng thành công",
+            DT: room
+        }
+
     } catch (error) {
         await transaction.rollback();
         console.log(error);
@@ -252,36 +263,41 @@ export const blockRoom = async (id) => {
     }
 }
 export const deleteRoom = async (id) => {
+    let transaction = await sequelize.transaction();
     try {
         let room = await db.Room.findOne({
-            where: { id: id }
+            where: { id: id },
+            transaction: transaction
         });
+
         if (room) {
             await db.RoomServiceType.destroy({
-                where: { roomId: room.id }  // Replace `someRoomId` with the room ID you're deleting
+                where: { roomId: room.id },
+                transaction: transaction
             });
-            await db.Bed.destroy({
-                where: { roomId: room.id }  // Replace `someRoomId` with the room ID you're deleting
-            });
+
             await db.Room.destroy({
                 where: {
                     id: room.id,  // Replace with your condition
                 },
+                transaction: transaction
             });
+
+            await transaction.commit();
+
             return {
                 EC: 0,
                 EM: "Xóa phòng thành công",
                 DT: room
             }
         } else {
+            await transaction.rollback();
             return {
-                EC: 404,
-                EM: "Không tìm thấy phòng",
-                DT: "",
+                EC: 404, EM: "Không tìm thấy phòng", DT: ""
             }
         }
-
     } catch (error) {
+        await transaction.rollback();
         console.log(error);
         return ERROR_SERVER
     }
@@ -291,7 +307,7 @@ export const getAvailableRooms = async (medicalTreatmentTier) => {
     try {
         // Get all rooms with active status and service types with ID 3 or 4
         let rooms = await db.Room.findAll({
-            where: { 
+            where: {
                 status: status.ACTIVE,
                 capacity: { [Op.gt]: 0 } // Only include rooms with defined capacity
             },
@@ -309,8 +325,8 @@ export const getAvailableRooms = async (medicalTreatmentTier) => {
                     where: {
                         status: status.ACTIVE,
                         id: {
-                            [Op.or]: +medicalTreatmentTier === 3 ? [6] : 
-                                    +medicalTreatmentTier === 1 ? [3, 4] : null
+                            [Op.or]: +medicalTreatmentTier === 3 ? [6] :
+                                +medicalTreatmentTier === 1 ? [3, 4] : null
                         }
                     },
                     through: { attributes: [] } // Exclude join table attributes
@@ -356,7 +372,7 @@ export const getAvailableRooms = async (medicalTreatmentTier) => {
         // Add available capacity information to each room
         const roomsWithCapacity = availableRooms.map(room => {
             const examCount = roomCountMap[room.id] || 0;
-            
+
             return {
                 ...room.dataValues,
                 availableCapacity: room.capacity - examCount,

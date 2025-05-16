@@ -19,7 +19,7 @@ import initWebRounte from './router/web';
 import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
 import initNotificationRoute from './router/notification';
 import dotenv from 'dotenv';
-import { formatUnicode } from './utils/formatUnicode';
+import { paymentMomoCallback } from './services/paymentService';
 dotenv.config();
 
 const app = express();
@@ -122,7 +122,6 @@ io.on('connection', (socket) => {
 
 // Khởi tạo các chức năng socket
 emitNewDateTicket(io);
-
 // Initialize web routes
 authenRoute(app, passport);
 initWebRounte(app);

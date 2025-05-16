@@ -1,7 +1,7 @@
 import express from 'express';
 
 
-import { examinationPayment, paraclinicalPayment, prescriptionPayment } from '../services/paymentService';
+import { dischargedPayment, examinationAdvancePayment, examinationPayment, paraclinicalPayment, prescriptionPayment } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getStaffNameByIdController } from '../controllers/staffController';
 import { createHandBookController, getAllHandBooksController, updateHandBookController } from '../controllers/handBookController';
@@ -102,6 +102,8 @@ let initDoctorRoute = (app) => {
     router.post("/paymentParaclinicalMomo", paraclinicalPayment)
     router.post("/paymentExaminationMomo", examinationPayment)
     router.post("/paymentPrescriptionMomo", prescriptionPayment)
+    router.post("/paymentExaminationAdvanceMomo", examinationAdvancePayment)
+    router.post("/paymentDischargedMomo", dischargedPayment)
 
     // -- Message
     router.get("/getConversationForStaff", getConversationForStaffController)

@@ -246,7 +246,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
     }
 };
 
-export const updatePrescription = async (data, payment, userId) => {
+export const updatePrescription = async (data, userId) => {
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
     try {
@@ -318,7 +318,38 @@ export const updatePrescription = async (data, payment, userId) => {
         };
     }
 };
+export const updatePrescriptionMomo = async (data, payment) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+    try {
+        let dataUpdate = data.update;
+        for (let detail of dataUpdate.presDetail) {
+            await db.PrescriptionDetail.update({
+                insuranceCovered: detail.insuranceCovered,
+            }, {
+                where: {
+                    prescriptionId: detail.prescriptionId,
+                    medicineId: detail.medicineId
+                },
+                transaction: t
+            });
+        }
 
+        await db.Prescription.update({
+            status: paymentStatus.PAID,
+            insuranceCovered: dataUpdate.insuranceCovered,
+            coveredPrice: dataUpdate.coveredPrice,
+            paymentId: payment?.id || null,
+        }, {
+            where: { id: data.id },
+            transaction: t
+        });
+        await t.commit();
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
 //Chỉ dùng cho nội trú
 export const createPrescription = async (data) => {
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
@@ -347,7 +378,7 @@ export const createPrescription = async (data) => {
             examinationId: data.examinationId,
             status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID
         };
-        
+
         if (data.prescriptionType === 1) {
             whereCondition.createdAt = {
                 [Op.between]: [todayStart, todayEnd]
@@ -370,7 +401,7 @@ export const createPrescription = async (data) => {
             transaction: t
         });
 
-        if (todayPrescriptions) { 
+        if (todayPrescriptions) {
             // Lấy chi tiết đơn thuốc cũ trước khi xóa để cộng lại vào kho
             const oldPrescriptionDetails = await db.PrescriptionDetail.findAll({
                 where: {
@@ -378,7 +409,7 @@ export const createPrescription = async (data) => {
                 },
                 transaction: t
             });
-            
+
             // Cộng lại số lượng thuốc vào kho
             for (const detail of oldPrescriptionDetails) {
                 const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
@@ -389,7 +420,7 @@ export const createPrescription = async (data) => {
                     );
                 }
             }
-            
+
             // Xóa chi tiết đơn thuốc
             await db.PrescriptionDetail.destroy({
                 where: {
@@ -397,19 +428,19 @@ export const createPrescription = async (data) => {
                 },
                 transaction: t
             });
-        
+
             // Xóa đơn thuốc
 
             await todayPrescriptions.destroy({ transaction: t });
         }
-        
-        
+
+
         // 1. Tạo đơn thuốc
         const prescription = await db.Prescription.create({
             examinationId: data.examinationId,
             note: data.note,
             totalMoney: data.totalMoney,
-            status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID, 
+            status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID,
         }, { transaction: t });
 
         if (!prescription) {
@@ -443,16 +474,16 @@ export const createPrescription = async (data) => {
                     transaction: t // Pass transaction to the query
                 }
             );
-            
+
             if (!medicine) {
                 throw new Error(`Không tìm thấy thuốc với id ${item.medicineId}`);
             }
-            
+
             // Kiểm tra số lượng có đủ không
             if (medicine.inventory < item.quantity) {
                 throw new Error(`Số lượng thuốc ${medicine.name} không đủ để kê đơn`);
             }
-            
+
             // Cập nhật số lượng thuốc
             await medicine.update(
                 { inventory: medicine.inventory - item.quantity },
@@ -465,7 +496,7 @@ export const createPrescription = async (data) => {
         yesterday.setDate(yesterday.getDate() - 1);
 
         if (data.oldPresId) {
-            if(data.prescriptionType === 1){
+            if (data.prescriptionType === 1) {
                 await db.Prescription.update({
                     endDate: yesterday
                 }, {
@@ -484,7 +515,7 @@ export const createPrescription = async (data) => {
 
         await examination.update({
             status: status.EXAMINING,
-        }, { transaction: t }); 
+        }, { transaction: t });
 
         await t.commit(); // Commit nếu mọi thứ thành công
 

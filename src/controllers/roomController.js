@@ -1,4 +1,4 @@
-import  { blockRoom, createRoom, deleteRoom, getAllRooms, getAvailableRooms, getRoomByDepartment, getRoomById, updateRoom } from '../services/roomService';
+import { blockRoom, createRoom, deleteRoom, getAllRooms, getAvailableRooms, getRoomByDepartment, getRoomById, updateRoom } from '../services/roomService';
 import { ERROR_SERVER } from '../utils';
 
 export const getAllRoomAdminController = async (req, res) => {
@@ -6,8 +6,8 @@ export const getAllRoomAdminController = async (req, res) => {
         let page = req.query?.page || 1;
         let limit = req.query?.limit || 25;
         let search = req.query?.search || "";
-        let searchDepartment = req.query.searchDepartment;
-        let response = await getAllRooms(page, limit, search, searchDepartment);
+        let filter = req?.query?.filter || null;
+        let response = await getAllRooms(page, limit, search, filter);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
@@ -55,7 +55,7 @@ export const getRoomByIdController = async (req, res) => {
 export const createRoomController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.departmentId && data.bedQuantity && data.serviceIds.length > 0) {
+        if (data && data.name && data.departmentId && data.capacity && data.serviceIds.length > 0) {
             let response = await createRoom(data);
             return res.status(200).json(response)
         } else {
@@ -74,7 +74,7 @@ export const createRoomController = async (req, res) => {
 export const updateRoomController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.name && data.departmentId) {
+        if (data && data.id && data.name && data.departmentId && data.serviceIds.length > 0) {
             let response = await updateRoom(data);
             return res.status(200).json(response)
         } else {

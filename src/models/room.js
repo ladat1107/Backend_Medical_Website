@@ -23,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'roomId',
                 as: 'roomScheduleData',
             });
-            Room.hasMany(models.Bed, {
-                foreignKey: 'roomId',
-                as: 'bedRoomData',
-            });
             Room.hasMany(models.Schedule, {
                 foreignKey: 'roomId',
                 as: 'scheduleRoomData',
@@ -56,14 +52,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'departments', 
+                model: 'departments',
                 key: 'id',
             },
         },
         medicalExamination: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'speciaties', 
+                model: 'speciaties',
                 key: 'id',
             },
         },

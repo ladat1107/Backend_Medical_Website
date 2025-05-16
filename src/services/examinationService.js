@@ -350,6 +350,7 @@ export const createExamination = async (data) => {
         return ERROR_SERVER;
     }
 };
+
 export const updateExamination = async (data, userId) => {
     // Initialize transaction
     const transaction = await db.sequelize.transaction();
@@ -524,7 +525,7 @@ export const updateExamination = async (data, userId) => {
             }, { transaction });
 
             await db.Paraclinical.update({
-                status: status.PAID,  
+                status: status.PAID,
             }, {
                 where: {
                     examinationId: existExamination.id,
@@ -535,7 +536,7 @@ export const updateExamination = async (data, userId) => {
         }
 
         //Hoàn thành thanh toán tạm ứng ở kế toán
-        if(data.advanceId) {
+        if (data.advanceId) {
             await db.AdvanceMoney.update({
                 amount: +data.advanceMoney,
                 status: paymentStatus.PAID,
@@ -546,12 +547,12 @@ export const updateExamination = async (data, userId) => {
         }
 
         // Sửa phòng nội trú ở kế toán
-        if(existExamination && data.updateRoomId && data.roomId ){
+        if (existExamination && data.updateRoomId && data.roomId) {
             await db.InpatientRoom.update({
                 roomId: data.roomId,
                 roomName: data.roomName
             }, {
-                where: { 
+                where: {
                     examId: existExamination.id,
                     roomId: data.updateRoomId
                 },
@@ -629,6 +630,43 @@ export const updateExamination = async (data, userId) => {
         await transaction.rollback();
         console.log(error);
         return ERROR_SERVER;
+    }
+}
+
+export const updateExaminationMomo = async (data, payment) => {
+    try {
+        let dataUpdate = data.update;
+        await db.Examination.update({
+            insuranceCoverage: dataUpdate?.insuranceCoverage || null,
+            insuranceCode: dataUpdate?.insuranceCode || null,
+            insuranceCovered: dataUpdate?.insuranceCovered || null,
+            coveredPrice: dataUpdate?.coveredPrice || null,
+            status: dataUpdate?.status,
+            paymentId: payment.id,
+        }, {
+            where: { id: data.id }
+        });
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+export const dischargedPaymentMomo = async (data, payment) => {
+    try {
+        let dataUpdate = data.update;
+        await db.Examination.update({
+            status: dataUpdate?.status,
+            price: dataUpdate?.price,
+            insuranceCovered: dataUpdate?.insuranceCovered,
+            coveredPrice: dataUpdate?.coveredPrice,
+            paymentId: payment.id,
+        }, {
+            where: { id: data.id }
+        });
+        return true;
+    } catch (error) {
+
     }
 }
 export const deleteExamination = async (id) => {
@@ -1291,8 +1329,6 @@ export const getStatisticsExamination = async (filter) => {
             EM: 'Lấy danh sách khám bệnh thành công',
             DT: examinations
         }
-
-
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;
@@ -1403,7 +1439,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
                 [Op.or]: [1, 3]
             },
             status: { [Op.lt]: status.DONE },
-        }; 
+        };
 
         const examinations = await db.Examination.findAll({
             where: whereConditionExamination,
@@ -1463,7 +1499,7 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
             ],
             limit: limit,
             offset: (page - 1) * limit,
-            distinct: true 
+            distinct: true
         });
 
         const totalItems = await db.Examination.count({
@@ -1834,11 +1870,11 @@ function reStatusInpatients(taskFunction) {
 const reStatusInpatientsJob = reStatusInpatients(async () => {
     // Thực hiện công việc của bạn ở đây
     console.log('Đang thực hiện công việc được lên lịch vào 0 giờ sáng');
-    const inpatients = await db.Inpatient.findAll({
+    const inpatients = await db.Examination.findAll({
         where: {
             [Op.or]: [
-                {medicalTreatmentTier: 1},
-                {medicalTreatmentTier: 3}
+                { medicalTreatmentTier: 1 },
+                { medicalTreatmentTier: 3 }
             ],
             status: status.EXAMINING,
             dischargeDate: null
@@ -1850,7 +1886,7 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
         return;
     }
 
-    await db.Inpatient.update({
+    await db.Examination.update({
         status: status.WAITING
     }, {
         where: {
@@ -1860,4 +1896,3 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
-//#endregion

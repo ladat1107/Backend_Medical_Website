@@ -20,6 +20,10 @@ export const paymentStatus = {
 export const typeRoom = {
     CLINIC: 2,
     DUTY: 1,
+    INPATIENT_NORMAL: 3,
+    INPATIENT_VIP: 4,
+    LABORATORY: 5,
+    EMERGENCY: 6
 }
 export const department = {
     CLINIC: 2,
@@ -52,7 +56,9 @@ export const TYPE_PAYMENT = {
     EXAMINATION: 1,
     PARA_CLINICAL: 2,
     PRESCRIPTION: 3,
-    APPOINMENT: 4
+    APPOINMENT: 4,
+    ADVANCE: 5,
+    DISCHARGE: 6
 }
 export const SOCKET = {
     EMIT_UPDATE_TICKET_NEW_DAY: "updateTicketNewDay"
@@ -69,4 +75,9 @@ export const STATUS_MESSAGE = {
     SENT: "sent",
     RECEIVED: "received",
     READ: "read"
+}
+export const MEDICAL_TREATMENT_TIER = {
+    INPATIENT: 1,
+    OUTPATIENT: 2,
+    EMERGENCY: 3
 }
