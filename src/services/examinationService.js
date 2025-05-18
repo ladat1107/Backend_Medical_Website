@@ -398,9 +398,10 @@ export const updateExamination = async (data, userId) => {
         }
 
         if (data.insuranceCode) {
+
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
-                where: { userId: userId },
+                where: { userId: existExamination.userId },
                 transaction
             });
 
@@ -417,17 +418,8 @@ export const updateExamination = async (data, userId) => {
                 existingInsurance = await db.Insurance.create({
                     insuranceCode: data.insuranceCode,
                     benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
-                    userId: userId
+                    userId: existExamination.userId
                 }, { transaction });
-            }
-
-            if (!existingInsurance) {
-                await transaction.rollback();
-                return {
-                    EC: 404,
-                    EM: "Không tìm thấy bảo hiểm",
-                    DT: ""
-                }
             }
 
             paymentObject = {
