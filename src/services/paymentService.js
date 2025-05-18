@@ -367,9 +367,16 @@ export const getPaymentAdmin = async (fillter) => {
                     as: 'prescriptionData',
                     attributes: ['id', 'totalMoney', 'insuranceCovered', 'coveredPrice', 'status'],
                     required: false,
+                },
+                {
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyData',
+                    attributes: ['id', 'amount', 'status'],
+                    required: false,
                 }
             ],
-            nest: true
+            nest: true,
+            order: [['createdAt', 'DESC']]
         });
         return {
             EC: 0,

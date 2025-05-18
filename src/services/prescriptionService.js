@@ -276,16 +276,26 @@ export const updatePrescription = async (data, userId) => {
                 transaction: t
             });
         }
-
+        let receiver = await db.User.findOne({
+            where: { id: userId },
+            attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'cid'],
+            raw: true,
+            transaction
+        });
         let createdPayment = null;
 
         if (data?.payment) {
+            let details = {};
+            if (receiver) {
+                details = { ...details, receiver, responseTime: new Date().toISOString() }
+            }
             createdPayment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: prescription.id,
                 amount: data.coveredPrice,
                 status: paymentStatus.PAID,
                 paymentMethod: data.payment,
+                detail: JSON.stringify(details)
             }, { transaction: t });
         }
 

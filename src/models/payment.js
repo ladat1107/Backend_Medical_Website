@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'paymentId',
                 as: 'prescriptionData',
             });
+            Payment.hasOne(models.AdvanceMoney, {
+                foreignKey: 'paymentId',
+                as: 'advanceMoneyData',
+            });
         }
     }
     Payment.init({

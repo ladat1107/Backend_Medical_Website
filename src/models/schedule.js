@@ -19,19 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         staffId: {
             type: DataTypes.INTEGER,
             allowNull: true,
-            references: {
-                model: 'staffs',
-                key: 'id',
-            },
             primaryKey: true,
         },
         roomId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'rooms', // Tên bảng users (có thể cần đảm bảo nó khớp với bảng thật trong DB)
-                key: 'id',
-            },
             primaryKey: true,
         },
         date: {

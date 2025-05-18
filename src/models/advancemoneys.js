@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'exam_id',
                 as: 'AdvanceMoneyExaminationData',
             });
+            AdvanceMoney.belongsTo(models.Payment, {
+                foreignKey: 'paymentId',
+                as: 'advanceMoneyData',
+            });
         }
     }
     AdvanceMoney.init({

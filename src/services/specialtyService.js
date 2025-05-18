@@ -52,15 +52,37 @@ export const getAllSpecialtyAdmin = async (page, limit, search) => {
 export const getSpcialtyHome = async (filter) => {
     try {
         let search = filter?.search || "";
-        console.log(search);
+        let date = filter?.date || undefined;
+        let whereSchedule = {};
+        if (date) {
+            whereSchedule = {
+                include: [
+                    {
+                        model: db.Room,
+                        as: "roomData",
+                        include: [
+                            {
+                                model: db.Schedule,
+                                as: "scheduleRoomData",
+                                where: { date: { [Op.gte]: date } },
+                                required: true,
+                            }
+                        ],
+                        required: true,
+                    }
+                ]
+            }
+        }
         let specialtyData = await db.Specialty.findAll({
+            ...whereSchedule,
             where: {
                 [Op.or]: [
                     { name: { [Op.like]: `%${search}%` }, },
                     { shortDescription: { [Op.like]: `%${search}%` } }
                 ],
                 status: status.ACTIVE,
-            }
+            },
+            nest: true,
         });
         return {
             EC: 0,

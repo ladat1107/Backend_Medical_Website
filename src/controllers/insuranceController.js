@@ -1,4 +1,4 @@
-import  { createInsurance, deleteInsurance, getInsuranceById, getInsuranceByUserId, updateInsurance } from "../services/insuranceService";
+import { createInsurance, deleteInsurance, getInsuranceById, getInsuranceByUserId, updateInsurance } from "../services/insuranceService";
 import { ERROR_SERVER } from "../utils";
 
 export const getInsuranceByIdController = async (req, res) => {
@@ -42,7 +42,7 @@ export const getInsuranceByUserIdController = async (req, res) => {
 export const createInsuranceController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.insuranceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod && data.userId) {
+        if (data && data.insuranceCode && data.benefitLevel && data.userId) {
             let response = await createInsurance(data);
             return res.status(200).json(response)
         } else {
@@ -61,7 +61,8 @@ export const createInsuranceController = async (req, res) => {
 export const updateInsuranceController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.insuranceCode && data.dateOfIssue && data.exp && data.benefitLevel && data.residentialCode && data.initialHealthcareRegistrationCode && data.continuousFiveYearPeriod) {
+        console.log(data);
+        if (data && data.id && data.insuranceCode && data.benefitLevel && data.userId) {
             let response = await updateInsurance(data);
             return res.status(200).json(response)
         } else {

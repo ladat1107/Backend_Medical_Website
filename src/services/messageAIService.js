@@ -18,11 +18,11 @@ const model = genAI.getGenerativeModel({
 - Address: 201 Nguyễn Chí Thanh, Phường 12, Quận 5, TP. Hồ Chí Minh  
 - Your role: Provide basic medical information, including symptoms, departments, doctors, and hospital details.  
 - Language: Answer fluently in the language the user asks.  
-- Medical questions should only be suggested, and accompanied by a disclaimer.  
+- Medical questions should only be suggested, and accompanied by a disclaimer, Suggested messages to reception staff.  
 - Respond politely and professionally, always addressing the user by name if provided.
 - Answer briefly and accurately to the core of the question.
-- Do not answer questions unrelated to current hospital.
-- Say hello only the first time, not in the middle of a conversation
+- Do not answer questions unrelated to current hospital. 
+- Say hello only the first time, not in the middle of a conversation.
 `,
 });
 const MESSAGE_TYPE = {
@@ -32,7 +32,7 @@ const MESSAGE_TYPE = {
     COUNT_DOCTORS_IN_DEPARTMENT: "COUNT_DOCTORS_IN_DEPARTMENT",
     DOCTOR_LIST_IN_HOSPITAL: "DOCTOR_LIST_IN_HOSPITAL",
     DOCTOR_LIST_OF_SPECIALTY: "DOCTOR_LIST_OF_SPECIALTY",
-
+    SUGGEST_MESSAGE_TO_RECEPTION: "SUGGEST_MESSAGE_TO_RECEPTION",
     UNKNOWN: "UNKNOWN",
 }
 const typemessage = async (question) => {
@@ -45,6 +45,7 @@ const typemessage = async (question) => {
         - ${MESSAGE_TYPE.DOCTOR_LIST_IN_DEPARTMENT}: Questions about how many staff or doctor work in a specific department (parameter: vietnamese name without "khoa")
         - ${MESSAGE_TYPE.DOCTOR_LIST_IN_HOSPITAL}:  Questions asking to list all doctors (staffs, employees) or count the number of doctors(staffs, employees) in the hospital
         - ${MESSAGE_TYPE.DOCTOR_LIST_OF_SPECIALTY}: Questions asking for doctors who treat specific **symptoms** or **conditions** (e.g., "đau bụng", "nhức chân", "đau đầu"). These questions typically contain references to physical symptoms, discomfort, or disease-related keywords. (parameter: extract the symptom or condition mentioned in the question).
+        - ${MESSAGE_TYPE.SUGGEST_MESSAGE_TO_RECEPTION}: Questions asking to suggest a message to reception staff
         - ${MESSAGE_TYPE.UNKNOWN}: Questions that do not fit any of the above categories
         Question: "${question}"
         
@@ -86,10 +87,6 @@ const getHospitalData = async (type, param) => {
             if (!findOne) {
                 return await findInformationDepartmentIncludeName(param);
             } else {
-                // return {
-                //     text: `Khoa ${findOne?.name} hiện tại có ${findOne?.staffDepartmentData?.length} nhân viên và ${findOne?.deanDepartmentData ? findOne?.deanDepartmentData?.staffUserData?.lastName + " " + findOne?.deanDepartmentData?.staffUserData?.firstName + " là trưởng khoa hiện tại" : " hiện tại chưa có trưởng khoa"}\n ${findOne?.shortDescription}`,
-                //     link: [{ name: `Chi tiết khoa ${findOne?.name}`, url: `/departmentDetail/${findOne.id}` }]
-                // }
                 return {
                     text: `Khoa ${findOne?.name} hiện tại có ${findOne?.staffDepartmentData?.length} nhân viên và ${findOne?.deanDepartmentData ? findOne?.deanDepartmentData?.staffUserData?.lastName + " " + findOne?.deanDepartmentData?.staffUserData?.firstName + " là trưởng khoa hiện tại" : " hiện tại chưa có trưởng khoa"}\n ${findOne}`,
                     link: [{ name: `Chi tiết khoa ${findOne?.name}`, url: `/departmentDetail/${findOne.id}` }]
@@ -115,6 +112,12 @@ const getHospitalData = async (type, param) => {
         }
         if (type === MESSAGE_TYPE.DOCTOR_LIST_OF_SPECIALTY) {
             return await findDoctorBySymptom(param);
+        }
+        if (type === MESSAGE_TYPE.SUGGEST_MESSAGE_TO_RECEPTION) {
+            return {
+                text: `Bạn có thể nhắn tin với nhân viên tiếp nhận để được hỗ trợ.`,
+                action: "Nhắn tin với tiếp nhận viên"
+            }
         }
         return null;
     } catch (error) {
@@ -155,7 +158,8 @@ export const messageAIService = async (message, history) => {
             let chatbotResponse = await model.generateContent(createPromptAfterQuery(history, message, dataAnswer.text));
             result = {
                 text: chatbotResponse.response.text(),
-                link: dataAnswer.link
+                link: dataAnswer.link,
+                action: dataAnswer?.action || undefined
             }
         }
         return {
