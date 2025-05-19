@@ -3,7 +3,7 @@ import { confirmBookingController, confirmTokenBookingController, getDoctorBooki
 import { deleteExaminationController, getExaminationByUserIdController, getExamToNoticeController, getListAdvanceMoneyController, getListInpationsController, updateOldParaclinicalController } from '../controllers/examinationController';
 import { paymentMomoCallback } from '../services/paymentService';
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
-import { getNumberMessageUnreadController, upsertConversationController } from '../controllers/messageController';
+import { getNumberMessageUnreadController, searchConversationController, upsertConversationController } from '../controllers/messageController';
 import { createNotificationController, getAllNotificationsController, getAllUserToNotifyController, markAllReadController, updateNotificationController } from '../controllers/notificationController';
 import { createMessageController } from '../controllers/messageController';
 import { createAdvanceMoneyController } from '../controllers/advanceMoneyController';
@@ -41,6 +41,7 @@ let initWebAuthenRounte = (app) => {
     router.get("/getListAdvanceMoney", getListAdvanceMoneyController)
 
     router.post("/createMessage", createMessageController)
+    router.get("/searchConversation", searchConversationController)
 
     router.get("/getExamToNotice", getExamToNoticeController)
     router.get("/getListInpatients", getListInpationsController)

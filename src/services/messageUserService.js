@@ -1,6 +1,6 @@
 
-import { Op, where } from "sequelize";
-import db from "../models/index"
+import { Op } from "sequelize";
+import db, { Sequelize } from "../models/index"
 import { ERROR_SERVER, STATUS_MESSAGE } from "../utils";
 let assistantForCustomer = [];
 
@@ -30,19 +30,45 @@ export const getConversation = async (userId, receiverId) => {
             }
             ],
         }, { transaction });
+
         if (!conversation) {
-            let staffForConversation = assistantForCustomer[Math.floor(Math.random() * assistantForCustomer.length)];
+            let staffForConversation = assistantForCustomer.length
+                ? assistantForCustomer.reduce((min, current) => current.count < min.count ? current : min)
+                : null;
+
             conversation = await db.Conversation.create({
                 patientId: receiverId || userId,
                 staffId: receiverId ? userId : staffForConversation?.id || null,
                 lastMessage: "",
             }, { transaction });
+
+            if (staffForConversation) {
+                assistantForCustomer = assistantForCustomer.map(assistant => {
+                    if (assistant.id === staffForConversation.id) {
+                        return { ...assistant, count: assistant.count + 1 };
+                    }
+                    return assistant;
+                });
+            }
         }
+
         if (!conversation.staffId || !assistantForCustomer.some(assistant => assistant.id === conversation.staffId)) {
-            let staffForConversation = assistantForCustomer[Math.floor(Math.random() * assistantForCustomer.length)];
+            let staffForConversation = assistantForCustomer.length
+                ? assistantForCustomer.reduce((min, current) => current.count < min.count ? current : min)
+                : null;
+
             await conversation.update({
-                staffId: staffForConversation?.id || null
+                staffId: receiverId ? userId : staffForConversation?.id || null
             }, { transaction });
+
+            if (staffForConversation) {
+                assistantForCustomer = assistantForCustomer.map(assistant => {
+                    if (assistant.id === staffForConversation.id) {
+                        return { ...assistant, count: assistant.count + 1 };
+                    }
+                    return assistant;
+                });
+            }
         }
 
         const [_, updatedMessages] = await db.Message.update({ status: STATUS_MESSAGE.READ }, {
@@ -74,11 +100,13 @@ export const getConversation = async (userId, receiverId) => {
 
 export const getConversationForStaff = async (staffId) => {
     try {
-        if (!assistantForCustomer.some(assistant => assistant.id === staffId)) {
-            assistantForCustomer.push({ id: staffId });
-        }
         let conversation = await db.Conversation.findAll({
-            where: { staffId: staffId },
+            where: {
+                [Op.or]: [
+                    { staffId: staffId },
+                    { staffId: { [Op.is]: null } }
+                ]
+            },
             include: [
                 {
                     model: db.User,
@@ -101,6 +129,10 @@ export const getConversationForStaff = async (staffId) => {
             ],
             nest: true,
         })
+
+        if (!assistantForCustomer.some(assistant => assistant?.id === staffId)) {
+            assistantForCustomer.push({ id: staffId, count: conversation.length });
+        }
 
         return { EC: 0, EM: "Nhân viên lấy cuộc hội thoại thành công", DT: conversation };
     } catch (error) {
@@ -182,6 +214,26 @@ export const getConversationById = async (conversationId) => {
 export const deleteAssistantForCustomer = async (staffId) => {
     try {
         assistantForCustomer = assistantForCustomer.filter(assistant => assistant.id !== staffId);
+
+        let staffForConversation = assistantForCustomer.length
+            ? assistantForCustomer.reduce((min, current) => current.count < min.count ? current : min)
+            : null;
+
+        let [updatedCount] = await db.Conversation.update({
+            staffId: staffForConversation?.id || null
+        }, {
+            where: { staffId: staffId }
+        });
+
+        if (staffForConversation) {
+            assistantForCustomer = assistantForCustomer.map(assistant => {
+                if (assistant.id === staffForConversation.id) {
+                    return { ...assistant, count: assistant.count + updatedCount };
+                }
+                return assistant;
+            });
+        }
+
         return { EC: 0, EM: "Rời khỏi cuộc hội thoại thành công", DT: assistantForCustomer };
     } catch (error) {
         console.log(error);
@@ -206,6 +258,53 @@ export const getNumberMessageUnread = async (userId) => {
         } else {
             return { EC: 0, EM: "Không có tin nhắn chưa đọc", DT: 0 };
         }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+
+export const searchConversation = async (keyword) => {
+    try {
+        const conversation = await db.Conversation.findAll({
+            include: [
+                {
+                    model: db.User,
+                    as: "patientData",
+                    attributes: ["id", "lastName", "firstName", "avatar"],
+                    where: {
+                        [Op.or]: [
+                            { lastName: { [Op.like]: `%${keyword}%` } },
+                            { firstName: { [Op.like]: `%${keyword}%` } },
+                            Sequelize.literal(`CONCAT(lastName, ' ', firstName) LIKE '%${keyword}%'`),
+                            { email: { [Op.like]: `%${keyword}%` } },
+                            { cid: { [Op.like]: `%${keyword}%` } }
+                        ]
+                    }
+                }
+            ],
+            nest: true,
+            order: [['updatedAt', 'DESC']],
+        })
+        return { EC: 0, EM: "Tìm kiếm cuộc hội thoại thành công", DT: conversation };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+
+export const getConversationFromSearch = async (conversationId, userId) => {
+    try {
+        let conversation = await db.Conversation.findOne({
+            where: { id: conversationId }
+        })
+
+        await conversation.update({ staffId: userId }, {
+            where: { id: conversationId }
+        })
+
+        return { EC: 0, EM: "Thêm cuộc trò chuyện thành công", DT: conversation };
+
     } catch (error) {
         console.log(error);
         return ERROR_SERVER;

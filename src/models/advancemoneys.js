@@ -28,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: true,
         },
+        paymentId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         status: {
             type: DataTypes.INTEGER,
             allowNull: true,
