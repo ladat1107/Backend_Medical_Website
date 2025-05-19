@@ -389,7 +389,7 @@ export const updateExamination = async (data, userId) => {
                 amount: data.advanceId ? data.advanceMoney : data.status === 8 ? data.amount : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
-                details: JSON.stringify(details)
+                detail: JSON.stringify(details)
             }, { transaction });
 
             paymentObject = {
@@ -398,9 +398,10 @@ export const updateExamination = async (data, userId) => {
         }
 
         if (data.insuranceCode) {
+
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
-                where: { userId: userId },
+                where: { userId: existExamination.userId },
                 transaction
             });
 
@@ -417,17 +418,8 @@ export const updateExamination = async (data, userId) => {
                 existingInsurance = await db.Insurance.create({
                     insuranceCode: data.insuranceCode,
                     benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
-                    userId: userId
+                    userId: existExamination.userId
                 }, { transaction });
-            }
-
-            if (!existingInsurance) {
-                await transaction.rollback();
-                return {
-                    EC: 404,
-                    EM: "Không tìm thấy bảo hiểm",
-                    DT: ""
-                }
             }
 
             paymentObject = {
@@ -673,12 +665,6 @@ export const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
             where: { id: id },
-            include: [
-                {
-                    model: db.Payment,
-                    as: "paymentData",
-                }
-            ],
             raw: true,
             nest: true,
         });
@@ -696,28 +682,13 @@ export const deleteExamination = async (id) => {
                 DT: ""
             }
         }
-        if (existExamination.paymentId) {
-            let refund = await refundMomo({ transId: existExamination.paymentData.transId, amount: existExamination.paymentData.amount * 0.8 });
-            if (refund.EC !== 0) {
-                return {
-                    EC: 400,
-                    EM: "Không thể hủy lịch hẹn",
-                    DT: ""
-                }
-            } else {
-                await db.Payment.update({
-                    status: paymentStatus.REFUNDED,
-                    amount: existExamination.paymentData.amount * 0.2,
-                }, {
-                    where: { id: existExamination.paymentData.id }
-                })
-            }
-        }
+
         await db.Examination.update({
             status: status.INACTIVE,
         }, {
             where: { id: id }
         })
+
         return {
             EC: 0,
             EM: "Hủy lịch hẹn thành công",

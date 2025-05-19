@@ -433,7 +433,7 @@ export const updateListPayParaclinicals = async (ids, insurance, userId) => {
             amount: price,
             paymentMethod: PAYMENT_METHOD.CASH,
             status: paymentStatus.PAID,
-            details: JSON.stringify(details)
+            detail: JSON.stringify(details)
         }, { transaction }); // Pass transaction to payment creation
 
         // Update all paraclinicals within the transaction

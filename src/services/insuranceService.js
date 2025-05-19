@@ -4,7 +4,7 @@ import { ERROR_SERVER } from "../utils";
 export const getInsuranceById = async (id) => {
     try {
         let insuarance = await db.Insurance.findOne({
-            where: { id: id },            
+            where: { id: id },
             raw: true,
             nest: true,
         });
@@ -45,14 +45,14 @@ export const getInsuranceByUserId = async (userId) => {
 export const createInsurance = async (data) => {
     try {
         let insuarance = await db.Insurance.create({
-            insuranceCode: data.insuranceCode,
-            dateOfIssue: data.dateOfIssue,
-            exp: data.exp,
-            benefitLevel: data.benefitLevel,
-            residentialCode: data.residentialCode,
-            initialHealthcareRegistrationCode: data.initialHealthcareRegistrationCode,
-            continuousFiveYearPeriod: data.continuousFiveYearPeriod,
-            userId: data.userId
+            insuranceCode: data?.insuranceCode || null,
+            dateOfIssue: data?.dateOfIssue || null,
+            exp: data?.exp || null,
+            benefitLevel: data?.benefitLevel || null,
+            residentialCode: data?.residentialCode || null,
+            initialHealthcareRegistrationCode: data?.initialHealthcareRegistrationCode || null,
+            continuousFiveYearPeriod: data?.continuousFiveYearPeriod || null,
+            userId: data?.userId || null
         });
         return {
             EC: 0,

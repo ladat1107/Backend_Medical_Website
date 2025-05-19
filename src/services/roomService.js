@@ -41,6 +41,11 @@ export const getAllRooms = async (page, limit, search, filter) => {
                     attributes: ['id'],
                     where: { status: { [Op.ne]: status.DONE_INPATIENT } },
                     required: false,
+                }, {
+                    model: db.Specialty,
+                    as: 'specialtyData',
+                    attributes: ['id', 'name'],
+                    required: false,
                 }
             ],
             order: [['createdAt', 'DESC']],
@@ -59,6 +64,7 @@ export const getAllRooms = async (page, limit, search, filter) => {
         return ERROR_SERVER
     }
 }
+
 export const getRoomByDepartment = async (departmentId) => {
     try {
         let room = await db.Room.findAll({

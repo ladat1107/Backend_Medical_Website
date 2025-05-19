@@ -1,8 +1,7 @@
 import { ERROR_SERVER, ROLE, status } from '../utils';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import db from '../models';
-//import { removeVietnameseTones } from '../utils/function';
-import { Op, } from 'sequelize';
+import db, { Sequelize } from '../models';
+import { Op } from 'sequelize';
 
 require('dotenv').config();
 let API_KEY = process.env.GEMINI_API_KEY;
@@ -17,22 +16,24 @@ const model = genAI.getGenerativeModel({
 - Hospital name: Hoa Sen Hospital (working 7am-5pm from Monday to Friday for the outpatient department, 24/7 for the remaining departments)
 - Address: 201 Nguyễn Chí Thanh, Phường 12, Quận 5, TP. Hồ Chí Minh  
 - Your role: Provide basic medical information, including symptoms, departments, doctors, and hospital details.  
-- Language: Answer fluently in the language the user asks.  
-- Medical questions should only be suggested, and accompanied by a disclaimer.  
+- Language: Answer flexibility in the language the user asks.  
+- Medical questions should only be suggested, and accompanied by a disclaimer, Suggested messages to reception staff.  
 - Respond politely and professionally, always addressing the user by name if provided.
 - Answer briefly and accurately to the core of the question.
-- Do not answer questions unrelated to current hospital.
-- Say hello only the first time, not in the middle of a conversation
+- Do not answer questions unrelated to current hospital. 
+- Say hello only the first time, not in the middle of a conversation.
 `,
 });
 const MESSAGE_TYPE = {
     LIST_DEPARTMENTS: "LIST_DEPARTMENTS",
+    DOCTOR_DETAIL: "DOCTOR_DETAIL",
     DEPARTMENT_DETAIL: "DEPARTMENT_DETAIL",
     DOCTOR_LIST_IN_DEPARTMENT: "DOCTOR_LIST_IN_DEPARTMENT",
     COUNT_DOCTORS_IN_DEPARTMENT: "COUNT_DOCTORS_IN_DEPARTMENT",
     DOCTOR_LIST_IN_HOSPITAL: "DOCTOR_LIST_IN_HOSPITAL",
     DOCTOR_LIST_OF_SPECIALTY: "DOCTOR_LIST_OF_SPECIALTY",
-
+    SUGGEST_MESSAGE_TO_RECEPTION: "SUGGEST_MESSAGE_TO_RECEPTION",
+    INSTRUCTION_FOR_MAKING_APPOINTMENT: "INSTRUCTION_FOR_MAKING_APPOINTMENT",
     UNKNOWN: "UNKNOWN",
 }
 const typemessage = async (question) => {
@@ -42,14 +43,17 @@ const typemessage = async (question) => {
         Types:
         - ${MESSAGE_TYPE.LIST_DEPARTMENTS}: Questions asking to list all departments or count the number of departments
         - ${MESSAGE_TYPE.DEPARTMENT_DETAIL}: Questions about what a department detail (parameter: department vietnamese name without "khoa")
+        - ${MESSAGE_TYPE.DOCTOR_DETAIL}: Questions about what a doctor detail (parameter: doctor vietnamese name without "bác sĩ" or "bs"), or questions asking for instructions on how to make an appointment without mentioning the name of the doctor or department
         - ${MESSAGE_TYPE.DOCTOR_LIST_IN_DEPARTMENT}: Questions about how many staff or doctor work in a specific department (parameter: vietnamese name without "khoa")
         - ${MESSAGE_TYPE.DOCTOR_LIST_IN_HOSPITAL}:  Questions asking to list all doctors (staffs, employees) or count the number of doctors(staffs, employees) in the hospital
         - ${MESSAGE_TYPE.DOCTOR_LIST_OF_SPECIALTY}: Questions asking for doctors who treat specific **symptoms** or **conditions** (e.g., "đau bụng", "nhức chân", "đau đầu"). These questions typically contain references to physical symptoms, discomfort, or disease-related keywords. (parameter: extract the symptom or condition mentioned in the question).
+        - ${MESSAGE_TYPE.SUGGEST_MESSAGE_TO_RECEPTION}: Questions asking to suggest a message to reception staff
+        - ${MESSAGE_TYPE.INSTRUCTION_FOR_MAKING_APPOINTMENT}: Questions asking for instructions on how to make an appointment without mentioning the name of the doctor or department
         - ${MESSAGE_TYPE.UNKNOWN}: Questions that do not fit any of the above categories
         Question: "${question}"
         
         Return only a JSON object with this exact format (no other text):
-        {"type": "ONE_OF_THE_TYPES_ABOVE", "param": "extracted parameter if applicable, otherwise empty string"}`;
+        {"type": "ONE_OF_THE_TYPES_ABOVE", "param": "extracted parameter if applicable, otherwise empty string (Can take parameters from previous question information if appropriate for the context)"}`;
 
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
@@ -86,10 +90,6 @@ const getHospitalData = async (type, param) => {
             if (!findOne) {
                 return await findInformationDepartmentIncludeName(param);
             } else {
-                // return {
-                //     text: `Khoa ${findOne?.name} hiện tại có ${findOne?.staffDepartmentData?.length} nhân viên và ${findOne?.deanDepartmentData ? findOne?.deanDepartmentData?.staffUserData?.lastName + " " + findOne?.deanDepartmentData?.staffUserData?.firstName + " là trưởng khoa hiện tại" : " hiện tại chưa có trưởng khoa"}\n ${findOne?.shortDescription}`,
-                //     link: [{ name: `Chi tiết khoa ${findOne?.name}`, url: `/departmentDetail/${findOne.id}` }]
-                // }
                 return {
                     text: `Khoa ${findOne?.name} hiện tại có ${findOne?.staffDepartmentData?.length} nhân viên và ${findOne?.deanDepartmentData ? findOne?.deanDepartmentData?.staffUserData?.lastName + " " + findOne?.deanDepartmentData?.staffUserData?.firstName + " là trưởng khoa hiện tại" : " hiện tại chưa có trưởng khoa"}\n ${findOne}`,
                     link: [{ name: `Chi tiết khoa ${findOne?.name}`, url: `/departmentDetail/${findOne.id}` }]
@@ -110,11 +110,26 @@ const getHospitalData = async (type, param) => {
                 }
             }
         }
+        if (type === MESSAGE_TYPE.DOCTOR_DETAIL) {
+            return await findInformationDoctorExactly(param);
+        }
         if (type === MESSAGE_TYPE.DOCTOR_LIST_IN_HOSPITAL) {
             return await findInformationStaffInHospital();
         }
         if (type === MESSAGE_TYPE.DOCTOR_LIST_OF_SPECIALTY) {
             return await findDoctorBySymptom(param);
+        }
+        if (type === MESSAGE_TYPE.INSTRUCTION_FOR_MAKING_APPOINTMENT) {
+            return {
+                text: `Bạn có thể đặt lịch khám tại bệnh viện Hoa Sen qua hotline: <b>0353366459</b>, hoặc đặt lịch bằng website bằng cách nhấn nút "Đặt lịch khám" dưới đây.`,
+                link: [{ name: "Đặt lịch khám", url: "/make-appointment" }]
+            }
+        }
+        if (type === MESSAGE_TYPE.SUGGEST_MESSAGE_TO_RECEPTION) {
+            return {
+                text: `Bạn có thể nhắn tin với nhân viên tiếp nhận để được hỗ trợ.`,
+                action: "Nhắn tin với tiếp nhận viên"
+            }
         }
         return null;
     } catch (error) {
@@ -155,7 +170,8 @@ export const messageAIService = async (message, history) => {
             let chatbotResponse = await model.generateContent(createPromptAfterQuery(history, message, dataAnswer.text));
             result = {
                 text: chatbotResponse.response.text(),
-                link: dataAnswer.link
+                link: dataAnswer.link,
+                action: dataAnswer?.action || undefined
             }
         }
         return {
@@ -340,5 +356,55 @@ const findDoctorBySymptom = async (param) => {
             text: "Không tìm thấy thông tin bác sĩ phù hợp",
             link: null
         };
+    }
+}
+
+const findInformationDoctorExactly = async (param) => {
+    try {
+        let findOne = await db.User.findAll({
+            where: {
+                [Op.and]: [
+                    { roleId: ROLE.DOCTOR },
+                    { status: status.ACTIVE },
+                    {
+                        [Op.or]: [
+                            { firstName: { [Op.like]: `%${param}%` } },
+                            { lastName: { [Op.like]: `%${param}%` } },
+                            Sequelize.literal(`CONCAT(lastName, ' ', firstName) LIKE '%${param}%'`)
+                        ]
+                    }
+                ]
+            },
+            include: [{
+                model: db.Staff,
+                as: 'staffUserData',
+                attributes: ['id', 'price', 'position', 'departmentId', 'shortDescription'],
+                include: [{
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                    required: false,
+                }]
+            }],
+            nest: true
+        })
+        if (!findOne) {
+            return { text: "Không tìm thấy thông tin bác sĩ phù hợp. Bạn có thể cung cấp thêm thông tin cụ thể bác sĩ cần tìm hoặc nhắn tin với tiếp nhận để có câu trả lời cụ thể nhất!", link: [] };
+        }
+        let link = findOne.map(doctor => ({
+            name: `Chi tiết bác sĩ ${doctor.lastName} ${doctor.firstName}`,
+            url: `/doctor-detail/${doctor.id}`
+        }))
+        return {
+            text: `-Đây là thông tin bác sĩ mà bạn tìm kiếm, bạn có thể đặt lịch với bác sĩ bằng cách nhắn vào xem chi tiết bác sĩ
+            -Thông tin từ database: ${findOne}`,
+            link: link
+        }
+
+
+
+    } catch (error) {
+        console.log('Error:', error);
+        return { text: "Bạn có thể tham khảo thông tin nhân sự tại bệnh viện Hoa Sen tại đây", link: [{ name: "Danh sách bác sĩ của Hoa Sen", url: "/doctor-list" }] };
     }
 }

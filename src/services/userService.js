@@ -311,6 +311,10 @@ export const getUserById = async (userId) => {
                         },
                     ]
                 },
+                {
+                    model: db.Insurance,
+                    as: 'userInsuranceData',
+                }
 
             ],
             raw: true,
@@ -898,6 +902,72 @@ export const getDoctorHome = async (filter) => {
         return ERROR_SERVER;
     }
 };
+export const getDoctorBookingById = async (id) => {
+    try {
+        let doctor = await db.Staff.findOne({
+            where: {
+                status: status.ACTIVE,
+                userId: +id,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        status: status.ACTIVE,
+                        roleId: ROLE.DOCTOR,
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Specialty,
+                    as: 'staffSpecialtyData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Examination,
+                    as: 'examinationStaffData',
+                    attributes: ['id'],
+                }, {
+                    model: db.Schedule,
+                    as: 'staffScheduleData',
+                    separate: true, // ⭐ Giúp tránh join phức tạp gây lỗi
+                    where: {
+                        date: { [Op.gte]: new Date() },
+                    },
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'scheduleRoomData',
+                            where: { departmentId: typeRoom.CLINIC },
+                            attributes: ['id', 'name']
+                        }
+                    ],
+                }
+            ],
+            attributes: ['id', 'position', 'userId', 'price'],
+            nest: true,
+        });
+        if (doctor) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin bác sĩ thành công",
+                DT: doctor,
+            };
+        } else {
+            return { EC: 404, EM: "Bác sĩ này không có lịch khám", DT: "", }
+        }
+
+    } catch (error) {
+        console.error("Lỗi server:", error);
+        return ERROR_SERVER;
+    }
+};
 export const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
@@ -1163,6 +1233,8 @@ export const confirmTokenBooking = async (token) => {
                     paymentDoctorStatus: paymentStatus.UNPAID,
 
                     price: data?.profile?.price,
+                    coveredPrice: data?.profile?.coveredPrice,
+                    insuranceCode: data?.profile?.insuranceCode,
                     special: data?.profile?.special,
                     roomName: data?.schedule?.room?.name || null,
 

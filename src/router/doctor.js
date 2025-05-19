@@ -13,7 +13,7 @@ import { createExaminationController, deleteExaminationController, getExaminatio
 import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
-import { deleteAssistantForCustomerController, getConversationForStaffController } from '../controllers/messageController';
+import { deleteAssistantForCustomerController, getConversationFromSearchController, getConversationForStaffController } from '../controllers/messageController';
 import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
 import { getAvailableRoomsController } from '../controllers/roomController';
 dotenv.config();
@@ -80,16 +80,6 @@ let initDoctorRoute = (app) => {
     router.post("/createOrUpdateParaclinical", createOrUpdateParaclinicalController)
     router.post("/createRequestParaclinical", createRequestParaclinicalController)
 
-    //-- Appointment
-    // router.get("/getAllAppointments", appointmentController.getAllAppointments)
-    // router.get("/getAllAppointmentsByDate", appointmentController.getAllAppointmentsByDate)
-    // router.get("/getAppointmentByUserId", appointmentController.getAppointmentByUserId)
-    // router.get("/getAppointmentByStaffId", appointmentController.getAppointmentByStaffId)
-    // router.get("/searchAppointment", appointmentController.searchAppointment)
-    // router.get("/searchAppointmentWithStaffId", appointmentController.seachAppointmentWithStaffId)
-    // router.post("/createAppointment", appointmentController.createAppointment)
-    // router.delete("/deleteAppointment", appointmentController.deleteAppointment)
-
     //examination
     router.get("/getExaminations", getExaminationsController)
     router.get("/getListToPay", getListToPayController)
@@ -108,6 +98,7 @@ let initDoctorRoute = (app) => {
     // -- Message
     router.get("/getConversationForStaff", getConversationForStaffController)
     router.delete("/deleteAssistantForCustomer", deleteAssistantForCustomerController)
+    router.put("/getConversationFromSearch", getConversationFromSearchController)
 
     // -- Room
     router.get("/getAvailableRooms", getAvailableRoomsController)

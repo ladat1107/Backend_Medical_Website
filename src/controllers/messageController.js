@@ -1,5 +1,5 @@
 import { messageAIService } from "../services/messageAIService";
-import { createMessage, deleteAssistantForCustomer, getConversation, getConversationForStaff, getNumberMessageUnread } from "../services/messageUserService";
+import { createMessage, deleteAssistantForCustomer, getConversation, getConversationForStaff, getConversationFromSearch, getNumberMessageUnread, searchConversation } from "../services/messageUserService";
 import { ERROR_SERVER, ROLE, STATUS_MESSAGE } from "../utils";
 
 export const messageSystem = async (req, res) => {
@@ -74,3 +74,25 @@ export const createMessageController = async (req, res) => {
     }
 }
 
+export const searchConversationController = async (req, res) => {
+    try {
+        let { search } = req.query;
+        let response = await searchConversation(search);
+        return res.status(200).json(response);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER);
+    }
+}
+
+export const getConversationFromSearchController = async (req, res) => {
+    try {
+        let { conversationId } = req.body;
+        let userId = req.user.id;
+        let response = await getConversationFromSearch(conversationId, userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER);
+    }
+}

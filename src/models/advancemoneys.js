@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'exam_id',
                 as: 'AdvanceMoneyExaminationData',
             });
+            AdvanceMoney.belongsTo(models.Payment, {
+                foreignKey: 'paymentId',
+                as: 'advanceMoneyData',
+            });
         }
     }
     AdvanceMoney.init({
@@ -22,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         date: {
             type: DataTypes.DATE,
+            allowNull: true,
+        },
+        paymentId: {
+            type: DataTypes.INTEGER,
             allowNull: true,
         },
         status: {
