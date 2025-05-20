@@ -724,7 +724,6 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         const totalAppointment = await db.Examination.count({
             where: {
                 ...whereCondition,
-                //is_appointment: 1,
                 status: 2,
             }
         });
@@ -1731,8 +1730,6 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
             offset,
             distinct: true // Ensures correct count with joins
         });
-
-        console.log('examinations', examinations);
 
         return {
             EC: 0,

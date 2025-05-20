@@ -453,15 +453,6 @@ export const createPrescription = async (data) => {
             status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID,
         }, { transaction: t });
 
-        if (!prescription) {
-            await t.rollback();
-            return {
-                EC: 1,
-                EM: "Tạo đơn thuốc không thành công",
-                DT: "",
-            };
-        }
-
         // 2. Tạo chi tiết đơn thuốc từ mảng
         const details = data.prescriptionDetails.map(item => ({
             prescriptionId: prescription.id,
