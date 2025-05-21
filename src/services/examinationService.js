@@ -1146,6 +1146,14 @@ export const getPatienSteps = async (examId) => {
             nest: true,
         });
 
+        if (!examination) {
+            return {
+                EC: 404,
+                EM: 'Không tìm thấy thông tin khám bệnh',
+                DT: '',
+            };
+        }
+
         // Format steps data
         const formatSteps = (data, isParaclinical = false) => {
             const stepLabels = isParaclinical ? {
