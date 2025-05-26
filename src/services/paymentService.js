@@ -14,14 +14,19 @@ require('dotenv').config();
 let accessKey = process.env.ACCESSKEY_MOMO;
 let secretKey = process.env.SECRETKEY_MOMO;
 
-// ngrok http 8843
+// ngrok http 8843 
+// TK: 9704 0000 0000 0018  
+// 03/07
+// NGUYEN VAN A
+
+let ngrokUrl = "https://06ba-58-187-190-224.ngrok-free.app";
 
 export const paymentMomo = async (data) => {
     try {
         let orderInfo = 'pay with MoMo';
         let partnerCode = "MOMO";
         let redirectUrl = data.redirectUrl;
-        let ipnUrl = `https://853b-14-169-30-204.ngrok-free.app/api/callbackMomo`;
+        let ipnUrl = `${ngrokUrl}/api/callbackMomo`;
         let requestType = "payWithMethod";
         let amount = data.price;
         let orderId = partnerCode + new Date().getTime();
@@ -371,7 +376,6 @@ export const getPaymentAdmin = async (fillter) => {
                 {
                     model: db.AdvanceMoney,
                     as: 'advanceMoneyData',
-                    attributes: ['id', 'amount', 'status'],
                     required: false,
                 }
             ],

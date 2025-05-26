@@ -8,14 +8,8 @@ import { blockDepartmentController, createDepartmentController, deleteDepartment
 import { blockStatusServiceTypeController, createServiceTypeController, deleteStatusServiceTypeController, getAllServiceTypesAdminController, getServiceSearchController, updateServiceTypeController } from '../controllers/serviceTypeController';
 import { getHandBooksAdminController, updateHandbookStatusController } from '../controllers/handBookController';
 import { blockRoomController, createRoomController, deleteRoomController, getAllRoomAdminController, updateRoomController } from '../controllers/roomController';
-import { createBedController, deleteBedController, updateBedController } from '../controllers/bedController';
-import { createPatientController, updatePatientController } from '../controllers/patientController';
-import { createRoleController, updateRoleController } from '../controllers/roleController';
 import { arrangScheduleController, createScheduleController, deleteScheduleController, getAllSchedulesAdminController, updateScheduleStaffController } from '../controllers/scheduleController';
 import { blockMedicineController, createMedicineController, deleteMedicineController, getAllMedicinesAdminController, getPrescriptionUsedController, updateMedicineController } from '../controllers/medicineController';
-import { createAllergyController, deleteAllergyController, updateAllergyController } from '../controllers/allergyController';
-import { createDisabilityController, deleteDisabilityController, updateDisabilityController } from '../controllers/disabilityController';
-import { createSurgicalHistoryController, deleteSurgicalHistoryController, updateSurgicalHistoryController } from '../controllers/surgicalHistoryController';
 import { getAllExaminationsAdminController, getExaminationByIdAdminController } from '../controllers/examinationController';
 import { getPaymentAdminController } from '../controllers/paymentController';
 require('dotenv').config();
@@ -56,25 +50,12 @@ let initAdminRoute = (app) => {
     router.get("/getHandbookAdmin", getHandBooksAdminController)
     router.put("/updateHandbookStatus", updateHandbookStatusController)
 
-    //// ----> Admin
+    //// ----> Admin room
     router.get("/getAllRoomAdmin", getAllRoomAdminController)
     router.post("/createRoom", createRoomController)
     router.put("/updateRoom", updateRoomController)
     router.put("/blockRoom", blockRoomController)
     router.delete("/deleteRoom", deleteRoomController)
-
-    //// ----> Admin
-    router.post("/createBed", createBedController)
-    router.put("/updateBed", updateBedController)
-    router.put("/deleteBed", deleteBedController)
-
-    //// ----> Admin
-    router.post("/createPatient", createPatientController)
-    router.put("/updatePatient", updatePatientController)
-
-    //// ----> Admin Role
-    router.post("/createRole", createRoleController)
-    router.put("/updateRole", updateRoleController)
 
     // ----> Admin
     router.post("/arrangSchedule", arrangScheduleController)
@@ -101,21 +82,6 @@ let initAdminRoute = (app) => {
 
     // ----> Admin Payment
     router.get("/getPaymentAdmin", getPaymentAdminController)
-
-    //----------------------------------------------------------------------------------------------------------------------------------------
-    // ----> Admin
-    router.post("/createAllergy", createAllergyController)
-    router.put("/updateAllergy", updateAllergyController)
-    router.put("/deleteAllergy", deleteAllergyController)
-
-    // ----> Admin
-    router.post("/createDisability", createDisabilityController)
-    router.put("/updateDisability", updateDisabilityController)
-    router.put("/deleteDisability", deleteDisabilityController)
-
-    router.post("/createSurgicalHistory", createSurgicalHistoryController)
-    router.put("/updateSurgicalHistory", updateSurgicalHistoryController)
-    router.put("/deleteSurgicalHistory", deleteSurgicalHistoryController)
 
     return app.use("/api/admin/", router);
 }

@@ -423,10 +423,11 @@ export const updateExamination = async (data, userId) => {
             }
 
             paymentObject = {
+                ...paymentObject,
                 insuranceCode: data.insuranceCode,
                 insuranceCoverage: getThirdDigitFromLeft(data.insuranceCode),
                 ...(data.insuranceCovered !== undefined && { insuranceCovered: data.insuranceCovered }),
-                ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice })
+                ...(data.coveredPrice !== undefined && { coveredPrice: data.coveredPrice }),
             }
         }
 
@@ -593,8 +594,8 @@ export const updateExamination = async (data, userId) => {
                     special: existExamination.special,
                     comorbidities: existExamination.comorbidities,
 
-                    insuranceCode: insuranceCode.insuranceCode,
-                    insuranceCoverage: getThirdDigitFromLeft(insuranceCode.insuranceCode),
+                    insuranceCode: insuranceCode?.insuranceCode || null,
+                    insuranceCoverage: getThirdDigitFromLeft(insuranceCode?.insuranceCode || ""),
 
                     // Số vào phòng bác sĩ (number) và tên phòng (roomName)
                     //number: existExamination.number + 1,
@@ -1378,7 +1379,12 @@ export const getExaminationByIdAdmin = async (id) => {
                         as: 'prescriptionDetails',
                         attributes: ['id', 'name', 'price'],
                         through: ['quantity', 'unit', 'dosage', 'price']
-                    }],
+                    },
+                    {
+                        model: db.Payment,
+                        as: 'paymentData',
+                    }
+                    ],
                 },
                 {
                     model: db.Payment,
@@ -1388,6 +1394,16 @@ export const getExaminationByIdAdmin = async (id) => {
                 {
                     model: db.VitalSign,
                     as: 'examinationVitalSignData',
+                },
+                {
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyExaminationData',
+                    include: [
+                        {
+                            model: db.Payment,
+                            as: 'paymentData',
+                        }
+                    ]
                 }
             ],
             nest: true,

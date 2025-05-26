@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import db from "../models/index";
 import { ERROR_SERVER, status } from "../utils/index";
-
+import dayjs from "dayjs";
 export const getAllMedicines = async () => {
     try {
         let medicines = await db.Medicine.findAll({
@@ -31,7 +31,7 @@ export const getAllMedicinesForExam = async () => {
     try {
         let medicines = await db.Medicine.findAll({
             where: { status: status.ACTIVE },
-            attributes: ['id', 'name', 'price', 'unit', 'batchNumber','inventory','exp'],
+            attributes: ['id', 'name', 'price', 'unit', 'batchNumber', 'inventory', 'exp'],
             raw: true,
             nest: true,
         });
@@ -84,6 +84,10 @@ export const getAllMedicinesAdmin = async () => {
             order: [['updatedAt', 'DESC']],
             raw: true,
         });
+        medicines = medicines.map(medicine => ({
+            ...medicine,
+            status: medicine.status === status.INACTIVE ? status.INACTIVE : dayjs(medicine.exp).isBefore(dayjs()) ? status.INACTIVE : status.ACTIVE
+        }));
         return {
             EC: 0,
             EM: "Lấy thông tin thuốc thành công",

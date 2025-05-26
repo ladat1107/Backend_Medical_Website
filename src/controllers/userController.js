@@ -389,8 +389,9 @@ export const getUserInsuaranceController = async (req, res) => {
 export const confirmBookingController = async (req, res) => {
     try {
         let data = req.body;
+        let userId = req.user.id;
         if (data && data.profile && data.doctor && data.schedule) {
-            let response = await confirmBooking(data);
+            let response = await confirmBooking(data, userId);
             return res.status(200).json(response)
         } else {
             return res.status(200).json({
