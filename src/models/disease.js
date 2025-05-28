@@ -8,16 +8,7 @@ module.exports = (sequelize, DataTypes) => {
             Disease.belongsTo(models.DiseaseGroup, {
                 foreignKey: 'diseaseGroupId',
                 as: 'diseaseDiseaseGroupData',
-            });
-            Disease.belongsToMany(models.User, {
-                through: 'DiseaseUsers',
-                foreignKey: 'diseaseId',
-                as: 'userData',
-            });
-            Disease.hasMany(models.Comorbidities, {
-                foreignKey: 'diseaseId',
-                as: 'diseaseComorbiditiesData',
-            });
+            }); 
         }
     }
     Disease.init({

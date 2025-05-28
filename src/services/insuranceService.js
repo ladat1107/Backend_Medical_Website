@@ -54,9 +54,10 @@ export const createInsurance = async (data) => {
             continuousFiveYearPeriod: data?.continuousFiveYearPeriod || null,
             userId: data?.userId || null
         });
+
         return {
             EC: 0,
-            EM: "Tạo thông tin bảo hiểm thành công",
+            EM: "Kiểm tra bảo hiểm thành công",
             DT: insuarance
         }
     } catch (error) {

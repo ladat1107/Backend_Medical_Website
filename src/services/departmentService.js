@@ -208,7 +208,7 @@ export const createDepartment = async (data) => {
         let department = await db.Department.create({
             name: data?.name,
             image: data?.image,
-            deanId: data?.deanId,
+            deanId: data?.deanId || null,
             shortDescription: data?.shortDescription,
             status: status.ACTIVE,
             address: data?.address,

@@ -280,7 +280,7 @@ export const updatePrescription = async (data, userId) => {
             where: { id: userId },
             attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'cid'],
             raw: true,
-            transaction
+            transaction: t
         });
         let createdPayment = null;
 

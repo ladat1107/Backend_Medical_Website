@@ -1110,12 +1110,12 @@ export const getUserInsuarance = async (userId) => {
     }
 }
 
-export const confirmBooking = async (data) => {
+export const confirmBooking = async (data, userId) => {
     try {
         let user = await db.User.findOne({
             where: { cid: data.profile.cid },
         });
-        if (!user) {
+        if (!user || user.id !== userId) {
             data.profile.bookFor = true;
         } else {
             let examination = await db.Examination.findAll({
@@ -1155,13 +1155,17 @@ export const confirmBooking = async (data) => {
         return ERROR_SERVER;
     }
 }
+
 export const confirmTokenBooking = async (token) => {
     let transaction = await sequelize.transaction();
     try {
         let data = await verifyToken(token);
 
         if (data) {
-            let user;
+            let user = await db.User.findOne({
+                where: { cid: data.profile.cid },
+            }, { transaction });
+
             let examinationCount = await db.Examination.findAll({
                 where: {
                     admissionDate: new Date(data.schedule.date),
@@ -1169,7 +1173,8 @@ export const confirmTokenBooking = async (token) => {
                     status: status.PENDING,
                     is_appointment: 1,
                 },
-            });
+            }, { transaction });
+
             if (examinationCount.length >= 6) {
                 return {
                     EC: 200,
@@ -1180,15 +1185,16 @@ export const confirmTokenBooking = async (token) => {
             let staff = await db.Staff.findOne({
                 where: { id: data.doctor.id },
                 attributes: ["id", "price"],
-            });
+            }, { transaction });
             if (!staff) {
+                await transaction.rollback();
                 return {
                     EC: 200,
                     EM: "Đặt lịch khám thất bại! Không tìm thấy bác sĩ",
                     DT: "",
                 }
             }
-            if (data.profile.bookFor) {
+            if (data.profile.bookFor && !user) {
                 let password = "123456";
                 let hashPassword = await hashPasswordUser(password);
                 user = await db.User.create({
@@ -1202,26 +1208,26 @@ export const confirmTokenBooking = async (token) => {
                     roleId: ROLE.PATIENT,
                     dob: new Date(data.profile.dob),
                     currentResident: data.profile.address || null,
-                });
-            } else {
-                user = await db.User.findOne({
-                    where: { cid: data.profile.cid },
-                });
-                let examination = await db.Examination.findAll({
-                    where: {
-                        userId: user.id,
-                        admissionDate: new Date(data.schedule.date),
-                        status: status.PENDING,
-                    }
-                });
-                if (examination.length > 0) {
-                    return {
-                        EC: 200,
-                        EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
-                        DT: "",
-                    }
+                    tokenVersion: new Date().getTime(),
+                }, { transaction });
+            }
+
+            let examinations = await db.Examination.findAll({
+                where: {
+                    userId: user.id,
+                    admissionDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                }
+            }, { transaction });
+            if (examinations.length > 0) {
+                await transaction.rollback();
+                return {
+                    EC: 200,
+                    EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                    DT: "",
                 }
             }
+
             if (user && staff) {
                 let examination = await db.Examination.create({
                     userId: user.id,
@@ -1233,8 +1239,9 @@ export const confirmTokenBooking = async (token) => {
                     paymentDoctorStatus: paymentStatus.UNPAID,
 
                     price: data?.profile?.price,
-                    coveredPrice: data?.profile?.coveredPrice,
-                    insuranceCode: data?.profile?.insuranceCode,
+                    coveredPrice: data?.profile?.coveredPrice !== undefined ? +data.profile.coveredPrice : data?.profile?.price,
+                    insuranceCode: data?.profile?.insuranceCode || null,
+                    insuranceCoverage: +data?.profile?.insuranceCoverage || null,
                     special: data?.profile?.special,
                     roomName: data?.schedule?.room?.name || null,
 
@@ -1245,6 +1252,7 @@ export const confirmTokenBooking = async (token) => {
                     bookFor: data.profile.bookFor ? data.profile.id : null,
                     oldParaclinical: data?.profile?.oldParaclinical || null,
                 }, { transaction });
+
                 if (examination) {
                     await transaction.commit();
                     return {

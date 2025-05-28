@@ -53,8 +53,9 @@ export const getAllMedicinesAdminController = async (req, res) => {
 
 export const createMedicineController = async (req, res) => {
     try {
-        let data = req.body;
-        let response = await createMedicine(data);
+        let data = req?.body?.data || [];
+        let allowAddExisting = req?.body?.allowAddExisting || false;
+        let response = await createMedicine(data, allowAddExisting);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
