@@ -99,8 +99,12 @@ export const getAllMedicinesAdmin = async () => {
     }
 }
 
-export const createMedicine = async (medicines) => {
+export const createMedicine = async (medicines, allowAddExisting) => {
+    let transaction = await db.sequelize.transaction();
     try {
+        let medicineInsert = [];
+        let medicineUpdate = [];
+
         if (!medicines.length) return { EC: 400, EM: "Không có dữ liệu để tạo thuốc", DT: "" };
         const keyPairs = medicines.map(m => ({
             registrationNumber: m.registrationNumber,
@@ -112,31 +116,60 @@ export const createMedicine = async (medicines) => {
             where: {
                 [Op.or]: keyPairs
             },
-            attributes: ['registrationNumber', 'batchNumber', 'name']
-        });
+            attributes: ['id', 'registrationNumber', 'batchNumber', 'name']
+        }, { transaction });
 
         // 2. Nếu có bất kỳ bản ghi nào trùng thì không insert
         if (existing.length > 0) {
             let error = "";
             existing.forEach(e => {
-                error += `Lô thuốc ${e.batchNumber} của ${e.name} đã tồn tại\n`;
+                error += `Lô thuốc ${e.batchNumber} của ${e.name} đã tồn tại <br>`;
             });
-            return {
-                EC: 1,
-                EM: 'Đã có bản ghi trùng trong cơ sở dữ liệu',
-                DT: error
-            };
-        }
+            if (!allowAddExisting) {
+                await transaction.commit();
+                return {
+                    EC: 1,
+                    EM: 'Đã có bản ghi trùng trong cơ sở dữ liệu',
+                    DT: error
+                };
+            } else {
+                medicineInsert = medicines.filter(medicine => !existing.some(e => e.registrationNumber === medicine.registrationNumber && e.batchNumber === medicine.batchNumber));
+                medicineUpdate = medicines.flatMap(medicine => {
+                    const match = existing.find(e => e.registrationNumber === medicine.registrationNumber && e.batchNumber === medicine.batchNumber);
+                    return match ? [{ ...medicine, id: match.id ?? match.dataValues?.id }] : [];
+                });
 
-        // 3. Nếu không có trùng thì insert toàn bộ (1 lần)
-        await db.Medicine.bulkCreate(medicines, { validate: true });
-        return {
-            EC: 0,
-            EM: "Tạo mới thuốc thành công",
-            DT: ""
+                await db.Medicine.bulkCreate(medicineInsert, { validate: true, transaction });
+                // Cập nhật tồn kho cho thuốc đã tồn tại
+                for (const medicine of medicineUpdate) {
+                    await db.Medicine.increment(
+                        { inventory: medicine.inventory },
+                        {
+                            where: { id: medicine.id },
+                            transaction,
+                        }
+                    );
+                }
+                await transaction.commit();
+                return {
+                    EC: 0,
+                    EM: "Tạo mới thuốc thành công",
+                    DT: ""
+                }
+            }
+        } else {
+            // 3. Nếu không có trùng thì insert toàn bộ (1 lần)
+            await db.Medicine.bulkCreate(medicines, { validate: true, transaction });
+            await transaction.commit();
+            return {
+                EC: 0,
+                EM: "Tạo mới thuốc thành công",
+                DT: ""
+            }
         }
     } catch (error) {
         console.log(error);
+        await transaction.rollback();
         return ERROR_SERVER
     }
 }
