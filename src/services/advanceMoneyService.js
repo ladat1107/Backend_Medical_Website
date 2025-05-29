@@ -22,6 +22,43 @@ export const createAdvanceMoney = async (data) => {
     }
 }
 
+export const deleteAdvanceMoney = async (id) => {
+    try {
+        const advanceMoney = await db.AdvanceMoney.findOne({
+            where: { id: id }
+        });
+
+        if (!advanceMoney) {
+            return {
+                EC: 1,
+                EM: "Không tìm thấy tạm ứng",
+                DT: {}
+            }
+        }
+
+        if (advanceMoney.status === paymentStatus.PAID) {
+            return {
+                EC: 1,
+                EM: "Không thể xóa tạm ứng đã thanh toán",
+                DT: {}
+            }
+        }
+
+        await db.AdvanceMoney.destroy({
+            where: { id: id }
+        });
+
+        return {
+            EC: 0,
+            EM: "Xóa tạm ứng thành công",
+            DT: advanceMoney
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER);
+    }
+}
+
 export const updateAdvanceMomo = async (data, payment) => {
     let transaction = await db.sequelize.transaction();
     try {

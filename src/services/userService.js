@@ -1227,7 +1227,7 @@ export const confirmTokenBooking = async (token) => {
                     DT: "",
                 }
             }
-
+           
             if (user && staff) {
                 let examination = await db.Examination.create({
                     userId: user.id,

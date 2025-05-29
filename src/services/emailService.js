@@ -34,7 +34,7 @@ let sendEmailConform = (data, url) => {
             <p><strong>Bệnh viện Hoa Sen: </strong></p>
             <p><strong>Địa chỉ: </strong> 203, Nguyễn Trãi, Linh Trung, Thủ Đức, TPHCM</p>
             <p>Việc đặt lịch khám bệnh sẽ trở nên dễ dàng hơn bao giờ hết! </p>
-            <p>Bạn vui lòng bấm nút xác nhận trong <strong>2 phút</strong> để tạo tài khoản:</p>
+            <p>Bạn vui lòng bấm nút xác nhận trong <strong>5 phút</strong> để tạo tài khoản:</p>
             <a href="${urlRedirect}" style="display: inline-block; padding: 10px 20px; margin: 20px 0; font-size: 16px; color: white; background-color: #00B5F1; text-align: center; text-decoration: none; border-radius: 10px;">Xác nhận</a>
             <p>Mong sớm gặp bạn!</p>
             <p>Chúc bạn vui vẻ,</p>
@@ -79,7 +79,7 @@ let sendEmailConformAppoinment = (data, url) => {
             <p>Việc đặt lịch khám bệnh sẽ trở nên dễ dàng hơn bao giờ hết! </p>
             <p>Ngày :  ${data.schedule.date}</p>
             <p>Thời gian :  ${data.schedule.time.label}</p>
-            <p>Bạn vui lòng bấm nút xác nhận trong <strong>2 phút</strong> để xác nhận lịch khám của bạn:</p>
+            <p>Bạn vui lòng bấm nút xác nhận trong <strong>5 phút</strong> để xác nhận lịch khám của bạn:</p>
             <p><strong>Lưu ý: </strong> Bạn phải đến trước thời gian khám ít nhất 10 phút và đến quầy tiếp nhận để được hỗ trợ tốt nhất!</p>
             <a href="${urlRedirect}" style="display: inline-block; padding: 10px 20px; margin: 20px 0; font-size: 16px; color: white; background-color: #00B5F1; text-align: center; text-decoration: none; border-radius: 10px;">Xác nhận</a>
             <p>Mong sớm gặp bạn!</p>

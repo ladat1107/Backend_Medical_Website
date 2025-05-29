@@ -397,7 +397,7 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
-        if (data.insuranceCode) {
+        if (data.insuranceCode && !data.advanceId) {
 
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({
@@ -483,18 +483,18 @@ export const updateExamination = async (data, userId) => {
                 transaction
             });
 
-            //tính tổng price trỏng all paraclinical
+            //tính tổng price trong all paraclinical
             let totalPrice = 0;
             allParaclinical.forEach(item => {
                 totalPrice += item.coveredPrice;
             });
 
-            await db.AdvanceMoney.create({
-                exam_id: existExamination.id,
-                date: new Date(),
-                status: paymentStatus.PAID,
-                amount: existExamination.coveredPrice + totalPrice,
-            }, { transaction });
+            // await db.AdvanceMoney.create({
+            //     exam_id: existExamination.id,
+            //     date: new Date(),
+            //     status: paymentStatus.PAID,
+            //     amount: existExamination.coveredPrice + totalPrice,
+            // }, { transaction });
 
             await db.AdvanceMoney.create({
                 exam_id: existExamination.id,
@@ -511,7 +511,7 @@ export const updateExamination = async (data, userId) => {
 
             await existExamination.update({
                 staffId: null,
-                status: status.WAITING,
+                status: existExamination.medicalTreatmentTier === 1 ? status.WAITING : status.PAID,
                 price: null,
                 insuranceCovered: null,
                 coveredPrice: null,
@@ -531,6 +531,7 @@ export const updateExamination = async (data, userId) => {
         //Hoàn thành thanh toán tạm ứng ở kế toán
         if (data.advanceId) {
             await db.AdvanceMoney.update({
+                ...paymentObject,
                 amount: +data.advanceMoney,
                 status: paymentStatus.PAID,
             }, {
@@ -724,7 +725,6 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         const totalAppointment = await db.Examination.count({
             where: {
                 ...whereCondition,
-                //is_appointment: 1,
                 status: 2,
             }
         });
@@ -1146,6 +1146,14 @@ export const getPatienSteps = async (examId) => {
             ],
             nest: true,
         });
+
+        if (!examination) {
+            return {
+                EC: 404,
+                EM: 'Không tìm thấy thông tin khám bệnh',
+                DT: '',
+            };
+        }
 
         // Format steps data
         const formatSteps = (data, isParaclinical = false) => {
@@ -1731,8 +1739,6 @@ export const getMedicalRecords = async (status, medicalTreatmentTier, page, limi
             offset,
             distinct: true // Ensures correct count with joins
         });
-
-        console.log('examinations', examinations);
 
         return {
             EC: 0,

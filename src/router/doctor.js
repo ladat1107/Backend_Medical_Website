@@ -16,6 +16,7 @@ import dotenv from 'dotenv';
 import { deleteAssistantForCustomerController, getConversationFromSearchController, getConversationForStaffController } from '../controllers/messageController';
 import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
 import { getAvailableRoomsController } from '../controllers/roomController';
+import { deleteAdvanceMoneyController } from '../controllers/advanceMoneyController';
 dotenv.config();
 
 let router = express.Router();
@@ -105,6 +106,9 @@ let initDoctorRoute = (app) => {
     router.post("/createPrescription", createPrescriptionController)
     router.get("/getMedicalRecords", getMedicalRecordsController)
     router.post("/updateInpatientRoom", updateInpatientRoomController)
+
+    //-- AdvanceMoney
+    router.delete("/deleteAdvanceMoney", deleteAdvanceMoneyController)
 
     return app.use("/api/", router);
 }
