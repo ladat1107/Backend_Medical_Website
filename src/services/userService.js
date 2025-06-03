@@ -26,7 +26,10 @@ export const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
-                email: data.email,
+                [Op.or]: [
+                    { email: data.email },
+                    { cid: data.email }
+                ]
             },
             include: [{
                 model: db.Role,

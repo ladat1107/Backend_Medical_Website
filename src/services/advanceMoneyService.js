@@ -64,17 +64,6 @@ export const updateAdvanceMomo = async (data, payment) => {
     try {
         let dataUpdate = data.update;
 
-        // let dataUpdate = data.update;
-        // await db.Examination.update({
-        //     insuranceCoverage: dataUpdate?.insuranceCoverage || null,
-        //     insuranceCode: dataUpdate?.insuranceCode || null,
-        //     insuranceCovered: dataUpdate?.insuranceCovered || null,
-        //     coveredPrice: dataUpdate?.coveredPrice || null,
-        //     status: dataUpdate?.status,
-        //     paymentId: payment.id,
-        // }, {
-        //     where: { id: data.id }
-        // });
         await db.AdvanceMoney.update({
             status: paymentStatus.PAID,
             amount: dataUpdate?.advanceMoney,
