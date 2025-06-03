@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
+import { status, paymentStatus, ERROR_SERVER, PAYMENT_METHOD } from "../utils/index";
 import { refundMomo } from "./paymentService";
 import { Op, or, Sequelize, where } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
@@ -646,23 +646,44 @@ export const updateExaminationMomo = async (data, payment) => {
         return false;
     }
 }
+
 export const dischargedPaymentMomo = async (data, payment) => {
+    let transaction = await db.sequelize.transaction();
     try {
         let dataUpdate = data.update;
+        await db.AdvanceMoney.create({
+            exam_id: data.id,
+            date: new Date(),
+            status: paymentStatus.PAID,
+            amount: dataUpdate?.amount,
+            paymentId: payment.id,
+        }, { transaction });
+        let paymentExamination = await db.Payment.create({
+            orderId: new Date().toISOString() + "ExaminationId__" + data.id,
+            transId: data.id,
+            amount: 0,
+            paymentMethod: PAYMENT_METHOD.CASH,
+            status: paymentStatus.PAID,
+        }, { transaction });
         await db.Examination.update({
             status: dataUpdate?.status,
             price: dataUpdate?.price,
             insuranceCovered: dataUpdate?.insuranceCovered,
             coveredPrice: dataUpdate?.coveredPrice,
-            paymentId: payment.id,
+            paymentId: paymentExamination.id,
         }, {
-            where: { id: data.id }
+            where: { id: data.id },
+            transaction
         });
+        await transaction.commit();
         return true;
     } catch (error) {
-
+        await transaction.rollback();
+        console.log(error);
+        return false;
     }
 }
+
 export const deleteExamination = async (id) => {
     try {
         let existExamination = await db.Examination.findOne({
