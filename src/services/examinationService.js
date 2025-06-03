@@ -357,6 +357,7 @@ export const updateExamination = async (data, userId) => {
 
     try {
         let paymentObject = {};
+
         let existExamination = await db.Examination.findOne({
             where: { id: data.id },
             transaction
@@ -386,7 +387,9 @@ export const updateExamination = async (data, userId) => {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
-                amount: data.advanceId ? data.advanceMoney : data.status === 8 ? data.amount : existExamination.price,
+                amount: data.advanceId ? data.advanceMoney 
+                        : data.status === status.DONE_INPATIENT ? data.amount 
+                        : existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
                 detail: JSON.stringify(details)
@@ -394,6 +397,29 @@ export const updateExamination = async (data, userId) => {
 
             paymentObject = {
                 paymentId: payment.id,
+            }
+
+            if (data.status === status.DONE_INPATIENT) {
+                await db.AdvanceMoney.create({
+                    exam_id: existExamination.id,
+                    date: new Date(),
+                    status: paymentStatus.PAID,
+                    amount: data.amount,
+                    paymentId: payment.id,
+                }, { transaction });
+
+                let payment0 = await db.Payment.create({
+                    orderId: new Date().toISOString() + "ExaminationId__" + existExamination.id,
+                    transId: existExamination.id,
+                    amount: 0,
+                    paymentMethod: PAYMENT_METHOD.CASH, 
+                    status: paymentStatus.PAID,
+                    detail: JSON.stringify(details)
+                }, { transaction });
+
+                paymentObject = {
+                    paymentId: payment0.id,
+                }
             }
         }
 
