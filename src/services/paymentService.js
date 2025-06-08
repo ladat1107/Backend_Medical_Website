@@ -19,7 +19,7 @@ let secretKey = process.env.SECRETKEY_MOMO;
 // 03/07
 // NGUYEN VAN A
 
-let ngrokUrl = "https://3447-14-238-107-186.ngrok-free.app";
+let ngrokUrl = "https://backend-medical-website.onrender.com";
 
 export const paymentMomo = async (data) => {
     try {
