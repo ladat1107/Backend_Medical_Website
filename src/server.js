@@ -87,6 +87,9 @@ io.on('connection', (socket) => {
 
     socket.on('authenticate', async (token) => {
         try {
+            console.log("authenticate", token);
+
+
             const pureToken = token.replace('Bearer ', '');
             const cookieHeader = socket.handshake.headers.cookie;
 
