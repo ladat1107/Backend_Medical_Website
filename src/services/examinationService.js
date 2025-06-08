@@ -386,9 +386,9 @@ export const updateExamination = async (data, userId) => {
             let payment = await db.Payment.create({
                 orderId: new Date().toISOString() + "_UserId__" + userId,
                 transId: existExamination.id,
-                amount: data.advanceId ? data.advanceMoney 
-                        : data.status === status.DONE_INPATIENT ? data.amount 
-                        : existExamination.price,
+                amount: data.advanceId ? data.advanceMoney
+                    : data.status === status.DONE_INPATIENT ? data.amount
+                        : data?.coveredPrice || existExamination.price,
                 paymentMethod: data.payment,
                 status: paymentStatus.PAID,
                 detail: JSON.stringify(details)
@@ -411,7 +411,7 @@ export const updateExamination = async (data, userId) => {
                     orderId: new Date().toISOString() + "ExaminationId__" + existExamination.id,
                     transId: existExamination.id,
                     amount: 0,
-                    paymentMethod: PAYMENT_METHOD.CASH, 
+                    paymentMethod: PAYMENT_METHOD.CASH,
                     status: paymentStatus.PAID,
                     detail: JSON.stringify(details)
                 }, { transaction });

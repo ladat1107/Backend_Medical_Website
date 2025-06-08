@@ -19,7 +19,7 @@ let secretKey = process.env.SECRETKEY_MOMO;
 // 03/07
 // NGUYEN VAN A
 
-let ngrokUrl = "https://aea3-1-55-44-246.ngrok-free.app";
+let ngrokUrl = "https://3447-14-238-107-186.ngrok-free.app";
 
 export const paymentMomo = async (data) => {
     try {
@@ -219,7 +219,7 @@ export const examinationPayment = async (req, res) => {
         let body = {
             id: examination.id,
             type: TYPE_PAYMENT.EXAMINATION,
-            price: Math.round(dataReq?.coveredPrice),
+            price: Math.round(dataReq?.coveredPrice || examination?.price),
             redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
             update: dataReq
         }
