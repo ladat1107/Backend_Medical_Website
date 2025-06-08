@@ -87,8 +87,6 @@ io.on('connection', (socket) => {
 
     socket.on('authenticate', async (token) => {
         try {
-            console.log("authenticate", token);
-
 
             const pureToken = token.replace('Bearer ', '');
             // const cookieHeader = socket.handshake.headers.cookie;
@@ -113,7 +111,6 @@ io.on('connection', (socket) => {
             const decoded = jwt.verify(pureToken, process.env.SECURITY_KEY);
 
             const userId = decoded.id;
-            console.log("userId", userId);
             // Đăng ký socket cho người dùng
             registerUserSocket(socket, userId);
 

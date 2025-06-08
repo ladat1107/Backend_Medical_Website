@@ -42,7 +42,7 @@ export const COOKIE = {
     refreshToken: "refreshToken"
 }
 export const TIME = {
-    tokenLife: 60 * 60, // tính theo giây
+    tokenLife: 24 * 60 * 60, // tính theo giây
     refreshToken: 7 * 24 * 60 * 60, // tính theo giây
     cookieLife: 7 * 24 * 60 * 60 * 1000,// tính theo milisecond
     tokenEmail: 5 * 60, // tính theo giây
