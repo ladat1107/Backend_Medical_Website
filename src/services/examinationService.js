@@ -191,7 +191,6 @@ export const getExaminationByUserId = async (userId, filter) => {
                 {
                     model: db.User,
                     as: 'userExaminationData',
-                    attributes: ['id', 'firstName', 'lastName', 'email', 'cid', "phoneNumber", "currentResident", "dob"],
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
