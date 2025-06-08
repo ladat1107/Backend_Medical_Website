@@ -33,6 +33,7 @@ export const NotificationType = {
 const userSocketMap = new Map();
 
 export const registerUserSocket = (socket, userId) => {
+    console.log("registerUserSocket", userId);
     if (userId) {
         userSocketMap.set(userId, socket);
     }
