@@ -102,6 +102,9 @@ io.on('connection', (socket) => {
 
             const refreshToken = parsedCookies['refreshToken'];
             if (!refreshToken) {
+                console.log("No refresh token found");
+                console.log("socket.handshake.headers", socket.handshake.headers);
+                console.log("parsedCookies", parsedCookies);
                 return socket.emit('error', 'No refresh token found');
             }
             console.log("refreshToken", refreshToken);
