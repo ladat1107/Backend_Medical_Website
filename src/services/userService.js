@@ -977,7 +977,7 @@ export const updateProfileInfor = async (data) => {
             phoneNumber: data?.phoneNumber,
             lastName: data?.lastName,
             firstName: data?.firstName,
-            gender: data?.gender || null,
+            gender: data?.gender === 0 ? 0 : (data?.gender || null),
             avatar: data?.avatar || null,
             cid: data?.cid,
             dob: data?.dob || null,
@@ -1306,6 +1306,7 @@ export const getMedicalHistories = async (userId) => {
                             { status: status.DONE_INPATIENT },
                         ]
                     },
+                    required: false,
                     include: [
                         {
                             model: db.Staff,
@@ -1362,8 +1363,7 @@ export const getMedicalHistories = async (userId) => {
                             }],
                         }
                         // Tạm thời loại bỏ include Comorbidities gây lỗi
-                    ],
-                    nest: true,
+                    ]
                 },
                 {
                     model: db.Insurance,
@@ -1376,6 +1376,8 @@ export const getMedicalHistories = async (userId) => {
             ],
             order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
+
+        console.log('Medical Histories:', medicalHistories);
 
         // Xử lý thêm cho trường hợp comorbidities là chuỗi mã bệnh
         const result = JSON.parse(JSON.stringify(medicalHistories));
