@@ -211,10 +211,11 @@ export const deleteSpecialty = async (data) => {
         return ERROR_SERVER
     }
 }
+
 export const getSpecialtyById = async (id) => {
     try {
         let specialtyData = await db.Specialty.findOne({
-            where: { id: id, status: status.ACTIVE },
+            where: { id: id },
             include: [
                 {
                     model: db.Staff,

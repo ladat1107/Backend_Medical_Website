@@ -104,10 +104,11 @@ io.on('connection', (socket) => {
             if (!refreshToken) {
                 return socket.emit('error', 'No refresh token found');
             }
-
+            console.log("refreshToken", refreshToken);
             const decoded = jwt.verify(refreshToken, process.env.SECURITY_KEY);
 
             const userId = decoded.id;
+            console.log("userId", userId);
             // Đăng ký socket cho người dùng
             registerUserSocket(socket, userId);
 
