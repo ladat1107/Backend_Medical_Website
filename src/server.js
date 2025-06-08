@@ -91,24 +91,26 @@ io.on('connection', (socket) => {
 
 
             const pureToken = token.replace('Bearer ', '');
-            const cookieHeader = socket.handshake.headers.cookie;
+            // const cookieHeader = socket.handshake.headers.cookie;
 
-            // Nếu muốn parse cookie:
-            const parsedCookies = cookieHeader?.split(';').reduce((acc, cookie) => {
-                const [key, value] = cookie.trim().split('=');
-                acc[key] = decodeURIComponent(value);
-                return acc;
-            }, {}) || {};
+            // console.log("cookieHeader", cookieHeader);
 
-            const refreshToken = parsedCookies['refreshToken'];
-            if (!refreshToken) {
-                console.log("No refresh token found");
-                console.log("socket.handshake.headers", socket.handshake.headers);
-                console.log("parsedCookies", parsedCookies);
-                return socket.emit('error', 'No refresh token found');
-            }
-            console.log("refreshToken", refreshToken);
-            const decoded = jwt.verify(refreshToken, process.env.SECURITY_KEY);
+            // // Nếu muốn parse cookie:
+            // const parsedCookies = cookieHeader?.split(';').reduce((acc, cookie) => {
+            //     const [key, value] = cookie.trim().split('=');
+            //     acc[key] = decodeURIComponent(value);
+            //     return acc;
+            // }, {}) || {};
+
+            // const refreshToken = parsedCookies['refreshToken'];
+            // if (!refreshToken) {
+            //     console.log("No refresh token found");
+            //     console.log("socket.handshake.headers", socket.handshake.headers);
+            //     console.log("parsedCookies", parsedCookies);
+            //     return socket.emit('error', 'No refresh token found');
+            // }
+            // console.log("refreshToken", refreshToken);
+            const decoded = jwt.verify(pureToken, process.env.SECURITY_KEY);
 
             const userId = decoded.id;
             console.log("userId", userId);
