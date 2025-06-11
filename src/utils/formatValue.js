@@ -5,21 +5,22 @@ export const formatDate = (dateString) => {
 
 const COVERED = {
   1: 1,
-  2: 0.95,
-  3: 0.8,
-  4: 1
+  2: 1,
+  3: 0.95,
+  4: 0.8,
+  5: 1
 }
 
 export const coveredPrice = (price, coveredLevel) => {
-    const numericPrice = Number(price);
-    if (!numericPrice || isNaN(numericPrice)) return 0;
-    if (!coveredLevel) return 0;
+  const numericPrice = Number(price);
+  if (!numericPrice || isNaN(numericPrice)) return 0;
+  if (!coveredLevel) return 0;
 
-    const covered = COVERED[coveredLevel];
+  const covered = COVERED[coveredLevel];
 
-    if (covered !== undefined && covered !== null) {
-        return numericPrice * covered;
-    }
-    
-    return 0;
+  if (covered !== undefined && covered !== null) {
+    return numericPrice * covered;
+  }
+
+  return 0;
 }

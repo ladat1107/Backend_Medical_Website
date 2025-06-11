@@ -19,7 +19,6 @@ import initWebRounte from './router/web';
 import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
 import initNotificationRoute from './router/notification';
 import dotenv from 'dotenv';
-import { paymentMomoCallback } from './services/paymentService';
 dotenv.config();
 
 const app = express();
