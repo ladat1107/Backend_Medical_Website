@@ -12,19 +12,34 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    systemInstruction: `You are Hoa Sen Mini, a medical assistant for Hoa Sen Hospital.  
-- Hospital name: Hoa Sen Hospital (working 7am-5pm from Monday to Friday for the outpatient department, 24/7 for the remaining departments)
+    systemInstruction: `You are Hoa Sen Mini, a helpful and professional virtual assistant for Hoa Sen Hospital.
+
+Hospital Information:
+- Name: Hoa Sen Hospital
 - Address: 201 Nguyễn Chí Thanh, Phường 12, Quận 5, TP. Hồ Chí Minh
 - Hotline: 0353366459
-- Your role: Provide basic medical information, including symptoms, departments, doctors, and hospital details.  
-- Language: Answer flexibility in the language the user asks.  
-- Medical questions should only be suggested, and accompanied by a disclaimer, Suggested messages to reception staff.  
-- Respond politely and professionally, always addressing the user by name if provided.
-- Answer briefly and accurately to the core of the question.
-- Do not answer questions unrelated to current hospital. 
-- Say hello only the first time, not in the middle of a conversation.
-`,
+- Outpatient hours: 7:00 AM – 5:00 PM (Monday to Friday)
+- Other departments: Open 24/7
+
+Your responsibilities:
+- Only answer questions directly related to the hospital, its departments, doctors, services, or symptoms treated at the hospital.
+- If the question is about general medical advice, diseases, or treatments **not explicitly handled at the hospital**, politely decline and suggest the user:
+  1. Visit Hoa Sen Hospital in person.
+  2. Or contact the hospital’s reception staff for accurate guidance.
+- Use **varied, human-like ways** to decline medical questions, such as:
+  - "Tôi không thể chắc chắn về điều đó. Bạn nên hỏi trực tiếp tiếp nhận để rõ hơn."
+  - "Vấn đề này cần được chuyên gia tư vấn trực tiếp, bạn có thể đến bệnh viện Hoa Sen để được hướng dẫn cụ thể."
+  - "Xin lỗi, tôi không thể đưa ra thông tin chính xác cho trường hợp này. Bạn nên liên hệ tiếp nhận."
+
+- Rotate your responses when declining, to avoid repeating the same sentence structure.
+- Do **not invent answers** or speculate.
+- Do **not greet repeatedly** — say hello only in the first message.
+- Avoid repeating phrases like “Tôi xin lỗi” or “Xin chào” unless truly necessary.
+- Always be polite, concise, and direct.
+- Use the user’s name if provided.
+- Match your response language to the user’s (Vietnamese or English).`,
 });
+
 const MESSAGE_TYPE = {
     LIST_DEPARTMENTS: "LIST_DEPARTMENTS",
     DOCTOR_DETAIL: "DOCTOR_DETAIL",
@@ -153,9 +168,10 @@ const createPromptAfterQuery = (history, userMessage, responseText) => {
     ${history.map(entry => `${entry.sender === 'bot' ? 'Bot' : 'User'}: ${entry.text}`).join('\n')}
     
     Hiện tại, người dùng vừa hỏi: "${userMessage}"
-    Dữ liệu tôi vừa truy vấn dưới database: "${responseText}"
-    Hãy cố gắng dựa vào ngữ cảnh trước đó để đưa ra câu trả lời chính xác. Nếu cần, hãy yêu cầu thêm thông tin hoặc giải thích rõ ràng.`;
+    Đây là dữ liệu tôi vừa truy vấn từ database: "${responseText}"
+    Hãy cố gắng dựa vào ngữ cảnh trước đó và phân tích dữ liệu để đưa ra câu trả lời chính xác. Nếu cần, hãy yêu cầu thêm thông tin hoặc giải thích rõ ràng.`;
 };
+
 export const messageAIService = async (message, history) => {
     try {
         let prompt = createSmartPrompt(history, message);
@@ -318,11 +334,14 @@ const findDoctorBySymptom = async (param) => {
         if (!param) return { text: "Không tìm thấy thông tin bác sĩ phù hợp. Bạn có thể cung cấp thêm thông tin cụ thể bác sĩ cần tìm hoặc nhắn tin với tiếp nhận để có câu trả lời cụ thể nhất!", link: null };
         let doctor = await db.Specialty.findAll({
             where: {
-                status: status.ACTIVE,
-                [Op.or]: [
-                    { name: { [Op.like]: `% ${param} %` } },
-                    { shortDescription: { [Op.like]: `% ${param} %` } }
-                ]
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { name: { [Op.like]: `%${param}%` } },
+                            { shortDescription: { [Op.like]: `%${param}%` } }
+                        ]
+                    },
+                    { status: status.ACTIVE }]
             },
             include: [{
                 model: db.Staff,
@@ -347,8 +366,13 @@ const findDoctorBySymptom = async (param) => {
                 url: `/doctor-detail/${staff.staffUserData.id}`
             }))
         );
+        let doctorInfor = doctor.flatMap(specialty => specialty?.staffSpecialtyData?.map(staff => ({
+            name: `${staff?.position}. ${staff.staffUserData.lastName} ${staff.staffUserData.firstName} - ${specialty.name}`,
+            specialty: "Tên chuyên khoa: " + specialty.name + " - " + "Mô tả chuyên khoa: " + specialty.shortDescription,
+            shortDescription: "Mô tả bác sĩ: " + staff.shortDescription,
+        })));
         return {
-            text: doctor,
+            text: doctorInfor,
             link: link
         }
     } catch (error) {

@@ -97,16 +97,24 @@ export const handleLogoutController = async (req, res) => {
 export const handleLoginGoogleController = async (req, res) => {
     try {
         let response = await loginGoogle(req?.user?._json, req?.user?.id);
-        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
-            httpOnly: true,
-            maxAge: TIME.cookieLife
-        })
-        delete response.DT.refreshToken;
-        let dataCustom = JSON.stringify(response.DT);
-        return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?google=${dataCustom}`);
+
+        // Kiểm tra response và DT trước khi xử lý
+        if (response && response.EC === 0 && response.DT) {
+            res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+                httpOnly: true,
+                maxAge: TIME.cookieLife
+            })
+            delete response.DT.refreshToken;
+            let dataCustom = JSON.stringify(response.DT);
+            return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?google=${dataCustom}`);
+        } else {
+            // Nếu có lỗi, redirect về trang login với error
+            console.log("Error in loginGoogle:", response);
+            return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?error=google_login_failed`);
+        }
     } catch (error) {
-        console.log(error);
-        return res.status(500).json(ERROR_SERVER)
+        console.log("Catch error in handleLoginGoogleController:", error);
+        return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?error=server_error`);
     }
 }
 export const getAllUserController = async (req, res) => {

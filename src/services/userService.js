@@ -26,9 +26,9 @@ export const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
-                [Op.or]: [
-                    { email: data.email },
-                    { cid: data.email }
+                [Op.and]: [
+                    { [Op.or]: [{ email: data.email }, { cid: data.email }] },
+                    { status: status.ACTIVE }
                 ]
             },
             include: [{
@@ -83,7 +83,7 @@ export const loginUser = async (data) => {
 export const loginGoogle = async (data, googleId) => {
     try {
         let user = await db.User.findOne({
-            where: { email: data.email },
+            where: { email: data.email, status: status.ACTIVE },
             include: [{
                 model: db.Role,
                 as: "userRoleData",
@@ -93,9 +93,12 @@ export const loginGoogle = async (data, googleId) => {
                 as: "staffUserData",
                 attributes: ["id"],
             }],
+            raw: true,
+            nest: true,
         });
+
         if (!user) {
-            user = await db.User.create({
+            let userCreate = await db.User.create({
                 email: data.email,
                 lastName: data.family_name,
                 firstName: data.given_name,
@@ -105,12 +108,29 @@ export const loginGoogle = async (data, googleId) => {
                 tokenVersion: new Date().getTime(),
                 status: status.ACTIVE,
             });
+
+            // Lấy lại user với đầy đủ thông tin include để đảm bảo structure nhất quán
+            user = await db.User.findOne({
+                where: { id: userCreate.id },
+                include: [{
+                    model: db.Role,
+                    as: "userRoleData",
+                    attributes: ["name"],
+                }, {
+                    model: db.Staff,
+                    as: "staffUserData",
+                    attributes: ["id"],
+                }],
+                raw: true,
+                nest: true,
+            });
         }
+
         let dataToken = {
             id: user.id,
             email: user.email,
             roleId: user.roleId,
-            staff: user?.staffUserData?.id,
+            staff: user?.staffUserData?.id || null,
             version: user.tokenVersion,
         }
         let token = createToken(dataToken, TIME.tokenLife);
@@ -119,7 +139,15 @@ export const loginGoogle = async (data, googleId) => {
             EC: 0,
             EM: "Đăng nhập thành công",
             DT: {
-                user: { id: user.id, staff: user?.staffUserData?.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                user: {
+                    id: user.id,
+                    staff: user?.staffUserData?.id || null,
+                    lastName: user.lastName,
+                    firstName: user.firstName,
+                    role: user.roleId,
+                    email: user.email,
+                    avatar: user.avatar
+                },
                 accessToken: token,
                 refreshToken: refreshToken
             }
@@ -693,6 +721,7 @@ export const confirmUser = async (token) => {
                 phoneNumber: data.phoneNumber,
                 cid: data.cid,
                 roleId: ROLE.PATIENT,
+                tokenVersion: new Date().getTime(),
                 status: status.ACTIVE,
             })
             if (user) {
@@ -1230,7 +1259,7 @@ export const confirmTokenBooking = async (token) => {
                     DT: "",
                 }
             }
-           
+
             if (user && staff) {
                 let examination = await db.Examination.create({
                     userId: user.id,
@@ -1376,8 +1405,6 @@ export const getMedicalHistories = async (userId) => {
             ],
             order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
-
-        console.log('Medical Histories:', medicalHistories);
 
         // Xử lý thêm cho trường hợp comorbidities là chuỗi mã bệnh
         const result = JSON.parse(JSON.stringify(medicalHistories));
