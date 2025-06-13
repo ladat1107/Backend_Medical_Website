@@ -343,7 +343,7 @@ export const profileInforController = async (req, res) => {
         if (data.id === "null") {
             data.id = req.user.id;
         }
-        let response = await updateProfileInfor(data);
+        let response = await updateProfileInfor(data);        
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);
@@ -361,10 +361,12 @@ export const profilePasswordController = async (req, res) => {
             })
         }
         let response = await updateProfilePassword(data);
-        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
-            httpOnly: true,
-            maxAge: TIME.cookieLife
-        })
+        // if (response.EC === 0) {
+        //     res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+        //         httpOnly: true,
+        //         maxAge: TIME.cookieLife
+        //     })
+        // }
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
