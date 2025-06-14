@@ -1,9 +1,10 @@
 import db from '../models/index';
 import { upsertPrescriptionDetail } from './prescriptionDetailService';
-import { status, paymentStatus, ERROR_SERVER } from "../utils/index";
+import { status, paymentStatus, ERROR_SERVER, ROLE } from "../utils/index";
 import { Op, Sequelize } from 'sequelize';
 import dayjs from 'dayjs';
-import { raw } from 'body-parser';
+import { staffLoad } from './socketService';
+import { io } from "../server";
 
 export const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
@@ -82,6 +83,14 @@ export const upsertPrescription = async (data) => {
         if (prescriptionDetail.EC !== 0) {
             return prescriptionDetail;
         }
+
+        const listPharmacists = await db.User.findAll({
+            where: { roleId: ROLE.PHARMACIST },
+            attributes: ['id'],
+            raw: true
+        });
+
+        staffLoad(io, listPharmacists.map(item => item.id))
 
         if (!prescriptionDetail) {
             return {

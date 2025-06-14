@@ -1,9 +1,11 @@
 import { Op } from "sequelize";
 import db from "../models/index";
-import { status, paymentStatus, PAYMENT_METHOD, ERROR_SERVER } from "../utils/index";
+import { status, paymentStatus, PAYMENT_METHOD, ERROR_SERVER, ROLE } from "../utils/index";
 import specialtyService, { getSpecialtiesByLaboratory } from "./specialtyService";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { coveredPrice } from "../utils/formatValue";
+import { staffLoad } from "./socketService";
+import { io } from "../server";
 
 export const getParaclinicalByExamId = async (examinationId) => {
     try {
@@ -100,6 +102,16 @@ export const createRequestParaclinical = async (data) => {
 
         // Kiểm tra xem tất cả đều thành công
         if (createResults.every(result => result.EC === 0)) {
+
+            const listAccountants = await db.User.findAll({
+                where: { roleId: ROLE.ACCOUNTANT },
+                attributes: ['id'],
+                raw: true,
+                transaction
+            });
+
+            staffLoad(io, listAccountants.map(item => item.id));
+
             await transaction.commit(); // Commit transaction if everything succeeded
             return {
                 EC: 0,
@@ -457,6 +469,20 @@ export const updateListPayParaclinicals = async (ids, insurance, userId) => {
                 throw new Error(`Failed to update paraclinical with ID: ${paraclinical.id}`);
             }
         }
+
+        const listDoctors = await db.User.findAll({
+            where: { 
+                [Op.or]: [
+                    { roleId: ROLE.DOCTOR },
+                    { roleId: ROLE.NURSE }
+                ]
+            },
+            attributes: ['id'],
+            raw: true,
+            transaction
+        });
+
+        staffLoad(io, listDoctors.map(item => item.id))
 
         // If we've reached here, all operations were successful, commit the transaction
         await transaction.commit();
