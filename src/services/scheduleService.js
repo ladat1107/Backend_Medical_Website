@@ -1,6 +1,6 @@
 import db from "../models/index";
 import { department, ERROR_SERVER, ROLE, status, typeRoom } from "../utils";
-const { Op } = require('sequelize');
+import { Op, Sequelize } from "sequelize";
 
 export const getAllSchedules = async () => {
     try {
@@ -601,6 +601,44 @@ export const getAllSchedulesAdmin = async (filter) => {
             EM: "Lấy thông tin lịch trực thành công",
             DT: dataRes
         }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getScheduleByDateAndDoctor = async (filter) => {
+    try {
+        const date = filter?.date || new Date();
+        const doctorId = filter?.doctorId || null;
+        if (!doctorId || !date) {
+            return { EC: 400, EM: "Không đủ dữ liệu", DT: '', }
+        }
+        const results = await db.Examination.findAll({
+            attributes: [
+                'time',
+                [Sequelize.fn('COUNT', Sequelize.col('time')), 'count'],
+            ],
+            where: {
+                staffId: doctorId,               // luôn lọc đúng bác sĩ
+                is_appointment: 1,
+                status: status.PENDING,
+                // so sánh phần ngày của admissionDate
+                [Op.and]: [
+                    Sequelize.where(
+                        Sequelize.literal('DATE(admissionDate)'),
+                        { [Op.eq]: date }
+                    ),
+                ],
+            },
+            group: ['time'],                   // chỉ cần group theo khung giờ
+            raw: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy dữ liệu thành công",
+            DT: results,
+        };
     } catch (error) {
         console.log(error);
         return ERROR_SERVER

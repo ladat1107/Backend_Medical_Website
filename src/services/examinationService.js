@@ -936,6 +936,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         };
     }
 };
+
 export const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
@@ -965,6 +966,7 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
+
 export const updateOldParaclinical = async (data) => {
     try {
         let { id, oldParaclinical } = data;
@@ -1993,3 +1995,65 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
+
+export const createAppointment = async (data) => {
+    try {
+        const examination = await db.Examination.findOne({
+            where: {
+                userId: data.userId,
+                staffId: data.staffId,
+                admissionDate: data.admissionDate,
+            }
+        })
+        if (examination) {
+            return {
+                EC: 400,
+                EM: 'Người này đã đặt lịch hẹn hôm nay',
+            }
+        }
+        await db.Examination.create(data);
+        return {
+            EC: 0,
+            EM: 'Tạo lịch khám thành công',
+            DT: data
+        };
+    } catch (error) {
+        console.error('Error creating appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+
+export const deleteAppointment = async (data) => {
+    try {
+        await db.Examination.destroy({
+            where: { id: data.id }
+        })
+        return {
+            EC: 0,
+            EM: 'Xóa lịch khám thành công',
+            DT: data
+        }
+    } catch (error) {
+        console.error('Error deleting appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+
+export const blockAppointment = async (data) => {
+    try {
+        await db.Examination.update({
+            status: status.INACTIVE,
+        }, {
+            where: { id: data.id }
+        })
+        return {
+            EC: 0,
+            EM: 'Khóa lịch khám thành công',
+            DT: data
+        }
+    } catch (error) {
+        console.error('Error blocking appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+

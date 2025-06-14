@@ -934,6 +934,67 @@ export const getDoctorHome = async (filter) => {
         return ERROR_SERVER;
     }
 };
+
+export const getDoctorBooking = async (filter) => {
+    try {
+        let date = filter?.date || new Date();
+        let condition = {}
+        if (filter?.specialtyId) {
+            condition.specialtyId = +filter.specialtyId;
+        }
+        let doctors = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE,
+                ...condition,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        status: status.ACTIVE,
+                        roleId: ROLE.DOCTOR,
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Schedule,
+                    as: 'staffScheduleData',
+                    where: {
+                        date: { [Op.eq]: date },
+                    },
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'scheduleRoomData',
+                            where: { departmentId: typeRoom.CLINIC, },
+                            attributes: ['name'],
+                        },
+                    ],
+                    required: true,
+                    attributes: ['date', "roomId", "staffId"],
+                    raw: true,
+                }
+            ],
+            attributes: ['id', 'position', 'userId', 'price', 'specialtyId'],
+            nest: true,
+        });        
+        return {
+            EC: 0,
+            EM: "Lấy thông tin bác sĩ thành công",
+            DT: doctors
+        };
+    } catch (error) {
+        console.error("Lỗi server:", error);
+        return ERROR_SERVER;
+    }
+}
+
 export const getDoctorBookingById = async (id) => {
     try {
         let doctor = await db.Staff.findOne({

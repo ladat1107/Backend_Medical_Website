@@ -10,7 +10,7 @@ import { getHandBooksAdminController, updateHandbookStatusController } from '../
 import { blockRoomController, createRoomController, deleteRoomController, getAllRoomAdminController, updateRoomController } from '../controllers/roomController';
 import { arrangScheduleController, createScheduleController, deleteScheduleController, getAllSchedulesAdminController, updateScheduleStaffController } from '../controllers/scheduleController';
 import { blockMedicineController, createMedicineController, deleteMedicineController, getAllMedicinesAdminController, getPrescriptionUsedController, updateMedicineController } from '../controllers/medicineController';
-import { getAllExaminationsAdminController, getExaminationByIdAdminController } from '../controllers/examinationController';
+import { blockAppointmentController, deleteAppointmentController, getAllExaminationsAdminController, getExaminationByIdAdminController } from '../controllers/examinationController';
 import { getPaymentAdminController } from '../controllers/paymentController';
 require('dotenv').config();
 
@@ -79,6 +79,8 @@ let initAdminRoute = (app) => {
     // ----> Admin Examination
     router.get("/getAllExaminationsAdmin", getAllExaminationsAdminController)
     router.get("/getExaminationByIdAdmin", getExaminationByIdAdminController)
+    router.put("/blockExamination", blockAppointmentController)
+    router.delete("/deleteExamination", deleteAppointmentController)
 
     // ----> Admin Payment
     router.get("/getPaymentAdmin", getPaymentAdminController)

@@ -1,4 +1,4 @@
-import { createExamination, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getMedicalRecords, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateInpatientRoom, updateOldParaclinical } from '../services/examinationService';
+import { blockAppointment, createAppointment, createExamination, deleteAppointment, deleteExamination, getExaminationById, getExaminationByIdAdmin, getExaminationByUserId, getExaminations, getExamToNotice, getListAdvanceMoney, getListInpations, getListToPay, getMedicalRecords, getPatienSteps, getScheduleApoinment, getStatisticsExamination, updateExamination, updateInpatientRoom, updateOldParaclinical } from '../services/examinationService';
 import { ERROR_SERVER, ROLE, status } from '../utils';
 
 export const getExaminationByIdController = async (req, res) => {
@@ -56,7 +56,7 @@ export const updateExaminationController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await updateExamination(data, req.user.id); 
+            let response = await updateExamination(data, req.user.id);
             return res.status(200).json(response)
         } else {
             return res.status(200).json({
@@ -232,7 +232,7 @@ export const getListInpationsController = async (req, res) => {
 
 export const getMedicalRecordsController = async (req, res) => {
     try {
-        const status = req.query.status || status.EXAMINING;    
+        const status = req.query.status || status.EXAMINING;
         const medicalTreatmentTier = req.query.medicalTreatmentTier || 1;
         const page = req.query.page || 1;
         const limit = req.query.limit || 20;
@@ -259,6 +259,46 @@ export const updateInpatientRoomController = async (req, res) => {
                 DT: ""
             })
         }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const createAppointmentController = async (req, res) => {
+    try {
+        const data = req.body;
+        if (data && data.userId && data.staffId && data.time && data.priority && data.symptoms && data.admissionDate && data.dischargeDate && data.price && data.medicalTreatmentTier && data.status && data.is_appointment && data.roomName && data.roomId) {
+            let response = await createAppointment(data);
+            return res.status(200).json(response)
+        } else {
+            return res.status(200).json({
+                EC: 400,
+                EM: "Không đủ dữ liệu tạo lịch khám",
+                DT: ""
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const deleteAppointmentController = async (req, res) => {
+    try {
+        const data = req.body;
+        let response = await deleteAppointment(data);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+export const blockAppointmentController = async (req, res) => {
+    try {
+        const data = req.body;
+        let response = await blockAppointment(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
         return res.status(500).json(ERROR_SERVER)

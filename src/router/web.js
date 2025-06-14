@@ -103,7 +103,7 @@ let initWebRounte = (app) => {
     router.get("/getServiceLaboratory", getServiceLaboratoryController)
     router.get("/getUserByQrCode", getUserByQrCodeController)
 
-   
+
     router.get("/getCurrentNumber", getTickets)
     router.put("/generateNumber", generalNumber)
     router.put("/generateNumberCurrent", generalNumberCurrent)
