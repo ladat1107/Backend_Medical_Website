@@ -322,19 +322,20 @@ export const createExamination = async (data) => {
         }
 
         //Socket khi tạo khám bệnh
+        let listAccountants = [];
         if (data.status === status.WAITING && examination) {
-            const listAccountants = await db.User.findAll({
+            listAccountants = await db.User.findAll({
                 where: { roleId: ROLE.ACCOUNTANT },
                 attributes: ['id'],
                 raw: true,
                 transaction
             });
-
-            staffLoad(io, listAccountants.map(item => item.id));
         }
 
         // Commit transaction if all operations are successful
         await transaction.commit();
+
+        staffLoad(io, listAccountants.map(item => item.id));
 
         return {
             EC: 0,
@@ -636,22 +637,21 @@ export const updateExamination = async (data, userId) => {
         }
 
         //Socket khi thay đổi trạng thái khám bệnh
+        let listAccountants = [];
         if (data.status !== existExamination.status) {
             switch (data.status) {
                 case status.WAITING:
                 case status.DONE_INPATIENT:
-                    const listAccountants = await db.User.findAll({
+                    listAccountants = await db.User.findAll({
                         where: { roleId: ROLE.ACCOUNTANT },
                         attributes: ['id'],
                         raw: true,
                         transaction
                     });
-
-                    staffLoad(io, listAccountants.map(item => item.id))
                     break;
 
                 case status.PAID:
-                    const listDoctors = await db.User.findAll({
+                    listAccountants = await db.User.findAll({
                         where: {
                             [Op.or]: [
                                 { roleId: ROLE.DOCTOR },
@@ -662,25 +662,23 @@ export const updateExamination = async (data, userId) => {
                         raw: true,
                         transaction
                     });
-
-                    staffLoad(io, listDoctors.map(item => item.id))
                     break;
 
                 case status.DONE:
-                    const listPharmacists = await db.User.findAll({
+                    listAccountants = await db.User.findAll({
                         where: { roleId: ROLE.PHARMACIST },
                         attributes: ['id'],
                         raw: true,
                         transaction
                     });
-
-                    staffLoad(io, listPharmacists.map(item => item.id))
                     break;
             }
         }
 
         // Commit transaction if all operations are successful
         await transaction.commit();
+
+        staffLoad(io, listAccountants.map(item => item.id))
 
         return {
             EC: 0,

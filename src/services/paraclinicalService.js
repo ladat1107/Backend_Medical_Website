@@ -110,9 +110,9 @@ export const createRequestParaclinical = async (data) => {
                 transaction
             });
 
-            staffLoad(io, listAccountants.map(item => item.id));
-
             await transaction.commit(); // Commit transaction if everything succeeded
+
+            staffLoad(io, listAccountants.map(item => item.id));
             return {
                 EC: 0,
                 EM: "Tạo tất cả xét nghiệm thành công",
@@ -437,7 +437,7 @@ export const updateListPayParaclinicals = async (ids, insurance, userId) => {
         if (receiver) {
             details = { ...details, receiver, responseTime: new Date().toISOString() }
         }
-        
+
         // Create payment within the transaction
         let payment = await db.Payment.create({
             orderId: new Date().toISOString() + "_UserId__" + userId,
@@ -471,7 +471,7 @@ export const updateListPayParaclinicals = async (ids, insurance, userId) => {
         }
 
         const listDoctors = await db.User.findAll({
-            where: { 
+            where: {
                 [Op.or]: [
                     { roleId: ROLE.DOCTOR },
                     { roleId: ROLE.NURSE }

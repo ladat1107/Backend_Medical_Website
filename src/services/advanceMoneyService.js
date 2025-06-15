@@ -13,7 +13,7 @@ export const createAdvanceMoney = async (data) => {
             status: paymentStatus.PENDING,
         });
 
-        if(advanceMoney) {
+        if (advanceMoney) {
             const listAccountants = await db.User.findAll({
                 where: { roleId: ROLE.ACCOUNTANT },
                 attributes: ['id'],

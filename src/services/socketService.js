@@ -92,14 +92,31 @@ export const staffLoad = (io, users) => {
 
     try {
         if (users && users.length > 0) {
+            let foundUsers = 0;
             users.forEach(userId => {
                 const userSocket = userSocketMap.get(userId);
                 if (userSocket) {
                     userSocket.emit('staffLoad');
+                    foundUsers++;
                 }
             });
+
+            // Nếu không tìm thấy socket nào được register, broadcast cho tất cả
+            if (foundUsers === 0) {
+                //console.log('Không tìm thấy socket nào được register, broadcasting cho tất cả');
+                io.emit('staffLoad');
+            }
+        } else {
+            // Nếu không có users cụ thể, broadcast cho tất cả
+            io.emit('staffLoad');
         }
     } catch (error) {
-        console.error("Lỗi trong staffLoad:", error);
+        //console.error("Lỗi trong staffLoad:", error);
+        // Fallback: broadcast cho tất cả nếu có lỗi
+        try {
+            io.emit('staffLoad');
+        } catch (fallbackError) {
+            console.error("Lỗi fallback broadcast:", fallbackError);
+        }
     }
 }
