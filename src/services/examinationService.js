@@ -1,10 +1,12 @@
 import dayjs from "dayjs";
 import db from "../models/index";
-import { status, paymentStatus, ERROR_SERVER, PAYMENT_METHOD } from "../utils/index";
+import { status, paymentStatus, ERROR_SERVER, PAYMENT_METHOD, ROLE } from "../utils/index";
 import { refundMomo } from "./paymentService";
 import { Op, or, Sequelize, where } from 'sequelize';
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
+import { io } from "../server";
+import { staffLoad } from "./socketService";
 
 const cron = require('node-cron');
 
@@ -224,21 +226,6 @@ export const createExamination = async (data) => {
             transaction
         });
 
-        // // Lấy ngày hôm nay (chỉ tính ngày, không quan tâm giờ, phút, giây)
-        // const today = new Date();
-        // today.setHours(0, 0, 0, 0);  // Đặt lại giờ để so sánh chỉ theo ngày
-
-        // // Tìm số thứ tự lớn nhất của phòng trong ngày hôm nay
-        // let maxNumber = await db.Examination.max('number', {
-        //     where: {
-        //         roomName: data.roomName,
-        //         admissionDate: {
-        //             [Op.gte]: today  // Chỉ lấy các bản ghi từ ngày hôm nay trở đi
-        //         }
-        //     },
-        //     transaction
-        // });
-
         let paymentObject = {};
         if (data.insuranceCode) {
 
@@ -332,6 +319,18 @@ export const createExamination = async (data) => {
                 roomId: data.roomId,
                 roomName: data.roomName
             }, { transaction });
+        }
+
+        //Socket khi tạo khám bệnh
+        if (data.status === status.WAITING && examination) {
+            const listAccountants = await db.User.findAll({
+                where: { roleId: ROLE.ACCOUNTANT },
+                attributes: ['id'],
+                raw: true,
+                transaction
+            });
+
+            staffLoad(io, listAccountants.map(item => item.id));
         }
 
         // Commit transaction if all operations are successful
@@ -636,6 +635,50 @@ export const updateExamination = async (data, userId) => {
             }
         }
 
+        //Socket khi thay đổi trạng thái khám bệnh
+        if (data.status !== existExamination.status) {
+            switch (data.status) {
+                case status.WAITING:
+                case status.DONE_INPATIENT:
+                    const listAccountants = await db.User.findAll({
+                        where: { roleId: ROLE.ACCOUNTANT },
+                        attributes: ['id'],
+                        raw: true,
+                        transaction
+                    });
+
+                    staffLoad(io, listAccountants.map(item => item.id))
+                    break;
+
+                case status.PAID:
+                    const listDoctors = await db.User.findAll({
+                        where: {
+                            [Op.or]: [
+                                { roleId: ROLE.DOCTOR },
+                                { roleId: ROLE.NURSE }
+                            ]
+                        },
+                        attributes: ['id'],
+                        raw: true,
+                        transaction
+                    });
+
+                    staffLoad(io, listDoctors.map(item => item.id))
+                    break;
+
+                case status.DONE:
+                    const listPharmacists = await db.User.findAll({
+                        where: { roleId: ROLE.PHARMACIST },
+                        attributes: ['id'],
+                        raw: true,
+                        transaction
+                    });
+
+                    staffLoad(io, listPharmacists.map(item => item.id))
+                    break;
+            }
+        }
+
         // Commit transaction if all operations are successful
         await transaction.commit();
 
@@ -893,6 +936,7 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
         };
     }
 };
+
 export const getScheduleApoinment = async (filter) => {
     try {
         let listDate = filter?.date || [];
@@ -922,6 +966,7 @@ export const getScheduleApoinment = async (filter) => {
         return ERROR_SERVER
     }
 }
+
 export const updateOldParaclinical = async (data) => {
     try {
         let { id, oldParaclinical } = data;
@@ -1006,8 +1051,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                         },
                     ],
                 },
-            ],
-            order: [['createdAt', 'DESC']]
+            ]
         });
 
         const paraclinicals = await db.Paraclinical.findAll({
@@ -1054,8 +1098,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                     as: 'roomParaclinicalData',
                     attributes: ['id', 'name'],
                 },
-            ],
-            order: [['createdAt', 'DESC']],
+            ]
         });
 
         // Combine and sort the lists
@@ -1064,6 +1107,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                 type: 'examination',
                 data: { ...exam.toJSON(), status: statusPay },
                 createdAt: exam.createdAt,
+                special: exam.special,
                 userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
                 userPhone: exam.userExaminationData.phoneNumber,
             })),
@@ -1081,6 +1125,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                                 totalParaclinicalPrice: 0
                             },
                             createdAt: parac.createdAt,
+                            special: parac.examinationResultParaclincalData.special,
                             userName: parac.examinationResultParaclincalData.userExaminationData.lastName +
                                 ' ' +
                                 parac.examinationResultParaclincalData.userExaminationData.firstName,
@@ -1118,13 +1163,28 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
             )
         ];
 
-        // Sắp xếp lại danh sách
+        // Sắp xếp theo special và createdAt - CHỈ ORDER MỘT LẦN DUY NHẤT TẠI ĐÂY
         const sortedList = combinedList.sort((itemA, itemB) => {
+            // Helper function để lấy priority của special
+            const getSpecialPriority = (special) => {
+                if (['old', 'children', 'disabled', 'pregnant'].includes(special)) return 1;
+                if (special === 'normal') return 2;
+                return 3;
+            };
+
+            const priorityA = getSpecialPriority(itemA.special);
+            const priorityB = getSpecialPriority(itemB.special);
+
+            // Sắp xếp theo special trước
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
+            // Nếu cùng priority special, sắp xếp theo createdAt (mới nhất lên trước)
             const dateA = new Date(itemA.createdAt);
             const dateB = new Date(itemB.createdAt);
             return dateA.getTime() - dateB.getTime();
         });
-
         // Áp dụng phân trang
         const totalItems = sortedList.length;
         const pageNum = page || 1;
@@ -1935,3 +1995,65 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
 
     console.log('Đã thay đổi trạng thái cho các bệnh nhân nội trú đã qua ngày hẹn khám.');
 })
+
+export const createAppointment = async (data) => {
+    try {
+        const examination = await db.Examination.findOne({
+            where: {
+                userId: data.userId,
+                staffId: data.staffId,
+                admissionDate: data.admissionDate,
+            }
+        })
+        if (examination) {
+            return {
+                EC: 400,
+                EM: 'Người này đã đặt lịch hẹn hôm nay',
+            }
+        }
+        await db.Examination.create(data);
+        return {
+            EC: 0,
+            EM: 'Tạo lịch khám thành công',
+            DT: data
+        };
+    } catch (error) {
+        console.error('Error creating appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+
+export const deleteAppointment = async (data) => {
+    try {
+        await db.Examination.destroy({
+            where: { id: data.id }
+        })
+        return {
+            EC: 0,
+            EM: 'Xóa lịch khám thành công',
+            DT: data
+        }
+    } catch (error) {
+        console.error('Error deleting appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+
+export const blockAppointment = async (data) => {
+    try {
+        await db.Examination.update({
+            status: status.INACTIVE,
+        }, {
+            where: { id: data.id }
+        })
+        return {
+            EC: 0,
+            EM: 'Khóa lịch khám thành công',
+            DT: data
+        }
+    } catch (error) {
+        console.error('Error blocking appointment:', error);
+        return ERROR_SERVER;
+    }
+}
+

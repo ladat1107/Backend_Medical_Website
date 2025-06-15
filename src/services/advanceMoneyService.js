@@ -1,5 +1,7 @@
 import db from "../models";
-import { ERROR_SERVER, paymentStatus } from "../utils";
+import { io } from "../server";
+import { ERROR_SERVER, paymentStatus, ROLE } from "../utils";
+import { staffLoad } from "./socketService";
 
 
 export const createAdvanceMoney = async (data) => {
@@ -10,6 +12,16 @@ export const createAdvanceMoney = async (data) => {
             date: new Date(),
             status: paymentStatus.PENDING,
         });
+
+        if(advanceMoney) {
+            const listAccountants = await db.User.findAll({
+                where: { roleId: ROLE.ACCOUNTANT },
+                attributes: ['id'],
+                raw: true
+            });
+
+            staffLoad(io, listAccountants.map(item => item.id));
+        }
 
         return {
             EC: 0,

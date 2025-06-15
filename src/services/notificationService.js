@@ -5,6 +5,7 @@ import { Op } from 'sequelize';
 import { getExamToNotice } from "./examinationService";
 import { io } from "../server";
 import { sendNotification } from "./socketService";
+import { sendEmailNotification } from "./emailService";
 
 const cron = require('node-cron');
 
@@ -442,14 +443,14 @@ function scheduleDaily6AM(taskFunction) {
     // - 6: giờ thứ 6 (6 giờ sáng)
     // - * * *: mọi ngày, mọi tháng, mọi ngày trong tuần
     const task = cron.schedule('0 6 * * *', () => {
-      console.log(`Đang thực hiện công việc theo lịch lúc 6 giờ sáng: ${new Date()}`);
-      taskFunction();
+        console.log(`Đang thực hiện công việc theo lịch lúc 6 giờ sáng: ${new Date()}`);
+        taskFunction();
     });
-    
+
     console.log('Đã lên lịch công việc vào 6 giờ sáng mỗi ngày');
     return task;
 }
-  
+
 // Sử dụng hàm
 const morningJob = scheduleDaily6AM(async () => {
     // Thực hiện công việc của bạn ở đây
@@ -460,7 +461,7 @@ const morningJob = scheduleDaily6AM(async () => {
         console.log('Không có thông báo nào để gửi');
         return;
     }
-    
+
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -496,6 +497,28 @@ const morningJob = scheduleDaily6AM(async () => {
     const attachedFiles = []; // Có thể thêm tệp đính kèm nếu cần
 
     sendNotification(io, title, htmlDescription, firstName, lastName, date, attachedFiles, notiCode, recipientArray);
+
+    const listEmailData = examToNotice?.DT.map(item => {
+        return {
+            email: item?.userExaminationData?.email || "ladat01626362980@gmail.com",
+            lastName: item?.userExaminationData?.lastName || "",
+            firstName: item?.userExaminationData?.firstName || "",
+            subject: "LỊCH HẸN TÁI KHÁM",
+            content: `<p>Bạn có lịch tái khám vào ngày <strong>${appointmentDate}</strong>. Vui lòng đến đúng giờ để được phục vụ tốt nhất 👨‍⚕️.</p>`,
+        }
+    });
+    // Gửi song song và chờ kết quả tất cả
+    const results = await Promise.allSettled(
+        listEmailData.map(item => sendEmailNotification(item))
+    );
+
+    // Xử lý từng kết quả
+    results.forEach((result, index) => {
+        const emailInfo = listEmailData[index];
+        if (result.status !== "fulfilled") {
+            console.error(`❌ Gửi email thất bại: ${emailInfo.email}`, result.reason);
+        }
+    });
 });
 
 

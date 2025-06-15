@@ -5,16 +5,16 @@ import { dischargedPayment, examinationAdvancePayment, examinationPayment, parac
 import { checkTokenWithCookie } from '../Middleware/JWTAction';
 import { getStaffNameByIdController } from '../controllers/staffController';
 import { createHandBookController, getAllHandBooksController, updateHandBookController } from '../controllers/handBookController';
-import { getAllSchedulesController, getScheduleByStaffIdController, getScheduleByStaffIdFromTodayController, getScheduleInWeekController } from '../controllers/scheduleController';
+import { getAllSchedulesController, getScheduleByDateAndDoctorController, getScheduleByStaffIdController, getScheduleByStaffIdFromTodayController, getScheduleInWeekController } from '../controllers/scheduleController';
 import { createPrescriptionController, getPrescriptionByExaminationIdController, getPrescriptionsController, updatePrescriptionController, upsertPrescriptionController } from '../controllers/prescriptionController';
 import { getAllDiseaseController, getDiseaseByNameController } from '../controllers/diseaseController';
 import { getAllMedicinesController, getAllMedicinesForExamController, getMedicineByIdController } from '../controllers/medicineController';
-import { createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getMedicalRecordsController, getPatienStepsController, updateExaminationController, updateInpatientRoomController } from '../controllers/examinationController';
+import { createAppointmentController, createExaminationController, deleteExaminationController, getExaminationByIdController, getExaminationByUserIdController, getExaminationsController, getListToPayController, getMedicalRecordsController, getPatienStepsController, updateExaminationController, updateInpatientRoomController } from '../controllers/examinationController';
 import { createOrUpdateVitalSignController, createVitalSignController, deleteVitalSignController, getVitalSignByExamIdController, updateVitalSignController } from '../controllers/vitalSignController';
 import { createOrUpdateParaclinicalController, createParaclinicalController, createRequestParaclinicalController, deleteParaclinicalController, getParaclinicalByExamIdController, getParaclinicalsController, updateListPayParaclinicalsController, updateParaclinicalController } from '../controllers/paraclinicalController';
 import dotenv from 'dotenv';
 import { deleteAssistantForCustomerController, getConversationFromSearchController, getConversationForStaffController } from '../controllers/messageController';
-import { getArrayAdminIdController, getArrayUserIdController } from '../controllers/userController';
+import { getArrayAdminIdController, getArrayUserIdController, getDoctorBookingController } from '../controllers/userController';
 import { getAvailableRoomsController } from '../controllers/roomController';
 import { deleteAdvanceMoneyController } from '../controllers/advanceMoneyController';
 dotenv.config();
@@ -33,6 +33,7 @@ let initDoctorRoute = (app) => {
     router.get("/getStaffNameById", getStaffNameByIdController)
     router.get("/getArrayUserId", getArrayUserIdController)
     router.get("/getArrayAdminId", getArrayAdminIdController)
+    router.get("/getDoctorBooking", getDoctorBookingController)
 
     //--  HandBook
     router.get("/getAllHandBooks", getAllHandBooksController)
@@ -44,6 +45,7 @@ let initDoctorRoute = (app) => {
     router.get("/getScheduleByStaffId", getScheduleByStaffIdController)
     router.get("/getScheduleInWeek", getScheduleInWeekController)
     router.get("/getScheduleByStaffIdFromToday", getScheduleByStaffIdFromTodayController)
+    router.get("/getScheduleByDateAndDoctor", getScheduleByDateAndDoctorController)
 
     //-- Prescription
     router.get("/getPrescriptionByExaminationId", getPrescriptionByExaminationIdController)
@@ -65,6 +67,7 @@ let initDoctorRoute = (app) => {
     router.put("/updateExamination", updateExaminationController)
     router.put("/deleteExamination", deleteExaminationController)
     router.get("/getPatienSteps", getPatienStepsController)
+    router.post("/createAppointment", createAppointmentController)
 
     //-- VitalSign
     router.get("/getVitalSignByExamId", getVitalSignByExamIdController)

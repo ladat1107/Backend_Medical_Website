@@ -1,5 +1,5 @@
 import e from 'express';
-import { arrangeSchedule, createSchedule, deleteSchedule, getAllSchedules, getAllSchedulesAdmin, getScheduleByStaffId, getScheduleByStaffIdFromToday, getScheduleInWeek, updateScheduleStaff } from '../services/scheduleService';
+import { arrangeSchedule, createSchedule, deleteSchedule, getAllSchedules, getAllSchedulesAdmin, getScheduleByDateAndDoctor, getScheduleByStaffId, getScheduleByStaffIdFromToday, getScheduleInWeek, updateScheduleStaff } from '../services/scheduleService';
 import { ERROR_SERVER } from '../utils';
 
 
@@ -119,6 +119,16 @@ export const getAllSchedulesAdminController = async (req, res) => {
 export const getScheduleByStaffIdFromTodayController = async (req, res) => {
     try {
         let response = await getScheduleByStaffIdFromToday(req.user.staff);
+        res.status(200).json(response);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getScheduleByDateAndDoctorController = async (req, res) => {
+    try {
+        let response = await getScheduleByDateAndDoctor(req.query);
         res.status(200).json(response);
     } catch (error) {
         console.log(error);

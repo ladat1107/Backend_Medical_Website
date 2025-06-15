@@ -83,3 +83,23 @@ export const updateNumberTicket = (io, ticket) => {
         console.error("Lỗi trong updateNumberTicket:", error);
     }
 }
+
+export const staffLoad = (io, users) => {
+    if (!io) {
+        console.error("IO không tồn tại!");
+        return;
+    }
+
+    try {
+        if (users && users.length > 0) {
+            users.forEach(userId => {
+                const userSocket = userSocketMap.get(userId);
+                if (userSocket) {
+                    userSocket.emit('staffLoad');
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Lỗi trong staffLoad:", error);
+    }
+}
