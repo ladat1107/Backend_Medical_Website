@@ -42,7 +42,7 @@ let sendEmailConform = (data, url) => {
         </div>
         <div style="text-align: center; padding: 10px; background-color: #f4f4f4; color: #666666; font-size: 12px;">
             <p>&copy; 2024 . All rights reserved.</p>
-            <p>[Bệnh viện Hoa Sen] | [0362322010]</p>
+            <p>[Bệnh viện Hoa Sen] | [0353366459]</p>
         </div>
     </div>`});
             console.log("Message sent: %s", info.messageId);
@@ -88,7 +88,7 @@ let sendEmailConformAppoinment = (data, url) => {
         </div>
         <div style="text-align: center; padding: 10px; background-color: #f4f4f4; color: #666666; font-size: 12px;">
             <p>&copy; 2024 . All rights reserved.</p>
-            <p>[Bệnh viện Hoa Sen] | [0362322010]</p>
+            <p>[Bệnh viện Hoa Sen] | [0353366459]</p>
         </div>
     </div>`});
             console.log("Message sent: %s", info.messageId);
@@ -107,7 +107,7 @@ let sendEmailNotification = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             let info = await transporter.sendMail({
-                from: "Bệnh viện Hoa sen <benhvienhoasen@gmail.com>",//process.env.GMAIL_APP, // sender address
+                from: "Bệnh viện Hoa sen <benhvienhoasen@gmail.com>",
                 to: `${data.email}`, // list of receivers
                 subject: `${data.subject}`, // Subject line
                 html: `<div style="width: 100%; padding: 20px; background-color: #ffffff; max-width: 600px; margin: 0 auto; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
@@ -121,7 +121,7 @@ let sendEmailNotification = (data) => {
         </div>
         <div style="text-align: center; padding: 10px; background-color: #f4f4f4; color: #666666; font-size: 12px;">
             <p>&copy; 2024 . All rights reserved.</p>
-            <p>[Bệnh viện Hoa Sen] | [0362322010]</p>
+            <p>[Bệnh viện Hoa Sen] | [0353366459]</p>
         </div>
     </div>`});
             console.log("Message sent: %s", info.messageId);
@@ -139,7 +139,6 @@ let sendEmailNotification = (data) => {
         }
     })
 }
-
 
 module.exports = {
     sendEmailConform,

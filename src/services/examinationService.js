@@ -331,7 +331,7 @@ export const createExamination = async (data) => {
             });
 
             staffLoad(io, listAccountants.map(item => item.id));
-        } 
+        }
 
         // Commit transaction if all operations are successful
         await transaction.commit();
@@ -636,7 +636,7 @@ export const updateExamination = async (data, userId) => {
         }
 
         //Socket khi thay đổi trạng thái khám bệnh
-        if(data.status !== existExamination.status) {
+        if (data.status !== existExamination.status) {
             switch (data.status) {
                 case status.WAITING:
                 case status.DONE_INPATIENT:
@@ -645,14 +645,14 @@ export const updateExamination = async (data, userId) => {
                         attributes: ['id'],
                         raw: true,
                         transaction
-                    });    
+                    });
 
                     staffLoad(io, listAccountants.map(item => item.id))
                     break;
-                
+
                 case status.PAID:
                     const listDoctors = await db.User.findAll({
-                        where: { 
+                        where: {
                             [Op.or]: [
                                 { roleId: ROLE.DOCTOR },
                                 { roleId: ROLE.NURSE }
@@ -676,7 +676,7 @@ export const updateExamination = async (data, userId) => {
 
                     staffLoad(io, listPharmacists.map(item => item.id))
                     break;
-            } 
+            }
         }
 
         // Commit transaction if all operations are successful
