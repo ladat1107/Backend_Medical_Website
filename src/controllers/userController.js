@@ -343,7 +343,7 @@ export const profileInforController = async (req, res) => {
         if (data.id === "null") {
             data.id = req.user.id;
         }
-        let response = await updateProfileInfor(data);        
+        let response = await updateProfileInfor(data);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error);

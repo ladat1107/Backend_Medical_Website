@@ -12,12 +12,12 @@ export const removeVietnameseTones = (str) => {
 export const splitName = (name) => {
     const nameArray = name?.split(" ");
     if (nameArray?.length === 1) return {
-        lastName: nameArray[0],
-        firstName: ""
+        firstName: nameArray[0],
+        lastName: ""
     }
     return {
-        lastName: nameArray.pop(),
-        firstName: nameArray.join(" ")
+        firstName: nameArray.pop(),
+        lastName: nameArray.join(" ")
     }
 }
 
