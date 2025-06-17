@@ -268,7 +268,7 @@ export const updateInpatientRoomController = async (req, res) => {
 export const createAppointmentController = async (req, res) => {
     try {
         const data = req.body;
-        if (data && data.userId && data.staffId && data.time && data.priority && data.symptoms && data.admissionDate && data.dischargeDate && data.price && data.medicalTreatmentTier && data.status && data.is_appointment && data.roomName && data.roomId) {
+        if (data && data.userId && data.staffId && data.time && data.symptom && data.admissionDate && data.price && data.medicalTreatmentTier && data.status && data.is_appointment && data.roomName && data.roomId) {
             let response = await createAppointment(data);
             return res.status(200).json(response)
         } else {

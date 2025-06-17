@@ -53,7 +53,6 @@ export const getExaminationById = async (id) => {
                     include: [{
                         model: db.Insurance,
                         as: "userInsuranceData",
-                        attributes: ["insuranceCode"]
                     }],
                 },
                 {
