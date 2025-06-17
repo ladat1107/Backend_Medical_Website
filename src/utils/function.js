@@ -54,3 +54,9 @@ export const formatDobQR = (dob) => {
     }
 }
 
+export const validateInsuranceCode = (code) => {
+    if (code.length !== 15) return false;
+    const isOldFormat = /^[A-Z]{2}[1-5]\d{2}\d{10}$/.test(code);
+    return isOldFormat;
+}
+

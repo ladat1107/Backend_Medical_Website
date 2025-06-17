@@ -13,6 +13,7 @@ export const createToken = (payload, time) => {
     }
     return token;
 }
+
 export const verifyToken = (token) => {
     let key = process.env.SECURITY_KEY;
     let decoded = null;
@@ -23,6 +24,7 @@ export const verifyToken = (token) => {
     }
     return decoded;
 }
+
 export const checkTokenWithCookie = async (req, res, next) => {
     if (defaultUrl.includes(req.path)) {
         return next();
@@ -94,6 +96,7 @@ export const checkAuthentication = (req, res, next) => {
     }
 
 }
+
 export const refreshToken = async (req, res) => {
     try {
         let reqToken = req.cookies[COOKIE.refreshToken];

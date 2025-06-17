@@ -158,7 +158,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         insuranceCode: {
-            type: DataTypes.STRING(45),
+            type: DataTypes.STRING(10),
             allowNull: true,
         },
         bookFor: {

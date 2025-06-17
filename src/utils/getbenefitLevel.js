@@ -1,7 +1,9 @@
+import { validateInsuranceCode } from "./function";
+
 export const getThirdDigitFromLeft = (str) => {
-    if (str.length < 10 || str.length > 10) {
-        return null; 
+    if (!validateInsuranceCode(str)) {
+        return null;
     }
-    return str[2]; 
+    return str[2];
 }
 

@@ -7,6 +7,7 @@ import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
 import { getStaffForReExamination } from "./scheduleService";
 import { io } from "../server";
 import { staffLoad } from "./socketService";
+import { validateInsuranceCode } from "../utils/function";
 
 const cron = require('node-cron');
 
@@ -228,6 +229,14 @@ export const createExamination = async (data) => {
 
         let paymentObject = {};
         if (data.insuranceCode) {
+            if (!validateInsuranceCode(data?.insuranceCode)) {
+                await transaction.rollback();
+                return {
+                    EC: 1,
+                    EM: "Mã bảo hiểm không hợp lệ",
+                    DT: null
+                }
+            }
 
             // Update thông tin bảo hiểm từ TIẾP NHẬN
             let existingInsurance = await db.Insurance.findOne({

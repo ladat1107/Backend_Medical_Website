@@ -1,5 +1,6 @@
 import db from "../models/index";
 import { ERROR_SERVER } from "../utils";
+import { validateInsuranceCode } from "../utils/function";
 
 export const getInsuranceById = async (id) => {
     try {
@@ -44,6 +45,13 @@ export const getInsuranceByUserId = async (userId) => {
 
 export const createInsurance = async (data) => {
     try {
+        if (!validateInsuranceCode(data?.insuranceCode)) {
+            return {
+                EC: 1,
+                EM: "Mã bảo hiểm không hợp lệ",
+                DT: null
+            }
+        }
         let insuarance = await db.Insurance.create({
             insuranceCode: data?.insuranceCode || null,
             dateOfIssue: data?.dateOfIssue || null,
@@ -68,6 +76,13 @@ export const createInsurance = async (data) => {
 
 export const updateInsurance = async (data) => {
     try {
+        if (!validateInsuranceCode(data?.insuranceCode)) {
+            return {
+                EC: 1,
+                EM: "Mã bảo hiểm không hợp lệ",
+                DT: null
+            }
+        }
         let insuarance = await db.Insurance.update({
             insuranceCode: data.insuranceCode,
             dateOfIssue: data.dateOfIssue,

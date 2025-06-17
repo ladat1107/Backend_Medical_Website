@@ -6,6 +6,7 @@ import { status } from "../utils/index";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
 import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
+import { validateInsuranceCode } from "../utils/function";
 require('dotenv').config();
 export const salt = bcrypt.genSaltSync(10);
 
@@ -463,9 +464,17 @@ export const createUser = async (data) => {
         let insurance = null;
 
         if (data?.insuranceCode && user) {
+            if (!validateInsuranceCode(data?.insuranceCode)) {
+                await transaction.rollback();
+                return {
+                    EC: 1,
+                    EM: "Mã bảo hiểm không hợp lệ",
+                    DT: null
+                }
+            }
             insurance = await db.Insurance.create({
                 insuranceCode: data.insuranceCode,
-                benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
+                benefitLevel: +getThirdDigitFromLeft(data.insuranceCode),
                 dateOfIssue: data?.dateOfIssue || null,
                 exp: data?.exp || null,
                 residentialCode: data?.residentialCode || null,
@@ -983,7 +992,7 @@ export const getDoctorBooking = async (filter) => {
             ],
             attributes: ['id', 'position', 'userId', 'price', 'specialtyId'],
             nest: true,
-        });        
+        });
         return {
             EC: 0,
             EM: "Lấy thông tin bác sĩ thành công",
