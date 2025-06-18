@@ -916,8 +916,8 @@ export const getExaminations = async (date, toDate, status, staffId, page, limit
                     'ASC'
                 ],
                 ['visit_status', 'ASC'],
-                ['createdAt', 'ASC']],
-            distinct: true // Ensures correct count with joins
+                ['updatedAt', 'ASC']],
+            distinct: true 
         });
 
         return {
@@ -1113,6 +1113,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                 type: 'examination',
                 data: { ...exam.toJSON(), status: statusPay },
                 createdAt: exam.createdAt,
+                updatedAt: exam.updatedAt,
                 special: exam.special,
                 userName: exam.userExaminationData.firstName + ' ' + exam.userExaminationData.lastName,
                 userPhone: exam.userExaminationData.phoneNumber,
@@ -1131,6 +1132,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                                 totalParaclinicalPrice: 0
                             },
                             createdAt: parac.createdAt,
+                            updatedAt: parac.updatedAt,
                             special: parac.examinationResultParaclincalData.special,
                             userName: parac.examinationResultParaclincalData.userExaminationData.lastName +
                                 ' ' +
@@ -1169,7 +1171,7 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
             )
         ];
 
-        // Sắp xếp theo special và createdAt - CHỈ ORDER MỘT LẦN DUY NHẤT TẠI ĐÂY
+        // Sắp xếp theo special và updatedAt - CHỈ ORDER MỘT LẦN DUY NHẤT TẠI ĐÂY
         const sortedList = combinedList.sort((itemA, itemB) => {
             // Helper function để lấy priority của special
             const getSpecialPriority = (special) => {
@@ -1186,14 +1188,13 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
                 return priorityA - priorityB;
             }
 
-            // Nếu cùng priority special, sắp xếp theo createdAt (mới nhất lên trước)
-            const dateA = new Date(itemA.createdAt);
-            const dateB = new Date(itemB.createdAt);
+            const dateA = new Date(itemA.updatedAt);
+            const dateB = new Date(itemB.updatedAt);
             return dateA.getTime() - dateB.getTime();
         });
         // Áp dụng phân trang
         const totalItems = sortedList.length;
-        const pageNum = page || 1;
+        const pageNum = page || 1; 
         const limitNum = limit || 10;
         const offset = (pageNum - 1) * limitNum;
         const paginatedList = sortedList.slice(offset, offset + limitNum);
@@ -1602,7 +1603,17 @@ export const getListAdvanceMoney = async (page, limit, search, statusPay) => {
             }],
             order: [
                 ['medicalTreatmentTier', 'DESC'],
-                ['createdAt', 'ASC']
+                [
+                    Sequelize.literal(
+                        `CASE 
+                            WHEN special IN ('old', 'children', 'disabled', 'pregnant') THEN 1 
+                            WHEN special = 'normal' THEN 2 
+                            ELSE 3 
+                        END`
+                    ),
+                    'ASC'
+                ],
+                ['updatedAt', 'ASC']
             ],
             limit: limit,
             offset: (page - 1) * limit,
@@ -1752,6 +1763,16 @@ export const getListInpations = async (date, toDate, statusExam, staffId, page, 
             limit: limit,
             offset: (page - 1) * limit,
             order: [
+                [
+                    Sequelize.literal(
+                        `CASE 
+                            WHEN special IN ('old', 'children', 'disabled', 'pregnant') THEN 1 
+                            WHEN special = 'normal' THEN 2 
+                            ELSE 3 
+                        END`
+                    ),
+                    'ASC'
+                ],
                 ['admissionDate', 'DESC'],
             ],
         });

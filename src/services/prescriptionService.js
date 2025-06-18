@@ -231,7 +231,7 @@ export const getPrescriptions = async (date, status, staffId, page, limit, searc
                     'ASC'
                 ],
                 ['visit_status', 'ASC'],
-                ['createdAt', 'ASC']],
+                ['updatedAt', 'ASC']],
             distinct: true // Ensures correct count with joins
         });
 
