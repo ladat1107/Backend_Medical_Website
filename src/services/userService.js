@@ -1,6 +1,6 @@
 import db, { Sequelize, sequelize } from "../models/index";
 import bcrypt from "bcrypt";
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
@@ -379,6 +379,13 @@ export const getUserByCid = async (cid) => {
                 model: db.Insurance,
                 as: "userInsuranceData",
                 attributes: ["insuranceCode"]
+            },{
+                model: db.Examination,
+                as: "userExaminationData",
+                where: {
+                    dischargeDate: { [Op.is]: null } 
+                },
+                required: false,
             }],
             raw: true,
             nest: true,
