@@ -2013,7 +2013,7 @@ const reStatusInpatientsJob = reStatusInpatients(async () => {
     }
 
     await db.Examination.update({
-        status: status.WAITING
+        status: status.PAID
     }, {
         where: {
             id: inpatients.map(inpatient => inpatient.id)
