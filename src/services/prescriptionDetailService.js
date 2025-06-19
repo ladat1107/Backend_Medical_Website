@@ -105,7 +105,7 @@ export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
 
         for (const [medicineId, detail] of existingDetailsMap) {
             await detail.destroy();
-            await medicineService.updateInventory(medicineId, -detail.quantity);
+            await updateInventory(medicineId, -detail.quantity);
         }
 
         return {

@@ -71,7 +71,7 @@ export const getDepartmentDuty = async () => {
                             model: db.ServiceType,
                             as: 'serviceData',
                             attributes: [],
-                            where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY] } },
+                            where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY, typeRoom.LABORATORY] } },
                             through: { attributes: [] },
                         },
                     ],
