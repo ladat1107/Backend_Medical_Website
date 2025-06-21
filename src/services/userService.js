@@ -3,15 +3,14 @@ import bcrypt from "bcrypt";
 import { Op, where } from 'sequelize';
 import { createToken, verifyToken } from "../Middleware/JWTAction"
 import { status } from "../utils/index";
-import staffService from "./staffService";
 import { sendEmailNotification, sendEmailConformAppoinment, sendEmailConform } from "./emailService";
-import { paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
+import { ERROR_SERVER, paymentStatus, ROLE, TIME, typeRoom } from "../utils/constraints";
 import { getThirdDigitFromLeft } from "../utils/getbenefitLevel";
-import { use } from "passport";
+import { validateInsuranceCode } from "../utils/function";
 require('dotenv').config();
-const salt = bcrypt.genSaltSync(10);
+export const salt = bcrypt.genSaltSync(10);
 
-const hashPasswordUser = async (password) => {
+export const hashPasswordUser = async (password) => {
     try {
         let hashPassword = await bcrypt.hashSync(password, salt);
         return hashPassword;
@@ -23,11 +22,15 @@ const hashPasswordUser = async (password) => {
         }
     }
 }
-const loginUser = async (data) => {
+
+export const loginUser = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
-                email: data.email,
+                [Op.and]: [
+                    { [Op.or]: [{ email: data.email }, { cid: data.email }] },
+                    { status: status.ACTIVE }
+                ]
             },
             include: [{
                 model: db.Role,
@@ -75,17 +78,13 @@ const loginUser = async (data) => {
     }
     catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const loginGoogle = async (data,googleId) => {
+export const loginGoogle = async (data, googleId) => {
     try {
         let user = await db.User.findOne({
-            where: { email: data.email },
+            where: { email: data.email, status: status.ACTIVE },
             include: [{
                 model: db.Role,
                 as: "userRoleData",
@@ -95,9 +94,12 @@ const loginGoogle = async (data,googleId) => {
                 as: "staffUserData",
                 attributes: ["id"],
             }],
+            raw: true,
+            nest: true,
         });
+
         if (!user) {
-            user = await db.User.create({
+            let userCreate = await db.User.create({
                 email: data.email,
                 lastName: data.family_name,
                 firstName: data.given_name,
@@ -107,12 +109,29 @@ const loginGoogle = async (data,googleId) => {
                 tokenVersion: new Date().getTime(),
                 status: status.ACTIVE,
             });
+
+            // Lấy lại user với đầy đủ thông tin include để đảm bảo structure nhất quán
+            user = await db.User.findOne({
+                where: { id: userCreate.id },
+                include: [{
+                    model: db.Role,
+                    as: "userRoleData",
+                    attributes: ["name"],
+                }, {
+                    model: db.Staff,
+                    as: "staffUserData",
+                    attributes: ["id"],
+                }],
+                raw: true,
+                nest: true,
+            });
         }
+
         let dataToken = {
             id: user.id,
             email: user.email,
             roleId: user.roleId,
-            staff: user?.staffUserData?.id,
+            staff: user?.staffUserData?.id || null,
             version: user.tokenVersion,
         }
         let token = createToken(dataToken, TIME.tokenLife);
@@ -121,21 +140,25 @@ const loginGoogle = async (data,googleId) => {
             EC: 0,
             EM: "Đăng nhập thành công",
             DT: {
-                user: { id: user.id, staff: user?.staffUserData?.id, lastName: user.lastName, firstName: user.firstName, role: user.roleId, email: user.email, avatar: user.avatar },
+                user: {
+                    id: user.id,
+                    staff: user?.staffUserData?.id || null,
+                    lastName: user.lastName,
+                    firstName: user.firstName,
+                    role: user.roleId,
+                    email: user.email,
+                    avatar: user.avatar
+                },
                 accessToken: token,
                 refreshToken: refreshToken
             }
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const checkEmail = async (email) => {
+export const checkEmail = async (email) => {
     try {
         let user = await db.User.findOne({
             where: { email: email }
@@ -149,7 +172,7 @@ const checkEmail = async (email) => {
         return false;
     }
 }
-const checkPhoneNumber = async (phoneNumber) => {
+export const checkPhoneNumber = async (phoneNumber) => {
     try {
         let user = await db.User.findOne({ where: { phoneNumber: phoneNumber } });
         if (user) {
@@ -161,7 +184,7 @@ const checkPhoneNumber = async (phoneNumber) => {
         return false;
     }
 }
-const checkCid = async (cid) => {
+export const checkCid = async (cid) => {
     try {
         let user = await db.User.findOne({ where: { cid: cid } });
         if (user) {
@@ -173,8 +196,7 @@ const checkCid = async (cid) => {
         return false;
     }
 }
-
-const checkDuplicateFields = async (email, phoneNumber, cid) => {
+export const checkDuplicateFields = async (email, phoneNumber, cid) => {
     try {
         const result = await db.User.findOne({
             where: {
@@ -207,7 +229,7 @@ const checkDuplicateFields = async (email, phoneNumber, cid) => {
         throw error;
     }
 };
-const getAllUser = async (page, limit, search, position) => {
+export const getAllUser = async (page, limit, search, position) => {
     try {
         let defaultPositions = [1, 3, 4, 5, 6, 7];
 
@@ -293,14 +315,10 @@ const getAllUser = async (page, limit, search, position) => {
 
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const getUserById = async (userId) => {
+export const getUserById = async (userId) => {
     try {
         let user = await db.User.findOne({
             where: { id: userId },
@@ -311,13 +329,8 @@ const getUserById = async (userId) => {
                 {
                     model: db.Staff,
                     as: "staffUserData",
-                    attributes: ["id", "price", "position", "departmentId", "specialtyId", "shortDescription"],
+                    attributes: ["id", "price", "position", "departmentId", "specialtyId", "shortDescription", "htmlDescription"],
                     include: [
-                        {
-                            model: db.Description,
-                            as: "staffDescriptionData",
-                            attributes: ["id", "markDownContent", "htmlContent"],
-                        },
                         {
                             model: db.Department,
                             as: 'staffDepartmentData',
@@ -330,6 +343,10 @@ const getUserById = async (userId) => {
                         },
                     ]
                 },
+                {
+                    model: db.Insurance,
+                    as: 'userInsuranceData',
+                }
 
             ],
             raw: true,
@@ -349,23 +366,26 @@ const getUserById = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getUserByCid = async (cid) => {
+export const getUserByCid = async (cid) => {
     try {
         let user = await db.User.findOne({
             where: { cid: cid },
             attributes: ["id", "phoneNumber", "lastName", "firstName",
-                "cid", "dob", "gender",],
+                "cid", "dob", "gender"],
             include: [{
                 model: db.Insurance,
                 as: "userInsuranceData",
                 attributes: ["insuranceCode"]
+            },{
+                model: db.Examination,
+                as: "userExaminationData",
+                where: {
+                    dischargeDate: { [Op.is]: null } 
+                },
+                required: false,
             }],
             raw: true,
             nest: true,
@@ -384,22 +404,46 @@ const getUserByCid = async (cid) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const createUser = async (data) => {
+export const getUserByInsuranceCode = async (insuranceCode) => {
+    try {
+        let user = await db.User.findOne({
+            include: [{
+                model: db.Insurance,
+                as: "userInsuranceData",
+                where: { insuranceCode: insuranceCode },
+                attributes: ["insuranceCode"]
+            }],
+            where: { status: status.ACTIVE },
+            attributes: ["id", "phoneNumber", "lastName", "firstName", "cid", "dob", "gender", "address"],
+            raw: true,
+            nest: true,
+        })
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin người dùng thành công",
+                DT: user
+            }
+        }
+        return {
+            EC: 200,
+            EM: "Không tìm thấy người dùng",
+            DT: "",
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+export const createUser = async (data) => {
+    let transaction = await db.sequelize.transaction();;
     try {
         data.password = "123456";
         if (data.email && !await checkEmail(data.email)) {
-            return {
-                EC: 200,
-                EM: "Email đã tồn tại",
-                DT: "",
-            }
+            return { EC: 200, EM: "Email đã tồn tại", DT: "", }
         }
         if (!await checkCid(data.cid)) {
             return {
@@ -421,59 +465,62 @@ const createUser = async (data) => {
             tokenVersion: new Date().getTime(),
             dob: data.dob || null,
             address: data.address || null,
-        });
+            gender: data?.gender || null,
+        },
+            { transaction });
         let insurance = null;
-        if (data.insuranceCode && user) {
-            insurance = await db.Insurance.create({
-                insuranceCode: data.insuranceCode,
-                benefitLevel: getThirdDigitFromLeft(data.insuranceCode),
-                userId: user.id
-            });
-            if (!insurance) {
-                await db.User.destroy({
-                    where: { id: user.id }
-                });
+
+        if (data?.insuranceCode && user) {
+            if (!validateInsuranceCode(data?.insuranceCode)) {
+                await transaction.rollback();
                 return {
-                    EC: 200,
-                    EM: "Tạo tài khoản thất bại",
-                    DT: "",
+                    EC: 1,
+                    EM: "Mã bảo hiểm không hợp lệ",
+                    DT: null
                 }
             }
+            insurance = await db.Insurance.create({
+                insuranceCode: data.insuranceCode,
+                benefitLevel: +getThirdDigitFromLeft(data.insuranceCode),
+                dateOfIssue: data?.dateOfIssue || null,
+                exp: data?.exp || null,
+                residentialCode: data?.residentialCode || null,
+                continuousFiveYearPeriod: data?.continuousFiveYearPeriod || null,
+                status: status.ACTIVE,
+                userId: user.id
+            }, { transaction });
         }
-        if (data.staff) {
-            const staff = await staffService.createStaff(data, user.id);
-            if (!staff) {
-                await db.User.destroy({
-                    where: { id: user.id }
-                });
+        if (data?.staff && user) {
+            await db.Staff.create({
+                price: data?.price || 0,
+                position: data?.position ? data.position.toString() : "",
+                departmentId: data.departmentId,
+                shortDescription: data?.shortDescription || null,
+                specialtyId: data?.specialtyId || null,
+                status: status.ACTIVE,
+                htmlDescription: data?.htmlDescription || null,
+                userId: user.id
+            }, { transaction });
+
+            let mail = await sendEmailNotification(
+                {
+                    email: user.email,
+                    lastName: user.lastName,
+                    firstName: user.firstName,
+                    subject: "TÀI KHOẢN NHÂN VIÊN",
+                    content: ` <p>Chúc mừng bạn đã trở thành nhân viên của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>. </p>`
+                }
+            );
+            if (mail.EC === 0) {
+                await transaction.commit();
                 return {
-                    EC: 200,
-                    EM: "Tạo tài khoản thất bại",
+                    EC: 0,
+                    EM: "Thêm người dùng thành công",
                     DT: "",
                 }
             } else {
-                let mail = await sendEmailNotification(
-                    {
-                        email: user.email,
-                        lastName: user.lastName,
-                        firstName: user.firstName,
-                        subject: "TÀI KHOẢN NHÂN VIÊN",
-                        content: ` <p>Chúc mừng bạn đã trở thành nhân viên của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>. </p>`
-                    }
-                );
-                if (mail.EC === 0) {
-                    return {
-                        EC: 0,
-                        EM: "Thêm người dùng thành công",
-                        DT: "",
-                    }
-                } else {
-                    return {
-                        EC: 200,
-                        EM: "Gửi email thất bại",
-                        DT: "",
-                    }
-                }
+                await transaction.rollback();
+                return { EC: 200, EM: "Gửi email thất bại", DT: "", }
             }
         } else {
             if (user && data.email) {
@@ -485,12 +532,14 @@ const createUser = async (data) => {
                     content: `Chúc mừng bạn đã trở thành người dùng của chúng tôi. Bạn có thể đăng nhập vào hệ thống bằng email: <strong>${user.email}</strong> và mật khẩu <strong>${data.password}</strong>.`
                 })
                 if (mail.EC === 0) {
+                    await transaction.commit();
                     return {
                         EC: 0,
                         EM: "Thêm người dùng thành công",
                         DT: "",
                     }
                 } else {
+                    await transaction.rollback();
                     return {
                         EC: 200,
                         EM: "Gửi mail thông báo thất bại",
@@ -498,6 +547,7 @@ const createUser = async (data) => {
                     }
                 }
             } else {
+                await transaction.commit();
                 return {
                     EC: 0,
                     EM: "Thêm người dùng thành công",
@@ -508,17 +558,13 @@ const createUser = async (data) => {
                 }
             }
         }
-
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        await transaction.rollback();
+        return ERROR_SERVER
     }
 }
-const updateUser = async (data) => {
+export const updateUser = async (data) => {
     let transaction = await sequelize.transaction();
     try {
         let user = await db.User.findOne({
@@ -540,19 +586,15 @@ const updateUser = async (data) => {
             }, {
                 where: { id: data.id },
             }, { transaction });
-            if (data.descriptionId) { // Nếu có descriptionId thì cập nhật thông tin Staff
-                await db.Description.update({
-                    markDownContent: data?.markDownContent,
-                    htmlContent: data?.htmlContent,
-                }, {
-                    where: { id: data.descriptionId },
-                }, { transaction });
+
+            if (data.staffId) { // Nếu có departmentId thì cập nhật thông tin Staff                
                 await db.Staff.update({
                     price: data?.price || null,
                     shortDescription: data?.shortDescription || null,
                     position: data?.position?.toString(),
                     departmentId: data?.departmentId,
                     specialtyId: data?.specialtyId || null,
+                    htmlDescription: data?.htmlDescription || null,
                 }, {
                     where: { userId: data.id },
                 }, { transaction });
@@ -580,14 +622,10 @@ const updateUser = async (data) => {
     } catch (error) {
         console.log(error);
         await transaction.rollback();
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const blockUser = async (data) => {
+export const blockUser = async (data) => {
     try {
         let user = await db.User.update({
             status: status.INACTIVE,
@@ -612,21 +650,29 @@ const blockUser = async (data) => {
 
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
-const deleteUser = async (userId) => {
+export const deleteUser = async (userId) => {
+    let transaction = await db.sequelize.transaction();
     try {
         let user = await db.User.findOne({
             where: { id: userId },
         });
         if (user) {
             let name = user.lastName + " " + user.firstName;
-            await user.destroy();
+            let staff = await db.Staff.findOne({
+                where: { userId: userId },
+            })
+            if (staff) {
+                await db.Staff.destroy({
+                    where: { userId: userId },
+                }, { transaction });
+            }
+            await db.User.destroy({
+                where: { id: userId },
+            }, { transaction });
+            await transaction.commit();
             return {
                 EC: 0,
                 EM: `Xóa người dùng ${name} thành công`,
@@ -640,14 +686,11 @@ const deleteUser = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        await transaction.rollback();
+        return ERROR_SERVER
     }
 }
-const registerUser = async (data) => {
+export const registerUser = async (data) => {
     try {
         let checkExist = await checkDuplicateFields(data.email, data.phoneNumber, data.cid)
         if (checkExist?.isDuplicate) {
@@ -674,7 +717,7 @@ const registerUser = async (data) => {
         }
     }
 }
-const confirmUser = async (token) => {
+export const confirmUser = async (token) => {
     try {
         let data = await verifyToken(token);
         if (data) {
@@ -694,6 +737,7 @@ const confirmUser = async (token) => {
                 phoneNumber: data.phoneNumber,
                 cid: data.cid,
                 roleId: ROLE.PATIENT,
+                tokenVersion: new Date().getTime(),
                 status: status.ACTIVE,
             })
             if (user) {
@@ -717,14 +761,11 @@ const confirmUser = async (token) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const forgotPassword = async (email) => {
+
+export const forgotPassword = async (email) => {
     try {
         let password = "123456";
         let user = await db.User.findOne({ where: { email: email } });
@@ -774,19 +815,16 @@ const forgotPassword = async (email) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-
-const getDoctorHome = async (filter) => {
+export const getDoctorHome = async (filter) => {
     try {
         let condition = {};
         let includeOption = [];
         let search = filter?.search || "";
+        let departmentId = filter?.departmentId || null;
+        let specialtyId = filter?.specialtyId || null;
         let listStaff = [];
         if (filter?.page && filter?.limit) {
             let limit = +filter.limit > 36 ? 36 : +filter.limit;
@@ -809,11 +847,13 @@ const getDoctorHome = async (filter) => {
                     },
                     {
                         model: db.Department,
+                        where: departmentId ? { id: departmentId } : {},
                         as: 'staffDepartmentData',
                         attributes: ['id', 'name'],
                     },
                     {
                         model: db.Specialty,
+                        where: specialtyId ? { id: specialtyId } : {},
                         as: 'staffSpecialtyData',
                         attributes: ['id', 'name'],
                     },
@@ -869,6 +909,7 @@ const getDoctorHome = async (filter) => {
                         model: db.User,
                         as: 'staffUserData',
                         where: {
+                            status: status.ACTIVE,
                             roleId: ROLE.DOCTOR,
                             [Op.or]: [
                                 { firstName: { [Op.like]: `%${search}%` } },
@@ -906,20 +947,143 @@ const getDoctorHome = async (filter) => {
         };
     } catch (error) {
         console.error("Lỗi server:", error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const updateProfileInfor = async (data) => {
+
+export const getDoctorBooking = async (filter) => {
+    try {
+        let date = filter?.date || new Date();
+        let condition = {}
+        if (filter?.specialtyId) {
+            condition.specialtyId = +filter.specialtyId;
+        }
+        let doctors = await db.Staff.findAll({
+            where: {
+                status: status.ACTIVE,
+                ...condition,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        status: status.ACTIVE,
+                        roleId: ROLE.DOCTOR,
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Schedule,
+                    as: 'staffScheduleData',
+                    where: {
+                        date: { [Op.eq]: date },
+                    },
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'scheduleRoomData',
+                            where: { departmentId: typeRoom.CLINIC, },
+                            attributes: ['name'],
+                        },
+                    ],
+                    required: true,
+                    attributes: ['date', "roomId", "staffId"],
+                    raw: true,
+                }
+            ],
+            attributes: ['id', 'position', 'userId', 'price', 'specialtyId'],
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin bác sĩ thành công",
+            DT: doctors
+        };
+    } catch (error) {
+        console.error("Lỗi server:", error);
+        return ERROR_SERVER;
+    }
+}
+
+export const getDoctorBookingById = async (id) => {
+    try {
+        let doctor = await db.Staff.findOne({
+            where: {
+                status: status.ACTIVE,
+                userId: +id,
+            },
+            include: [
+                {
+                    model: db.User,
+                    as: 'staffUserData',
+                    where: {
+                        status: status.ACTIVE,
+                        roleId: ROLE.DOCTOR,
+                    },
+                    attributes: ['id', 'lastName', 'firstName', 'avatar', 'gender'],
+                },
+                {
+                    model: db.Department,
+                    as: 'staffDepartmentData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Specialty,
+                    as: 'staffSpecialtyData',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: db.Examination,
+                    as: 'examinationStaffData',
+                    attributes: ['id'],
+                }, {
+                    model: db.Schedule,
+                    as: 'staffScheduleData',
+                    separate: true, // ⭐ Giúp tránh join phức tạp gây lỗi
+                    where: {
+                        date: { [Op.gte]: new Date() },
+                    },
+                    include: [
+                        {
+                            model: db.Room,
+                            as: 'scheduleRoomData',
+                            where: { departmentId: typeRoom.CLINIC },
+                            attributes: ['id', 'name']
+                        }
+                    ],
+                }
+            ],
+            attributes: ['id', 'position', 'userId', 'price'],
+            nest: true,
+        });
+        if (doctor) {
+            return {
+                EC: 0,
+                EM: "Lấy thông tin bác sĩ thành công",
+                DT: doctor,
+            };
+        } else {
+            return { EC: 404, EM: "Bác sĩ này không có lịch khám", DT: "", }
+        }
+
+    } catch (error) {
+        console.error("Lỗi server:", error);
+        return ERROR_SERVER;
+    }
+};
+export const updateProfileInfor = async (data) => {
     try {
         let [numberOfAffectedRows] = await db.User.update({
             phoneNumber: data?.phoneNumber,
             lastName: data?.lastName,
             firstName: data?.firstName,
-            gender: data?.gender || null,
+            gender: data?.gender === 0 ? 0 : (data?.gender || null),
             avatar: data?.avatar || null,
             cid: data?.cid,
             dob: data?.dob || null,
@@ -948,14 +1112,10 @@ const updateProfileInfor = async (data) => {
     }
     catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const updateProfilePassword = async (data) => {
+export const updateProfilePassword = async (data) => {
     try {
         let user = await db.User.findOne({
             where: { id: data.id },
@@ -1019,14 +1179,10 @@ const updateProfilePassword = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getUserInsuarance = async (userId) => {
+export const getUserInsuarance = async (userId) => {
     try {
         let insurance = await db.User.findOne({
             where: { id: userId },
@@ -1062,12 +1218,13 @@ const getUserInsuarance = async (userId) => {
         };
     }
 }
-const confirmBooking = async (data) => {
+
+export const confirmBooking = async (data, userId) => {
     try {
         let user = await db.User.findOne({
             where: { cid: data.profile.cid },
         });
-        if (!user) {
+        if (!user || user.id !== userId) {
             data.profile.bookFor = true;
         } else {
             let examination = await db.Examination.findAll({
@@ -1104,20 +1261,20 @@ const confirmBooking = async (data) => {
 
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 }
-const confirmTokenBooking = async (token) => {
+
+export const confirmTokenBooking = async (token) => {
     let transaction = await sequelize.transaction();
     try {
         let data = await verifyToken(token);
 
         if (data) {
-            let user;
+            let user = await db.User.findOne({
+                where: { cid: data.profile.cid },
+            }, { transaction });
+
             let examinationCount = await db.Examination.findAll({
                 where: {
                     admissionDate: new Date(data.schedule.date),
@@ -1125,7 +1282,8 @@ const confirmTokenBooking = async (token) => {
                     status: status.PENDING,
                     is_appointment: 1,
                 },
-            });
+            }, { transaction });
+
             if (examinationCount.length >= 6) {
                 return {
                     EC: 200,
@@ -1136,16 +1294,16 @@ const confirmTokenBooking = async (token) => {
             let staff = await db.Staff.findOne({
                 where: { id: data.doctor.id },
                 attributes: ["id", "price"],
-            });
+            }, { transaction });
             if (!staff) {
+                await transaction.rollback();
                 return {
                     EC: 200,
                     EM: "Đặt lịch khám thất bại! Không tìm thấy bác sĩ",
                     DT: "",
                 }
             }
-            if (data.profile.bookFor) {
-                console.log("Book for another person");
+            if (data.profile.bookFor && !user) {
                 let password = "123456";
                 let hashPassword = await hashPasswordUser(password);
                 user = await db.User.create({
@@ -1159,26 +1317,26 @@ const confirmTokenBooking = async (token) => {
                     roleId: ROLE.PATIENT,
                     dob: new Date(data.profile.dob),
                     currentResident: data.profile.address || null,
-                });
-            } else {
-                user = await db.User.findOne({
-                    where: { cid: data.profile.cid },
-                });
-                let examination = await db.Examination.findAll({
-                    where: {
-                        userId: user.id,
-                        admissionDate: new Date(data.schedule.date),
-                        status: status.PENDING,
-                    }
-                });
-                if (examination.length > 0) {
-                    return {
-                        EC: 200,
-                        EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
-                        DT: "",
-                    }
+                    tokenVersion: new Date().getTime(),
+                }, { transaction });
+            }
+
+            let examinations = await db.Examination.findAll({
+                where: {
+                    userId: user.id,
+                    admissionDate: new Date(data.schedule.date),
+                    status: status.PENDING,
+                }
+            }, { transaction });
+            if (examinations.length > 0) {
+                await transaction.rollback();
+                return {
+                    EC: 200,
+                    EM: "Mỗi người dùng chỉ được đặt lịch khám một lần trong ngày",
+                    DT: "",
                 }
             }
+
             if (user && staff) {
                 let examination = await db.Examination.create({
                     userId: user.id,
@@ -1189,7 +1347,10 @@ const confirmTokenBooking = async (token) => {
                     status: status.PENDING,
                     paymentDoctorStatus: paymentStatus.UNPAID,
 
-                    price: staff.price,
+                    price: data?.profile?.price,
+                    coveredPrice: data?.profile?.coveredPrice !== undefined ? +data.profile.coveredPrice : data?.profile?.price,
+                    insuranceCode: data?.profile?.insuranceCode || null,
+                    insuranceCoverage: +data?.profile?.insuranceCoverage || null,
                     special: data?.profile?.special,
                     roomName: data?.schedule?.room?.name || null,
 
@@ -1198,7 +1359,9 @@ const confirmTokenBooking = async (token) => {
                     visit_status: 0,
                     is_appointment: 1,
                     bookFor: data.profile.bookFor ? data.profile.id : null,
+                    oldParaclinical: data?.profile?.oldParaclinical || null,
                 }, { transaction });
+
                 if (examination) {
                     await transaction.commit();
                     return {
@@ -1232,14 +1395,10 @@ const confirmTokenBooking = async (token) => {
     } catch (error) {
         await transaction.rollback();
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 }
-const getMedicalHistories = async (userId) => {
+export const getMedicalHistories = async (userId) => {
     try {
         let medicalHistories = await db.User.findAll({
             where: { id: userId },
@@ -1248,9 +1407,23 @@ const getMedicalHistories = async (userId) => {
                     model: db.Examination,
                     as: "userExaminationData",
                     where: {
-                        status: status.DONE
+                        [Op.or]: [
+                            { status: status.DONE },
+                            { status: status.DONE_INPATIENT },
+                        ]
                     },
+                    required: false,
                     include: [
+                        {
+                            model: db.Staff,
+                            as: 'examinationStaffData',
+                            attributes: ['id', 'departmentId', 'position'],
+                            include: [{
+                                model: db.User,
+                                as: 'staffUserData',
+                                attributes: ['id', 'lastName', 'firstName'],
+                            }],
+                        },
                         {
                             model: db.VitalSign,
                             as: 'examinationVitalSignData',
@@ -1259,6 +1432,16 @@ const getMedicalHistories = async (userId) => {
                             model: db.Paraclinical,
                             as: 'examinationResultParaclincalData',
                             include: [
+                                {
+                                    model: db.Staff,
+                                    as: 'doctorParaclinicalData',
+                                    attributes: ['id', 'departmentId'],
+                                    include: [{
+                                        model: db.User,
+                                        as: 'staffUserData',
+                                        attributes: ['id', 'lastName', 'firstName'],
+                                    }],
+                                },
                                 {
                                     model: db.Room,
                                     as: 'roomParaclinicalData',
@@ -1275,7 +1458,6 @@ const getMedicalHistories = async (userId) => {
                         {
                             model: db.Prescription,
                             as: 'prescriptionExamData',
-                            attributes: ['id', 'note', 'totalMoney'],
                             include: [{
                                 model: db.Medicine,
                                 as: 'prescriptionDetails',
@@ -1286,8 +1468,8 @@ const getMedicalHistories = async (userId) => {
                                 through: ['quantity', 'unit', 'dosage', 'price']
                             }],
                         }
-                    ],
-                    nest: true,
+                        // Tạm thời loại bỏ include Comorbidities gây lỗi
+                    ]
                 },
                 {
                     model: db.Insurance,
@@ -1298,42 +1480,108 @@ const getMedicalHistories = async (userId) => {
                     as: 'folkData'
                 }
             ],
-            order: [["createdAt", "DESC"]],
+            order: [[{ model: db.Examination, as: "userExaminationData" }, "dischargeDate", "DESC"]]
         });
+
+        // Xử lý thêm cho trường hợp comorbidities là chuỗi mã bệnh
+        const result = JSON.parse(JSON.stringify(medicalHistories));
+
+        // Xử lý cho mỗi user
+        for (let user of result) {
+            if (user.userExaminationData && user.userExaminationData.length > 0) {
+                // Xử lý cho mỗi examination
+                for (let examination of user.userExaminationData) {
+                    // Xử lý cho trường comorbidities có sẵn (chuỗi code bệnh)
+                    if (examination.comorbidities) {
+                        const diseaseCodes = examination.comorbidities.split(',').filter(code => code.trim() !== '');
+
+                        if (diseaseCodes.length > 0) {
+                            const diseaseDetails = await db.Disease.findAll({
+                                where: {
+                                    code: diseaseCodes
+                                },
+                                attributes: ['id', 'code', 'name']
+                            });
+
+                            // Thêm thông tin chi tiết bệnh vào kết quả
+                            examination.comorbiditiesDetails = diseaseDetails;
+                        } else {
+                            examination.comorbiditiesDetails = [];
+                        }
+                    } else {
+                        examination.comorbiditiesDetails = [];
+                    }
+                }
+            }
+        }
 
         return {
             EC: 0,
             EM: "Lấy thông tin lịch sử khám bệnh thành công",
-            DT: medicalHistories,
+            DT: result,
         };
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi chính trong getMedicalHistories:', error);
         return {
             EC: 500,
-            EM: "Lỗi server!",
+            EM: "Lỗi server! " + (error.message || ''),
             DT: null,
         };
     }
 }
 
-module.exports = {
-    getAllUser,
-    getUserById,
-    getUserByCid,
-    createUser,
-    updateUser,
-    blockUser,
-    deleteUser,
-    registerUser,
-    loginUser,
-    loginGoogle,
-    getDoctorHome,
-    updateProfileInfor,
-    updateProfilePassword,
-    getUserInsuarance,
-    getMedicalHistories,
-    confirmUser,
-    forgotPassword,
-    confirmBooking,
-    confirmTokenBooking,
+export const getArrayUserId = async () => {
+    try {
+        let user = await db.User.findAll({
+            where: {
+                status: status.ACTIVE,
+                roleId: ROLE.PATIENT
+            },
+            attributes: ['id']
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy danh sách người dùng thành công",
+                DT: user,
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getArrayAdminId = async () => {
+    try {
+        let user = await db.User.findAll({
+            where: {
+                status: status.ACTIVE,
+                roleId: ROLE.ADMIN
+            },
+            attributes: ['id']
+        });
+        if (user) {
+            return {
+                EC: 0,
+                EM: "Lấy danh sách người dùng thành công",
+                DT: user,
+            }
+        } else {
+            return {
+                EC: 200,
+                EM: "Không tìm thấy người dùng",
+                DT: "",
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
 }

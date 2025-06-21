@@ -37,6 +37,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             allowNull: false,
         },
+        insuranceCovered: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        coveredPrice: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
         status: {
             type: DataTypes.INTEGER, // 0 - delete, 1 - unpay, 2 - paid
             allowNull: false,
@@ -48,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'payments', // Tên bảng tham chiếu
                 key: 'id',
             },
+        },
+        endDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     }, {
         sequelize,

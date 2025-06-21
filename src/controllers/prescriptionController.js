@@ -1,15 +1,12 @@
-import prescriptionService from '../services/prescriptionService';
+import { createPrescription, deletePrescription, getPrescriptionByExaminationId, getPrescriptions, updatePrescription, upsertPrescription } from '../services/prescriptionService';
+import { ERROR_SERVER } from '../utils';
 
-const getPrescriptionByExaminationId = async (req, res) => {
+export const getPrescriptionByExaminationIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.examinationId) {
-            let response = await prescriptionService.getPrescriptionByExaminationId(data.examinationId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getPrescriptionByExaminationId(data.examinationId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -19,34 +16,22 @@ const getPrescriptionByExaminationId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const upsertPrescription = async (req, res) => {
+export const upsertPrescriptionController = async (req, res) => {
     try {
         let data = req.body;
-        let response = await prescriptionService.upsertPrescription(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await upsertPrescription(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getPrescriptions = async (req, res) => {
+export const getPrescriptionsController = async (req, res) => {
     try {
         let date = req.query.date || null;
         let status = req.query.status || null;
@@ -56,44 +41,43 @@ const getPrescriptions = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await prescriptionService.getPrescriptions(date, status, staffId, +page, +limit, search);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getPrescriptions(date, status, staffId, +page, +limit, search);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updatePrescription = async (req, res) => {
+export const updatePrescriptionController = async (req, res) => {
     try {
         let data = req.body;
-        let response = await prescriptionService.updatePrescription(data, null, req.user.id);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await updatePrescription(data, req.user.id);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-module.exports = {
-    getPrescriptionByExaminationId,
-    upsertPrescription,
-    getPrescriptions,
-    updatePrescription
+export const createPrescriptionController = async (req, res) => {
+    try {
+        let data = req.body;
+        let response = await createPrescription(data);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const deletePrescriptionController = async (req, res) => {
+    try {
+        const { id } = req.query;
+        let response = await deletePrescription(id);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
 }

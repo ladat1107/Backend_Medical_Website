@@ -1,3 +1,5 @@
+import { ERROR_SERVER } from "../../utils/index"
+
 export const getServiceHome = (req, res) => {
     try {
         let data = [
@@ -268,10 +270,7 @@ export const getServiceHome = (req, res) => {
             DT: customData
         })
     } catch (e) {
-        return res.status(500).json({
-            EC: 1,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        });
+        console.log(e);
+        return res.status(500).json(ERROR_SERVER);
     }
 }

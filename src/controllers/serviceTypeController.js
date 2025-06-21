@@ -1,81 +1,44 @@
-import serviceTypeService from '../services/serviceTypeService';
-import { PAGINATE } from '../utils';
+import { blockStatusServiceType, createServiceType, deleteStatusServiceType, getAllServiceTypes, getAllServiceTypesAdmin, getServiceLaboratory, getServiceSearch, getServiceTypeById, updateServiceType } from '../services/serviceTypeService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllServiceTypes = async (req, res) => {
+export const getAllServiceTypesController = async (req, res) => {
     try {
-        let response = await serviceTypeService.getAllServiceTypes();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllServiceTypes();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getAllServiceTypesAdmin = async (req, res) => {
+export const getAllServiceTypesAdminController = async (req, res) => {
     try {
-        if (req.query.page && req.query.limit) {
-            let page = parseInt(req.query.page);
-            let limit = parseInt(req.query.limit);
-            let limitValue = 25;
-            for (let i = 0; i < PAGINATE.length; i++) {
-                if (PAGINATE[i].id === limit) {
-                    limitValue = PAGINATE[i].value;
-                    break;
-                }
-            }
-            let search = req.query.search;
-            let response = await serviceTypeService.getAllServiceTypesAdmin(page, limitValue, search);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }
+        let page = req.query?.page || 1;
+        let limit = req.query?.limit || 25;
+        let search = req.query?.search || "";
+        let response = await getAllServiceTypesAdmin(page, limit, search);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getServiceSearch = async (req, res) => {
+export const getServiceSearchController = async (req, res) => {
     try {
 
-        let response = await serviceTypeService.getServiceSearch();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getServiceSearch();
+        return res.status(200).json(response)
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getServiceTypeById = async (req, res) => {
+export const getServiceTypeByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await serviceTypeService.getServiceTypeById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getServiceTypeById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -85,24 +48,16 @@ const getServiceTypeById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createServiceType = async (req, res) => {
+export const createServiceTypeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.name && data.price) {
-            let response = await serviceTypeService.createServiceType(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createServiceType(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -112,24 +67,16 @@ const createServiceType = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateServiceType = async (req, res) => {
+export const updateServiceTypeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.name && data.price) {
-            let response = await serviceTypeService.updateServiceType(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateServiceType(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -139,24 +86,16 @@ const updateServiceType = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const blockStatusServiceType = async (req, res) => {
+export const blockStatusServiceTypeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await serviceTypeService.blockStatusServiceType(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await blockStatusServiceType(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -166,23 +105,15 @@ const blockStatusServiceType = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const deleteStatusServiceType = async (req, res) => {
+export const deleteStatusServiceTypeController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await serviceTypeService.deleteStatusServiceType(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteStatusServiceType(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -192,40 +123,16 @@ const deleteStatusServiceType = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getServiceLaboratory = async (req, res) => {
+export const getServiceLaboratoryController = async (req, res) => {
     try {
-        let response = await serviceTypeService.getServiceLaboratory();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getServiceLaboratory();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllServiceTypes,
-    getServiceTypeById,
-    createServiceType,
-    updateServiceType,
-    blockStatusServiceType,
-    deleteStatusServiceType,
-    getAllServiceTypesAdmin,
-    getServiceSearch,
-    getServiceLaboratory
 }

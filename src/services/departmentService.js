@@ -1,10 +1,8 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models/index";
-import { status, typeRoom } from "../utils/index";
-import descriptionService from "./descriptionService";
-import { raw } from "body-parser";
+import { ERROR_SERVER, status, typeRoom } from "../utils/index";
 
-const getAllDepartment = async (page, limit, search) => {
+export const getAllDepartment = async (page, limit, search) => {
     try {
         let department = await db.Department.findAndCountAll({
             where: {
@@ -55,14 +53,10 @@ const getAllDepartment = async (page, limit, search) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentDuty = async () => {
+export const getDepartmentDuty = async () => {
     try {
         let department = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -77,7 +71,7 @@ const getDepartmentDuty = async () => {
                             model: db.ServiceType,
                             as: 'serviceData',
                             attributes: [],
-                            where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY] } },
+                            where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY, typeRoom.LABORATORY] } },
                             through: { attributes: [] },
                         },
                     ],
@@ -97,14 +91,10 @@ const getDepartmentDuty = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentHome = async () => {
+export const getDepartmentHome = async () => {
     try {
         let departments = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -116,14 +106,10 @@ const getDepartmentHome = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getAllNameDepartment = async () => {
+export const getAllNameDepartment = async () => {
     try {
         let department = await db.Department.findAll({
             where: { status: status.ACTIVE },
@@ -140,24 +126,14 @@ const getAllNameDepartment = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getDepartmentById = async (departmentId) => {
+export const getDepartmentById = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
             include: [{
-                model: db.Description,
-                as: 'departmentDescriptionData',
-                attributes: ['markDownContent', 'htmlContent'],
-                required: false,
-                where: { status: status.ACTIVE },
-            }, {
                 model: db.Staff,
                 as: 'deanDepartmentData',
                 attributes: ['id', 'position'],
@@ -174,7 +150,7 @@ const getDepartmentById = async (departmentId) => {
                 include: [{
                     model: db.User,
                     as: 'staffUserData',
-                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar'],
+                    attributes: ['id', 'lastName', 'firstName', 'email', 'dob', 'phoneNumber', 'avatar', 'roleId'],
                     where: { status: status.ACTIVE },
                 }],
             }],
@@ -195,15 +171,11 @@ const getDepartmentById = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getAllStaffInDepartment = async (departmentId) => {
+export const getAllStaffInDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId, status: status.ACTIVE },
@@ -227,96 +199,56 @@ const getAllStaffInDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createDepartment = async (data) => {
+export const createDepartment = async (data) => {
     try {
-        let descriptionId = await descriptionService.createDescription(data);
-        if (descriptionId) {
-            let department = await db.Department.create({
-                name: data?.name,
-                image: data?.image,
-                deanId: data?.deanId,
-                shortDescription: data?.shortDescription,
-                status: status.ACTIVE,
-                descriptionId: descriptionId,
-                address: data?.address
-            });
-            return {
-                EC: 0,
-                EM: "Tạo phòng ban thành công",
-                DT: department
-            }
-        } else {
-            await descriptionService.deleteDescription(descriptionId);
-            return {
-                EC: 500,
-                EM: "Tạo phòng ban thất bại",
-                DT: "",
-            }
+        let department = await db.Department.create({
+            name: data?.name,
+            image: data?.image,
+            deanId: data?.deanId || null,
+            shortDescription: data?.shortDescription,
+            status: status.ACTIVE,
+            address: data?.address,
+            htmlDescription: data?.htmlDescription || null,
+        });
+        return {
+            EC: 0,
+            EM: "Tạo phòng ban thành công",
+            DT: department
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const updateDepartment = async (data) => {
+export const updateDepartment = async (data) => {
     try {
-        let department = await db.Department.findOne({
+        let department = await db.Department.update({
+            name: data.name,
+            image: data?.image,
+            deanId: data.deanId,
+            shortDescription: data?.shortDescription,
+            htmlDescription: data?.htmlDescription || null,
+            status: data?.status,
+            address: data?.address
+        }, {
             where: { id: data.id },
         });
-        if (department) {
-            let description = await descriptionService.updateDescription(data, department.descriptionId);
-            if (description) {
-                await department.update({
-                    name: data.name,
-                    image: data?.image,
-                    deanId: data.deanId,
-                    shortDescription: data?.shortDescription,
-                    descriptionId: description.id,
-                    status: data?.status,
-                    address: data?.address
-                });
-                return {
-                    EC: 0,
-                    EM: "Cập nhật phòng ban thành công",
-                    DT: department
-                }
-            } else {
-                return {
-                    EC: 500,
-                    EM: "Cập nhật phòng ban thất bại",
-                    DT: "",
-                }
-            }
-        } else {
-            return {
-                EC: 404,
-                EM: "Không tìm thấy phòng ban",
-                DT: "",
-            }
+        return {
+            EC: 0,
+            EM: "Cập nhật phòng ban thành công",
+            DT: department
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const blockDepartment = async (departmentId) => {
+export const blockDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -348,14 +280,10 @@ const blockDepartment = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteDepartment = async (departmentId) => {
+export const deleteDepartment = async (departmentId) => {
     try {
         let department = await db.Department.findOne({
             where: { id: departmentId },
@@ -372,59 +300,17 @@ const deleteDepartment = async (departmentId) => {
             await db.Room.update(
                 { departmentId: 1 }, // Giá trị cần cập nhật
                 {
-                    where: {
-                        departmentId: department.id
-                    }
+                    where: { departmentId: department.id }
                 }
             );
-            let description = await db.Description.destroy({
-                where: { id: department.descriptionId }
-            });
-            if (description) {
-                await db.Department.destroy({
-                    where: {
-                        id: department.id,
-                    },
-                });
-                return {
-                    EC: 0,
-                    EM: "Xóa phòng ban thành công",
-                    DT: department
-                }
-            } else {
-                return {
-                    EC: 500,
-                    EM: "Xóa phòng ban thất bại",
-                    DT: "",
-                }
-            }
-        }
-        return {
-            EC: 404,
-            EM: "Không tìm thấy phòng ban",
-            DT: "",
-        }
+            await db.Department.destroy({ where: { id: department.id } });
+
+            return { EC: 0, EM: "Xóa phòng ban thành công", DT: department }
+        } else return { EC: 400, EM: "Không tìm thấy phòng ban", DT: "", }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getOutpatientDepartments = async () => { }
 
-module.exports = {
-    getAllDepartment,
-    getDepartmentDuty,
-    getDepartmentById,
-    getAllStaffInDepartment,
-    createDepartment,
-    updateDepartment,
-    deleteDepartment,
-    getAllNameDepartment,
-    blockDepartment,
-    getDepartmentHome,
-}

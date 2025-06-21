@@ -1,20 +1,32 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import db from '../models/index';
-import { PAYMENT_METHOD, paymentStatus, status, TYPE_PAYMENT } from '../utils';
-import prescriptionService from './prescriptionService';
+import { ERROR_SERVER, PAYMENT_METHOD, paymentStatus, TYPE_PAYMENT } from '../utils';
+import { updatePrescriptionMomo } from './prescriptionService';
 import { Op } from 'sequelize';
+import { dischargedPaymentMomo, updateExaminationMomo } from './examinationService';
+import { updateAdvanceMomo } from './advanceMoneyService';
+import { getThirdDigitFromLeft } from '../utils/getbenefitLevel';
+import { coveredPrice } from '../utils/formatValue';
+import { updateParaclinicalMomo } from './paraclinicalService';
 require('dotenv').config();
 
-let accessKey = 'F8BBA842ECF85';
-let secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+let accessKey = process.env.ACCESSKEY_MOMO;
+let secretKey = process.env.SECRETKEY_MOMO;
+
+// ngrok http 8843 
+// TK: 9704 0000 0000 0018  
+// 03/07
+// NGUYEN VAN A
+
+let ngrokUrl = "https://backend-medical-website.onrender.com";
 
 export const paymentMomo = async (data) => {
     try {
         let orderInfo = 'pay with MoMo';
         let partnerCode = "MOMO";
         let redirectUrl = data.redirectUrl;
-        let ipnUrl = `${process.env.NGROK_URL}/api/callback`;
+        let ipnUrl = `${ngrokUrl}/api/callbackMomo`;
         let requestType = "payWithMethod";
         let amount = data.price;
         let orderId = partnerCode + new Date().getTime();
@@ -76,11 +88,7 @@ export const paymentMomo = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
@@ -89,6 +97,7 @@ export const paymentMomoCallback = async (req, res) => {
         let data = req.body;
         if (data.resultCode === 0) {
             let detail = JSON.stringify(data);
+
             let payment = await db.Payment.create({
                 orderId: data.orderId,
                 amount: data.amount,
@@ -100,14 +109,16 @@ export const paymentMomoCallback = async (req, res) => {
             if (payment) {
                 let dataExtra = JSON.parse(data.extraData);
                 let result = true;
-                if (dataExtra.type === TYPE_PAYMENT.APPOINMENT) {
-                    result = await paymentAppoinment(dataExtra, payment);
-                } else if (dataExtra.type === TYPE_PAYMENT.PARA_CLINICAL) {
-                    result = await paymentParaclinical(dataExtra, payment);
+                if (dataExtra.type === TYPE_PAYMENT.PARA_CLINICAL) {
+                    result = await updateParaclinicalMomo(dataExtra, payment);
                 } else if (dataExtra.type === TYPE_PAYMENT.EXAMINATION) {
-                    result = await paymentExamination(dataExtra, payment);
+                    result = await updateExaminationMomo(dataExtra, payment);
                 } else if (dataExtra.type === TYPE_PAYMENT.PRESCRIPTION) {
-                    result = await prescriptionService.updatePrescription(dataExtra, payment, null);
+                    result = await updatePrescriptionMomo(dataExtra, payment);
+                } else if (dataExtra.type === TYPE_PAYMENT.ADVANCE) {
+                    result = await updateAdvanceMomo(dataExtra, payment);
+                } else if (dataExtra.type === TYPE_PAYMENT.DISCHARGE) {
+                    result = await dischargedPaymentMomo(dataExtra, payment);
                 }
                 if (result === false) {
                     await db.Payment.destroy({
@@ -125,11 +136,7 @@ export const paymentMomoCallback = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
 
     }
 }
@@ -175,11 +182,7 @@ export const refundMomo = async (data) => {
 
         // Kiểm tra kết quả trả về
         if (response.data.resultCode === 0) {
-            return {
-                EC: 0,
-                EM: "Hoàn tiền thành công",
-                DT: response.data,
-            };
+            return { EC: 0, EM: "Hoàn tiền thành công", DT: response.data, };
         } else {
             return {
                 EC: response.data.resultCode,
@@ -196,45 +199,7 @@ export const refundMomo = async (data) => {
         };
     }
 };
-
-// EXPLANATION PAYMENT MOMO
-export const appoinmentPayment = async (req, res) => {
-    try {
-        let id = req.query.id;
-        let examination = await db.Examination.findOne({
-            where: {
-                id: id
-            }
-        });
-        if (!examination) {
-            return res.status(200).json({
-                EC: 404,
-                EM: "Không tìm thấy cuộc hẹn",
-                DT: ""
-            })
-        }
-        let data = {
-            id: examination.id,
-            type: TYPE_PAYMENT.APPOINMENT,
-            price: examination.price,
-            redirectUrl: 'http://localhost:3000/appointmentList',
-        }
-        let response = await paymentMomo(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
-    }
-    catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
+// Thanh toán đơn khám
 export const examinationPayment = async (req, res) => {
     try {
         let dataReq = req.body;
@@ -250,175 +215,180 @@ export const examinationPayment = async (req, res) => {
                 DT: ""
             })
         }
+
         let body = {
             id: examination.id,
             type: TYPE_PAYMENT.EXAMINATION,
-            price: examination.price,
-            redirectUrl: 'http://localhost:3000/cashier',
+            price: Math.round(dataReq?.coveredPrice || examination?.price),
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
             update: dataReq
         }
         let response = await paymentMomo(body);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
+// Thanh toán đơn cận lâm sàng
 export const paraclinicalPayment = async (req, res) => {
     try {
-        let ids = req.body.ids;
-        if (!ids) {
-            return res.status(200).json({
-                EC: 404,
-                EM: "Không tìm thấy dịch vụ cận lâm sàng",
-                DT: ""
-            })
+        let { ids, insurance } = req.body;
+        const insuranceCoverage = insurance ? getThirdDigitFromLeft(insurance) : 0
+        if (!ids || ids.length === 0) {
+            return res.status(200).json({ EC: 404, EM: "Không tìm thấy dịch vụ cận lâm sàng", DT: "" })
         }
-        let paraclinical = await db.Paraclinical.findAll({
-            where: {
-                id: { [Op.in]: ids }
-            },
-            attributes: ['id', 'price'],
-            raw: true,
-            nest: true
+        let paraclinicals = await db.Paraclinical.findAll({
+            where: { id: { [Op.in]: ids } },
         });
 
-        if (!paraclinical) {
-            return res.status(200).json({
-                EC: 404,
-                EM: "Không tìm thấy dịch vụ cận lâm sàng",
-                DT: ""
-            })
-        }
         let price = 0;
-        for (let i = 0; i < paraclinical.length; i++) {
-            price += paraclinical[i].price;
+        for (let paraclinical of paraclinicals) {
+            price += +paraclinical.price - coveredPrice(+paraclinical.price, insuranceCoverage);
         }
+
         let data = {
             id: ids,
             type: TYPE_PAYMENT.PARA_CLINICAL,
             price: price,
-            redirectUrl: 'http://localhost:3000/cashier',
+            insuranceCoverage: insuranceCoverage,
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
         }
         let response = await paymentMomo(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
+// Thanh toán đơn thuốc
 export const prescriptionPayment = async (req, res) => {
     try {
         let dataReq = req.body;
-        let prescription = await db.Prescription.findOne({
-            where: {
-                id: dataReq.id
-            },
-        });
+        let prescription = await db.Prescription.findOne({ where: { id: dataReq.id }, });
         if (!prescription) {
-            return res.status(200).json({
-                EC: 404,
-                EM: "Không tìm thấy đơn thuốc",
-                DT: ""
-            })
+            return res.status(200).json({ EC: 404, EM: "Không tìm thấy đơn thuốc", DT: "" })
         }
         let body = {
             id: prescription.id,
             type: TYPE_PAYMENT.PRESCRIPTION,
-            price: prescription.totalMoney,
-            redirectUrl: 'http://localhost:3000/prescribe',
+            price: Math.round(dataReq.coveredPrice),
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/prescribe`,
             update: dataReq
         }
         let response = await paymentMomo(body);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-
-
-///Viết vô examinationService.js
-const paymentAppoinment = async (data, payment) => {
+// Thanh toán tiền tạm ứng
+export const examinationAdvancePayment = async (req, res) => {
     try {
-        let examination = data;
-        await db.Examination.update(
-            {
-                paymentId: payment.id
-            },
-            {
-                where: { id: examination.id },
-            });
-        return true;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-const paymentExamination = async (data, payment) => {
-    try {
-        let dataUpdate = data.update;
-        await db.Examination.update({
-            insuranceCoverage: dataUpdate?.insuranceCoverage,
-            insuaranceCode: dataUpdate?.insuaranceCode,
-            status: dataUpdate?.status,
-            paymentId: payment.id,
-        }, {
-            where: { id: data.id }
-        });
-        return true;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
-/// viết vô paraclinicalService.js
-const paymentParaclinical = async (data, payment) => {
-    try {
-        let ids = data?.id;
-        await db.Paraclinical.update(
-            {
-                status: status.PAID,
-                paymentId: payment.id
-            }, {
-            where: {
-                id: {
-                    [Op.in]: ids
-                },
-            }
+        let dataReq = req.body;
+        let advance = await db.AdvanceMoney.findOne({ where: { id: dataReq.advanceId } });
+        if (!advance) {
+            return res.status(200).json({ EC: 404, EM: "Không tìm thấy tiền tạm ứng", DT: "" })
         }
-        );
-        return true;
+        let body = {
+            id: advance.id,
+            type: TYPE_PAYMENT.ADVANCE,
+            price: Math.round(dataReq?.advanceMoney),
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
+            update: dataReq
+        }
+        let response = await paymentMomo(body);
+        return res.status(200).json(response)
+
     } catch (error) {
         console.log(error);
-        return false;
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+// Thanh toán xuất viện
+export const dischargedPayment = async (req, res) => {
+    try {
+        let dataReq = req.body;
+        let examination = await db.Examination.findOne({ where: { id: dataReq.id } });
+        if (!examination) {
+            return res.status(200).json({ EC: 404, EM: "Không tìm thấy đơn khám", DT: "" })
+        }
+        let body = {
+            id: examination.id,
+            type: TYPE_PAYMENT.DISCHARGE,
+            price: Math.round(dataReq.amount),
+            redirectUrl: `${process.env.REACT_APP_BACKEND_URL}/cashier`,
+            update: dataReq
+        }
+        let response = await paymentMomo(body);
+        return res.status(200).json(response)
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+
+export const getPaymentAdmin = async (fillter) => {
+    try {
+        let { startDate, endDate } = fillter;
+        let payments = await db.Payment.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [startDate, endDate]
+                },
+            },
+            include: [
+                {
+                    model: db.Examination,
+                    as: 'examinationData',
+                    attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status', 'medicalTreatmentTier'],
+                    include: [{
+                        model: db.Paraclinical,
+                        as: 'examinationResultParaclincalData',
+                        attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status'],
+                        required: false,
+                    }, {
+                        model: db.Prescription,
+                        as: 'prescriptionExamData',
+                        attributes: ['id', 'totalMoney', 'insuranceCovered', 'coveredPrice', 'status'],
+                        required: false,
+                    }],
+                    required: false,
+                },
+                {
+                    model: db.Paraclinical,
+                    as: 'paraclinicalData',
+                    attributes: ['id', 'price', 'insuranceCovered', 'coveredPrice', 'status'],
+                    required: false,
+                },
+                {
+                    model: db.Prescription,
+                    as: 'prescriptionData',
+                    attributes: ['id', 'totalMoney', 'insuranceCovered', 'coveredPrice', 'status'],
+                    required: false,
+                },
+                {
+                    model: db.AdvanceMoney,
+                    as: 'advanceMoneyData',
+                    required: false,
+                }
+            ],
+            nest: true,
+            order: [['createdAt', 'DESC']]
+        });
+        return {
+            EC: 0,
+            EM: "Lấy danh sách thanh toán thành công",
+            DT: payments
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
     }
 }

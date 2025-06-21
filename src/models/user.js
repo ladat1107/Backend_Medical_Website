@@ -14,46 +14,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'userInsuranceData', // Phải đồng nhất với alias khi truy vấn
       });
-      User.hasOne(models.ConditionAtBirth, {
-        foreignKey: 'userId',
-        as: 'conditionAtBirthUserData',
-      });
       User.hasMany(models.Staff, {
         foreignKey: 'userId',
         as: 'staffUserData',
-      });
-      User.hasMany(models.Patient, {
-        foreignKey: 'userId',
-        as: 'patientUserData',
       });
       User.hasMany(models.Relative, {
         foreignKey: 'userId',
         as: 'userRelativeData',
       });
-      User.hasMany(models.FamilyHistory, {
-        foreignKey: 'userId',
-        as: 'userFamilyHistoryData',
-      });
-      User.belongsToMany(models.SurgicalHistory, {
-        through: 'SurgicalhistoryUsers',
-        foreignKey: 'userId',
-        as: 'surgicalhistoryData',
-      });
-      User.belongsToMany(models.Disability, {
-        through: 'DisabilityUsers',
-        foreignKey: 'userId',
-        as: 'disablityData',
-      });
-      User.belongsToMany(models.Allergy, {
-        through: 'AllergyUsers',
-        foreignKey: 'userId',
-        as: 'allergyData',
-      });
-      User.belongsToMany(models.Disease, {
-        through: 'DiseaseUsers',
-        foreignKey: 'userId',
-        as: 'diseaseData',
-      });
+      User.hasOne(models.Conversation, {
+        foreignKey: 'patientId',
+        as: 'patientData',
+      })
+      User.hasMany(models.Conversation, {
+        foreignKey: 'staffId',
+        as: 'staffData',
+      })
       User.hasMany(models.Examination, {
         foreignKey: 'userId',
         as: 'userExaminationData',

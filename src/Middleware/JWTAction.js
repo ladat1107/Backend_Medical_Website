@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import db from "../models/index";
 import { COOKIE, TIME } from "../utils";
-import { where } from "sequelize";
 require('dotenv').config();
-const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callback"];
-const createToken = (payload, time) => {
+const defaultUrl = ["/", "/registerUser", '/handleLogin', '/handleLogout', '/confirm', "/callbackMomo"];
+export const createToken = (payload, time) => {
     let key = process.env.SECURITY_KEY;
     let token = null;
     try {
@@ -14,7 +13,8 @@ const createToken = (payload, time) => {
     }
     return token;
 }
-const verifyToken = (token) => {
+
+export const verifyToken = (token) => {
     let key = process.env.SECURITY_KEY;
     let decoded = null;
     try {
@@ -24,7 +24,8 @@ const verifyToken = (token) => {
     }
     return decoded;
 }
-const checkTokenWithCookie = async (req, res, next) => {
+
+export const checkTokenWithCookie = async (req, res, next) => {
     if (defaultUrl.includes(req.path)) {
         return next();
     }
@@ -62,7 +63,7 @@ const checkTokenWithCookie = async (req, res, next) => {
     }
 }
 
-const checkAuthentication = (req, res, next) => {
+export const checkAuthentication = (req, res, next) => {
     if (defaultUrl.includes(req.path) || req.path === "/account") {
         return next();
     }
@@ -95,7 +96,8 @@ const checkAuthentication = (req, res, next) => {
     }
 
 }
-const refreshToken = async (req, res) => {
+
+export const refreshToken = async (req, res) => {
     try {
         let reqToken = req.cookies[COOKIE.refreshToken];
         if (!reqToken) {
@@ -114,6 +116,7 @@ const refreshToken = async (req, res) => {
                     email: reqDecoded.email,
                     roleId: reqDecoded.roleId,
                     staff: reqDecoded?.staff,
+                    version: reqDecoded.version,
                 }
                 let newToken = createToken(data, TIME.tokenLife);
                 return res.status(200).json({
@@ -144,10 +147,4 @@ const refreshToken = async (req, res) => {
         });
     }
 }
-module.exports = {
-    createToken,
-    verifyToken,
-    checkTokenWithCookie,
-    checkAuthentication,
-    refreshToken,
-}
+

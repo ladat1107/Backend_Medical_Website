@@ -1,33 +1,22 @@
-import staffService from '../services/staffService';
+import { getAllStaff, getStaffbyDepartmentId, getStaffById, getStaffByName, getStaffByRole, getStaffNameById, profileStaff } from '../services/staffService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllStaff = async (req, res) => {
+export const getAllStaffController = async (req, res) => {
     try {
-        let response = await staffService.getAllStaff();
-        res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        });
+        let response = await getAllStaff();
+        res.status(200).json(response);
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getStaffbyDepartmentId = async (req, res) => {
+export const getStaffbyDepartmentIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.departmentId) {
-            let response = await staffService.getStaffbyDepartmentId(data.departmentId);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getStaffbyDepartmentId(data.departmentId);
+            return res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getStaffbyDepartmentId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getStaffById = async (req, res) => {
+export const getStaffByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await staffService.getStaffById(data.id);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getStaffById(data.id);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +45,16 @@ const getStaffById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getStaffNameById = async (req, res) => {
+export const getStaffNameByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.staffId) {
-            let response = await staffService.getStaffNameById(data.staffId);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getStaffNameById(data.staffId);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,24 +64,16 @@ const getStaffNameById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getStaffByRole = async (req, res) => {
+export const getStaffByRoleController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.roleId) {
-            let response = await staffService.getStaffByRole(data.roleId);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getStaffByRole(data.roleId);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -118,24 +83,16 @@ const getStaffByRole = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getStaffByName = async (req, res) => {
+export const getStaffByNameController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.name) {
-            let response = await staffService.getStaffByName(data.name);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await getStaffByName(data.name);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -145,23 +102,15 @@ const getStaffByName = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const profileStaff = async (req, res) => {
+export const profileStaffController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.id && data.descriptionId && data.markDownContent && data.htmlContent && data.shortDescription) {
-            let response = await staffService.profileStaff(data);
-            res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+        if (data && data.id && data.htmlDescription && data.shortDescription) {
+            let response = await profileStaff(data);
+            res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -171,19 +120,6 @@ const profileStaff = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-module.exports = {
-    getAllStaff,
-    getStaffbyDepartmentId,
-    getStaffById,
-    getStaffByRole,
-    getStaffByName,
-    profileStaff,
-    getStaffNameById
 }

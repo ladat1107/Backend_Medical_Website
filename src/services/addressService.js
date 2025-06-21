@@ -1,5 +1,5 @@
 import db from "../models";
-import { status } from "../utils";
+import { ERROR_SERVER, status } from "../utils";
 
 export const getFolk = async (req, res) => {
     try {
@@ -15,11 +15,7 @@ export const getFolk = async (req, res) => {
         });
     } catch (err) {
         console.log(err);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Có lỗi xảy ra",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 export const getProvince = async (req, res) => {
@@ -36,11 +32,7 @@ export const getProvince = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Có lỗi xảy ra",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 export const getDistrict = async (req, res) => {
@@ -57,28 +49,6 @@ export const getDistrict = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Có lỗi xảy ra",
-            DT: "",
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
-
-// let custom = []
-// for (let i = 0; i < data.length; i++) {
-//     custom.push({
-//         id: +data[i].id,
-//         nameVi: data[i].full_name,
-//         nameEn: data[i].full_name_en,
-//         longitude: +data[i].longitude,
-//         latitude: +data[i].latitude,
-//         status: 1
-//     })
-// }
-// let provinces = await db.Province.bulkCreate(custom);
-// return res.status(200).json({
-//     EC: 0,
-//     EM: "Thành công",
-//     DT: provinces,
-// });

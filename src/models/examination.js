@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'examinationResultParaclincalData',
             });
-            Examination.hasOne(models.VitalSign, {
+            Examination.hasMany(models.VitalSign, {
                 foreignKey: 'examinationId',
                 as: 'examinationVitalSignData',
             });
@@ -25,13 +25,29 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'examinationId',
                 as: 'prescriptionExamData',
             });
-            Examination.hasMany(models.Comorbidities, {
-                foreignKey: 'examinationId',
-                as: 'examinationComorbiditiesData',
-            });
             Examination.belongsTo(models.Payment, {
                 foreignKey: 'paymentId',
                 as: 'paymentData',
+            });
+            Examination.belongsTo(models.Examination, {
+                foreignKey: 'parentExaminationId',
+                as: 'parentExaminationData',
+            });
+            Examination.hasOne(models.Examination, {
+                foreignKey: 'parentExaminationId',
+                as: 'ReExaminationData',
+            });
+            Examination.belongsTo(models.Room, {
+                foreignKey: 'roomId',
+                as: 'examinationRoomData',
+            });
+            Examination.hasMany(models.AdvanceMoney, {
+                foreignKey: 'exam_id',
+                as: 'advanceMoneyExaminationData',
+            });
+            Examination.hasMany(models.InpatientRoom, {
+                foreignKey: 'examId',
+                as: 'inpatientRoomExaminationData',
             });
         }
     }
@@ -48,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         staffId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'staffs', // Tên bảng tham chiếu
                 key: 'id',
@@ -89,7 +105,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         price: {
             type: DataTypes.DOUBLE,
-            allowNull: false,
+            allowNull: true,
+        },
+        insuranceCovered: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        coveredPrice: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
         },
         special: {
             type: DataTypes.STRING(100),
@@ -107,6 +131,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(256),
             allowNull: true,
         },
+        roomId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'rooms', // Tên bảng tham chiếu
+                key: 'id',
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
+        },
         number: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -123,8 +157,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        insuaranceCode: {
-            type: DataTypes.STRING(45),
+        insuranceCode: {
+            type: DataTypes.STRING(10),
             allowNull: true,
         },
         bookFor: {
@@ -144,6 +178,28 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
             },
         },
+        oldParaclinical: DataTypes.TEXT,
+        reExaminationDate: DataTypes.DATE,
+        dischargeStatus: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        parentExaminationId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'examinations', // Tên bảng tham chiếu
+                key: 'id',
+            },
+        },
+        reExaminationTime: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        isWrongTreatment: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
     }, {
         sequelize,
         modelName: 'Examination',

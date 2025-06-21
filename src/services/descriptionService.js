@@ -1,7 +1,7 @@
 import db from "../models/index";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 
-const getDesciptionById = async (descriptionId) => {
+export const getDesciptionById = async (descriptionId) => {
     try {
         let description = await db.Description.findOne({
             where: { id: descriptionId },
@@ -22,15 +22,11 @@ const getDesciptionById = async (descriptionId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createDescription = async (data) => {
+export const createDescription = async (data) => {
     try {
         let description = await db.Description.create({
             markDownContent: data.markDownContent,
@@ -40,15 +36,11 @@ const createDescription = async (data) => {
         return description.id;
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateDescription = async (data, descriptionId) => {
+export const updateDescription = async (data, descriptionId) => {
     try {
         let description = await db.Description.findOne({
             where: { id: descriptionId },
@@ -74,7 +66,7 @@ const updateDescription = async (data, descriptionId) => {
     }
 }
 
-const updateStatusDescription = async (descriptionId) => {
+export const updateStatusDescription = async (descriptionId) => {
     try {
         let description = await db.Description.findOne({
             where: { id: descriptionId }
@@ -95,24 +87,11 @@ const updateStatusDescription = async (descriptionId) => {
     }
 }
 
-const deleteDescription = async (descriptionId) => {
+export const deleteDescription = async (descriptionId) => {
     try {
         await db.Description.destroy(descriptionId);
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
-}
-
-module.exports = {
-    getDesciptionById,
-    createDescription,
-    updateDescription,
-    updateStatusDescription,
-    deleteDescription,
-
 }

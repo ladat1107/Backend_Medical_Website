@@ -1,7 +1,9 @@
-import userService from '../services/userService'
-import { COOKIE, PAGINATE, ROLE, TIME } from '../utils';
+import { blockUser, confirmBooking, confirmTokenBooking, confirmUser, createUser, deleteUser, forgotPassword, getAllUser, getArrayAdminId, getArrayUserId, getDoctorBooking, getDoctorBookingById, getDoctorHome, getMedicalHistories, getUserByCid, getUserById, getUserByInsuranceCode, getUserInsuarance, loginGoogle, loginUser, registerUser, updateProfileInfor, updateProfilePassword, updateUser } from '../services/userService';
+import { COOKIE, ERROR_SERVER, ROLE, TIME } from '../utils';
+import { formatUnicode } from '../utils/formatUnicode';
+import { decodeHexToString, formatDobQR, splitName } from '../utils/function';
 require('dotenv').config();
-const handleRegisterUser = async (req, res) => {
+export const handleRegisterUserController = async (req, res) => {
     try {
         let data = req.body
         if (!data || !data.email || !data.password || !data.lastName || !data.firstName || !data.phoneNumber || !data.cid) {
@@ -11,32 +13,21 @@ const handleRegisterUser = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await userService.registerUser(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await registerUser(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 
 }
-const handleConfirm = async (req, res) => {
+export const handleConfirmController = async (req, res) => {
     try {
         let data = req.body;
+
         if (data && data.token) {
-            let response = await userService.confirmUser(data.token);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await confirmUser(data.token);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -46,23 +37,15 @@ const handleConfirm = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const handleForgotPassword = async (req, res) => {
+export const handleForgotPasswordController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.email) {
-            let response = await userService.forgotPassword(data.email);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await forgotPassword(data.email);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -73,14 +56,10 @@ const handleForgotPassword = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const handleLogin = async (req, res) => {
+export const handleLoginController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.email || !data.password) {
@@ -90,95 +69,82 @@ const handleLogin = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await userService.loginUser(data);
+        let response = await loginUser(data);
         res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
             httpOnly: true,
             maxAge: TIME.cookieLife
         })
         delete response.DT.refreshToken;
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+export const handleLogoutController = async (req, res) => {
+    try {
+        res.clearCookie(COOKIE.refreshToken);
         return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
+            EC: 0,
+            EM: "Đăng xuất thành công",
+            DT: ""
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const handleLoginGoogle = async (req, res) => {
+export const handleLoginGoogleController = async (req, res) => {
     try {
-        let response = await userService.loginGoogle(req?.user?._json, req?.user?.id);
-        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
-            httpOnly: true,
-            maxAge: TIME.cookieLife
-        })
-        delete response.DT.refreshToken;
-        let dataCustom = JSON.stringify(response.DT);
-        return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?google=${dataCustom}`);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
-const getAllUser = async (req, res) => {
-    try {
-        if (req.query.page && req.query.limit) {
-            let page = parseInt(req.query.page);
-            let limit = parseInt(req.query.limit);
-            let limitValue = 25;
-            for (let i = 0; i < PAGINATE.length; i++) {
-                if (PAGINATE[i].id === limit) {
-                    limitValue = PAGINATE[i].value;
-                    break;
-                }
-            }
-            let search = req.query.search;
-            let position = req.query.position;
-            if (position.includes('[') && position.includes(']')) {
-                position = JSON.parse(position);
-            } else {
-                position = [];
-            }
-            let response = await userService.getAllUser(page, limitValue, search, position);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
+        let response = await loginGoogle(req?.user?._json, req?.user?.id);
+
+        // Kiểm tra response và DT trước khi xử lý
+        if (response && response.EC === 0 && response.DT) {
+            res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+                httpOnly: true,
+                maxAge: TIME.cookieLife
             })
+            delete response.DT.refreshToken;
+            let dataCustom = JSON.stringify(response.DT);
+            return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?google=${dataCustom}`);
+        } else {
+            // Nếu có lỗi, redirect về trang login với error
+            console.log("Error in loginGoogle:", response);
+            return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?error=google_login_failed`);
         }
-
+    } catch (error) {
+        console.log("Catch error in handleLoginGoogleController:", error);
+        return res.redirect(`${process.env.REACT_APP_BACKEND_URL}/login?error=server_error`);
+    }
+}
+export const getAllUserController = async (req, res) => {
+    try {
+        let page = req.query?.page || 1;
+        let limit = req.query?.limit || 25;
+        let search = req.query.search;
+        let position = req.query.position;
+        if (position.includes('[') && position.includes(']')) {
+            position = JSON.parse(position);
+        } else {
+            position = [];
+        }
+        let response = await getAllUser(page, limit, search, position);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getUserById = async (req, res) => {
+export const getUserByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
             if (data.id === "null") {
                 data.id = req.user.id;
             }
-            let response = await userService.getUserById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getUserById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -188,24 +154,16 @@ const getUserById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getUserByCid = async (req, res) => {
+export const getUserByCidController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.cid) {
-            let response = await userService.getUserByCid(data.cid);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getUserByCid(data.cid);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -215,20 +173,16 @@ const getUserByCid = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const createUser = async (req, res) => {
+export const createUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data) {
             let arr = ["lastName", "firstName", "cid", "roleId"];
             if ([3, 4, 5, 6, 7].includes(data.roleId)) {
-                arr.push("phoneNumber", "email", "markDownContent", "departmentId")
+                arr.push("phoneNumber", "email", "departmentId")
                 data.staff = true;
             }
             for (let i = 0; i < arr.length; i++) {
@@ -240,13 +194,8 @@ const createUser = async (req, res) => {
                     })
                 }
             }
-
-            let response = await userService.createUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -256,23 +205,15 @@ const createUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const updateUser = async (req, res) => {
+export const updateUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await userService.updateUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -289,16 +230,12 @@ const updateUser = async (req, res) => {
         })
     }
 }
-const blockUser = async (req, res) => {
+export const blockUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await userService.blockUser(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await blockUser(data);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -308,23 +245,15 @@ const blockUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const deleteUser = async (req, res) => {
+export const deleteUserController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await userService.deleteUser(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteUser(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(400).json({
                 EC: 400,
@@ -334,169 +263,94 @@ const deleteUser = async (req, res) => {
         }
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+export const getUserByQrCodeController = async (req, res) => {
+    try {
+        let data = req?.query?.qrCode?.split("|");
+        let response = {};
+        if (data?.length === 7) {
+            response = await getUserByCid(data[0]);
+            if (response.EC === 200) {
+                const dataQrDecode = formatUnicode(req?.query?.qrCode);
+                const dataQrDecodeSplit = dataQrDecode.split("|");
+                const fullName = splitName(dataQrDecodeSplit[2]);
+                const dob = formatDobQR(dataQrDecodeSplit[3]);
+                return res.status(200).json({
+                    EC: 1, EM: "Tạo tài khoản mới", DT: {
+                        type: "cid",
+                        data: {
+                            cid: dataQrDecodeSplit[0],
+                            lastName: fullName.lastName,
+                            firstName: fullName.firstName,
+                            dob: dob,
+                            gender: dataQrDecodeSplit[4] === "Nam" ? "0" : "1",
+                            address: dataQrDecodeSplit[5],
+                        }
+                    }
+                });
+            }
+            else return res.status(200).json(response);
+        } else if (data?.length === 17) {
+            response = await getUserByInsuranceCode(data[0]);
+            if (response.EC === 200) {
+                const decodeName = decodeHexToString(data[1]);
+                const decodeAddress = decodeHexToString(data[15]);
+                const fullName = splitName(decodeName);
+                return res.status(200).json({
+                    EC: 1, EM: "Tạo tài khoản mới", DT: {
+                        type: "insuranceCode",
+                        data: {
+                            insuranceCode: data[0],
+                            lastName: fullName.lastName,
+                            firstName: fullName.firstName,
+                            dob: data[2],
+                            gender: +data[3] === 1 ? "0" : "1",
+                            address: decodeAddress,
+                            residentialCode: data[5],
+                            dateOfIssue: data[6],
+                            exp: data[7]?.includes("/") ? data[7] : null,
+                        }
+                    }
+                });
+            }
+            else return res.status(200).json(response);
+        } else return res.status(200).json({
+            EC: 400,
+            EM: "Mã QR không hợp lệ",
             DT: ""
         })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateFunction = async (req, res) => {
+export const getDoctorHomeController = async (req, res) => {
     try {
-        let data = req.body;
-        if (data) {
-            let arr = ["id", "userName", "email", "phoneNumber", "gender", "groupId"];
-            for (let i = 0; i < arr.length; i++) {
-                if (!data[arr[i]]) {
-                    return res.status(400).json({
-                        EC: 400,
-                        EM: `Dữ liệu ${arr[i]} không được để trống`,
-                        DT: ""
-                    })
-                }
-            }
-            let response = await userService.updateFunction(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(400).json({
-                EC: 400,
-                EM: "Dữ liệu không được để trống",
-                DT: ""
-            })
-        }
+        let response = await getDoctorHome(req.query);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const deleteFunction = async (req, res) => {
-    try {
-        let data = req.body;
-        if (data && data.id) {
-            let response = await userService.deleteFunction(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
-const getFunctionById = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.id) {
-            let response = await userService.getFunctionById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Không tìm thấy người dùng",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
-const handleGetAccount = async (req, res) => {
-    try {
-        if (req.user && req.token) {
-            console.log("Check account: ", req.user);
-            return res.status(200).json({
-                EC: 200,
-                EM: "Success",
-                DT: {
-                    token: req.token,
-                    user: req.user
-                }
-            })
-        } else {
-            return res.status(401).json({
-                EC: 401,
-                EM: "Unauthorized",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
-const getDoctorHome = async (req, res) => {
-    try {
-        let response = await userService.getDoctorHome(req.query);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
-    }
-}
-const profileInfor = async (req, res) => {
+export const profileInforController = async (req, res) => {
     try {
         let data = req.body;
         if (data.id === "null") {
             data.id = req.user.id;
         }
-        let response = await userService.updateProfileInfor(data);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await updateProfileInfor(data);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const profilePassword = async (req, res) => {
+export const profilePasswordController = async (req, res) => {
     try {
         let data = req.body;
         if (!data || !data.id || !data.oldPassword || !data.newPassword) {
@@ -506,11 +360,13 @@ const profilePassword = async (req, res) => {
                 DT: ""
             })
         }
-        let response = await userService.updateProfilePassword(data);
-        res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
-            httpOnly: true,
-            maxAge: TIME.cookieLife
-        })
+        let response = await updateProfilePassword(data);
+        // if (response.EC === 0) {
+        //     res.cookie(COOKIE.refreshToken, response.DT.refreshToken, {
+        //         httpOnly: true,
+        //         maxAge: TIME.cookieLife
+        //     })
+        // }
         return res.status(200).json({
             EC: response.EC,
             EM: response.EM,
@@ -518,24 +374,16 @@ const profilePassword = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getUserInsuarance = async (req, res) => {
+export const getUserInsuaranceController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.userId) {
-            let response = await userService.getUserInsuarance(data.userId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getUserInsuarance(data.userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -545,23 +393,16 @@ const getUserInsuarance = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
-const confirmBooking = async (req, res) => {
+export const confirmBookingController = async (req, res) => {
     try {
         let data = req.body;
+        let userId = req.user.id;
         if (data && data.profile && data.doctor && data.schedule) {
-            let response = await userService.confirmBooking(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await confirmBooking(data, userId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -571,23 +412,15 @@ const confirmBooking = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
-const confirmTokenBooking = async (req, res) => {
+export const confirmTokenBookingController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.token) {
-            let response = await userService.confirmTokenBooking(data.token);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await confirmTokenBooking(data.token);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -597,56 +430,61 @@ const confirmTokenBooking = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
 
-const getMedicalHistories = async (req, res) => {
+export const getMedicalHistoriesController = async (req, res) => {
     try {
         let userId = req.user.roleId === ROLE.PATIENT ? req?.user?.id : req?.query?.userId;
-        let response = await userService.getMedicalHistories(userId);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getMedicalHistories(userId);
+        return res.status(200).json(response)
 
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi hệ thống",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-module.exports = {
-    getAllUser,
-    getUserById,
-    getUserByCid,
-    createUser,
-    updateUser,
-    blockUser,
-    deleteUser,
-    getUserInsuarance,
-    handleForgotPassword,
-    handleRegisterUser,
-    handleLogin,
-    handleLoginGoogle,
-    updateFunction,
-    deleteFunction,
-    getFunctionById,
-    handleGetAccount,
-    handleConfirm,
-    getDoctorHome,
-    profileInfor,
-    profilePassword,
-    getMedicalHistories,
-    confirmBooking,
-    confirmTokenBooking,
+export const getArrayUserIdController = async (req, res) => {
+    try {
+        let response = await getArrayUserId();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getArrayAdminIdController = async (req, res) => {
+    try {
+        let response = await getArrayAdminId();
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+export const getDoctorBookingByIdController = async (req, res) => {
+    try {
+        let id = req.query.id;
+        if (!id) {
+            return res.status(400).json({ EC: 400, EM: "Thiếu mã bác sĩ!", DT: null })
+        }
+        let response = await getDoctorBookingById(id);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
+}
+
+export const getDoctorBookingController = async (req, res) => {
+    try {
+        let response = await getDoctorBooking(req.query);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(ERROR_SERVER)
+    }
 }

@@ -1,13 +1,16 @@
 import db from '../models/index';
-import prescriptionDetailService from './prescriptionDetailService';
-import { status, paymentStatus, PAYMENT_METHOD } from "../utils/index";
-import { Op, or, Sequelize, where } from 'sequelize';
+import { upsertPrescriptionDetail } from './prescriptionDetailService';
+import { status, paymentStatus, ERROR_SERVER, ROLE } from "../utils/index";
+import { Op, Sequelize } from 'sequelize';
+import dayjs from 'dayjs';
+import { staffLoad } from './socketService';
+import { io } from "../server";
 
-const calculateTotalMoney = (details) => {
+export const calculateTotalMoney = (details) => {
     return details.reduce((sum, detail) => sum + (detail.quantity * detail.price), 0);
 };
 
-const getPrescriptionByExaminationId = async (examinationId) => {
+export const getPrescriptionByExaminationId = async (examinationId) => {
     try {
         let prescription = await db.Prescription.findOne({
             where: { examinationId: examinationId },
@@ -34,15 +37,11 @@ const getPrescriptionByExaminationId = async (examinationId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const upsertPrescription = async (data) => {
+export const upsertPrescription = async (data) => {
     try {
         let response = await db.Examination.update(
             {
@@ -79,11 +78,19 @@ const upsertPrescription = async (data) => {
             });
         }
 
-        let prescriptionDetail = await prescriptionDetailService.upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
+        let prescriptionDetail = await upsertPrescriptionDetail(prescription.id, data.prescriptionDetails);
 
         if (prescriptionDetail.EC !== 0) {
             return prescriptionDetail;
         }
+
+        const listPharmacists = await db.User.findAll({
+            where: { roleId: ROLE.PHARMACIST },
+            attributes: ['id'],
+            raw: true
+        });
+
+        staffLoad(io, listPharmacists.map(item => item.id))
 
         if (!prescriptionDetail) {
             return {
@@ -109,7 +116,7 @@ const upsertPrescription = async (data) => {
     }
 };
 
-const getPrescriptions = async (date, status, staffId, page, limit, search) => {
+export const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     try {
         const whereCondition = {};
 
@@ -154,7 +161,8 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
         const { count, rows: examinations } = await db.Examination.findAndCountAll({
             where: {
                 ...searchCondition,
-                status: 7
+                status: 7,
+                medicalTreatmentTier: 2,
             },
             include: [
                 {
@@ -196,7 +204,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
                     include: [{
                         model: db.Medicine,
                         as: 'prescriptionDetails',
-                        attributes: ['id', 'name', 'price'],
+                        attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
                         through: {
                             model: db.PrescriptionMedicine,
                             where: {
@@ -223,7 +231,7 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
                     'ASC'
                 ],
                 ['visit_status', 'ASC'],
-                ['createdAt', 'ASC']],
+                ['updatedAt', 'ASC']],
             distinct: true // Ensures correct count with joins
         });
 
@@ -247,11 +255,316 @@ const getPrescriptions = async (date, status, staffId, page, limit, search) => {
     }
 };
 
-const updatePrescription = async (data, payment, userId) => {
+export const updatePrescription = async (data, userId) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+
     try {
         let prescription = await db.Prescription.findOne({
             where: { id: data.id },
+            transaction: t
         });
+
+        if (!prescription) {
+            await t.rollback();
+            return {
+                EC: 1,
+                EM: "Không tìm thấy đơn thuốc",
+                DT: "",
+            };
+        }
+
+        // Cập nhật từng chi tiết đơn thuốc
+        for (let detail of data.presDetail) {
+            await db.PrescriptionDetail.update({
+                insuranceCovered: detail.insuranceCovered,
+            }, {
+                where: {
+                    prescriptionId: detail.prescriptionId,
+                    medicineId: detail.medicineId
+                },
+                transaction: t
+            });
+        }
+        let receiver = await db.User.findOne({
+            where: { id: userId },
+            attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'cid'],
+            raw: true,
+            transaction: t
+        });
+        let createdPayment = null;
+
+        if (data?.payment) {
+            let details = {};
+            if (receiver) {
+                details = { ...details, receiver, responseTime: new Date().toISOString() }
+            }
+            createdPayment = await db.Payment.create({
+                orderId: new Date().toISOString() + "_UserId__" + userId,
+                transId: prescription.id,
+                amount: data.coveredPrice,
+                status: paymentStatus.PAID,
+                paymentMethod: data.payment,
+                detail: JSON.stringify(details)
+            }, { transaction: t });
+        }
+
+        // Cập nhật prescription
+        await db.Prescription.update({
+            status: paymentStatus.PAID,
+            insuranceCovered: data.insuranceCovered,
+            coveredPrice: data.coveredPrice,
+            paymentId: createdPayment?.id || null,
+        }, {
+            where: { id: data.id },
+            transaction: t
+        });
+
+        await t.commit(); // Thành công: lưu lại tất cả thay đổi
+
+        return {
+            EC: 0,
+            EM: "Cập nhật đơn thuốc thành công",
+            DT: [1]
+        };
+
+    } catch (error) {
+        await t.rollback(); // Lỗi: hoàn tác toàn bộ
+        console.log(error);
+        return {
+            EC: 500,
+            EM: "Lỗi từ server",
+            DT: "",
+        };
+    }
+};
+export const updatePrescriptionMomo = async (data, payment) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+    try {
+        let dataUpdate = data.update;
+        for (let detail of dataUpdate.presDetail) {
+            await db.PrescriptionDetail.update({
+                insuranceCovered: detail.insuranceCovered,
+            }, {
+                where: {
+                    prescriptionId: detail.prescriptionId,
+                    medicineId: detail.medicineId
+                },
+                transaction: t
+            });
+        }
+
+        await db.Prescription.update({
+            status: paymentStatus.PAID,
+            insuranceCovered: dataUpdate.insuranceCovered,
+            coveredPrice: dataUpdate.coveredPrice,
+            paymentId: payment?.id || null,
+        }, {
+            where: { id: data.id },
+            transaction: t
+        });
+        await t.commit();
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+//Chỉ dùng cho nội trú
+export const createPrescription = async (data) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+
+    try {
+
+        let examination = await db.Examination.findOne({
+            where: {
+                id: data.examinationId
+            },
+            transaction: t // Pass transaction to the query
+        });
+
+        if (!examination) {
+            await transaction.rollback(); // Rollback if examination not found
+            return {
+                EC: 404,
+                EM: "Không tìm thấy phiên khám",
+                DT: ""
+            }
+        }
+
+        const todayStart = dayjs().startOf('day').toDate()
+        const todayEnd = dayjs().endOf('day').toDate();
+        const whereCondition = {
+            examinationId: data.examinationId,
+            status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID
+        };
+
+        if (data.prescriptionType === 1) {
+            whereCondition.createdAt = {
+                [Op.between]: [todayStart, todayEnd]
+            };
+        }
+
+        const todayPrescriptions = await db.Prescription.findOne({
+            where: whereCondition,
+            include: [{
+                model: db.Medicine,
+                as: 'prescriptionDetails',
+                attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
+                through: {
+                    model: db.PrescriptionMedicine,
+                    required: true
+                },
+                raw: true,
+                required: true
+            }],
+            transaction: t
+        });
+
+        if (todayPrescriptions) {
+            // Lấy chi tiết đơn thuốc cũ trước khi xóa để cộng lại vào kho
+            const oldPrescriptionDetails = await db.PrescriptionDetail.findAll({
+                where: {
+                    prescriptionId: todayPrescriptions.id,
+                },
+                transaction: t
+            });
+
+            // Cộng lại số lượng thuốc vào kho
+            for (const detail of oldPrescriptionDetails) {
+                const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
+                if (medicine) {
+                    await medicine.update(
+                        { inventory: medicine.inventory + detail.quantity },
+                        { transaction: t }
+                    );
+                }
+            }
+
+            // Xóa chi tiết đơn thuốc
+            await db.PrescriptionDetail.destroy({
+                where: {
+                    prescriptionId: todayPrescriptions.id,
+                },
+                transaction: t
+            });
+
+            // Xóa đơn thuốc
+
+            await todayPrescriptions.destroy({ transaction: t });
+        }
+
+
+        // 1. Tạo đơn thuốc
+        const prescription = await db.Prescription.create({
+            examinationId: data.examinationId,
+            note: data.note,
+            totalMoney: data.totalMoney,
+            status: data.prescriptionType === 1 ? paymentStatus.PAID : paymentStatus.DISCHARGE_PAID,
+        }, { transaction: t });
+
+        // 2. Tạo chi tiết đơn thuốc từ mảng
+        const details = data.prescriptionDetails.map(item => ({
+            prescriptionId: prescription.id,
+            medicineId: item.medicineId,
+            quantity: item.quantity,
+            unit: item.unit,
+            price: item.price,
+            session: item.session,
+            dose: item.dose,
+            dosage: item.dosage,
+        }));
+
+        await db.PrescriptionDetail.bulkCreate(details, { transaction: t });
+
+        // Cập nhật số lượng thuốc trong kho
+        for (const item of data.prescriptionDetails) {
+            const medicine = await db.Medicine.findOne(
+                {
+                    where: { id: item.medicineId },
+                    transaction: t // Pass transaction to the query
+                }
+            );
+
+            if (!medicine) {
+                throw new Error(`Không tìm thấy thuốc với id ${item.medicineId}`);
+            }
+
+            // Kiểm tra số lượng có đủ không
+            if (medicine.inventory < item.quantity) {
+                throw new Error(`Số lượng thuốc ${medicine.name} không đủ để kê đơn`);
+            }
+
+            // Cập nhật số lượng thuốc
+            await medicine.update(
+                { inventory: medicine.inventory - item.quantity },
+                { transaction: t }
+            );
+        }
+
+        // 3. Cập nhật endDate cho đơn thuốc cũ
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (data.oldPresId) {
+            if (data.prescriptionType === 1) {
+                await db.Prescription.update({
+                    endDate: yesterday
+                }, {
+                    where: { id: data.oldPresId },
+                    transaction: t
+                });
+            } else {
+                await db.Prescription.update({
+                    endDate: new Date()
+                }, {
+                    where: { id: data.oldPresId },
+                    transaction: t
+                });
+            }
+        }
+
+        await examination.update({
+            status: status.EXAMINING,
+        }, { transaction: t });
+
+        await t.commit(); // Commit nếu mọi thứ thành công
+
+        return {
+            EC: 0,
+            EM: "Tạo đơn thuốc thành công",
+            DT: prescription,
+        };
+    } catch (error) {
+        await t.rollback(); // Rollback nếu có lỗi
+        console.error(error);
+        return {
+            EC: 1,
+            EM: "Lỗi server khi tạo đơn thuốc",
+            DT: "",
+        };
+    }
+};
+
+export const deletePrescription = async (prescriptionId) => {
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
+    try {
+        const prescription = await db.Prescription.findOne({
+            where: { id: +prescriptionId },
+            include: [{
+                model: db.Medicine,
+                as: 'prescriptionDetails',
+                attributes: ['id', 'name', 'price', 'isCovered', 'insuranceCovered'],
+                through: {
+                    model: db.PrescriptionMedicine,
+                    required: true
+                },
+                raw: true,
+                required: true
+            }],
+            transaction: t
+        });
+
+        console.log("prescription", prescriptionId);
 
         if (!prescription) {
             return {
@@ -261,51 +574,84 @@ const updatePrescription = async (data, payment, userId) => {
             };
         }
 
-        if (data.exam) {
-            await db.Examination.update({
-                insuaranceCode: data.exam.insuaranceCode,
-                insuranceCoverage: data.exam.insuranceCoverage,
-            }, {
-                where: { id: data.exam.examId }
-            })
-        }
-        if (data?.payment) {
-            payment = await db.Payment.create({
-                orderId: new Date().toISOString() + "_UserId__" + userId,
-                transId: prescription.id,
-                amount: prescription.totalMoney,
-                status: paymentStatus.PAID,
-                paymentMethod: data.payment,
-            })
+        const oldPrescriptionDetails = await db.PrescriptionDetail.findAll({
+            where: {
+                prescriptionId: prescription.id,
+            },
+            transaction: t
+        });
+
+        // Cộng lại số lượng thuốc vào kho
+        for (const detail of oldPrescriptionDetails) {
+            const medicine = await db.Medicine.findByPk(detail.medicineId, { transaction: t });
+            if (medicine) {
+                await medicine.update(
+                    { inventory: medicine.inventory + detail.quantity },
+                    { transaction: t }
+                );
+            }
         }
 
-        await db.Prescription.update({
-            status: paymentStatus.PAID,
-            paymentId: payment.id,
-        }, {
-            where: { id: data.id }
-        })
+        // Xóa chi tiết đơn thuốc
+        await db.PrescriptionDetail.destroy({
+            where: {
+                prescriptionId: prescription.id,
+            },
+            transaction: t
+        });
+
+        await db.Prescription.destroy({
+            where: { id: prescriptionId },
+            transaction: t
+        });
+
+        await t.commit();
 
         return {
             EC: 0,
-            EM: "Cập nhật đơn thuốc thành công",
-            DT: [1]
+            EM: "Xóa đơn thuốc thành công",
+            DT: true,
         };
-
-
     } catch (error) {
-        console.log(error);
+        await t.rollback(); // Rollback nếu có lỗi
+        console.error(error);
         return {
             EC: 500,
             EM: "Lỗi từ server",
             DT: "",
         };
     }
-};
-
-module.exports = {
-    getPrescriptionByExaminationId,
-    upsertPrescription,
-    getPrescriptions,
-    updatePrescription
 }
+
+export const getPrescriptionUsed = async (filter) => {
+    try {
+        const { startDate, endDate } = filter;
+        const prescription = await db.Prescription.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            include: [{
+                model: db.Medicine,
+                as: 'prescriptionDetails',
+                attributes: ['id', 'name', "unit", "exp", "inventory"],
+                through: {
+                    attributes: ['quantity']
+                }
+            }],
+            nest: true,
+        })
+
+        return {
+            EC: 0,
+            EM: 'Lấy danh sách đơn thuốc thành công',
+            DT: prescription,
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER;
+    }
+}
+
+

@@ -5,23 +5,29 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Server } from "socket.io";
+import http from "http";
+import jwt from 'jsonwebtoken';
 
 import configViewEngine from './config/configViewEngine';
-import initAdminRoute from "./router/admin"
-import initDoctorRoute from "./router/doctor"
+import initAdminRoute from "./router/admin";
+import initDoctorRoute from "./router/doctor";
 import connectDB from './config/connectDB';
 import initWebAuthenRounte from './router/webAuthen';
 import authenRoute from './router/authen';
 import initWebRounte from './router/web';
-require('dotenv').config();
+import { emitNewDateTicket, registerUserSocket, removeUserSocket } from './services/socketService';
+import initNotificationRoute from './router/notification';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
-
+const server = http.createServer(app);
 const corsOptions = {
-    origin: process.env.REACT_APP_BACKEND_URL, // Chỉ cho phép yêu cầu từ URL được xác định trong REACT_URL
-    methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE', // Các phương thức yêu cầu muốn cho phép
-    allowedHeaders: 'X-Requested-With, content-type, Authorization', // Các header  muốn cho phép
-    credentials: true // Cho phép gửi cookie cùng với yêu cầu
+    origin: process.env.REACT_APP_BACKEND_URL,
+    methods: 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+    allowedHeaders: 'X-Requested-With, content-type, Authorization',
+    credentials: true
 };
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -33,14 +39,14 @@ app.use(bodyParser.urlencoded({
 // Cấu hình express-session
 app.use(
     session({
-        secret: process.env.SECRET_SESSION, // Một chuỗi bí mật dùng để mã hóa session
+        secret: process.env.SECRET_SESSION, // Key để mã hóa session
         resave: false, // Không lưu lại session nếu không thay đổi
         saveUninitialized: true, // Lưu session ngay cả khi chưa khởi tạo
     })
 );
 
 app.use(passport.initialize());
-app.use(passport.session()); // Sử dụng session để lưu trữ phiên
+app.use(passport.session());
 
 // Passport setup (cấu hình Google OAuth)
 passport.use(
@@ -51,7 +57,6 @@ passport.use(
             callbackURL: '/auth/google/callback',
         },
         (accessToken, refreshToken, profile, done) => {
-            // Thông tin người dùng nhận từ Google ==> console.log('Google Profile:', profile);
             done(null, profile);
         }
     )
@@ -67,23 +72,76 @@ app.use(cookieParser());
 // Configure view engine
 configViewEngine(app);
 
-// Initialize web routes
-authenRoute(app,passport);
+// Khởi tạo Socket.io
+const io = new Server(server, {
+    cors: {
+        origin: process.env.REACT_APP_BACKEND_URL || "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
 
-initWebRounte(app);
+// Xử lý kết nối Socket.io
+io.on('connection', (socket) => {
+
+    socket.on('authenticate', async (token) => {
+        try {
+
+            const pureToken = token.replace('Bearer ', '');
+            // const cookieHeader = socket.handshake.headers.cookie;
+
+            // console.log("cookieHeader", cookieHeader);
+
+            // // Nếu muốn parse cookie:
+            // const parsedCookies = cookieHeader?.split(';').reduce((acc, cookie) => {
+            //     const [key, value] = cookie.trim().split('=');
+            //     acc[key] = decodeURIComponent(value);
+            //     return acc;
+            // }, {}) || {};
+
+            // const refreshToken = parsedCookies['refreshToken'];
+            // if (!refreshToken) {
+            //     console.log("No refresh token found");
+            //     console.log("socket.handshake.headers", socket.handshake.headers);
+            //     console.log("parsedCookies", parsedCookies);
+            //     return socket.emit('error', 'No refresh token found');
+            // }
+            // console.log("refreshToken", refreshToken);
+            const decoded = jwt.verify(pureToken, process.env.SECURITY_KEY);
+
+            const userId = decoded.id;
+            // Đăng ký socket cho người dùng
+            registerUserSocket(socket, userId);
+
+            // Setup xử lý khi ngắt kết nối
+            socket.on('disconnect', () => {
+                removeUserSocket(userId);
+            });
+        } catch (error) {
+            console.error('Authentication error:', error);
+        }
+    });
+
+});
+
+
+// Khởi tạo các chức năng socket
+emitNewDateTicket(io);
+// Initialize web routes
+authenRoute(app, passport);
 initWebRounte(app);
 initWebAuthenRounte(app);
 initAdminRoute(app);
-initDoctorRoute(app)
+initDoctorRoute(app);
+initNotificationRoute(app);
 
 connectDB();
 
 let PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
 });
 
-//insertGroup();
-
+export { io };
 export default app;

@@ -1,6 +1,8 @@
 import db from "../models/index";
+import { ERROR_SERVER } from "../utils";
+import { validateInsuranceCode } from "../utils/function";
 
-const getInsuranceById = async (id) => {
+export const getInsuranceById = async (id) => {
     try {
         let insuarance = await db.Insurance.findOne({
             where: { id: id },
@@ -14,15 +16,11 @@ const getInsuranceById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getInsuranceByUserId = async (userId) => {
+export const getInsuranceByUserId = async (userId) => {
     try {
         let insuarance = await db.Insurance.findOne({
             where: { userId: userId },
@@ -41,43 +39,50 @@ const getInsuranceByUserId = async (userId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const createInsurance = async (data) => {
+export const createInsurance = async (data) => {
     try {
+        if (!validateInsuranceCode(data?.insuranceCode)) {
+            return {
+                EC: 1,
+                EM: "Mã bảo hiểm không hợp lệ",
+                DT: null
+            }
+        }
         let insuarance = await db.Insurance.create({
-            insuranceCode: data.insuranceCode,
-            dateOfIssue: data.dateOfIssue,
-            exp: data.exp,
-            benefitLevel: data.benefitLevel,
-            residentialCode: data.residentialCode,
-            initialHealthcareRegistrationCode: data.initialHealthcareRegistrationCode,
-            continuousFiveYearPeriod: data.continuousFiveYearPeriod,
-            userId: data.userId
+            insuranceCode: data?.insuranceCode || null,
+            dateOfIssue: data?.dateOfIssue || null,
+            exp: data?.exp || null,
+            benefitLevel: data?.benefitLevel || null,
+            residentialCode: data?.residentialCode || null,
+            initialHealthcareRegistrationCode: data?.initialHealthcareRegistrationCode || null,
+            continuousFiveYearPeriod: data?.continuousFiveYearPeriod || null,
+            userId: data?.userId || null
         });
+
         return {
             EC: 0,
-            EM: "Tạo thông tin bảo hiểm thành công",
+            EM: "Kiểm tra bảo hiểm thành công",
             DT: insuarance
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const updateInsurance = async (data) => {
+export const updateInsurance = async (data) => {
     try {
+        if (!validateInsuranceCode(data?.insuranceCode)) {
+            return {
+                EC: 1,
+                EM: "Mã bảo hiểm không hợp lệ",
+                DT: null
+            }
+        }
         let insuarance = await db.Insurance.update({
             insuranceCode: data.insuranceCode,
             dateOfIssue: data.dateOfIssue,
@@ -98,15 +103,11 @@ const updateInsurance = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const deleteInsurance = async (id) => {
+export const deleteInsurance = async (id) => {
     try {
         let insuarance = await db.Insurance.destroy({
             where: {
@@ -120,18 +121,10 @@ const deleteInsurance = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-export default {
-    getInsuranceById,
-    getInsuranceByUserId,
-    createInsurance,
-    updateInsurance,
-    deleteInsurance
-}
+
+
+

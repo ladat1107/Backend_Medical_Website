@@ -1,72 +1,45 @@
-import handBookService from '../services/handBookService';
-import { PAGINATE, ROLE } from '../utils';
+import { createHandBook, getAllHandBooks, getHandbookAdmin, getHandBookById, getHandBookHome, updateHandBook, updateHandbookStatus } from '../services/handBookService';
+import { ERROR_SERVER, ROLE } from '../utils';
 
-const getAllHandBooks = async (req, res) => {
+export const getAllHandBooksController = async (req, res) => {
     try {
         let page = req.query?.page || 1;
-        let limit = req.query?.limit || 10;
+        let limit = req.query?.limit || 12;
         let search = req.query?.search || "";
         let staffId = req.user.staff;
         let filter = req.query?.filter || "";
         let status = req.query?.status || null;
-        let response = await handBookService.getAllHandBooks(page, limit, search, staffId, filter, status);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllHandBooks(page, limit > 500 ? 12 : limit, search, staffId, filter, status);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getHandBooksAdmin = async (req, res) => {
+export const getHandBooksAdminController = async (req, res) => {
     try {
-        let page = parseInt(req.query.page || 1);
-        let limit = parseInt(req.query.limit || 10);
-        let limitValue = 25;
-        for (let i = 0; i < PAGINATE.length; i++) {
-            if (PAGINATE[i].id === limit) {
-                limitValue = PAGINATE[i].value;
-                break;
-            }
-        }
+        let page = req.query.page || 1;
+        let limit = req.query.limit || 12;
         let search = req.query.search || "";
         let status = req.query.status || "";
         let filter = req.query.filter || "";
-        let response = await handBookService.getHandbookAdmin(page, limitValue, search, status, filter);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getHandbookAdmin(page, limit, search, status, filter);
+        return res.status(200).json(response)
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getHandBookById = async (req, res) => {
+export const getHandBookByIdController = async (req, res) => {
     try {
         let data = req.query;
         let role = req?.user?.roleId || ROLE.PATIENT;
         if (data && data.id) {
-            let response = await handBookService.getHandBookById(data.id, role);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getHandBookById(data.id, role);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -76,26 +49,18 @@ const getHandBookById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createHandBook = async (req, res) => {
+export const createHandBookController = async (req, res) => {
     try {
         let data = req.body;
         data.author = req.user.staff;
         if (data && data.title && data.author && data.image
-            && data.htmlContent && data.markDownContent) {
-            let response = await handBookService.createHandBook(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            && data.htmlDescription) {
+            let response = await createHandBook(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -105,26 +70,18 @@ const createHandBook = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateHandBook = async (req, res) => {
+export const updateHandBookController = async (req, res) => {
     try {
         let data = req.body;
         data.author = req.user.staff;
         if (data && data.id && data.title && data.author && data.image
-            && data.htmlContent && data.markDownContent) {
-            let response = await handBookService.updateHandBook(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            && data.htmlDescription) {
+            let response = await updateHandBook(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -134,24 +91,16 @@ const updateHandBook = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateHandbookStatus = async (req, res) => {
+export const updateHandbookStatusController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.status) {
-            let response = await handBookService.updateHandbookStatus(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateHandbookStatus(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -161,63 +110,38 @@ const updateHandbookStatus = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getHandBookHome = async (req, res) => {
+export const getHandBookHomeController = async (req, res) => {
     try {
-        let response = await handBookService.getHandBookHome(req.query);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getHandBookHome(req.query);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getHandBookDeparment = async (req, res) => {
-    try {
-        let data = req.query;
-        if (data && data.departmentId) {
-            let response = await handBookService.getHandBookDeparment(data.departmentId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        } else {
-            return res.status(200).json({
-                EC: 400,
-                EM: "Dữ liệu không được trống!",
-                DT: ""
-            })
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
-    }
-}
-module.exports = {
-    getAllHandBooks,
-    getHandBooksAdmin,
-    getHandBookById,
-    createHandBook,
-    updateHandBook,
-    updateHandbookStatus,
-    getHandBookHome,
-    getHandBookDeparment,
-}
+
+// export const getHandBookDeparmentController = async (req, res) => {
+//     try {
+//         let data = req.query;
+//         if (data && data.departmentId) {
+//             let response = await getHandBookDeparment(data.departmentId);
+//             return res.status(200).json({
+//                 EC: response.EC,
+//                 EM: response.EM,
+//                 DT: response.DT
+//             })
+//         } else {
+//             return res.status(200).json({
+//                 EC: 400,
+//                 EM: "Dữ liệu không được trống!",
+//                 DT: ""
+//             })
+//         }
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json(ERROR_SERVER)
+//     }
+// }

@@ -1,191 +1,108 @@
 import express from 'express';
-import userController from '../controllers/userController';
-import departmentController from '../controllers/departmentController';
-import staffController from '../controllers/staffController';
-import handBookController from '../controllers/handBookController';
-import serviceTypeController from '../controllers/serviceTypeController';
-import bedController from '../controllers/bedController';
-import patientController from '../controllers/patientController';
-import roomController from '../controllers/roomController';
-import roleController from '../controllers/roleController';
-import relativeController from '../controllers/relativeController';
-import familyHistoryController from '../controllers/familyHistoryController';
-import surgicalHistoryController from '../controllers/surgicalHistoryController';
-import surgicalHistoryUserController from '../controllers/surgicalHistoryUserController';
-import disabilityController from '../controllers/disabilityController';
-import disabilityUserController from '../controllers/disabilityUserController';
-import allergyController from '../controllers/allergyController';
-import allergyUserController from '../controllers/allergyUserController';
-import conditionAtBirthController from '../controllers/conditionAtBirthController';
-import insuranceController from '../controllers/insuranceController';
-import scheduleController from '../controllers/scheduleController';
-import appointmentController from '../controllers/appointmentController';
-import examinationController from '../controllers/examinationController';
-import vitalSignController from '../controllers/vitalSignController';
-import paraclinicalController from '../controllers/paraclinicalController';
-import medicineController from '../controllers/medicineController';
-import prescriptionController from '../controllers/prescriptionController';
-import diseaseController from '../controllers/diseaseController';
-import specialtyController from '../controllers/specialtyController';
-import { getServiceHome } from "../utils/data/dataService"
-import { checkTokenWithCookie, checkAuthentication } from "../Middleware/JWTAction";
-import { getDataByDepartment } from '../services/staffService';
+
 import { getDistrict, getFolk, getProvince } from '../services/addressService';
 import { generalNumber, generalNumberCurrent, getTickets } from '../services/ticketService';
-require('dotenv').config();
+import { getSpcialtyHomeController, getSpecialtiesByDepartmentController, getSpecialtiesByLaboratoryController, getSpecialtyByIdController, getSpecialtySelectController } from '../controllers/specialtyController';
+import { getAllDepartmentController, getAllNameDepartmentController, getAllStaffInDepartmentController, getDepartmentByIdController, getDepartmentHomeController } from '../controllers/departmentController';
+import { getHandBookByIdController, getHandBookHomeController } from '../controllers/handBookController';
+import { getScheduleApoinmentController } from '../controllers/examinationController';
+import { getServiceHome } from '../utils/data/dataService';
+import { createUserController, getDoctorHomeController, getUserByCidController, getUserByIdController, getUserByQrCodeController, getUserInsuaranceController, profilePasswordController } from '../controllers/userController';
+import { getAllStaffController, getStaffByIdController, getStaffByNameController, getStaffByRoleController, profileStaffController } from '../controllers/staffController';
+import { getAllServiceTypesController, getServiceLaboratoryController, getServiceTypeByIdController } from '../controllers/serviceTypeController';
+import { getRoomByDepartmentController, getRoomByIdController } from '../controllers/roomController';
+import { createRelativeController, deleteRelativeController, getAllRelativesController, getRelativeByIdController, getRelativesByUserIdController, updateRelativeController } from '../controllers/relativeController';
+import { createInsuranceController, deleteInsuranceController, getInsuranceByIdController, getInsuranceByUserIdController, updateInsuranceController } from '../controllers/insuranceController';
+import { messageSystem } from '../controllers/messageController';
+//import { sendNotification } from '../services/socketService';
+import dotenv from 'dotenv';
+dotenv.config();
 
 let router = express.Router();
 let initWebRounte = (app) => {
 
     //------> Specialty
-    router.get("/getSpcialtyHome", specialtyController.getSpcialtyHome)
+    router.get("/getSpcialtyHome", getSpcialtyHomeController)
 
     // DEPARTMENT
-    router.get("/getDepartmenHome", departmentController.getDepartmentHome);
+    router.get("/getDepartmenHome", getDepartmentHomeController);
 
     // HANDBOOK
-    router.get("/getHandBookHome", handBookController.getHandBookHome);
+    router.get("/getHandBookHome", getHandBookHomeController);
+    router.get("/getHandBookById", getHandBookByIdController);
 
-    router.get("/getHandBookById", handBookController.getHandBookById)
     //EXAMINATION
-    router.get("/getScheduleApoinment", examinationController.getScheduleApoinment);
+    router.get("/getScheduleApoinment", getScheduleApoinmentController);
 
     //FOLK
     router.get("/getFolk", getFolk);
     router.get("/getProvince", getProvince);
     router.get("/getDistrict", getDistrict);
+
     //SECTION
     router.get("/getServicesHome", getServiceHome);
 
-    router.get("/getSpecialtySelect", specialtyController.getSpecialtySelect)
-    router.get("/getSpecialtyById", specialtyController.getSpecialtyById)
+    router.get("/getSpecialtySelect", getSpecialtySelectController)
+    router.get("/getSpecialtyById", getSpecialtyByIdController)
 
     //-- User   
 
-    router.get("/getUserById", userController.getUserById)
-    router.get("/getUserByCid", userController.getUserByCid)
-    router.get("/getDoctorHome", userController.getDoctorHome);
-    router.put("/profileUpdatePassword", userController.profilePassword)
-    router.get("/getUserInsuarance", userController.getUserInsuarance)
+    router.get("/getUserById", getUserByIdController)
+    router.get("/getUserByCid", getUserByCidController)
+    router.get("/getDoctorHome", getDoctorHomeController);
+    router.put("/profileUpdatePassword", profilePasswordController)
+    router.get("/getUserInsuarance", getUserInsuaranceController)
 
     //-- Department
-    router.get("/getAllNameDepartment", departmentController.getAllNameDepartment)
-    router.get("/getDepartmentById", departmentController.getDepartmentById)
-    router.get("/getAllStaffInDepartment", departmentController.getAllStaffInDepartment)
+    router.get("/getAllNameDepartment", getAllNameDepartmentController)
+    router.get("/getDepartmentById", getDepartmentByIdController)
+    router.get("/getAllStaffInDepartment", getAllStaffInDepartmentController)
+    router.get("/getAllDepartment", getAllDepartmentController)
 
-    ////-----> Admin C.U.D department
-    router.get("/getAllDepartment", departmentController.getAllDepartment)
-    router.post("/admin/createDepartment", departmentController.createDepartment)
-    router.put("/admin/updateDepartment", departmentController.updateDepartment)
-    router.put("/admin/blockDepartment", departmentController.blockDepartment)
-    router.delete("/admin/deleteDepartment", departmentController.deleteDepartment)
+    //-- Message
+    router.post("/messageSystem", messageSystem)
 
     //-- Staff
-    router.get("/getAllStaff", staffController.getAllStaff)
-    router.get("/getStaffById", staffController.getStaffById)
-    // router.get("/getStaffbyDepartmentId", staffController.getStaffbyDepartmentId)
-    router.get("/getStaffByRole", staffController.getStaffByRole)
-    router.get("/getStaffByName", staffController.getStaffByName)
+    router.get("/getAllStaff", getAllStaffController)
+    router.get("/getStaffById", getStaffByIdController)
+    // router.get("/getStaffbyDepartmentId", getStaffbyDepartmentId)
+    router.get("/getStaffByRole", getStaffByRoleController)
+    router.get("/getStaffByName", getStaffByNameController)
 
 
-    router.put("/profileUpdateStaff", staffController.profileStaff)
-
+    router.put("/profileUpdateStaff", profileStaffController)
 
     //-- ServiceType
-    router.get("/getAllServiceTypes", serviceTypeController.getAllServiceTypes)
-    router.get("/getServiceTypeById", serviceTypeController.getServiceTypeById)
+    router.get("/getAllServiceTypes", getAllServiceTypesController)
+    router.get("/getServiceTypeById", getServiceTypeByIdController)
 
     //-- Room
-    router.get("/getRoomById", roomController.getRoomById)
-    router.get("/getRoomByDepartment", roomController.getRoomByDepartment)
-
-    //-- Bed
-    router.get("/getAllBeds", bedController.getAllBeds)
-    router.get("/getBedById", bedController.getBedById)
-    router.get("/getBedByRoom", bedController.getBedByRoom)
-    router.get("/getBedEmpty", bedController.getBedEmpty)
-
-    //-- Patient
-    router.get("/getAllPatients", patientController.getAllPatients)
-    router.get("/getPatientById", patientController.getPatientById)
-    router.get("/getPatientByUserId", patientController.getPatientByUserId)
-
-    //-- Role
-    router.get("/getAllRoles", roleController.getAllRoles)
-    router.get("/getRoleById", roleController.getRoleById)
+    router.get("/getRoomById", getRoomByIdController)
+    router.get("/getRoomByDepartment", getRoomByDepartmentController)
 
     //-- Relative
-    router.get("/getAllRelatives", relativeController.getAllRelatives)
-    router.get("/getRelativeById", relativeController.getRelativeById)
-    router.get("/getRelativesByUserId", relativeController.getRelativesByUserId)
-    router.post("/createRelative", relativeController.createRelative)
-    router.put("/updateRelative", relativeController.updateRelative)
-    router.put("/deleteRelative", relativeController.deleteRelative)
-
-    //-- FamilyHistory
-    router.get("/getAllFamilyHistories", familyHistoryController.getAllFamilyHistories)
-    router.get("/getFamilyHistoryById", familyHistoryController.getFamilyHistoryById)
-    router.get("/getFamilyHistoriesByUserId", familyHistoryController.getFamilyHistoriesByUserId)
-    router.post("/createFamilyHistory", familyHistoryController.createFamilyHistory)
-    router.put("/updateFamilyHistory", familyHistoryController.updateFamilyHistory)
-    router.delete("/deleteFamilyHistory", familyHistoryController.deleteFamilyHistory)
-
-    //-- SurgicalHistory
-    router.get("/getAllSurgicalHistories", surgicalHistoryController.getAllSurgicalHistories)
-    router.get("/getSurgicalHistoryById", surgicalHistoryController.getSurgicalHistoryById)
-
-    //-- SurgicalHistoryUser
-    router.get("/getAllSurgicalHistoryUsers", surgicalHistoryUserController.getAllSurgicalHistoryUser)
-    router.get("/getSurgicalHistoryUsersByUserId", surgicalHistoryUserController.getSurgicalHistoryUserByUserId)
-    router.get("/getSurgicalHistoryUserBySurgicalHistoryId", surgicalHistoryUserController.getSurgicalHistoryUserBySurgicalHistoryId)
-    router.post("/createSurgicalHistoryUser", surgicalHistoryUserController.createSurgicalHistoryUser)
-    router.put("/updateSurgicalHistoryUser", surgicalHistoryUserController.updateSurgicalHistoryUser)
-    router.delete("/deleteSurgicalHistoryUser", surgicalHistoryUserController.deleteSurgicalHistoryUser)
-
-    //-- Disability
-    router.get("/getAllDisabilities", disabilityController.getAllDisabilities)
-    router.get("/getDisabilityById", disabilityController.getDisabilityById)
-
-    //-- DisabilityUser
-    router.get("/getAllDisabilityUsers", disabilityUserController.getAllDisabilityUsers)
-    router.get("/getDisabilityUserByUserId", disabilityUserController.getDisabilityUserByUserId)
-    router.get("/getDisabilityUserByDisabilityId", disabilityUserController.getDisabilityUserByDisabilityId)
-    router.post("/createDisabilityUser", disabilityUserController.createDisabilityUser)
-    router.put("/updateDisabilityUser", disabilityUserController.updateDisabilityUser)
-    router.delete("/deleteDisabilityUser", disabilityUserController.deleteDisabilityUser)
-
-    //-- Allergy
-    router.get("/getAllAllergies", allergyController.getAllAllergies)
-    router.get("/getAllergyById", allergyController.getAllergyById)
-
-    //-- AllergyUser
-    router.get("/getAllAllergyUsers", allergyUserController.getAllAllergyUsers)
-    router.get("/getAllergyUserByUserId", allergyUserController.getAllergyUserByUserId)
-    router.get("/getAllergyUserByAllergyId", allergyUserController.getAllergyUserByAllergyId)
-    router.post("/createAllergyUser", allergyUserController.createAllergyUser)
-    router.put("/updateAllergyUser", allergyUserController.updateAllergyUser)
-    router.delete("/deleteAllergyUser", allergyUserController.deleteAllergyUser)
-
-    //-- ConditionAtBirth
-    router.get("/getConditionAtBirthById", conditionAtBirthController.getConditionAtBirthById)
-    router.get("/getConditionAtBirthByUserId", conditionAtBirthController.getConditionAtBirthByUserId)
-    router.post("/createConditionAtBirth", conditionAtBirthController.createConditionAtBirth)
-    router.put("/updateConditionAtBirth", conditionAtBirthController.updateConditionAtBirth)
-    router.delete("/deleteConditionAtBirth", conditionAtBirthController.deleteConditionAtBirth)
+    router.get("/getAllRelatives", getAllRelativesController)
+    router.get("/getRelativeById", getRelativeByIdController)
+    router.get("/getRelativesByUserId", getRelativesByUserIdController)
+    router.post("/createRelative", createRelativeController)
+    router.put("/updateRelative", updateRelativeController)
+    router.delete("/deleteRelative", deleteRelativeController)
 
     //-- Insuarance
-    router.get("/getInsuaranceById", insuranceController.getInsuranceById)
-    router.get("/getInsuaranceByUserId", insuranceController.getInsuranceByUserId)
-    router.post("/createInsuarance", insuranceController.createInsurance)
-    router.put("/updateInsuarance", insuranceController.updateInsurance)
-    router.delete("/deleteInsuarance", insuranceController.deleteInsurance)
+    router.get("/getInsuaranceById", getInsuranceByIdController)
+    router.get("/getInsuaranceByUserId", getInsuranceByUserIdController)
+    router.post("/createInsuarance", createInsuranceController)
+    router.put("/updateInsuarance", updateInsuranceController)
+    router.delete("/deleteInsuarance", deleteInsuranceController)
 
     //-- Create User
-    router.post("/createUser", userController.createUser)
+    router.post("/createUser", createUserController)
 
-    router.get("/getSpecialtiesByDepartment", specialtyController.getSpecialtiesByDepartment)
-    router.get("/getSpecialtiesByLaboratory", specialtyController.getSpecialtiesByLaboratory)
-    router.get("/getServiceLaboratory", serviceTypeController.getServiceLaboratory)
+    router.get("/getSpecialtiesByDepartment", getSpecialtiesByDepartmentController)
+    router.get("/getSpecialtiesByLaboratory", getSpecialtiesByLaboratoryController)
+    router.get("/getServiceLaboratory", getServiceLaboratoryController)
+    router.get("/getUserByQrCode", getUserByQrCodeController)
+
 
     router.get("/getCurrentNumber", getTickets)
     router.put("/generateNumber", generalNumber)

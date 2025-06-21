@@ -1,63 +1,34 @@
-import departmentService from '../services/departmentService';
-import { PAGINATE } from '../utils';
+import { blockDepartment, createDepartment, deleteDepartment, getAllDepartment, getAllNameDepartment, getAllStaffInDepartment, getDepartmentById, getDepartmentDuty, getDepartmentHome, updateDepartment } from '../services/departmentService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllDepartment = async (req, res) => {
+export const getAllDepartmentController = async (req, res) => {
     try {
-        if (req.query.page && req.query.limit) {
-            let page = parseInt(req.query.page);
-            let limit = parseInt(req.query.limit);
-            let limitValue = 25;
-            for (let i = 0; i < PAGINATE.length; i++) {
-                if (PAGINATE[i].id === limit) {
-                    limitValue = PAGINATE[i].value;
-                    break;
-                }
-            }
-            let search = req.query.search;
-            let response = await departmentService.getAllDepartment(page, limitValue, search,);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
-        }
+        let page = req.query?.page || 1;
+        let limit = req.query?.limit || 25;
+        let search = req.query?.search || "";
+        let response = await getAllDepartment(page, limit, search);
+        return res.status(200).json(response)
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getAllNameDepartment = async (req, res) => {
+export const getAllNameDepartmentController = async (req, res) => {
     try {
-        let response = await departmentService.getAllNameDepartment();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllNameDepartment();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getDepartmentById = async (req, res) => {
+export const getDepartmentByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await departmentService.getDepartmentById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getDepartmentById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -67,24 +38,16 @@ const getDepartmentById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
 
-const getAllStaffInDepartment = async (req, res) => {
+export const getAllStaffInDepartmentController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await departmentService.getAllStaffInDepartment(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getAllStaffInDepartment(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -94,24 +57,16 @@ const getAllStaffInDepartment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
 
-const createDepartment = async (req, res) => {
+export const createDepartmentController = async (req, res) => {
     try {
         let data = req.body;
-        if (data && data.name && data.image && data.deanId && data.address && data.markDownContent && data.htmlContent) {
-            let response = await departmentService.createDepartment(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+        if (data && data.name && data.image && data.htmlDescription) {
+            let response = await createDepartment(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -121,25 +76,16 @@ const createDepartment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateDepartment = async (req, res) => {
+export const updateDepartmentController = async (req, res) => {
     try {
         let data = req.body
-        if (data && data.id && data.name && data.image && data.deanId && data.address
-            && data.markDownContent && data.htmlContent) {
-            let response = await departmentService.updateDepartment(data)
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+        if (data && data.id && data.name && data.image && data.htmlDescription) {
+            let response = await updateDepartment(data)
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -149,23 +95,15 @@ const updateDepartment = async (req, res) => {
         }
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const deleteDepartment = async (req, res) => {
+export const deleteDepartmentController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await departmentService.deleteDepartment(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await deleteDepartment(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -175,23 +113,15 @@ const deleteDepartment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
-const blockDepartment = async (req, res) => {
+export const blockDepartmentController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id) {
-            let response = await departmentService.blockDepartment(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await blockDepartment(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -201,56 +131,24 @@ const blockDepartment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(200).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(200).json(ERROR_SERVER)
     }
 }
-const getDepartmentHome = async (req, res) => {
+export const getDepartmentHomeController = async (req, res) => {
     try {
-        let response = await departmentService.getDepartmentHome();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getDepartmentHome();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
-const getDepartmentDuty = async (req, res) => {
+export const getDepartmentDutyController = async (req, res) => {
     try {
-        let response = await departmentService.getDepartmentDuty();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getDepartmentDuty();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-module.exports = {
-    getAllNameDepartment,
-    getDepartmentDuty,
-    getAllDepartment,
-    getDepartmentById,
-    getAllStaffInDepartment,
-    createDepartment,
-    updateDepartment,
-    deleteDepartment,
-    blockDepartment,
-    getDepartmentHome,
 }

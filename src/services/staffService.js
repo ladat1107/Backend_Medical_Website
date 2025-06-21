@@ -1,10 +1,9 @@
 import db, { sequelize } from "../models/index";
-import specialty from "../models/specialty";
-import { status } from "../utils/index";
+import { ERROR_SERVER, status } from "../utils/index";
 import descriptionService from "./descriptionService";
-const { Op } = require('sequelize');
+export const { Op } = require('sequelize');
 
-const getAllStaff = async () => {
+export const getAllStaff = async () => {
     try {
         let staff = await db.Staff.findAll({
             where: { status: status.ACTIVE },
@@ -17,14 +16,10 @@ const getAllStaff = async () => {
                     as: 'userRoleData',
                     attributes: ['name']
                 }],
-            }, {
+            },{
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }],
             raw: true,
             nest: true,
@@ -36,15 +31,11 @@ const getAllStaff = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getStaffbyDepartmentId = async (departmentId) => {
+export const getStaffbyDepartmentId = async (departmentId) => {
     try {
         let staffs = await db.Staff.findAll({
             where: { id: departmentId },
@@ -83,15 +74,11 @@ const getStaffbyDepartmentId = async (departmentId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getStaffById = async (staffId) => {
+export const getStaffById = async (staffId) => {
     try {
         let staff = await db.Staff.findOne({
             where: { id: staffId },
@@ -108,10 +95,6 @@ const getStaffById = async (staffId) => {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }],
             raw: true,
             nest: true,
@@ -130,15 +113,11 @@ const getStaffById = async (staffId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getStaffNameById = async (staffId) => {
+export const getStaffNameById = async (staffId) => {
     try {
         let staff = await db.Staff.findOne({
             where: { id: +staffId },
@@ -165,15 +144,11 @@ const getStaffNameById = async (staffId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getStaffByRole = async (roleId) => {
+export const getStaffByRole = async (roleId) => {
     try {
         let staff = await db.Staff.findAll({
             where: { status: status.ACTIVE }, // Chỉ lấy nhân viên active
@@ -195,10 +170,6 @@ const getStaffByRole = async (roleId) => {
                 model: db.Department,
                 as: 'staffDepartmentData',
                 attributes: ['name']
-            }, {
-                model: db.Description,
-                as: 'staffDescriptionData',
-                attributes: ['markDownContent', 'htmlContent']
             }]
         });
 
@@ -209,15 +180,11 @@ const getStaffByRole = async (roleId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getStaffByName = async (name) => {
+export const getStaffByName = async (name) => {
     try {
         if (!name) name = ""
         let staff = await db.Staff.findAll({
@@ -245,87 +212,59 @@ const getStaffByName = async (name) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
 }
 
-const createStaff = async (data, userId) => {
+export const createStaff = async (data, userId) => {
     try {
-        let positionInsert = ""
-        if (data.position) {
-            positionInsert = data.position.toString();
-        }
-        let descriptionId = await descriptionService.createDescription(data);
-        if (descriptionId) {
-            await db.Staff.create({
-                price: data?.price || 0,
-                position: positionInsert,
-                departmentId: data.departmentId,
-                shortDescription: data?.shortDescription || null,
-                specialtyId: data?.specialtyId || null,
-                status: status.ACTIVE,
-                descriptionId: descriptionId,
-                userId: userId
-            });
-            return true;
-        } else {
-            await descriptionService.deleteDescription(descriptionId);
-            return false;
-        }
+        await db.Staff.create({
+            price: data?.price || 0,
+            position: data?.position ? data.position.toString() : "",
+            departmentId: data.departmentId,
+            shortDescription: data?.shortDescription || null,
+            specialtyId: data?.specialtyId || null,
+            status: status.ACTIVE,
+            htmlDescription: data?.htmlDescription || null,
+            userId: userId
+        });
+        return true;
     } catch (error) {
         console.log(error);
         return false;
     }
 }
-const updateStaff = async (data) => {
+export const updateStaff = async (data) => {
     try {
         let staff = await db.Staff.findOne({
             where: { userId: data.id }
         });
         if (staff) {
-            let description = await descriptionService.updateDescription(data, staff.descriptionId);
-            if (description) {
-                await staff.update({
-                    price: data.price,
-                    position: data.position,
-                    shortDescription: data?.shortDescription || null,
-                    specialtyId: data?.specialtyId,
-                    departmentId: data.departmentId,
-                });
-                return true
-            } else {
-                return false;
-            }
+            await staff.update({
+                price: data.price,
+                position: data.position,
+                shortDescription: data?.shortDescription || null,
+                specialtyId: data?.specialtyId,
+                htmlDescription: data?.htmlDescription || null,
+            });
+            return true
         }
-        else {
-            return false;
-        }
+        else return false;
     } catch (error) {
         console.log(error);
         return false;
     }
 }
-const profileStaff = async (data) => {
-    let transaction = await sequelize.transaction();
+export const profileStaff = async (data) => {
     try {
-        await db.Description.update({
-            markDownContent: data.markDownContent,
-            htmlContent: data.htmlContent
-        }, {
-            where: { id: data.descriptionId }
-        }, { transaction });
         await db.Staff.update({
             shortDescription: data?.shortDescription || null,
+            htmlDescription: data?.htmlDescription || null,
             specialtyId: data?.specialtyId || null,
             position: data?.position?.toString() || null,
         }, {
             where: { id: data.id }
-        }, { transaction });
-        await transaction.commit();
+        });
         return {
             EC: 0,
             EM: "Cập nhật hồ sơ thành công",
@@ -333,25 +272,6 @@ const profileStaff = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        await transaction.rollback();
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        }
+        return ERROR_SERVER
     }
-}
-const getDataByDepartment = async (req, res) => {
-
-}
-module.exports = {
-    getAllStaff,
-    getStaffbyDepartmentId,
-    getStaffById,
-    getStaffByRole,
-    getStaffByName,
-    createStaff,
-    updateStaff,
-    profileStaff,
-    getStaffNameById
 }

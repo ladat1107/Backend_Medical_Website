@@ -1,9 +1,8 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import db from "../models";
-import { status } from "../utils";
-import paraclinical from "../models/paraclinical";
+import { ERROR_SERVER, status } from "../utils";
 
-let getSpecialtySelect = async () => {
+export const getSpecialtySelect = async () => {
     try {
         let specialtyData = await db.Specialty.findAll({
             where: { status: status.ACTIVE },
@@ -19,15 +18,11 @@ let getSpecialtySelect = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
 
     }
 }
-let getAllSpecialtyAdmin = async (page, limit, search) => {
+export const getAllSpecialtyAdmin = async (page, limit, search) => {
     try {
         let specialtyData = await db.Specialty.findAndCountAll({
             where: {
@@ -50,26 +45,44 @@ let getAllSpecialtyAdmin = async (page, limit, search) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
 
     }
 }
-let getSpcialtyHome = async (filter) => {
+export const getSpcialtyHome = async (filter) => {
     try {
         let search = filter?.search || "";
-        console.log(search);
+        let date = filter?.date || undefined;
+        let whereSchedule = {};
+        if (date) {
+            whereSchedule = {
+                include: [
+                    {
+                        model: db.Room,
+                        as: "roomData",
+                        include: [
+                            {
+                                model: db.Schedule,
+                                as: "scheduleRoomData",
+                                where: { date: { [Op.gte]: date } },
+                                required: true,
+                            }
+                        ],
+                        required: true,
+                    }
+                ]
+            }
+        }
         let specialtyData = await db.Specialty.findAll({
+            ...whereSchedule,
             where: {
                 [Op.or]: [
                     { name: { [Op.like]: `%${search}%` }, },
                     { shortDescription: { [Op.like]: `%${search}%` } }
                 ],
                 status: status.ACTIVE,
-            }
+            },
+            nest: true,
         });
         return {
             EC: 0,
@@ -78,15 +91,11 @@ let getSpcialtyHome = async (filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
 
     }
 }
-let createSpecialty = async (data) => {
+export const createSpecialty = async (data) => {
     try {
         let specialty = await db.Specialty.create({
             name: data?.name,
@@ -108,14 +117,10 @@ let createSpecialty = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-let updateSpecialty = async (data) => {
+export const updateSpecialty = async (data) => {
     try {
         let specialty = await db.Specialty.update({
             name: data?.name || null,
@@ -139,14 +144,10 @@ let updateSpecialty = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-let blockSpecialty = async (data) => {
+export const blockSpecialty = async (data) => {
     try {
         let specialty = await db.Specialty.update({
             status: status.INACTIVE
@@ -167,14 +168,10 @@ let blockSpecialty = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-let deleteSpecialty = async (data) => {
+export const deleteSpecialty = async (data) => {
     let transaction = await db.sequelize.transaction();
     try {
         await db.Staff.update({ specialtyId: null },// Giá trị cần cập nhật
@@ -211,14 +208,11 @@ let deleteSpecialty = async (data) => {
     } catch (error) {
         console.log(error);
         await transaction.rollback();
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-let getSpecialtyById = async (id) => {
+
+export const getSpecialtyById = async (id) => {
     try {
         let specialtyData = await db.Specialty.findOne({
             where: { id: id, status: status.ACTIVE },
@@ -249,15 +243,11 @@ let getSpecialtyById = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const getSpecialtiesByDepartment = async () => {
+export const getSpecialtiesByDepartment = async () => {
     try {
         let roomsWithSpecialties = await db.Room.findAll({
             attributes: ['id', 'name'],
@@ -323,15 +313,11 @@ const getSpecialtiesByDepartment = async () => {
         };
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
 
-const getSpecialtiesByLaboratory = async (labId) => {
+export const getSpecialtiesByLaboratory = async (labId) => {
     try {
 
         let roomsWithSpecialties = await db.Room.findAll({
@@ -424,23 +410,6 @@ const getSpecialtiesByLaboratory = async (labId) => {
         };
     } catch (error) {
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-
-module.exports = {
-    getSpecialtySelect,
-    getSpcialtyHome,
-    createSpecialty,
-    updateSpecialty,
-    blockSpecialty,
-    deleteSpecialty,
-    getAllSpecialtyAdmin,
-    getSpecialtyById,
-    getSpecialtiesByDepartment,
-    getSpecialtiesByLaboratory
-}

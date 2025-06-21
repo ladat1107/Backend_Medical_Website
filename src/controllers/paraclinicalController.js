@@ -1,15 +1,13 @@
-import paraclinicalService from '../services/paraclinicalService';
+import { getExaminations } from '../services/examinationService';
+import { createOrUpdateParaclinical, createParaclinical, createRequestParaclinical, deleteParaclinical, getParaclinicalByExamId, getParaclinicals, updateListPayParaclinicals, updateParaclinical } from '../services/paraclinicalService';
+import { ERROR_SERVER } from '../utils';
 
-const getParaclinicalByExamId = async (req, res) => {
+export const getParaclinicalByExamIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.examinationId) {
-            let response = await paraclinicalService.getParaclinicalByExamId(data.examinationId);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getParaclinicalByExamId(data.examinationId);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -19,24 +17,16 @@ const getParaclinicalByExamId = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createRequestParaclinical = async (req, res) => {
+export const createRequestParaclinicalController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.examinationId && data.listParaclinicals) {
-            let response = await paraclinicalService.createRequestParaclinical(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createRequestParaclinical(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -46,27 +36,19 @@ const createRequestParaclinical = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createParaclinical = async (req, res) => {
+export const createParaclinicalController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.examinationId && data.paraclinical && data.price
             // && data.description
             // && data.result && data.image && data.doctorId
         ) {
-            let response = await paraclinicalService.createParaclinical(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createParaclinical(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -76,15 +58,11 @@ const createParaclinical = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateParaclinical = async (req, res) => {
+export const updateParaclinicalController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id
@@ -92,12 +70,8 @@ const updateParaclinical = async (req, res) => {
             // && data.description
             // && data.result && data.image && data.price
         ) {
-            let response = await paraclinicalService.updateParaclinical(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateParaclinical(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -107,24 +81,16 @@ const updateParaclinical = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const deleteParaclinical = async (req, res) => {
+export const deleteParaclinicalController = async (req, res) => {
     try {
         let { id, examinationId } = req.query;
         if (id !== undefined && examinationId !== undefined) {
-            let response = await paraclinicalService.deleteParaclinical({ id, examinationId });
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            });
+            let response = await deleteParaclinical({ id, examinationId });
+            return res.status(200).json(response);
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -134,26 +100,18 @@ const deleteParaclinical = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        });
+        return res.status(500).json(ERROR_SERVER);
     }
 }
 
 
-const createOrUpdateParaclinical = async (req, res) => {
+export const createOrUpdateParaclinicalController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.examinationId && data.paraclinical && data.description
             && data.result && data.image && data.price && data.doctorId !== undefined) {
-            let response = await paraclinicalService.createOrUpdateParaclinical(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createOrUpdateParaclinical(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -163,15 +121,11 @@ const createOrUpdateParaclinical = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getExaminations = async (req, res) => {
+export const getExaminationsController = async (req, res) => {
     try {
         let date = req.query.date || null;
         let status = req.query.status || null;
@@ -183,23 +137,15 @@ const getExaminations = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await examinationService.getExaminations(date, status, staffId, +page, +limit, search, time);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getExaminations(date, status, staffId, +page, +limit, search, time);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getParaclinicals = async (req, res) => {
+export const getParaclinicalsController = async (req, res) => {
     try {
         let date = req.query.date || null;
         let status = req.query.status || null;
@@ -209,32 +155,20 @@ const getParaclinicals = async (req, res) => {
         let limit = req.query.limit || 20;
         let search = req.query.search || '';
 
-        let response = await paraclinicalService.getParaclinicals(date, status, staffId, +page, +limit, search);
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getParaclinicals(date, status, staffId, +page, +limit, search);
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateListPayParaclinicals = async (req, res) => {
+export const updateListPayParaclinicalsController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.ids) {
-            let response = await paraclinicalService.updateListPayParaclinicals(data.ids, req.user.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateListPayParaclinicals(data.ids, data.insurance, req.user.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -244,21 +178,6 @@ const updateListPayParaclinicals = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getParaclinicalByExamId,
-    createParaclinical,
-    updateParaclinical,
-    deleteParaclinical,
-    createOrUpdateParaclinical,
-    createRequestParaclinical,
-    getParaclinicals,
-    updateListPayParaclinicals
 }

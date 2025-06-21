@@ -5,11 +5,15 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec ./node_modules/.bin/babel-node src/server.js"
+    "_start": "babel-node src/server.js",
+    "start": "nodemon --exec ./node_modules/.bin/babel-node src/server.js",
+    "lint": "eslint . --ext .js",
+    "build": "babel-node src/server.js"
   },
   "author": "La Dat",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.23.0",
     "axios": "^1.7.9",
     "bcrypt": "5.1.1",
     "body-parser": "^1.20.3",
@@ -22,13 +26,17 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.1",
+    "iconv-lite": "^0.6.3",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.10.2",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "socket.io": "^4.8.1",
+    "ua-parser-js": "^1.0.40"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",

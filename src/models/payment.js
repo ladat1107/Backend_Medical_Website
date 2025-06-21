@@ -9,13 +9,17 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'paymentId',
                 as: 'examinationData',
             });
-            Payment.hasOne(models.Paraclinical, {
+            Payment.hasMany(models.Paraclinical, {
                 foreignKey: 'paymentId',
                 as: 'paraclinicalData',
             });
             Payment.hasOne(models.Prescription, {
                 foreignKey: 'paymentId',
                 as: 'prescriptionData',
+            });
+            Payment.hasOne(models.AdvanceMoney, {
+                foreignKey: 'paymentId',
+                as: 'advanceMoneyData',
             });
         }
     }

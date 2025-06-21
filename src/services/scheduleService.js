@@ -1,8 +1,8 @@
 import db from "../models/index";
-import { department, ROLE, status, typeRoom } from "../utils";
-const { Op } = require('sequelize');
+import { department, ERROR_SERVER, ROLE, status, typeRoom } from "../utils";
+import { Op, Sequelize } from "sequelize";
 
-const getAllSchedules = async () => {
+export const getAllSchedules = async () => {
     try {
         let schedule = await db.Schedule.findAll({
             include: [{
@@ -25,14 +25,11 @@ const getAllSchedules = async () => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getScheduleByStaffId = async (staffId) => {
+
+export const getScheduleByStaffId = async (staffId) => {
     try {
         let schedule = await db.Schedule.findAll({
             where: { staffId: staffId },
@@ -52,14 +49,95 @@ const getScheduleByStaffId = async (staffId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const getScheduleInWeek = async (data) => {
+export const getScheduleByStaffIdFromToday = async (staffId) => {
+    try {
+        let schedule = await db.Schedule.findAll({
+            where: {
+                staffId: staffId,
+                date: {
+                    [Op.gte]: new Date(),
+                }
+            },
+            attributes: ['roomId', 'date'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: [],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            }],
+            raw: true,
+            nest: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy thông tin lịch trực thành công",
+            DT: schedule
+        }
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getStaffForReExamination = async (staffId, date) => {
+    try {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        let schedule = await db.Schedule.findAll({
+            where: {
+                date: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
+            },
+            attributes: ['roomId', 'date', 'staffId'],
+            include: [{
+                model: db.Room,
+                as: 'scheduleRoomData',
+                attributes: ['id', 'name'],
+                where: { departmentId: typeRoom.CLINIC, },
+                required: true,
+            }, {
+                model: db.Staff,
+                as: 'staffScheduleData',
+                attributes: ['id', 'departmentId', 'price'],
+            }],
+            raw: true,
+            nest: true,
+        });
+
+        let result = null;
+
+        // Nếu có kết quả
+        if (schedule && schedule.length > 0) {
+            // Tìm nhân viên khớp staffId
+            const matchingStaff = schedule.find(item => item.staffId === staffId);
+
+            // Nếu tìm thấy staffId khớp, trả về nó
+            if (matchingStaff) {
+                result = matchingStaff;
+            } else {
+                // Không tìm thấy staffId khớp, trả về bất kỳ item nào (item đầu tiên)
+                result = schedule[0];
+            }
+        }
+        // Nếu không có kết quả, result vẫn là null
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
+}
+
+export const getScheduleInWeek = async (data) => {
     try {
         let schedule = await db.Schedule.findAll({
             where: {
@@ -88,14 +166,11 @@ const getScheduleInWeek = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const createSchedule = async (data) => {
+
+export const createSchedule = async (data) => {
     let transaction = await db.sequelize.transaction();
     try {
         await db.Schedule.destroy({
@@ -121,7 +196,7 @@ const createSchedule = async (data) => {
                         {
                             model: db.User, // Model User liên kết với Staff
                             as: 'staffUserData', // Alias trong association
-                            attributes: ['lastName', 'firstName'], // Lấy thông tin tên nhân viên
+                            attributes: ['id', 'lastName', 'firstName'], // Added 'id' to attributes
                         },
                     ],
                 },
@@ -144,23 +219,51 @@ const createSchedule = async (data) => {
         }
         //Thêm dữ liệu mới
         let schedule = await db.Schedule.bulkCreate(data, { transaction });
+
+        // Fetch the newly created schedules with the user id included
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: new Date(data[0].date),
+                roomId: data[0].roomId,
+                staffId: {
+                    [Op.in]: data.map(item => item.staffId),
+                },
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+
         await transaction.commit();
         return {
             EC: 0,
             EM: "Tạo thông tin lịch trực thành công",
-            DT: schedule,
+            DT: createdSchedules,
         };
     } catch (error) {
         await transaction.rollback();
         console.error(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        };
+        return ERROR_SERVER;
     }
 };
-const updateScheduleStaff = async (data) => {
+
+export const updateScheduleStaff = async (data) => {
     try {
         let schedule = await db.Schedule.update({
             staffId: data.newStaffId
@@ -174,14 +277,11 @@ const updateScheduleStaff = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const deleteSchedule = async (data) => {
+
+export const deleteSchedule = async (data) => {
     try {
         let schedule = await db.Schedule.destroy({
             where: { staffId: data.staffId, roomId: data.roomId, date: data.date },
@@ -193,14 +293,11 @@ const deleteSchedule = async (data) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-const arrangeSchedule = async (data) => {
+
+export const arrangeSchedule = async (data) => {
     const transaction = await db.sequelize.transaction();
     try {
         let doctorNedeed = data?.doctorNedeed || 1;
@@ -231,7 +328,7 @@ const arrangeSchedule = async (data) => {
                     model: db.ServiceType,
                     as: 'serviceData',
                     attributes: ['id', 'name'],
-                    where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY] }, status: status.ACTIVE },
+                    where: { id: { [Op.in]: [typeRoom.CLINIC, typeRoom.DUTY, typeRoom.LABORATORY] }, status: status.ACTIVE },
                     through: { attributes: [] },
                 },
             ],
@@ -352,15 +449,42 @@ const arrangeSchedule = async (data) => {
             }
         }
         await db.Schedule.bulkCreate(schedule, { transaction });
+
+        const createdSchedules = await db.Schedule.findAll({
+            where: {
+                date: { [Op.between]: [start, end] }
+            },
+            include: [
+                {
+                    model: db.Staff,
+                    as: 'staffScheduleData',
+                    attributes: ['id', 'departmentId', 'specialtyId'],
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'staffUserData',
+                            attributes: ['id', 'lastName', 'firstName'], // Include User id
+                        },
+                    ],
+                },
+                {
+                    model: db.Room,
+                    as: 'scheduleRoomData',
+                },
+            ],
+            transaction,
+        });
+
         await transaction.commit();
-        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule } };
+        return { EC: 0, EM: 'Xếp lịch trực thành công', DT: { schedule: createdSchedules } };
     } catch (error) {
         await transaction.rollback();
         console.error(error);
         return { EC: 500, EM: 'Lỗi server!', DT: '' };
     }
 };
-const getAllSchedulesAdmin = async (filter) => {
+
+export const getAllSchedulesAdmin = async (filter) => {
     try {
         let condition = {};
         let listStaff;
@@ -479,20 +603,44 @@ const getAllSchedulesAdmin = async (filter) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
-module.exports = {
-    getAllSchedulesAdmin,
-    getAllSchedules,
-    getScheduleByStaffId,
-    getScheduleInWeek,
-    createSchedule,
-    updateScheduleStaff,
-    deleteSchedule,
-    arrangeSchedule,
+
+export const getScheduleByDateAndDoctor = async (filter) => {
+    try {
+        const date = filter?.date || new Date();
+        const doctorId = filter?.doctorId || null;
+        if (!doctorId || !date) {
+            return { EC: 400, EM: "Không đủ dữ liệu", DT: '', }
+        }
+        const results = await db.Examination.findAll({
+            attributes: [
+                'time',
+                [Sequelize.fn('COUNT', Sequelize.col('time')), 'count'],
+            ],
+            where: {
+                staffId: doctorId,               // luôn lọc đúng bác sĩ
+                is_appointment: 1,
+                status: status.PENDING,
+                // so sánh phần ngày của admissionDate
+                [Op.and]: [
+                    Sequelize.where(
+                        Sequelize.literal('DATE(admissionDate)'),
+                        { [Op.eq]: date }
+                    ),
+                ],
+            },
+            group: ['time'],                   // chỉ cần group theo khung giờ
+            raw: true,
+        });
+        return {
+            EC: 0,
+            EM: "Lấy dữ liệu thành công",
+            DT: results,
+        };
+    } catch (error) {
+        console.log(error);
+        return ERROR_SERVER
+    }
 }

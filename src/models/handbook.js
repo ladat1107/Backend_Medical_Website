@@ -9,11 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
-      Handbook.belongsTo(models.Description, {
-        foreignKey: 'descriptionId',
-        as: 'handbookDescriptionData',
-      });
+    static associate(models) {     
       Handbook.belongsTo(models.Staff, {
         foreignKey: 'author',
         as: 'handbookStaffData',
@@ -35,14 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     image: DataTypes.STRING,
     status: DataTypes.INTEGER,
-    descriptionId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'descriptions',
-        key: 'id',
-      },
-    },
+    htmlDescription: DataTypes.TEXT,
     shortDescription: DataTypes.STRING,
     view: {
       type: DataTypes.INTEGER,

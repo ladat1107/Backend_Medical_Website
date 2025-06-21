@@ -1,7 +1,9 @@
+import { session } from 'passport';
 import db from '../models/index';
-import medicineService from './medicineService';
+import { ERROR_SERVER } from '../utils';
+import medicineService, { updateInventory } from './medicineService';
 
-const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
+export const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
     try {
         let prescriptionDetail = await db.PrescriptionDetail.findAll({
             where: { prescriptionId: prescriptionId },
@@ -21,20 +23,16 @@ const getAllPrescriptionDetailsByPrescriptionId = async (prescriptionId) => {
         }
     } catch (error) {
         console.log(error);
-        return {
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: "",
-        }
+        return ERROR_SERVER
     }
 }
 
-const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
+export const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
     try {
 
         for (const newDetail of newDetails) {
             const medicine = await db.Medicine.findByPk(newDetail.medicineId);
-            
+
             if (!medicine) {
                 return {
                     EC: 404,
@@ -45,15 +43,15 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
 
             // Kiểm tra số lượng tồn kho
             const existingDetail = await db.PrescriptionDetail.findOne({
-                where: { 
-                    prescriptionId, 
-                    medicineId: newDetail.medicineId 
+                where: {
+                    prescriptionId,
+                    medicineId: newDetail.medicineId
                 }
             });
 
             // Tính toán số lượng cần thêm/giảm
-            const quantityChange = existingDetail 
-                ? newDetail.quantity - existingDetail.quantity 
+            const quantityChange = existingDetail
+                ? newDetail.quantity - existingDetail.quantity
                 : newDetail.quantity;
 
             // Kiểm tra nếu số lượng yêu cầu vượt quá số lượng tồn kho
@@ -74,7 +72,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
             },
         });
 
-        const existingDetailsMap = new Map(existingDetails.map(detail => [detail.medicineId, detail]));   
+        const existingDetailsMap = new Map(existingDetails.map(detail => [detail.medicineId, detail]));
         const updatedDetails = [];
 
         for (const newDetail of newDetails) {
@@ -84,14 +82,16 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                 await existingDetail.update({
                     quantity: newDetail.quantity,
                     unit: newDetail.unit,
-                    dosage: newDetail.dosage,
-                    price: newDetail.price
+                    price: newDetail.price,
+                    session: newDetail.session,
+                    dose: newDetail.dose,
+                    dosage: newDetail.dosage
                 });
                 updatedDetails.push(existingDetail);
                 existingDetailsMap.delete(newDetail.medicineId);
 
                 if (quantityChange !== 0) {
-                    await medicineService.updateInventory(newDetail.medicineId, quantityChange);
+                    await updateInventory(newDetail.medicineId, quantityChange);
                 }
             } else {
                 const createdDetail = await db.PrescriptionDetail.create({
@@ -99,13 +99,13 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
                     ...newDetail
                 });
                 updatedDetails.push(createdDetail);
-                await medicineService.updateInventory(newDetail.medicineId, newDetail.quantity);
+                await updateInventory(newDetail.medicineId, newDetail.quantity);
             }
         }
 
         for (const [medicineId, detail] of existingDetailsMap) {
             await detail.destroy();
-            await medicineService.updateInventory(medicineId, -detail.quantity);
+            await updateInventory(medicineId, -detail.quantity);
         }
 
         return {
@@ -114,7 +114,7 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
             DT: updatedDetails
         };
 
-        
+
     } catch (error) {
         console.log(error);
         return {
@@ -125,15 +125,17 @@ const upsertPrescriptionDetail = async (prescriptionId, newDetails) => {
     }
 };
 
-const createPrescriptionDetail = async (prescriptionId, data) => {
+export const createPrescriptionDetail = async (prescriptionId, data) => {
     try {
         let prescriptionDetail = await db.PrescriptionDetail.create({
             prescriptionId: prescriptionId,
             medicineId: data.medicineId,
             quantity: data.quantity,
             unit: data.unit,
-            dosage: data.dosage,
-            price: data.price
+            price: data.price,
+            session: data.session,
+            dose: +data.dose,
+            dosage: data.dosage
         });
         if (prescriptionDetail) {
             return true;
@@ -146,8 +148,9 @@ const createPrescriptionDetail = async (prescriptionId, data) => {
     }
 }
 
-const updatePrescriptionDetail = async (prescriptionId, data) => {
+export const updatePrescriptionDetail = async (prescriptionId, data) => {
     try {
+
         let prescriptionDetail = await db.PrescriptionDetail.findOne({
             where: {
                 prescriptionId: prescriptionId,
@@ -158,8 +161,10 @@ const updatePrescriptionDetail = async (prescriptionId, data) => {
             prescriptionDetail.update({
                 quantity: data.quantity,
                 unit: data.unit,
-                dosage: data.dosage,
-                price: data.price
+                price: data.price,
+                session: data.session,
+                dose: +data.dose,
+                dosage: data.dosage
             })
             console.log("Update PrescriptionDetail successfully");
             return true;
@@ -173,7 +178,7 @@ const updatePrescriptionDetail = async (prescriptionId, data) => {
     }
 }
 
-const deletePrescriptionDetail = async (data) => {
+export const deletePrescriptionDetail = async (data) => {
     try {
         let prescriptionDetail = await db.PrescriptionDetail.findOne({
             where: {
@@ -195,10 +200,3 @@ const deletePrescriptionDetail = async (data) => {
     }
 }
 
-module.exports = {
-    getAllPrescriptionDetailsByPrescriptionId,
-    createPrescriptionDetail,
-    updatePrescriptionDetail,
-    upsertPrescriptionDetail,
-    deletePrescriptionDetail
-}

@@ -1,33 +1,22 @@
-import roleService from '../services/roleService';
+import { createRole, getAllRoles, getRoleById, updateRole } from '../services/roleService';
+import { ERROR_SERVER } from '../utils';
 
-const getAllRoles = async (req, res) => {
+export const getAllRolesController = async (req, res) => {
     try {
-        let response = await roleService.getAllRoles();
-        return res.status(200).json({
-            EC: response.EC,
-            EM: response.EM,
-            DT: response.DT
-        })
+        let response = await getAllRoles();
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const getRoleById = async (req, res) => {
+export const getRoleByIdController = async (req, res) => {
     try {
         let data = req.query;
         if (data && data.id) {
-            let response = await roleService.getRoleById(data.id);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await getRoleById(data.id);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -37,24 +26,16 @@ const getRoleById = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const createRole = async (req, res) => {
+export const createRoleController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.name) {
-            let response = await roleService.createRole(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await createRole(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -64,24 +45,16 @@ const createRole = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
 }
 
-const updateRole = async (req, res) => {
+export const updateRoleController = async (req, res) => {
     try {
         let data = req.body;
         if (data && data.id && data.name && data.status !== undefined) {
-            let response = await roleService.updateRole(data);
-            return res.status(200).json({
-                EC: response.EC,
-                EM: response.EM,
-                DT: response.DT
-            })
+            let response = await updateRole(data);
+            return res.status(200).json(response)
         } else {
             return res.status(200).json({
                 EC: 400,
@@ -91,17 +64,6 @@ const updateRole = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            EC: 500,
-            EM: "Lỗi server!",
-            DT: ""
-        })
+        return res.status(500).json(ERROR_SERVER)
     }
-}
-
-module.exports = {
-    getAllRoles,
-    getRoleById,
-    createRole,
-    updateRole
 }

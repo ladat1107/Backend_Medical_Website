@@ -37,10 +37,26 @@ module.exports = (sequelize, DataTypes) => {
         },
         dosage: {
             type: DataTypes.STRING(128),
-            allowNull: false,
+            allowNull: true,
         },
         price: {
             type: DataTypes.DOUBLE,
+            allowNull: false,
+        },
+        insuranceCovered: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        coveredPrice: {
+            type: DataTypes.DOUBLE,
+            allowNull: true,
+        },
+        session: {
+            type: DataTypes.STRING(128),
+            allowNull: false,
+        },
+        dose: {
+            type: DataTypes.STRING(128),
             allowNull: false,
         },
     }, {

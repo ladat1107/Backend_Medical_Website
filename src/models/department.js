@@ -13,15 +13,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'departmentId',
                 as: 'staffDepartmentData',
             });
-            Department.belongsToMany(models.Symptom, {
-                through: 'DepartmentSymptoms',
-                foreignKey: 'id',
-                as: 'symptomData',
-            });
-            Department.belongsTo(models.Description, {
-                foreignKey: 'descriptionId',
-                as: 'departmentDescriptionData',
-            });
             Department.belongsTo(models.Staff, {
                 foreignKey: 'deanId',
                 as: 'deanDepartmentData',
@@ -39,24 +30,13 @@ module.exports = (sequelize, DataTypes) => {
         },
         deanId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'Staffs', // Tên bảng staffs
-                key: 'id',
-            },
+            allowNull: true,
         },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        descriptionId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'Descriptions', // Tên bảng descriptions
-                key: 'id',
-            },
-        },
+        htmlDescription: DataTypes.TEXT,
         address: {
             type: DataTypes.STRING(255),
             allowNull: false,
